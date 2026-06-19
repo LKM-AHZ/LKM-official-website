@@ -1,5 +1,5 @@
 site:
-  name: LKM
+  name: 理科迷
   site: 'https://lkm-official-website.vercel.app'
   base: '/'
   trailingSlash: false
@@ -28,7 +28,7 @@ metadata:
     cardType: summary_large_image
 
 i18n:
-  language: en
+  language: zh-cn
   textDirection: ltr
 
 apps:
