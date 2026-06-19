@@ -4,14 +4,30 @@ import Content from '~/components/widgets/Content.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Testimonials from '~/components/widgets/Testimonials.astro';
-import Layout from '~/layouts/PageLayout.astro';
+import Layout from '~/layouts/SidebarLayout.astro';
+
+import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
   title: 'Services',
 };
+
+const topTabs = [
+  { text: 'About us', href: getPermalink('/about') },
+  { text: 'Services', href: getPermalink('/services') },
+  { text: 'Pricing', href: getPermalink('/pricing') },
+  { text: 'Contact', href: getPermalink('/contact') },
+];
+
+const sidebarLinks = [
+  { text: 'Templates', href: getPermalink('/services#templates') },
+  { text: 'Features', href: getPermalink('/services#features') },
+  { text: 'Benefits', href: getPermalink('/services#benefits') },
+  { text: 'Testimonials', href: getPermalink('/services#testimonials') },
+];
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/services')}>
   <!-- Hero Widget ******************* -->
 
   <Hero

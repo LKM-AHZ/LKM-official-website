@@ -1,0 +1,43 @@
+---
+export interface Tab {
+  text: string;
+  href: string;
+}
+
+export interface Props {
+  tabs?: Tab[];
+  currentPath?: string;
+}
+
+const { tabs = [], currentPath = '' } = Astro.props;
+---
+
+{
+  tabs.length > 0 && (
+    <div class="border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <nav class="flex gap-0 overflow-x-auto" aria-label="Section tabs">
+          {tabs.map(({ text, href }) => {
+            const isActive =
+              currentPath === href ||
+              currentPath.startsWith(href + '/') ||
+              (href !== '/' && currentPath.startsWith(href));
+            return (
+              <a
+                href={href}
+                class:list={[
+                  'whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 transition-colors duration-150',
+                  isActive
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted hover:text-default hover:border-gray-300',
+                ]}
+              >
+                {text}
+              </a>
+            );
+          })}
+        </nav>
+      </div>
+    </div>
+  )
+}

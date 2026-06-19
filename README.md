@@ -226,6 +226,16 @@ npm run build
 - `package.json` 的 `name` 字段已从空字符串改为 `lkm-official-website`
 - 移除了 `markdown-elements-demo-post.mdx` 中失效的 YouTube/Tweet/Vimeo 嵌入内容，消除构建时的 fetch 错误
 
+### 侧边栏 + 全局顶栏
+
+- 新增 `src/layouts/SidebarLayout.astro` — 带侧边栏的页面布局
+- 新增 `src/components/widgets/Sidebar.astro` + `Sidebar.module.css` — 侧边栏组件（CSS Modules）
+- 新增 `src/components/widgets/TopNav.astro` — 全局顶栏组件，在各分区页面之间切换
+- 页面布局：顶部 Header → 顶栏分区标签 → 左侧侧边栏 + 右侧内容区 → 底部 Footer
+- 顶栏显示分区入口（About us / Services / Pricing / Contact），当前分区高亮
+- 侧边栏显示当前分区内子页面导航（如 About 分区：Overview / Values / Achievements / Locations / Support）
+- 已应用到 about、services、pricing、contact 四个页面
+
 ### 文档
 
 - README.md 已精简为中文，移除了开发无关内容（badge 展示、第三方部署按钮、贡献指南等）
