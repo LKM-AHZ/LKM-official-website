@@ -1,0 +1,43 @@
+---
+import { Icon } from 'astro-icon/components';
+import styles from './Sidebar.module.css';
+
+interface SidebarLink {
+  text: string;
+  href: string;
+  icon?: string;
+}
+
+export interface Props {
+  links?: SidebarLink[];
+  currentPath?: string;
+}
+
+const { links = [], currentPath = '' } = Astro.props;
+---
+
+<nav class={styles.nav} aria-label="Sidebar navigation">
+  {
+    links.length > 0 && (
+      <ul class={styles.linkList}>
+        {links.map(({ text, href, icon }) => {
+          const isActive = currentPath === href || currentPath.startsWith(href + '/');
+          return (
+            <li>
+              <a
+                href={href}
+                class:list={[
+                  styles.link,
+                  isActive ? 'bg-primary/10 text-primary' : [styles.linkInactive, 'text-muted hover:text-default'],
+                ]}
+              >
+                {icon && <Icon name={icon} class={styles.icon} />}
+                <span>{text}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+</nav>
