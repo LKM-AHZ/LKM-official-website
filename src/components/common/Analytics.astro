@@ -25,7 +25,7 @@ void apiBase; // Used in inline client script via template string interpolation
 
 <script is:inline>
   // Track page view to LKM backend analytics
-  (function() {
+  (function () {
     var api = '{apiBase}';
     try {
       fetch(api + '/api/analytics/track', {

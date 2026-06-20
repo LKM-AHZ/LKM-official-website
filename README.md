@@ -55,14 +55,14 @@ createdb lkm
 
 配置环境变量（可选，默认值见 `backend/models/database.py`）：
 
-| 环境变量       | 默认值     | 说明                  |
-| :------------- | :--------- | :-------------------- |
-| `PG_HOST`      | `localhost`| PostgreSQL 主机地址   |
-| `PG_PORT`      | `5432`     | PostgreSQL 端口       |
-| `PG_DATABASE`  | `lkm`      | 数据库名              |
-| `PG_USER`      | `lkm`      | 数据库用户            |
-| `PG_PASSWORD`  | `lkm123`   | 数据库密码            |
-| `ADMIN_API_KEY`| `lkm-admin-secret-key` | 管理员 API 密钥 |
+| 环境变量        | 默认值                 | 说明                |
+| :-------------- | :--------------------- | :------------------ |
+| `PG_HOST`       | `localhost`            | PostgreSQL 主机地址 |
+| `PG_PORT`       | `5432`                 | PostgreSQL 端口     |
+| `PG_DATABASE`   | `lkm`                  | 数据库名            |
+| `PG_USER`       | `lkm`                  | 数据库用户          |
+| `PG_PASSWORD`   | `lkm123`               | 数据库密码          |
+| `ADMIN_API_KEY` | `lkm-admin-secret-key` | 管理员 API 密钥     |
 
 启动开发服务器并测试：
 
@@ -78,16 +78,19 @@ uv run python test_db.py                      # 测试数据库连接
 项目提供了 Windows 和 Linux 的一键部署脚本：
 
 **Windows (开发模式):**
+
 ```bat
 .\deploy.bat
 ```
 
 **Linux (开发模式):**
+
 ```bash
 ./deploy.sh
 ```
 
 **Linux (生产构建):**
+
 ```bash
 ./deploy-prod.sh
 ```
@@ -107,23 +110,23 @@ PG_HOST=192.168.1.100 PG_PASSWORD=secret ./deploy.sh
 
 ### 前端
 
-| 命令                     | 说明                            |
-| :----------------------- | :------------------------------ |
-| `pnpm install`           | 安装依赖                        |
-| `pnpm run dev`           | 启动开发服务器 `localhost:4321` |
-| `pnpm run build`         | 生产构建，输出到 `./dist/`      |
-| `pnpm run preview`       | 本地预览生产构建                |
-| `pnpm run check`         | 类型检查 + ESLint + Prettier    |
-| `pnpm run fix`           | 自动修复 ESLint + Prettier      |
+| 命令               | 说明                            |
+| :----------------- | :------------------------------ |
+| `pnpm install`     | 安装依赖                        |
+| `pnpm run dev`     | 启动开发服务器 `localhost:4321` |
+| `pnpm run build`   | 生产构建，输出到 `./dist/`      |
+| `pnpm run preview` | 本地预览生产构建                |
+| `pnpm run check`   | 类型检查 + ESLint + Prettier    |
+| `pnpm run fix`     | 自动修复 ESLint + Prettier      |
 
 ### 后端
 
-| 命令                                       | 说明                       |
-| :----------------------------------------- | :------------------------- |
-| `cd backend && uv venv`                    | 创建 Python 虚拟环境       |
-| `cd backend && uv pip install -r requirements.txt` | 安装依赖          |
-| `cd backend && uv run uvicorn main:app --reload`   | 启动开发服务器    |
-| `cd backend && uv run python test_db.py`   | 测试数据库连接             |
+| 命令                                               | 说明                 |
+| :------------------------------------------------- | :------------------- |
+| `cd backend && uv venv`                            | 创建 Python 虚拟环境 |
+| `cd backend && uv pip install -r requirements.txt` | 安装依赖             |
+| `cd backend && uv run uvicorn main:app --reload`   | 启动开发服务器       |
+| `cd backend && uv run python test_db.py`           | 测试数据库连接       |
 
 ---
 
@@ -483,36 +486,36 @@ export const footerData = {
 
 ### API 端点
 
-| 方法   | 路径                       | 说明               |
-| :----- | :------------------------- | :----------------- |
-| `GET`  | `/api/health`              | 健康检查           |
-| `POST` | `/api/contact`             | 提交联系表单       |
-| `GET`  | `/api/comments`            | 获取评论列表（按 post_slug）|
-| `POST` | `/api/comments`            | 提交评论（支持嵌套回复）|
-| `GET`  | `/api/events`              | 获取活动列表       |
-| `GET`  | `/api/events/{id}`         | 获取活动详情       |
-| `POST` | `/api/events/{id}/register`| 活动报名           |
-| `GET`  | `/api/content`             | 获取内容页面列表   |
-| `GET`  | `/api/content/{slug}`      | 获取单个内容页面   |
-| `PUT`  | `/api/content/{slug}`      | 创建/更新内容页面（需 admin key）|
-| `POST` | `/api/upload`              | 文件上传（需 admin key）  |
-| `GET`  | `/api/upload/{filename}`   | 下载已上传文件     |
-| `GET`  | `/api/upload`              | 文件列表（需 admin key） |
-| `GET`  | `/api/search`              | 站内全文搜索       |
-| `POST` | `/api/analytics/track`     | 记录页面访问       |
-| `GET`  | `/api/analytics/stats`     | 获取访问统计（需 admin key）|
+| 方法   | 路径                        | 说明                              |
+| :----- | :-------------------------- | :-------------------------------- |
+| `GET`  | `/api/health`               | 健康检查                          |
+| `POST` | `/api/contact`              | 提交联系表单                      |
+| `GET`  | `/api/comments`             | 获取评论列表（按 post_slug）      |
+| `POST` | `/api/comments`             | 提交评论（支持嵌套回复）          |
+| `GET`  | `/api/events`               | 获取活动列表                      |
+| `GET`  | `/api/events/{id}`          | 获取活动详情                      |
+| `POST` | `/api/events/{id}/register` | 活动报名                          |
+| `GET`  | `/api/content`              | 获取内容页面列表                  |
+| `GET`  | `/api/content/{slug}`       | 获取单个内容页面                  |
+| `PUT`  | `/api/content/{slug}`       | 创建/更新内容页面（需 admin key） |
+| `POST` | `/api/upload`               | 文件上传（需 admin key）          |
+| `GET`  | `/api/upload/{filename}`    | 下载已上传文件                    |
+| `GET`  | `/api/upload`               | 文件列表（需 admin key）          |
+| `GET`  | `/api/search`               | 站内全文搜索                      |
+| `POST` | `/api/analytics/track`      | 记录页面访问                      |
+| `GET`  | `/api/analytics/stats`      | 获取访问统计（需 admin key）      |
 
 ### 数据库表
 
-| 表名                  | 用途               |
-| :-------------------- | :----------------- |
-| `contacts`            | 联系表单提交记录   |
-| `comments`            | 博客评论（支持嵌套）|
-| `events`              | 活动/讲座信息      |
-| `event_registrations` | 活动报名记录       |
-| `contents`            | 动态内容页面       |
-| `uploads`             | 上传文件记录       |
-| `page_views`          | 页面访问统计       |
+| 表名                  | 用途                 |
+| :-------------------- | :------------------- |
+| `contacts`            | 联系表单提交记录     |
+| `comments`            | 博客评论（支持嵌套） |
+| `events`              | 活动/讲座信息        |
+| `event_registrations` | 活动报名记录         |
+| `contents`            | 动态内容页面         |
+| `uploads`             | 上传文件记录         |
+| `page_views`          | 页面访问统计         |
 
 所有表在应用启动时通过 `init_db()` 自动创建（`CREATE TABLE IF NOT EXISTS`），无需手动迁移。
 
@@ -620,12 +623,12 @@ cd backend && uv run uvicorn main:app --host 0.0.0.0 --port 8000  # 启动后端
 
 ### 部署方式
 
-| 平台       | 说明                                                       |
-| :--------- | :--------------------------------------------------------- |
-| **Vercel** | 前端静态托管 + 后端 Serverless（`vercel.json` 已配置）      |
-| **Docker** | `Dockerfile` + `docker-compose.yml`（前端 nginx 静态托管）  |
-| **Netlify**| `netlify.toml` 已提供（仅前端静态）                         |
-| **任意托管**| 上传 `dist/` 目录即可（前端），后端需单独部署               |
+| 平台         | 说明                                                       |
+| :----------- | :--------------------------------------------------------- |
+| **Vercel**   | 前端静态托管 + 后端 Serverless（`vercel.json` 已配置）     |
+| **Docker**   | `Dockerfile` + `docker-compose.yml`（前端 nginx 静态托管） |
+| **Netlify**  | `netlify.toml` 已提供（仅前端静态）                        |
+| **任意托管** | 上传 `dist/` 目录即可（前端），后端需单独部署              |
 
 > Vercel 部署时需在项目设置中配置数据库环境变量（`PG_HOST`、`PG_PORT` 等），指向云 PostgreSQL 实例。
 

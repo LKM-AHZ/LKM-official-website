@@ -90,7 +90,7 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
 <script>
   const form = document.getElementById('contact-form') as HTMLFormElement | null;
   if (form) {
-    form.addEventListener('submit', async function(this: HTMLFormElement, e: SubmitEvent) {
+    form.addEventListener('submit', async function (this: HTMLFormElement, e: SubmitEvent) {
       e.preventDefault();
       const msg = document.getElementById('form-message');
       const btn = this.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -107,13 +107,18 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
         const data = await res.json();
 
         if (msg) {
-          msg.className = 'mb-4 p-3 rounded-lg text-center text-sm ' + (res.ok ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200');
+          msg.className =
+            'mb-4 p-3 rounded-lg text-center text-sm ' +
+            (res.ok
+              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200');
           msg.textContent = data.message || data.detail || '提交失败';
         }
         if (res.ok) this.reset();
       } catch {
         if (msg) {
-          msg.className = 'mb-4 p-3 rounded-lg text-center text-sm bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+          msg.className =
+            'mb-4 p-3 rounded-lg text-center text-sm bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
           msg.textContent = '网络错误，请稍后重试';
         }
       } finally {

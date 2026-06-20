@@ -16,8 +16,8 @@ void API_BASE; // Used in inline client script via template string interpolation
   <div id="comment-form-wrap" class="mb-8 p-6 rounded-lg bg-gray-50 dark:bg-slate-800">
     <h4 class="text-lg font-semibold mb-4">发表评论</h4>
     <form id="comment-form">
-      <input type="hidden" name="post_slug" value={postSlug}>
-      <input type="hidden" id="comment-parent-id" name="parent_id" value="">
+      <input type="hidden" name="post_slug" value={postSlug} />
+      <input type="hidden" id="comment-parent-id" name="parent_id" value="" />
 
       <div class="mb-4">
         <input
@@ -27,7 +27,7 @@ void API_BASE; // Used in inline client script via template string interpolation
           placeholder="昵称 *"
           required
           class="py-2 px-3 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-900 text-sm"
-        >
+        />
       </div>
       <div class="mb-4">
         <input
@@ -36,7 +36,7 @@ void API_BASE; // Used in inline client script via template string interpolation
           id="comment-email"
           placeholder="邮箱（选填）"
           class="py-2 px-3 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-900 text-sm"
-        >
+        />
       </div>
       <div class="mb-4">
         <textarea
@@ -49,9 +49,7 @@ void API_BASE; // Used in inline client script via template string interpolation
         ></textarea>
       </div>
       <div class="flex items-center gap-3">
-        <button type="submit" class="btn btn-primary text-sm">
-          提交评论
-        </button>
+        <button type="submit" class="btn btn-primary text-sm"> 提交评论 </button>
         <span id="comment-cancel-reply" class="hidden text-sm text-blue-600 cursor-pointer hover:underline">
           取消回复
         </span>
@@ -102,7 +100,7 @@ void API_BASE; // Used in inline client script via template string interpolation
           <button onclick="window.replyTo('${c.id}', '${h(c.author)}')" class="text-xs text-blue-600 hover:underline mt-1">回复</button>
         </div>
       </div>
-      ${(c.replies || []).map(r => renderComment(r, depth + 1)).join('')}
+      ${(c.replies || []).map((r) => renderComment(r, depth + 1)).join('')}
     </div>`;
   }
 
@@ -130,7 +128,7 @@ void API_BASE; // Used in inline client script via template string interpolation
   interface WindowWithReplyTo extends Window {
     replyTo?: (id: string, author: string) => void;
   }
-  (window as WindowWithReplyTo).replyTo = function(id: string, author: string): void {
+  (window as WindowWithReplyTo).replyTo = function (id: string, author: string): void {
     const parentInput = document.getElementById('comment-parent-id') as HTMLInputElement | null;
     const contentInput = document.getElementById('comment-content') as HTMLInputElement | null;
     const cancelBtn = document.getElementById('comment-cancel-reply');
@@ -144,7 +142,7 @@ void API_BASE; // Used in inline client script via template string interpolation
 
   const cancelReplyEl = document.getElementById('comment-cancel-reply');
   if (cancelReplyEl) {
-    cancelReplyEl.addEventListener('click', function() {
+    cancelReplyEl.addEventListener('click', function () {
       const parentInput = document.getElementById('comment-parent-id') as HTMLInputElement | null;
       const contentInput = document.getElementById('comment-content') as HTMLInputElement | null;
       if (parentInput) parentInput.value = '';
@@ -155,7 +153,7 @@ void API_BASE; // Used in inline client script via template string interpolation
 
   const commentForm = document.getElementById('comment-form') as HTMLFormElement | null;
   if (commentForm) {
-    commentForm.addEventListener('submit', async function(this: HTMLFormElement, e: SubmitEvent) {
+    commentForm.addEventListener('submit', async function (this: HTMLFormElement, e: SubmitEvent) {
       e.preventDefault();
       const msg = document.getElementById('comment-form-msg');
       const btn = this.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -173,7 +171,9 @@ void API_BASE; // Used in inline client script via template string interpolation
         const data = await res.json();
 
         if (msg) {
-          msg.className = 'mt-3 p-3 rounded-lg text-center text-sm ' + (res.ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800');
+          msg.className =
+            'mt-3 p-3 rounded-lg text-center text-sm ' +
+            (res.ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800');
           msg.textContent = data.message || data.detail || '提交失败';
         }
 

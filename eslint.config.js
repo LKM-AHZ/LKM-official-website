@@ -61,6 +61,13 @@ export default [
     },
   },
   {
-    ignores: ['dist', 'node_modules', '.github', 'types.generated.d.ts', '.astro', 'src/components/blog/SinglePost.astro'],
+    ignores: [
+      'dist',
+      'node_modules',
+      '.github',
+      'types.generated.d.ts',
+      '.astro',
+      'src/components/blog/SinglePost.astro',
+    ],
   },
 ];

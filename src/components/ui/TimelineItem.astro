@@ -12,14 +12,14 @@ interface Props {
   iconColor?: string; // 新增：允许控制颜色 class
 }
 
-const { 
-  year, 
-  title, 
-  description, 
-  index, 
-  total, 
-  iconName = "tabler:circle-check", // 设定一个默认图标
-  iconColor = "text-primary" 
+const {
+  year,
+  title,
+  description,
+  index,
+  total,
+  iconName = 'tabler:circle-check', // 设定一个默认图标
+  iconColor = 'text-primary',
 } = Astro.props;
 
 const isEven = index % 2 === 0;
@@ -31,13 +31,10 @@ const showEndLine = index < total - 1;
   {showStartLine && <hr />}
 
   <div class="timeline-middle">
-    <Icon 
-      name={iconName} 
-      class:list={["h-8 w-8", iconColor]} 
-    />
+    <Icon name={iconName} class:list={['h-8 w-8', iconColor]} />
   </div>
 
-  <div class:list={[isEven ? "timeline-start mb-10 md:text-end" : "timeline-end md:mb-10"]}>
+  <div class:list={[isEven ? 'timeline-start mb-10 md:text-end' : 'timeline-end md:mb-10']}>
     <time class="font-mono italic">{year}</time>
     <div class="text-lg font-black">{title}</div>
     <p class="text-sm text-base-content/80 leading-relaxed max-w-xl dark:text-white">{description}</p>
