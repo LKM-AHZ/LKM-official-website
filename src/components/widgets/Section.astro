@@ -1,6 +1,4 @@
 ---
-import { Icon } from 'astro-icon/components';
-import Button from '~/components/ui/Button.astro';
 import Headline from '~/components/ui/Headline.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import type { Features as Props } from '~/types';
@@ -9,9 +7,9 @@ const {
   title = await Astro.slots.render('title'),
   subtitle = await Astro.slots.render('subtitle'),
   tagline = await Astro.slots.render('tagline'),
-  items = [],
-  columns = 3,
-  defaultIcon,
+  items: _items = [],
+  columns: _columns = 3,
+  defaultIcon: _defaultIcon,
 
   id,
   isDark = false,
@@ -19,14 +17,7 @@ const {
   bg = await Astro.slots.render('bg'),
 } = Astro.props;
 
-const columnsClass =
-  columns === 4
-    ? 'lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2'
-    : columns === 3
-      ? 'lg:grid-cols-3 sm:grid-cols-2'
-      : columns === 2
-        ? 'sm:grid-cols-2'
-        : '';
+export { _items, _columns, _defaultIcon };
 ---
 
 <WidgetWrapper id={id} isDark={isDark} containerClass={`max-w-7xl mx-auto ${classes?.container ?? ''}`} bg={bg}>

@@ -1,0 +1,202 @@
+---
+export interface Props {
+  postSlug: string;
+}
+
+const { postSlug } = Astro.props;
+
+const API_BASE = import.meta.env.PUBLIC_API_URL || '';
+void API_BASE; // Used in inline client script via template string interpolation
+---
+
+<div id="comments-section" class="mt-16 border-t border-gray-200 dark:border-gray-700 pt-8">
+  <h3 class="text-2xl font-bold mb-6">评论</h3>
+
+  <!-- Comment form -->
+  <div id="comment-form-wrap" class="mb-8 p-6 rounded-lg bg-gray-50 dark:bg-slate-800">
+    <h4 class="text-lg font-semibold mb-4">发表评论</h4>
+    <form id="comment-form">
+      <input type="hidden" name="post_slug" value={postSlug}>
+      <input type="hidden" id="comment-parent-id" name="parent_id" value="">
+
+      <div class="mb-4">
+        <input
+          type="text"
+          name="author"
+          id="comment-author"
+          placeholder="昵称 *"
+          required
+          class="py-2 px-3 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-900 text-sm"
+        >
+      </div>
+      <div class="mb-4">
+        <input
+          type="email"
+          name="email"
+          id="comment-email"
+          placeholder="邮箱（选填）"
+          class="py-2 px-3 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-900 text-sm"
+        >
+      </div>
+      <div class="mb-4">
+        <textarea
+          name="content"
+          id="comment-content"
+          rows="4"
+          placeholder="写下你的想法..."
+          required
+          class="py-2 px-3 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-900 text-sm"
+        ></textarea>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="submit" class="btn btn-primary text-sm">
+          提交评论
+        </button>
+        <span id="comment-cancel-reply" class="hidden text-sm text-blue-600 cursor-pointer hover:underline">
+          取消回复
+        </span>
+      </div>
+      <div id="comment-form-msg" class="hidden mt-3 p-3 rounded-lg text-center text-sm"></div>
+    </form>
+  </div>
+
+  <!-- Comments list -->
+  <div id="comments-list" class="space-y-6">
+    <p class="text-gray-500 text-center">加载中...</p>
+  </div>
+</div>
+
+<script>
+  const API = '{API_BASE}';
+  const slug = '{postSlug}';
+
+  interface CommentData {
+    id: number;
+    author: string;
+    content: string;
+    created_at: string;
+    parent_id?: number | null;
+    replies?: CommentData[];
+  }
+
+  function timeAgo(dateStr: string): string {
+    const date = new Date(dateStr + 'Z');
+    const now = new Date();
+    const diff = Math.floor((Number(now) - Number(date)) / 1000);
+    if (diff < 60) return '刚刚';
+    if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+    return Math.floor(diff / 86400) + ' 天前';
+  }
+
+  function renderComment(c: CommentData, depth = 0): string {
+    const ml = depth > 0 ? 'ml-6' : '';
+    return `<div class="${ml} mb-4">
+      <div class="flex items-start gap-3">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-semibold text-sm">${h(c.author)}</span>
+            <span class="text-xs text-gray-400">${timeAgo(c.created_at)}</span>
+          </div>
+          <p class="text-sm text-gray-700 dark:text-gray-300">${h(c.content)}</p>
+          <button onclick="window.replyTo('${c.id}', '${h(c.author)}')" class="text-xs text-blue-600 hover:underline mt-1">回复</button>
+        </div>
+      </div>
+      ${(c.replies || []).map(r => renderComment(r, depth + 1)).join('')}
+    </div>`;
+  }
+
+  function h(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  async function loadComments(): Promise<void> {
+    try {
+      const res = await fetch(API + '/api/comments?post_slug=' + encodeURIComponent(slug));
+      const data = await res.json();
+      const list = document.getElementById('comments-list');
+      if (!list) return;
+      if (data.comments.length === 0) {
+        list.innerHTML = '<p class="text-gray-500 text-center">暂无评论，来说点什么吧</p>';
+      } else {
+        list.innerHTML = data.comments.map((c: CommentData) => renderComment(c)).join('');
+      }
+    } catch {
+      const list = document.getElementById('comments-list');
+      if (list) list.innerHTML = '<p class="text-red-500 text-center">加载评论失败</p>';
+    }
+  }
+
+  interface WindowWithReplyTo extends Window {
+    replyTo?: (id: string, author: string) => void;
+  }
+  (window as WindowWithReplyTo).replyTo = function(id: string, author: string): void {
+    const parentInput = document.getElementById('comment-parent-id') as HTMLInputElement | null;
+    const contentInput = document.getElementById('comment-content') as HTMLInputElement | null;
+    const cancelBtn = document.getElementById('comment-cancel-reply');
+    if (parentInput) parentInput.value = id;
+    if (contentInput) {
+      contentInput.placeholder = '回复 @' + author + '...';
+      contentInput.focus();
+    }
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+  };
+
+  const cancelReplyEl = document.getElementById('comment-cancel-reply');
+  if (cancelReplyEl) {
+    cancelReplyEl.addEventListener('click', function() {
+      const parentInput = document.getElementById('comment-parent-id') as HTMLInputElement | null;
+      const contentInput = document.getElementById('comment-content') as HTMLInputElement | null;
+      if (parentInput) parentInput.value = '';
+      if (contentInput) contentInput.placeholder = '写下你的想法...';
+      (this as HTMLElement).classList.add('hidden');
+    });
+  }
+
+  const commentForm = document.getElementById('comment-form') as HTMLFormElement | null;
+  if (commentForm) {
+    commentForm.addEventListener('submit', async function(this: HTMLFormElement, e: SubmitEvent) {
+      e.preventDefault();
+      const msg = document.getElementById('comment-form-msg');
+      const btn = this.querySelector<HTMLButtonElement>('button[type="submit"]');
+      const orig = btn ? btn.textContent : '';
+
+      try {
+        if (btn) btn.textContent = '提交中...';
+        if (msg) msg.className = 'hidden';
+
+        const formData = new FormData(this);
+        const res = await fetch(API + '/api/comments', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (msg) {
+          msg.className = 'mt-3 p-3 rounded-lg text-center text-sm ' + (res.ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800');
+          msg.textContent = data.message || data.detail || '提交失败';
+        }
+
+        if (res.ok) {
+          this.reset();
+          const parentInput = document.getElementById('comment-parent-id') as HTMLInputElement | null;
+          const contentInput = document.getElementById('comment-content') as HTMLInputElement | null;
+          const cancelBtn = document.getElementById('comment-cancel-reply');
+          if (parentInput) parentInput.value = '';
+          if (contentInput) contentInput.placeholder = '写下你的想法...';
+          if (cancelBtn) cancelBtn.classList.add('hidden');
+          loadComments();
+        }
+      } catch {
+        if (msg) {
+          msg.className = 'mt-3 p-3 rounded-lg text-center text-sm bg-red-100 text-red-800';
+          msg.textContent = '网络错误';
+        }
+      } finally {
+        if (btn && orig) btn.textContent = orig;
+      }
+    });
+  }
+
+  loadComments();
+</script>

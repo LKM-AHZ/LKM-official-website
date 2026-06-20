@@ -4,6 +4,9 @@ import { ANALYTICS } from 'astrowind:config';
 const id = ANALYTICS?.vendors?.googleAnalytics?.id ? String(ANALYTICS.vendors.googleAnalytics.id) : '';
 const partytown = !!ANALYTICS?.vendors?.googleAnalytics?.partytown;
 const scriptType = partytown ? 'text/partytown' : undefined;
+
+const apiBase = import.meta.env.PUBLIC_API_URL || '';
+void apiBase; // Used in inline client script via template string interpolation
 ---
 
 {id && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${id}`} type={scriptType} />}
@@ -18,4 +21,23 @@ const scriptType = partytown ? 'text/partytown' : undefined;
     window.gtag('js', new Date());
     window.gtag('config', d);
   }
+</script>
+
+<script is:inline>
+  // Track page view to LKM backend analytics
+  (function() {
+    var api = '{apiBase}';
+    try {
+      fetch(api + '/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: window.location.pathname,
+          referrer: document.referrer || '',
+        }),
+      });
+    } catch {
+      // Silently fail for analytics
+    }
+  })();
 </script>
