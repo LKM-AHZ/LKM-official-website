@@ -42,7 +42,7 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
       threshold: 0
     };
 
-    const links = document.querySelectorAll('[data-toc-link]');
+    void (document.querySelectorAll('[data-toc-link]')) as NodeListOf<HTMLElement> | undefined;
     const headings = document.querySelectorAll('article h2, article h3');
     
     let activeLink: Element | null = null;
