@@ -73,6 +73,19 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
               'pl-[15px]'
             );
             activeLink = correspondingLink;
+
+            // 滚动居中：将当前高亮的目录项滚动到 TOC 容器的可视中心
+            const tocContainer = document.querySelector('.toc-container');
+            if (tocContainer && correspondingLink instanceof HTMLElement) {
+              const linkOffsetTop = correspondingLink.offsetTop;
+              const linkHeight = correspondingLink.offsetHeight;
+              const containerHeight = tocContainer.clientHeight;
+              const scrollTarget = linkOffsetTop - containerHeight / 2 + linkHeight / 2;
+              tocContainer.scrollTo({
+                top: Math.max(0, scrollTarget),
+                behavior: 'smooth',
+              });
+            }
           }
         }
       });

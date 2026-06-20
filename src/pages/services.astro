@@ -44,6 +44,7 @@ const sidebarLinks = [
   <!-- Features2 Widget ************** -->
 
   <Features2
+    id="templates"
     title="Explore our diverse templates"
     subtitle="Discover our selection below to streamline and elevate your projects."
     columns={3}
@@ -139,7 +140,7 @@ const sidebarLinks = [
     }}
   >
     <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Main Features</h3>
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2" id="features">Main Features</h3>
     </Fragment>
   </Content>
 
@@ -179,13 +180,14 @@ const sidebarLinks = [
     }}
   >
     <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Benefits</h3>
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2" id="benefits">Benefits</h3>
     </Fragment>
   </Content>
 
   <!-- Testimonials Widget *********** -->
 
   <Testimonials
+    id="testimonials"
     title="Words from real customers"
     testimonials={[
       {
