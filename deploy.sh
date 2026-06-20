@@ -93,11 +93,11 @@ pnpm install
 # ---------- 3. 后端依赖 ----------
 echo ""
 echo -e "${GREEN}[3/5] 安装后端依赖...${NC}"
-cd "$BACKEND_DIR"
+cd "$PROJECT_DIR"
 if [ ! -d ".venv" ]; then
     uv venv
 fi
-uv pip install -r requirements.txt
+uv pip install -r "$BACKEND_DIR/requirements.txt"
 
 # ---------- 4. 数据库 ----------
 echo ""
@@ -116,8 +116,8 @@ else
 fi
 
 # 测试数据库连接
-cd "$BACKEND_DIR"
-uv run python test_db.py || echo -e "${YELLOW}[WARN] 数据库连接测试失败，请检查 PostgreSQL 服务是否启动${NC}"
+cd "$PROJECT_DIR"
+uv run python "$BACKEND_DIR/test_db.py" || echo -e "${YELLOW}[WARN] 数据库连接测试失败，请检查 PostgreSQL 服务是否启动${NC}"
 
 # ---------- 5. 启动 ----------
 echo ""
@@ -125,8 +125,8 @@ echo -e "${GREEN}[5/5] 启动服务...${NC}"
 
 # 启动后端
 echo "        启动 FastAPI 后端 (port $BACKEND_PORT)..."
-cd "$BACKEND_DIR"
-uv run uvicorn main:app --host 0.0.0.0 --port "$BACKEND_PORT" &
+cd "$PROJECT_DIR"
+uv run uvicorn backend.main:app --host 0.0.0.0 --port "$BACKEND_PORT" &
 BACKEND_PID=$!
 
 # 等待后端就绪

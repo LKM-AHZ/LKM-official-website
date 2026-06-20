@@ -46,11 +46,11 @@ echo -e "${GREEN}       构建完成 -> $DIST_DIR${NC}"
 # ---------- 2. 后端依赖 ----------
 echo ""
 echo -e "${GREEN}[2/3] 准备后端...${NC}"
-cd "$BACKEND_DIR"
+cd "$PROJECT_DIR"
 if [ ! -d ".venv" ]; then
     uv venv
 fi
-uv pip install -r requirements.txt
+uv pip install -r "$BACKEND_DIR/requirements.txt"
 
 # ---------- 3. 启动 ----------
 echo ""
@@ -110,8 +110,8 @@ NGINXEOF
 }
 NGINXEOF
 
-    cd "$BACKEND_DIR"
-    uv run uvicorn main:app --host 127.0.0.1 --port "$BACKEND_PORT" &
+    cd "$PROJECT_DIR"
+    uv run uvicorn backend.main:app --host 127.0.0.1 --port "$BACKEND_PORT" &
     BACKEND_PID=$!
 
     sleep 1
@@ -138,8 +138,8 @@ else
     python3 -m http.server "$FRONTEND_PORT" &
     FRONTEND_PID=$!
 
-    cd "$BACKEND_DIR"
-    uv run uvicorn main:app --host 0.0.0.0 --port "$BACKEND_PORT" &
+    cd "$PROJECT_DIR"
+    uv run uvicorn backend.main:app --host 0.0.0.0 --port "$BACKEND_PORT" &
     BACKEND_PID=$!
 
     echo ""

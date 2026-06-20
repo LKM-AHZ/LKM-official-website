@@ -28,5 +28,8 @@ pnpm-lock.yaml
 .codex
 .codegraph
 
+# python venv
+.venv/
+
 3.11
 22.12.0
