@@ -16,7 +16,7 @@ export interface Props {
 const { links = [], currentPath = '' } = Astro.props;
 ---
 
-<nav class={styles.nav} aria-label="Sidebar navigation">
+<nav class={styles.nav} aria-label="Sidebar navigation" data-sidebar>
   {
     links.length > 0 && (
       <ul class={styles.linkList}>
@@ -41,3 +41,36 @@ const { links = [], currentPath = '' } = Astro.props;
     )
   }
 </nav>
+
+<script>
+  function initSidebarScroll() {
+    const sidebar = document.querySelector('[data-sidebar]');
+    if (!sidebar) return;
+
+    sidebar.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement).closest('a[href]');
+      if (!link) return;
+
+      const href = link.getAttribute('href');
+      if (!href) return;
+
+      const url = new URL(href, location.origin);
+      const isSamePage = url.pathname === location.pathname;
+      const hash = url.hash;
+
+      if (!hash) return;
+
+      if (isSamePage) {
+        e.preventDefault();
+        const target = document.querySelector(hash);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          history.replaceState(null, '', hash);
+        }
+      }
+    });
+  }
+
+  initSidebarScroll();
+  document.addEventListener('astro:after-swap', initSidebarScroll);
+</script>
