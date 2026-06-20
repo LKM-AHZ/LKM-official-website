@@ -1,15 +1,29 @@
 ---
-import Layout from '~/layouts/PageLayout.astro';
+import Layout from '~/layouts/SidebarLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import ContactUs from '~/components/widgets/Contact.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
+import { getPermalink } from '~/utils/permalinks';
+
 const metadata = {
   title: 'Contact',
 };
+
+const topTabs = [
+  { text: 'About us', href: getPermalink('/about') },
+  { text: 'Services', href: getPermalink('/services') },
+  { text: 'Pricing', href: getPermalink('/pricing') },
+  { text: 'Contact', href: getPermalink('/contact') },
+];
+
+const sidebarLinks = [
+  { text: 'Send Message', href: getPermalink('/contact#form') },
+  { text: 'Support', href: getPermalink('/contact#support') },
+];
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/contact')}>
   <!-- HeroText Widget ******************* -->
 
   <HeroText tagline="Contact" title="Let's Connect!" />

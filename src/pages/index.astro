@@ -391,41 +391,40 @@ const metadata = {
   <!-- FAQs Widget ******************* -->
 
   <FAQs
-    id="faq"
     title="常见问题"
     subtitle="以下整理了用户关于 LKM 官方网站的常见疑问，帮助您快速了解项目特性和使用方式。"
     tagline="FAQs"
     classes={{ container: 'max-w-6xl' }}
     items={[
       {
-        title: 'LKM 网站采用什么技术栈？',
+        title: 'What tech stack does LKM use?',
         description:
-          '基于 Astro v6 + Tailwind CSS v4 + CSS Modules 构建，同时内置了 Vue、React、Svelte 三种 UI 框架支持。所有页面为纯静态生成，具备优秀的性能和 SEO 表现。',
+          'Built with Astro v6 + Tailwind CSS v4 + CSS Modules, with built-in Vue, React, and Svelte UI framework support. All pages are statically generated for excellent performance and SEO.',
       },
       {
-        title: '如何开始使用？',
+        title: 'How do I get started?',
         description:
-          '确保 Node.js >= 22.12.0，克隆项目后执行 npm install 安装依赖，然后运行 npm run dev 启动开发服务器，访问 localhost:4321 即可预览。',
+          'Ensure Node.js >= 22.12.0, clone the project, run npm install to install dependencies, then npm run dev to start the dev server at localhost:4321.',
       },
       {
-        title: '如何自定义样式？',
+        title: 'How do I customize styles?',
         description:
-          '项目提供两种样式方式：通过 Tailwind CSS v4 的 @theme 变量和 @utility 工具类进行全局样式管理；或使用 CSS Modules（.module.css 文件）实现局部作用域样式。',
+          'Two approaches are available: global theming via Tailwind CSS v4 @theme variables and @utility classes, or scoped styles using CSS Modules (.module.css files).',
       },
       {
-        title: '支持哪些内容格式的博客？',
+        title: 'What content formats are supported for blogging?',
         description:
-          '支持 Markdown 和 MDX 格式的博客文章，自动生成 RSS 订阅、站点地图，支持分类和标签系统，内置阅读时间计算和社交分享功能。',
+          'Markdown and MDX are both supported. The blog includes RSS feed generation, sitemap, category & tag filtering, reading time estimation, and social sharing.',
       },
       {
-        title: '如何部署到生产环境？',
+        title: 'How do I deploy to production?',
         description:
-          '运行 npm run build 生成静态产物到 dist/ 目录，可直接部署到 Vercel、Netlify、GitHub Pages 等任意静态托管服务。',
+          'Run npm run build to generate static output in the dist/ directory. Deploy to Vercel, Netlify, GitHub Pages, or any static hosting service.',
       },
       {
-        title: '支持哪些 UI 框架？',
+        title: 'Which UI frameworks are supported?',
         description:
-          '项目已内置 @astrojs/vue、@astrojs/react、@astrojs/svelte 集成，可以直接在 src/components/ 下创建 .vue、.jsx/.tsx、.svelte 组件并在 .astro 文件中使用。',
+          'The project includes @astrojs/vue, @astrojs/react, and @astrojs/svelte integrations. Create .vue, .jsx/.tsx, or .svelte components under src/components/ and use them in .astro files.',
       },
     ]}
   />

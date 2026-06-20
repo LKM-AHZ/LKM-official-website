@@ -1,5 +1,5 @@
 ---
-import Layout from '~/layouts/PageLayout.astro';
+import Layout from '~/layouts/SidebarLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import Prices from '~/components/widgets/Pricing.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
@@ -7,12 +7,28 @@ import Steps from '~/components/widgets/Steps.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
+import { getPermalink } from '~/utils/permalinks';
+
 const metadata = {
   title: 'Pricing',
 };
+
+const topTabs = [
+  { text: 'About us', href: getPermalink('/about') },
+  { text: 'Services', href: getPermalink('/services') },
+  { text: 'Pricing', href: getPermalink('/pricing') },
+  { text: 'Contact', href: getPermalink('/contact') },
+];
+
+const sidebarLinks = [
+  { text: 'Plans', href: getPermalink('/pricing#plans') },
+  { text: 'Features', href: getPermalink('/pricing#features') },
+  { text: 'Process', href: getPermalink('/pricing#process') },
+  { text: 'FAQ', href: getPermalink('/pricing#faq') },
+];
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/pricing')}>
   <!-- HeroText Widget ******************* -->
 
   <HeroText

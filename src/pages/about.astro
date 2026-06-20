@@ -4,14 +4,31 @@ import Features3 from '~/components/widgets/Features3.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Steps2 from '~/components/widgets/Steps2.astro';
-import Layout from '~/layouts/PageLayout.astro';
+import Layout from '~/layouts/SidebarLayout.astro';
+
+import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
   title: 'About us',
 };
+
+const topTabs = [
+  { text: 'About us', href: getPermalink('/about') },
+  { text: 'Services', href: getPermalink('/services') },
+  { text: 'Pricing', href: getPermalink('/pricing') },
+  { text: 'Contact', href: getPermalink('/contact') },
+];
+
+const sidebarLinks = [
+  { text: 'Overview', href: getPermalink('/about') },
+  { text: 'Our values', href: getPermalink('/about#values') },
+  { text: 'Achievements', href: getPermalink('/about#achievements') },
+  { text: 'Locations', href: getPermalink('/about#locations') },
+  { text: 'Support', href: getPermalink('/about#support') },
+];
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/about')}>
   <!-- Hero Widget ******************* -->
 
   <Hero
