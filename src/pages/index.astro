@@ -9,7 +9,8 @@ import Features2 from '~/components/widgets/Features2.astro';
 // import Content from '~/components/widgets/Content.astro';
 import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
-// import Timeline from '~/components/ui/Timeline.astro';
+import Timeline from '~/components/widgets/Timeline.astro';
+import Section from '~/components/widgets/Section.astro';
 // import Stats from '~/components/widgets/Stats.astro';
 // import CallToAction from '~/components/widgets/CallToAction.astro';
 // import TimelineSection from '~/components/widgets/TimelineSection.astro';
@@ -103,6 +104,49 @@ const metadata = {
     </Fragment>
   </Features2>
 
+  <Section title="发展历程" subtitle="物换星移，春秋代序" tagline="Timeline">
+    <div class="flex justify-center"></div>
+    <Timeline
+      items={[
+        {
+          year: '1984',
+          title: 'First Macintosh computer',
+          description:
+            'The Apple Macintosh—later rebranded as the Macintosh 128K—is the original Apple Macintosh personal computer. It played a pivotal role in establishing desktop publishing as a general office function...',
+        },
+        {
+          year: '1998',
+          title: 'iMac',
+          description:
+            "iMac is a family of all-in-one Mac desktop computers designed and built by Apple Inc. It has been the primary part of Apple's consumer desktop offerings since its debut in August 1998...",
+        },
+        {
+          year: '2001',
+          title: 'iPod',
+          iconColor: "text-current",
+          iconName: "tabler:clock-hour-4",
+          description:
+            'The iPod is a discontinued series of portable media players and multi-purpose mobile devices designed and marketed by Apple Inc. The first version was released on October 23, 2001...',
+        },
+        {
+          year: '2007',
+          title: 'iPhone',
+          iconName: "tabler:clock-hour-4",
+          iconColor: "text-current",
+          description:
+            "iPhone is a line of smartphones produced by Apple Inc. that use Apple's own iOS mobile operating system. The first-generation iPhone was announced by then-Apple CEO Steve Jobs on January 9, 2007...",
+        },
+        {
+          year: '2015',
+          title: 'Apple Watch',
+          iconColor: "text-current",
+          iconName: "tabler:clock-hour-4",
+          description:
+            'The Apple Watch is a line of smartwatches produced by Apple Inc. It incorporates fitness tracking, health-oriented capabilities, and wireless telecommunication...',
+        },
+      ]}
+    />
+  </Section>
 
   <!-- <Steps2
     title="只需三步，轻松搞定"

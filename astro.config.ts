@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 import { defineConfig } from 'astro/config';
 
 import { unified } from '@astrojs/markdown-remark';
-
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
@@ -14,6 +13,8 @@ import compress from 'astro-compress';
 import vue from '@astrojs/vue';
 import react from '@astrojs/react';
 import svelte from '@astrojs/svelte';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import type { AstroIntegration } from 'astro';
 
 import astrowind from './vendor/integration';
@@ -28,6 +29,7 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
 
 export default defineConfig({
   output: 'static',
+  
 
   integrations: [
     sitemap(),
@@ -92,8 +94,8 @@ export default defineConfig({
 
   markdown: {
     processor: unified({
-      remarkPlugins: [readingTimeRemarkPlugin],
-      rehypePlugins: [responsiveTablesRehypePlugin],
+      remarkPlugins: [readingTimeRemarkPlugin, remarkMath],
+      rehypePlugins: [responsiveTablesRehypePlugin, rehypeKatex],
     }),
   },
 
