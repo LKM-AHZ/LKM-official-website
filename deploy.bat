@@ -68,11 +68,11 @@ if %errorlevel% neq 0 (
 :: ---------- 后端依赖 ----------
 echo.
 echo [3/5] 安装后端依赖...
-cd /d "%BACKEND_DIR%"
+cd /d "%PROJECT_DIR%"
 if not exist ".venv" (
     uv venv
 )
-uv pip install -r requirements.txt
+uv pip install -r "%BACKEND_DIR%\requirements.txt"
 if %errorlevel% neq 0 (
     echo [ERROR] 后端依赖安装失败
     pause
@@ -92,8 +92,8 @@ if %PG_AVAILABLE% EQU 1 (
 )
 
 :: 测试数据库连接 (即使 psql 不可用也尝试，通过后端直连 PostgreSQL)
-cd /d "%BACKEND_DIR%"
-uv run python test_db.py
+cd /d "%PROJECT_DIR%"
+uv run python "%BACKEND_DIR%\test_db.py"
 if %errorlevel% neq 0 (
     echo [WARN] 数据库连接测试失败，请检查 PostgreSQL 服务是否启动
 )
@@ -104,7 +104,7 @@ echo [5/5] 启动服务...
 
 :: 启动后端
 echo        启动 FastAPI 后端 (port %BACKEND_PORT%)...
-start "LKM Backend" cmd /c "cd /d "%BACKEND_DIR%" && uv run uvicorn main:app --host 0.0.0.0 --port %BACKEND_PORT%""
+start "LKM Backend" cmd /c "cd /d "%PROJECT_DIR%" && uv run uvicorn backend.main:app --host 0.0.0.0 --port %BACKEND_PORT%""
 
 :: 等待后端就绪
 echo        等待后端启动...
