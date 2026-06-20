@@ -1,8 +1,18 @@
 @import 'tailwindcss';
-@plugin "daisyui";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+/* @plugin "daisyui"; */
+@plugin "daisyui" {
+  themes: false;     /* 关键 1：彻底禁用 daisyUI 所有的自带主题颜色，防止改掉你本来的颜色系统 */
+  root: "#never-match-this"; /* 关键 2：把 daisyUI 注入全局的变量隔离，不让它挂载到 :root 下影响全局 */
+  
+  /* 选填：如果你只想打包特定组件来减少包体积，可以在这里指定，例如： */
+  /* include: modal, collapse, toggle; */
+}
 @plugin "@tailwindcss/typography";
 
-@variant dark (&:where(.dark, .dark *));
+/* @variant dark (&:where(.dark, .dark *)); */
+@variant dark (&:where(.dark, [data-theme="dark"], .dark *, [data-theme="dark"] *));
 
 @custom-variant intersect (&:not([no-intersect]));
 
@@ -14,10 +24,12 @@
   --color-muted: var(--aw-color-text-muted);
 
   --font-sans:
-    'var(--aw-font-sans, ui-sans-serif)', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Noto Sans SC', 'var(--aw-font-sans, ui-sans-serif)', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
   --font-serif: 'var(--aw-font-serif, ui-serif)', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-  --font-heading: 'var(--aw-font-heading, ui-sans-serif)', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Noto Sans SC', 'var(--aw-font-heading, ui-sans-serif)', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   --animate-fade: fadeInUp 1s both;
 
@@ -114,4 +126,116 @@
 
 .dd *:first-child {
   margin-top: 0;
+}
+
+/* ==========================================================================
+   全站中文字体、字距与呼吸感全局优化 (已修复非文章区域的对齐冲突)
+   ========================================================================== */
+
+@layer base {
+  /* 1. 作用于全站 html / body 级别的字距 */
+  html, body {
+    letter-spacing: 0.04em;       /* 全局字间距微调，让所有非标题文本都舒展开 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 2. 全局基础文本标签（移除了 text-align: justify，不再破坏原有对齐） */
+  p {
+    line-height: 1.75;            /* 全局段落行高保持在 1.75 */
+    margin-bottom: 1.25rem;       /* 全局段落默认下边距 */
+  }
+
+  /* 3. 全局标题字距微调 */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0.02em;       /* 防止中文字大块挤压 */
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  /* ==========================================================================
+     专门针对文章、长文本排版优化的局部样式（应用于 .prose 容器）
+     ========================================================================== */
+  
+  /* 1. 仅在文章内部开启中文两端对齐和大字距、大行高 */
+  .prose p, .prose li, .prose ol, .prose ul {
+    letter-spacing: 0.05em !important; 
+    line-height: 1.85 !important;      
+    color: #2d3748 !important;         
+    text-align: justify;               /* 两端对齐安全地隔离在文章区域内 */
+    text-justify: inter-ideograph;
+  }
+  
+  .dark .prose p, .dark .prose li {
+    color: #e2e8f0 !important;
+  }
+
+  /* 2. 文章内段落之间的间距 */
+  .prose p {
+    margin-top: 1.5rem !important;    
+    margin-bottom: 1.5rem !important; 
+  }
+
+  /* 3. 文章内标题留白 */
+  .prose h2 {
+    margin-top: 3rem !important;       
+    margin-bottom: 1.25rem !important;
+  }
+  
+  .prose h3 {
+    margin-top: 2.25rem !important;    
+    margin-bottom: 1rem !important;
+  }
+
+  /* 4. 列表与引用块、行内代码（保持一致） */
+  .prose li {
+    margin-top: 0.75rem !important;    
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .prose ul, .prose ol {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    padding-left: 1.5em !important;    
+  }
+
+  .prose blockquote {
+    font-style: normal;
+    letter-spacing: 0.04em !important;
+    border-left-width: 4px;
+    border-left-color: rgb(59, 130, 246) !important; 
+    background-color: rgba(59, 130, 246, 0.04);
+    padding: 1.25rem 1.75rem !important;
+    margin: 2rem 0 !important;         
+    border-radius: 0 0.75rem 0.75rem 0;
+  }
+  
+  .dark .prose blockquote {
+    background-color: rgba(59, 130, 246, 0.08);
+  }
+  
+  .prose blockquote p::before, .prose blockquote p::after {
+    content: "" !important;            
+  }
+
+  .prose code:not(pre code) {
+    background-color: #f1f5f9 !important;
+    color: #e04343 !important;
+    padding: 0.2rem 0.4rem !important;
+    border-radius: 0.375rem !important;
+    font-size: 0.88em !important;
+    font-weight: 600 !important;
+    letter-spacing: 0px !important;    
+    margin: 0 0.2em !important;        
+  }
+  
+  .dark .prose code:not(pre code) {
+    background-color: #1e293b !important;
+    color: #f87171 !important;
+  }
+  
+  .prose code:not(pre code)::before, .prose code:not(pre code)::after {
+    content: "" !important;            
+  }
 }

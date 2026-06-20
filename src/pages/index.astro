@@ -15,7 +15,7 @@ import Section from '~/components/widgets/Section.astro';
 // import CallToAction from '~/components/widgets/CallToAction.astro';
 // import TimelineSection from '~/components/widgets/TimelineSection.astro';
 const metadata = {
-  title: 'AstroWind — Free template for creating websites with Astro + Tailwind CSS',
+  title: '理科迷 —— 科技爱好者',
   ignoreTitleTemplate: true,
 };
 ---
@@ -24,15 +24,21 @@ const metadata = {
   <!-- Hero Widget ******************* -->
 
   <Hero
+    id="intro"
     actions={[
       {
         variant: 'primary',
         text: '博客',
         href: 'blog',
-        target: '_blank',
+        target: '_self',
         icon: 'tabler:arrow-right',
       },
-      { text: 'Learn more', href: '#features' },
+      {
+        text: 'GitHub',
+        href: 'https://github.com/LKM-2014/LKM-official-website',
+        target: '_blank',
+        icon: 'tabler:brand-github',
+      },
     ]}
     image={{ src: '~/assets/images/hero-image.png', alt: 'AstroWind Hero Image' }}
   >
@@ -58,6 +64,7 @@ const metadata = {
   </Hero>
 
   <Features2
+    id="team"
     title="团队成员"
     subtitle="理科迷因为有你，所以更加精彩"
     tagline="Team Members"
@@ -104,7 +111,7 @@ const metadata = {
     </Fragment>
   </Features2>
 
-  <Section title="发展历程" subtitle="物换星移，春秋代序" tagline="Timeline">
+  <Section title="发展历程" subtitle="物换星移，春秋代序" tagline="Timeline" id="timeline">
     <div class="flex justify-center"></div>
     <Timeline
       items={[
@@ -123,24 +130,24 @@ const metadata = {
         {
           year: '2001',
           title: 'iPod',
-          iconColor: "text-current",
-          iconName: "tabler:clock-hour-4",
+          iconColor: 'text-current',
+          iconName: 'tabler:clock-hour-4',
           description:
             'The iPod is a discontinued series of portable media players and multi-purpose mobile devices designed and marketed by Apple Inc. The first version was released on October 23, 2001...',
         },
         {
           year: '2007',
           title: 'iPhone',
-          iconName: "tabler:clock-hour-4",
-          iconColor: "text-current",
+          iconName: 'tabler:clock-hour-4',
+          iconColor: 'text-current',
           description:
             "iPhone is a line of smartphones produced by Apple Inc. that use Apple's own iOS mobile operating system. The first-generation iPhone was announced by then-Apple CEO Steve Jobs on January 9, 2007...",
         },
         {
           year: '2015',
           title: 'Apple Watch',
-          iconColor: "text-current",
-          iconName: "tabler:clock-hour-4",
+          iconColor: 'text-current',
+          iconName: 'tabler:clock-hour-4',
           description:
             'The Apple Watch is a line of smartwatches produced by Apple Inc. It incorporates fitness tracking, health-oriented capabilities, and wireless telecommunication...',
         },
@@ -375,18 +382,17 @@ const metadata = {
   <!-- HighlightedPosts Widget ******* -->
 
   <BlogLatestPosts
+    id="update"
     title="最近更新"
-    information={`The blog is used to display AstroWind documentation.
-                        Each new article will be an important step that you will need to know to be an expert in creating a website using Astro v6 + Tailwind CSS v4.
-                        Astro is a very interesting technology. Thanks.
+    information={`如果不知道看什么，可以阅读这些文档来熟悉我们！
                 `}
   />
 
   <!-- FAQs Widget ******************* -->
 
   <FAQs
-    title="Frequently Asked Questions"
-    subtitle="Find answers to common questions about the LKM website, its tech stack, usage, and deployment."
+    title="常见问题"
+    subtitle="以下整理了用户关于 LKM 官方网站的常见疑问，帮助您快速了解项目特性和使用方式。"
     tagline="FAQs"
     classes={{ container: 'max-w-6xl' }}
     items={[

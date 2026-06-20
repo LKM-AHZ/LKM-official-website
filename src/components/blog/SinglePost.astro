@@ -1,10 +1,10 @@
 ---
 import { Icon } from 'astro-icon/components';
-
+import type { MarkdownHeading } from 'astro';
 import Image from '~/components/common/Image.astro';
 import PostTags from '~/components/blog/Tags.astro';
 import SocialShare from '~/components/common/SocialShare.astro';
-
+import TableOfContents from '~/components/ui/TableOfContents.astro';
 import { getPermalink } from '~/utils/permalinks';
 import { getFormattedDate } from '~/utils/utils';
 
@@ -13,92 +13,195 @@ import type { Post } from '~/types';
 export interface Props {
   post: Post;
   url: string | URL;
+  headings?: MarkdownHeading[];
 }
 
-const { post, url } = Astro.props;
+const { post, url, headings=[] } = Astro.props;
+
 ---
 
 <section class="py-8 sm:py-16 lg:py-20 mx-auto">
-  <article>
-    <header
-      class={post.image
-        ? 'intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade'
-        : 'intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade'}
-    >
-      <div class="flex justify-between flex-col sm:flex-row max-w-3xl mx-auto mt-0 mb-2 px-4 sm:px-6 sm:items-center">
-        <p>
-          <Icon name="tabler:clock" class="w-4 h-4 inline-block -mt-0.5 dark:text-gray-400" />
-          <time datetime={String(post.publishDate)} class="inline-block">{getFormattedDate(post.publishDate)}</time>
-          {
-            post.author && (
-              <>
-                {' '}
-                · <Icon name="tabler:user" class="w-4 h-4 inline-block -mt-0.5 dark:text-gray-400" />
-                <span class="inline-block">{post.author}</span>
-              </>
-            )
-          }
-          {
-            post.category && (
-              <>
-                {' '}
-                ·{' '}
-                <a class="hover:underline inline-block" href={getPermalink(post.category.slug, 'category')}>
-                  {post.category.title}
-                </a>
-              </>
-            )
-          }
-          {
-            post.readingTime && (
-              <>
-                &nbsp;· <span>{post.readingTime}</span> min read
-              </>
-            )
-          }
-        </p>
-      </div>
-
-      <h1
-        class="px-4 sm:px-6 max-w-3xl mx-auto text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading"
-      >
-        {post.title}
-      </h1>
-      <p
-        class="max-w-3xl mx-auto mt-4 mb-8 px-4 sm:px-6 text-xl md:text-2xl text-muted dark:text-slate-400 text-justify"
-      >
-        {post.excerpt}
-      </p>
-
-      {
-        post.image ? (
-          <Image
-            src={post.image}
-            class="max-w-full lg:max-w-[900px] mx-auto mb-6 sm:rounded-md bg-gray-400 dark:bg-slate-700"
-            widths={[400, 900]}
-            sizes="(max-width: 900px) 400px, 900px"
-            alt={post?.excerpt || ''}
-            width={900}
-            height={506}
-            format="webp"
-            loading="eager"
-            decoding="async"
-          />
-        ) : (
-          <div class="max-w-3xl mx-auto px-4 sm:px-6">
-            <div class="border-t dark:border-slate-700" />
+  <div class="max-w-7xl mx-auto">
+    <div class="flex gap-8 relative">
+      <!-- Main content -->
+      <article class="flex-1 min-w-0">
+        <header
+          class={post.image
+            ? 'intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade'
+            : 'intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade'}
+        >
+          <div class="flex justify-between flex-col sm:flex-row max-w-3xl mx-auto mt-0 mb-2 px-4 sm:px-6 sm:items-center">
+            <p>
+              <Icon name="tabler:clock" class="w-4 h-4 inline-block -mt-0.5 dark:text-gray-400" />
+              <time datetime={String(post.publishDate)} class="inline-block">{getFormattedDate(post.publishDate)}</time>
+              {
+                post.author && (
+                  <>
+                    {' '}
+                    · <Icon name="tabler:user" class="w-4 h-4 inline-block -mt-0.5 dark:text-gray-400" />
+                    <span class="inline-block">{post.author}</span>
+                  </>
+                )
+              }
+              {
+                post.category && (
+                  <>
+                    {' '}
+                    ·{' '}
+                    <a class="hover:underline inline-block" href={getPermalink(post.category.slug, 'category')}>
+                      {post.category.title}
+                    </a>
+                  </>
+                )
+              }
+              {
+                post.readingTime && (
+                  <>
+                    &nbsp;· <span>{post.readingTime}</span> min read
+                  </>
+                )
+              }
+            </p>
           </div>
-        )
-      }
-    </header>
-    <div
-      class="mx-auto px-6 sm:px-6 max-w-3xl prose prose-md lg:prose-xl dark:prose-invert dark:prose-headings:text-slate-300 prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-primary dark:prose-a:text-blue-400 prose-img:rounded-md prose-img:shadow-lg mt-8 prose-headings:scroll-mt-[80px] prose-li:my-0"
-    >
-      <slot />
+
+          <h1
+            class="px-4 sm:px-6 max-w-3xl mx-auto text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading"
+          >
+            {post.title}
+          </h1>
+          <p
+            class="max-w-3xl mx-auto mt-4 mb-8 px-4 sm:px-6 text-xl md:text-2xl text-muted dark:text-slate-400 text-justify"
+          >
+            {post.excerpt}
+          </p>
+
+          {
+            post.image ? (
+              <Image
+                src={post.image}
+                class="max-w-full lg:max-w-[900px] mx-auto mb-6 sm:rounded-md bg-gray-400 dark:bg-slate-700"
+                widths={[400, 900]}
+                sizes="(max-width: 900px) 400px, 900px"
+                alt={post?.excerpt || ''}
+                width={900}
+                height={506}
+                format="webp"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <div class="max-w-3xl mx-auto px-4 sm:px-6">
+                <div class="border-t dark:border-slate-700" />
+              </div>
+            )
+          }
+        </header>
+        <div
+          class="mx-auto px-6 sm:px-6 max-w-3xl prose prose-md lg:prose-lg dark:prose-invert dark:prose-headings:text-slate-300 prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-primary dark:prose-a:text-blue-400 prose-img:rounded-md prose-img:shadow-lg mt-8 prose-headings:scroll-mt-[80px] prose-li:my-0"
+        >
+          <slot />
+        </div>
+        <div class="mx-auto px-6 sm:px-6 max-w-3xl mt-8 flex justify-between flex-col sm:flex-row">
+          <PostTags tags={post.tags} class="mr-5 rtl:mr-0 rtl:ml-5" />
+          <SocialShare url={url} text={post.title} class="mt-5 sm:mt-1 align-middle text-gray-500 dark:text-slate-600" />
+        </div>
+      </article>
+
+      <!-- Floating TOC sidebar -->
+      <aside class="hidden xl:block flex-shrink-0">
+        <TableOfContents headings={headings} />
+      </aside>
     </div>
-    <div class="mx-auto px-6 sm:px-6 max-w-3xl mt-8 flex justify-between flex-col sm:flex-row">
-      <PostTags tags={post.tags} class="mr-5 rtl:mr-0 rtl:ml-5" />
-      <SocialShare url={url} text={post.title} class="mt-5 sm:mt-1 align-middle text-gray-500 dark:text-slate-600" />
-    </div>
-  </article>
+  </div>
 </section>
+
+<style is:global>
+  /* ==========================================================================
+     专门针对中文排版优化的全局样式（带来全面的呼吸感）
+     ========================================================================== */
+  
+  /* 1. 全局正文与列表：增大字距、行高与段距 */
+  .prose p, .prose li, .prose ol, .prose ul {
+    letter-spacing: 0.05em !important; /* 增大字间距，让方块字不再拥挤 */
+    /* line-height: 1.85 !important;      增大行高，中文推荐在 1.8 - 1.9 之间 */
+    color: #2d3748 !important;         /* 稍微降低纯黑度，减少视觉疲劳 */
+    text-align: justify;               /* 两端对齐，中文排版必备，防止右侧参差不齐 */
+    text-justify: inter-ideograph;
+  }
+  .dark .prose p, .dark .prose li {
+    color: #e2e8f0 !important;
+  }
+
+  /* 2. 全局段落之间的间距（全局拉开） */
+  .prose p {
+    margin-top: 1.5rem !important;    /* 增大段落上方间距 */
+    margin-bottom: 1.5rem !important; /* 增大段落下方间距 */
+  }
+
+  /* 3. 全局标题优化：中文标题字距不宜过紧，且上方需要大量留白 */
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    letter-spacing: 0.03em !important; /* 标题字距同步微调 */
+    font-weight: 700 !important;
+    color: #111827 !important;
+  }
+  .dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4 {
+    color: #f9fafb !important;
+  }
+
+  .prose h2 {
+    margin-top: 3rem !important;       /* 大标题上方留出充足的呼吸空间 */
+    margin-bottom: 1.25rem !important;
+  }
+  .prose h3 {
+    margin-top: 2.25rem !important;    /* 中标题上方留白 */
+    margin-bottom: 1rem !important;
+  }
+
+  /* 4. 列表（Li）自身的间距拉开 */
+  .prose li {
+    margin-top: 0.75rem !important;    /* 列表项之间不再紧贴 */
+    margin-bottom: 0.75rem !important;
+  }
+  .prose ul, .prose ol {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    padding-left: 1.5em !important;    /* 优化缩进 */
+  }
+
+  /* 5. 优雅的引用块（Blockquote） */
+  .prose blockquote {
+    font-style: normal;
+    letter-spacing: 0.04em !important;
+    border-left-width: 4px;
+    border-left-color: rgb(59, 130, 246) !important; /* 主题蓝 */
+    background-color: rgba(59, 130, 246, 0.04);
+    padding: 1.25rem 1.75rem !important;
+    margin: 2rem 0 !important;         /* 引用块上下拉开距离 */
+    border-radius: 0 0.75rem 0.75rem 0;
+  }
+  .dark .prose blockquote {
+    background-color: rgba(59, 130, 246, 0.08);
+  }
+  .prose blockquote p::before, .prose blockquote p::after {
+    content: "" !important;            /* 移除英文双引号 */
+  }
+
+  /* 6. 行内代码（Inline Code）美化 */
+  .prose code:not(pre code) {
+    background-color: #f1f5f9 !important;
+    color: #e04343 !important;
+    padding: 0.2rem 0.4rem !important;
+    border-radius: 0.375rem !important;
+    font-size: 0.88em !important;
+    font-weight: 600 !important;
+    letter-spacing: 0px !important;    /* 代码不需要跟中文一样的大字距 */
+    margin: 0 0.2em !important;        /* 让代码块与前后中文字符保持一点点微小的物理距离 */
+  }
+  .dark .prose code:not(pre code) {
+    background-color: #1e293b !important;
+    color: #f87171 !important;
+  }
+  .prose code:not(pre code)::before, .prose code:not(pre code)::after {
+    content: "" !important;            /* 移除自带的反引号 */
+  }
+</style>

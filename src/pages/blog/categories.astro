@@ -1,0 +1,79 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import { fetchPosts } from '~/utils/blog';
+import { getPermalink } from '~/utils/permalinks';
+import type { Taxonomy } from '~/types';
+
+export const prerender = true;
+
+// 获取所有文章并统计分类
+const posts = await fetchPosts();
+const categoriesMap = new Map<string, { category: Taxonomy; count: number }>();
+
+posts.forEach((post) => {
+  if (post.category?.slug) {
+    const existing = categoriesMap.get(post.category.slug);
+    if (existing) {
+      existing.count++;
+    } else {
+      categoriesMap.set(post.category.slug, {
+        category: post.category,
+        count: 1,
+      });
+    }
+  }
+});
+
+// 转换为数组并按文章数量排序
+const categories = Array.from(categoriesMap.values()).sort((a, b) => b.count - a.count);
+
+const metadata = {
+  title: '所有分类',
+  description: '浏览所有文章分类',
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+---
+
+<Layout metadata={metadata}>
+  <section class="px-4 md:px-6 py-12 sm:py-16 lg:py-20 mx-auto max-w-4xl">
+    <header class="mb-8">
+      <h1 class="text-4xl md:text-5xl font-bold leading-tight tracking-tighter font-heading">
+        所有分类
+      </h1>
+      <p class="text-muted mt-4 text-xl">
+        浏览 {categories.length} 个分类中的所有文章
+      </p>
+    </header>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        categories.map(({ category, count }) => (
+          <a
+            href={getPermalink(category.slug, 'category')}
+            class="block p-6 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all hover:shadow-lg group"
+          >
+            <div class="flex flex-col h-full">
+              <h2 class="text-xl font-semibold mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                {category.title}
+              </h2>
+              <p class="text-muted text-sm mt-auto">
+                {count} {count === 1 ? '篇文章' : '篇文章'}
+              </p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+
+    {
+      categories.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-muted text-lg">暂无分类</p>
+        </div>
+      )
+    }
+  </section>
+</Layout>

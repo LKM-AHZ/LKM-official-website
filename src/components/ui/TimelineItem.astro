@@ -40,7 +40,7 @@ const showEndLine = index < total - 1;
   <div class:list={[isEven ? "timeline-start mb-10 md:text-end" : "timeline-end md:mb-10"]}>
     <time class="font-mono italic">{year}</time>
     <div class="text-lg font-black">{title}</div>
-    <p class="text-sm text-base-content/80 leading-relaxed max-w-xl">{description}</p>
+    <p class="text-sm text-base-content/80 leading-relaxed max-w-xl dark:text-white">{description}</p>
   </div>
 
   {showEndLine && <hr />}

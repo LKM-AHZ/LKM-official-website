@@ -9,7 +9,7 @@ site:
 # Default SEO metadata
 metadata:
   title:
-    default: LKM
+    default: 理科迷
     template: '%s — LKM'
   description: 'LKM 官方网站 — 基于 Astro v6 + Tailwind CSS v4 + CSS Modules 构建，支持 Vue / React / Svelte。适用于企业官网、产品展示、博客等场景。'
   robots:

@@ -1,0 +1,74 @@
+---
+// src/components/blog/TableOfContents.astro
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+// 过滤掉不需要的标题级别（比如只保留 h2 和 h3）
+const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{filteredHeadings.length > 0 && (
+  <nav class="toc-container sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto hidden xl:block w-64 p-4 border-l border-gray-200 dark:border-slate-700">
+    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100 mb-3">
+      目录
+    </h3>
+    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+      {filteredHeadings.map((heading) => (
+        <li class={`toc-item transition-all duration-200 ${heading.depth === 3 ? 'pl-4' : ''}`}>
+          <a
+            href={`#${heading.slug}`}
+            class="hover:text-primary dark:hover:text-blue-400 block py-0.5"
+            data-toc-link
+          >
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  // 页面滚动时自动高亮当前标题
+  function initTOC() {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -70% 0px', // 触发高亮的视窗核心区域
+      threshold: 0
+    };
+
+    const links = document.querySelectorAll('[data-toc-link]');
+    const headings = document.querySelectorAll('article h2, article h3');
+    
+    let activeLink: Element | null = null;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          const correspondingLink = document.querySelector(`[data-toc-link][href="#${id}"]`);
+          
+          if (correspondingLink) {
+            // 移除旧的高亮
+            if (activeLink) {
+              activeLink.classList.remove('text-primary', 'dark:text-blue-400', 'font-medium', 'border-l-2', 'border-primary', '-ml-[17px]', 'pl-[15px]');
+            }
+            // 添加新高亮
+            correspondingLink.classList.add('text-primary', 'dark:text-blue-400', 'font-medium', 'border-l-2', 'border-primary', '-ml-[17px]', 'pl-[15px]');
+            activeLink = correspondingLink;
+          }
+        }
+      });
+    }, observerOptions);
+
+    headings.forEach((heading) => observer.observe(heading));
+  }
+
+  // 兼容 Astro 的 View Transitions (视图过渡)
+  document.addEventListener('astro:page-load', initTOC);
+</script>
