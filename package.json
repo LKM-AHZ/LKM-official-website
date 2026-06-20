@@ -32,9 +32,17 @@
     "astro-embed": "^0.13.0",
     "astro-icon": "^1.1.5",
     "astro-seo": "^1.1.0",
+    "daisyui": "^5.5.23",
+    "katex": "^0.17.0",
     "limax": "4.2.3",
     "lodash.merge": "^4.6.2",
-    "unpic": "^4.2.2"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "svelte": "^5.56.3",
+    "unpic": "^4.2.2",
+    "vue": "^3.5.38"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
@@ -44,7 +52,7 @@
     "@iconify-json/flat-color-icons": "^1.2.3",
     "@iconify-json/tabler": "^1.2.35",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.1",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash.merge": "^4.6.9",
     "@types/mdx": "^2.0.13",
@@ -62,12 +70,13 @@
     "reading-time": "^1.5.0",
     "sharp": "0.34.5",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.60.0"
   },
   "overrides": {
     "yaml": ">=2.8.3",
     "vite": "^7"
-  }
+  },
+  "packageManager": "pnpm@11.8.0+sha512.c1f5e7c4cb241c8f174b743851d82f42b802324afc8b0f116b96adb15aa06664948dde36960a3ba1079ba5b4b29dd0140135b94b5b5f5263592249d68e555f26"
 }

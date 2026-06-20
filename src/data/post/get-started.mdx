@@ -1,0 +1,296 @@
+---
+publishDate: 2026-06-20T12:30:00+08:00
+author: Timothy Starman
+title: 理科迷 —— 贡献指南
+excerpt: 如果你希望为博客添加一些你的内容，here you go.
+image: https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+category: 教程
+tags:
+  - astro
+  - tailwind css
+  - 理科迷
+---
+
+## 序言
+
+如果你希望为理科迷博客做出贡献，无论是撰写技术文章、分享学习心得，还是改进网站功能，我们都非常欢迎！本指南将帮助你快速了解如何参与到这个项目中。
+
+## 环境准备
+
+在开始之前，请确保你的开发环境满足以下要求：
+
+- **Node.js** >= 22.12.0
+- **Git** 用于版本控制
+- 一个趁手的代码编辑器（推荐 VS Code）
+
+### 克隆项目
+
+```bash
+git clone https://github.com/your-org/LKM-official-website.git
+cd LKM-official-website
+npm install
+```
+
+### 启动开发服务器
+
+```bash
+npm run dev
+```
+
+访问 `http://localhost:4321` 即可在浏览器中预览网站。
+
+## 贡献方式一：撰写博客文章
+
+这是最简单也是最受欢迎的贡献方式。如果你有技术文章、学习笔记或研究心得想要分享，请按照以下步骤操作。
+
+### 1. 创建文章文件
+
+在 `src/data/post/` 目录下创建一个新的 `.md` 或 `.mdx` 文件。文件名将成为文章的 URL，建议使用英文短横线命名法，例如：
+
+```
+src/data/post/introduction-to-quantum-computing.md
+```
+
+### 2. 添加文章元信息
+
+在文件开头添加 YAML 格式的 frontmatter：
+
+```yaml
+---
+publishDate: 2026-06-20T14:00:00+08:00
+author: 你的名字
+title: 量子计算入门
+excerpt: 一篇面向初学者的量子计算科普文章，介绍量子比特、量子叠加态和量子纠缠等核心概念。
+image: https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1740
+category: 物理
+tags:
+  - 量子计算
+  - 科普
+  - 物理
+---
+```
+
+**字段说明：**
+
+- `publishDate`：发布时间（ISO 8601 格式，建议加上时区 `+08:00`）
+- `author`：作者姓名
+- `title`：文章标题（必填）
+- `excerpt`：文章摘要，显示在列表页
+- `image`：封面图片，可以使用 Unsplash 等图床链接
+- `category`：分类（如：物理、化学、数学、计算机科学、教程等）
+- `tags`：标签数组，用于文章归类
+- `draft`：设置为 `true` 可暂时隐藏文章（可选）
+
+### 3. 撰写正文
+
+使用 Markdown 语法撰写文章内容。项目支持：
+
+- 标准 Markdown 语法
+- 数学公式（通过 KaTeX）
+- 代码高亮
+- 图片嵌入
+- 如果使用 `.mdx` 扩展名，还可以嵌入 Astro/React/Vue 组件
+
+**数学公式示例：**
+
+```markdown
+行内公式：$E = mc^2$
+
+块级公式：
+
+$$
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+$$
+```
+
+**代码块示例：**
+
+````markdown
+```python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+```
+````
+
+### 4. 预览与验证
+
+在开发服务器运行状态下，访问 `http://localhost:4321/blog/你的文章slug` 查看效果。
+
+构建前检查：
+
+```bash
+npm run build
+npm run check
+```
+
+确保没有错误后，即可提交。
+
+## 贡献方式二：改进网站功能
+
+如果你想为网站添加新功能或修复 bug，请遵循以下流程。
+
+### 1. 创建功能分支
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+或修复 bug：
+
+```bash
+git checkout -b fix/bug-description
+```
+
+### 2. 了解项目结构
+
+```
+src/
+  assets/styles/tailwind.css   # Tailwind v4 配置
+  components/
+    common/        # 通用组件（Image、Metadata、Analytics 等）
+    ui/            # 基础 UI 组件（Button、Headline 等）
+    widgets/       # 页面部件（Hero、Features、Header、Footer）
+    blog/          # 博客相关组件
+  content.config.ts    # 内容集合 Schema
+  data/post/           # 博客文章
+  layouts/             # 页面布局
+  pages/               # 文件路由
+  utils/               # 工具函数
+  config.yaml          # 站点配置
+  navigation.ts        # 导航结构
+```
+
+### 3. 代码规范
+
+- 使用 TypeScript 进行类型安全编程
+- 遵循项目现有的代码风格
+- 组件使用 Astro 语法编写（也支持 Vue/React/Svelte）
+- 样式优先使用 Tailwind CSS 工具类
+- 对于复杂的局部样式，可使用 CSS Modules（`.module.css`）
+
+**CSS Modules 示例：**
+
+```css
+/* MyComponent.module.css */
+@reference "tailwindcss";
+
+.container {
+  @apply max-w-7xl mx-auto px-4;
+}
+```
+
+```astro
+---
+// MyComponent.astro
+import styles from './MyComponent.module.css';
+---
+
+<div class={styles.container}>
+  <!-- 内容 -->
+</div>
+```
+
+### 4. 提交代码
+
+```bash
+git add .
+git commit -m "feat: 添加了某某功能"
+```
+
+提交信息格式建议：
+
+- `feat:` 新功能
+- `fix:` 修复 bug
+- `docs:` 文档更新
+- `style:` 代码格式调整
+- `refactor:` 代码重构
+- `test:` 测试相关
+- `chore:` 构建/工具链相关
+
+### 5. 推送并创建 PR
+
+```bash
+git push -u origin feature/your-feature-name
+```
+
+然后访问 GitHub 仓库，点击 "Create Pull Request"。
+
+**PR 描述建议包含：**
+
+- 改动的目的和背景
+- 主要变更内容
+- 测试情况
+- 截图（如涉及 UI 变更）
+
+## 技术栈说明
+
+为了更好地贡献代码，了解项目的技术栈会很有帮助：
+
+- **Astro v6**：现代化的静态站点生成器，支持多框架组件
+- **Tailwind CSS v4**：采用 CSS-first 配置，使用 `@theme` 和 `@utility`
+- **TypeScript 5.9**：类型安全的 JavaScript
+- **MDX**：支持在 Markdown 中使用组件
+- **Sharp**：图片优化
+- **KaTeX**：数学公式渲染
+- **DaisyUI**：Tailwind CSS 组件库
+
+## 常见问题
+
+### 如何添加数学公式支持？
+
+项目已内置 KaTeX，直接使用 `$...$` 或 `$$...$$` 语法即可。
+
+### 如何使用其他 UI 框架组件？
+
+项目已集成 Vue、React、Svelte。在 `src/components/` 下创建对应扩展名的文件（`.vue`、`.jsx`/`.tsx`、`.svelte`），然后在 `.astro` 文件中导入使用。
+
+### 如何优化图片？
+
+- 本地图片放在 `src/assets/images/` 并使用 `~/assets/images/your-image.png` 引用，构建时会自动优化
+- 外部图片建议使用 Unsplash 等 CDN
+
+### 构建失败怎么办？
+
+运行以下命令检查问题：
+
+```bash
+npm run check
+```
+
+这会运行 ESLint、Prettier 和 Astro 类型检查。自动修复部分问题：
+
+```bash
+npm run fix
+```
+
+## 行为准则
+
+- 尊重所有贡献者
+- 保持友好、建设性的讨论
+- 专注于技术问题本身
+- 欢迎新手提问，耐心解答
+
+## 获取帮助
+
+如果你在贡献过程中遇到任何问题：
+
+- 查看 [README.md](https://github.com/your-org/LKM-official-website/blob/main/README.md) 和 [AGENTS.md](https://github.com/your-org/LKM-official-website/blob/main/AGENTS.md)
+- 在 GitHub 上提 Issue
+- 加入我们的社区讨论
+
+## 结语
+
+感谢你愿意为理科迷做出贡献！无论是一篇文章、一次代码改进，还是一个拼写修正，每一份贡献都让这个平台变得更好。我们期待看到你的 Pull Request！
+
+## 乱数假文
+
+
+相步哪战很审查，电保也台注府固术解女。两律牛布曾扬山。北厂独她委促党国板审殖，破演远止跑始界突最河久开雷香。
+
+外派杂雨医差局族间食振。感增持教例练。都井都证握钢落文。
+
+没强马源坏於刑请将，挥杆船策下适书纪原形章负。控变春护群曲二况山席小席，批国由间尔儿交纪总余航导帮。
+
+固石既否德人台外支！乙守检一预史势查验按早庆确刘，刚个自切时万最反。夜杨掌举列且。换出过执种刻织。
