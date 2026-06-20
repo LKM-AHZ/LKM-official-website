@@ -211,48 +211,48 @@ src/data/post/*.md(x) ──→ content.config.ts (Zod schema) ──→ getColl
 
 ### widgets/ — 页面部件
 
-| 组件                         | 说明                                      |
-| :--------------------------- | :---------------------------------------- |
-| `Hero.astro`                 | 标准 Hero 区域                            |
-| `Hero2.astro`                | 替代 Hero 布局                            |
-| `HeroText.astro`             | 纯文字 Hero（无图）                       |
-| `Features.astro`             | 特性网格（图标+标题+描述）                |
-| `Features2.astro`            | 特性布局变体 2                            |
-| `Features3.astro`            | 特性布局变体 3（支持配图）                |
-| `Content.astro`              | 图文内容区（支持左右排版）                |
-| `Steps.astro`                | 步骤流程（带配图）                        |
-| `Steps2.astro`               | 步骤流程变体                              |
-| `Pricing.astro`              | 价格表（多套餐）                          |
-| `FAQs.astro`                 | 常见问题折叠面板                          |
-| `Stats.astro`                | 数据统计展示                              |
-| `Testimonials.astro`         | 用户评价轮播                              |
-| `CallToAction.astro`         | CTA 横幅                                  |
-| `Header.astro`               | 全局导航栏                                |
-| `Footer.astro`               | 全局页脚                                  |
-| `Announcement.astro`         | 顶部公告栏                                |
-| `Note.astro`                 | 提示/公告条                               |
-| `Brands.astro`               | 品牌 Logo 展示                            |
-| `Contact.astro`              | 联系表单区域                              |
-| `BlogLatestPosts.astro`      | 最新博客文章网格                          |
-| `BlogHighlightedPosts.astro` | 精选博客文章                              |
-| `Sidebar.astro`              | 侧边栏导航                                |
-| `TopNav.astro`               | 顶部分区标签栏                            |
+| 组件                         | 说明                       |
+| :--------------------------- | :------------------------- |
+| `Hero.astro`                 | 标准 Hero 区域             |
+| `Hero2.astro`                | 替代 Hero 布局             |
+| `HeroText.astro`             | 纯文字 Hero（无图）        |
+| `Features.astro`             | 特性网格（图标+标题+描述） |
+| `Features2.astro`            | 特性布局变体 2             |
+| `Features3.astro`            | 特性布局变体 3（支持配图） |
+| `Content.astro`              | 图文内容区（支持左右排版） |
+| `Steps.astro`                | 步骤流程（带配图）         |
+| `Steps2.astro`               | 步骤流程变体               |
+| `Pricing.astro`              | 价格表（多套餐）           |
+| `FAQs.astro`                 | 常见问题折叠面板           |
+| `Stats.astro`                | 数据统计展示               |
+| `Testimonials.astro`         | 用户评价轮播               |
+| `CallToAction.astro`         | CTA 横幅                   |
+| `Header.astro`               | 全局导航栏                 |
+| `Footer.astro`               | 全局页脚                   |
+| `Announcement.astro`         | 顶部公告栏                 |
+| `Note.astro`                 | 提示/公告条                |
+| `Brands.astro`               | 品牌 Logo 展示             |
+| `Contact.astro`              | 联系表单区域               |
+| `BlogLatestPosts.astro`      | 最新博客文章网格           |
+| `BlogHighlightedPosts.astro` | 精选博客文章               |
+| `Sidebar.astro`              | 侧边栏导航                 |
+| `TopNav.astro`               | 顶部分区标签栏             |
 
 ### common/ — 通用组件
 
-| 组件                      | 说明                                             |
-| :------------------------ | :----------------------------------------------- |
-| `Image.astro`             | 智能图片：本地→Sharp，远程CDN→Unpic              |
-| `Metadata.astro`          | SEO 元标签                                       |
-| `CommonMeta.astro`        | 基础 meta 标签                                   |
-| `Analytics.astro`         | Google Analytics 脚本                            |
-| `SiteVerification.astro`  | Google Search Console 验证                       |
-| `ToggleTheme.astro`       | 暗色/亮色模式切换按钮                            |
-| `ToggleMenu.astro`        | 移动端菜单切换按钮                               |
-| `SocialShare.astro`       | 社交分享按钮                                     |
-| `BasicScripts.astro`      | 基础客户端脚本                                   |
-| `ApplyColorMode.astro`    | 初始主题模式应用                                 |
-| `SplitbeeAnalytics.astro` | Splitbee 分析                                    |
+| 组件                      | 说明                                |
+| :------------------------ | :---------------------------------- |
+| `Image.astro`             | 智能图片：本地→Sharp，远程CDN→Unpic |
+| `Metadata.astro`          | SEO 元标签                          |
+| `CommonMeta.astro`        | 基础 meta 标签                      |
+| `Analytics.astro`         | Google Analytics 脚本               |
+| `SiteVerification.astro`  | Google Search Console 验证          |
+| `ToggleTheme.astro`       | 暗色/亮色模式切换按钮               |
+| `ToggleMenu.astro`        | 移动端菜单切换按钮                  |
+| `SocialShare.astro`       | 社交分享按钮                        |
+| `BasicScripts.astro`      | 基础客户端脚本                      |
+| `ApplyColorMode.astro`    | 初始主题模式应用                    |
+| `SplitbeeAnalytics.astro` | Splitbee 分析                       |
 
 ### ui/ — 基础 UI
 
@@ -283,14 +283,14 @@ src/data/post/*.md(x) ──→ content.config.ts (Zod schema) ──→ getColl
 
 ## 工具函数
 
-| 文件                   | 关键导出                                                        | 说明                       |
-| :--------------------- | :-------------------------------------------------------------- | :------------------------- |
-| `utils/blog.ts`        | `fetchPosts`, `getStaticPathsBlog*`, `getRelatedPosts`          | 博客数据加载、排序、关联   |
-| `utils/permalinks.ts`  | `getPermalink`, `getHomePermalink`, `getBlogPermalink`, `getAsset` | URL 生成、slug 处理       |
-| `utils/images.ts`      | `findImage`, `adaptOpenGraphImages`                             | 图片路径解析、OG 图片处理  |
-| `utils/frontmatter.ts` | `readingTimeRemarkPlugin`, `responsiveTablesRehypePlugin`       | Markdown 阅读时间、响应式表格 |
-| `utils/directories.ts` | `getProjectRootDir`, `getRelativeUrlByFilePath`                 | 目录工具                   |
-| `utils/utils.ts`       | `getFormattedDate`, `trim`, `toUiAmount`                        | 日期格式化、字符串处理     |
+| 文件                   | 关键导出                                                           | 说明                          |
+| :--------------------- | :----------------------------------------------------------------- | :---------------------------- |
+| `utils/blog.ts`        | `fetchPosts`, `getStaticPathsBlog*`, `getRelatedPosts`             | 博客数据加载、排序、关联      |
+| `utils/permalinks.ts`  | `getPermalink`, `getHomePermalink`, `getBlogPermalink`, `getAsset` | URL 生成、slug 处理           |
+| `utils/images.ts`      | `findImage`, `adaptOpenGraphImages`                                | 图片路径解析、OG 图片处理     |
+| `utils/frontmatter.ts` | `readingTimeRemarkPlugin`, `responsiveTablesRehypePlugin`          | Markdown 阅读时间、响应式表格 |
+| `utils/directories.ts` | `getProjectRootDir`, `getRelativeUrlByFilePath`                    | 目录工具                      |
+| `utils/utils.ts`       | `getFormattedDate`, `trim`, `toUiAmount`                           | 日期格式化、字符串处理        |
 
 ---
 
@@ -375,7 +375,7 @@ ui:
 analytics:
   vendors:
     googleAnalytics:
-      id: null  # 填入 "G-XXXXXXXXXX" 启用
+      id: null # 填入 "G-XXXXXXXXXX" 启用
 ```
 
 ### 导航配置
@@ -466,11 +466,11 @@ pnpm run build   # 构建静态文件到 ./dist/
 
 ### 部署方式
 
-| 平台         | 说明                                     |
-| :----------- | :--------------------------------------- |
-| **Vercel**   | 静态托管，直接部署 `dist/`               |
-| **Netlify**  | 静态托管，使用 `netlify.toml`            |
-| **任意托管** | 上传 `dist/` 目录即可                    |
+| 平台         | 说明                          |
+| :----------- | :---------------------------- |
+| **Vercel**   | 静态托管，直接部署 `dist/`    |
+| **Netlify**  | 静态托管，使用 `netlify.toml` |
+| **任意托管** | 上传 `dist/` 目录即可         |
 
 ---
 
