@@ -141,7 +141,7 @@
 
   /* 2. 全局基础文本标签（移除了 text-align: justify，不再破坏原有对齐） */
   p {
-    line-height: 1.75; /* 全局段落行高保持在 1.75 */
+    line-height: 1.25; /* 全局段落行高保持在 1.75 */
     margin-bottom: 1.25rem; /* 全局段落默认下边距 */
   }
 
@@ -167,7 +167,7 @@
   .prose li,
   .prose ol,
   .prose ul {
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.02em !important;
     line-height: 1.85 !important;
     color: #2d3748 !important;
     text-align: justify; /* 两端对齐安全地隔离在文章区域内 */
@@ -181,8 +181,8 @@
 
   /* 2. 文章内段落之间的间距 */
   .prose p {
-    margin-top: 1.5rem !important;
-    margin-bottom: 1.5rem !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 1.25rem !important;
   }
 
   /* 3. 文章内标题留白 */
