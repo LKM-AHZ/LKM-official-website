@@ -47,8 +47,8 @@ const { links = [], currentPath = '' } = Astro.props;
     const sidebar = document.querySelector('[data-sidebar]');
     if (!sidebar) return;
 
-    const handler = (e) => {
-      const link = (e.target).closest('a[href]');
+    const handler = (e: Event) => {
+      const link = (e.target as HTMLElement).closest('a[href]');
       if (!link) return;
 
       const href = link.getAttribute('href');
@@ -71,12 +71,12 @@ const { links = [], currentPath = '' } = Astro.props;
     };
 
     // Remove previous handler before re-attaching (prevents duplicates on astro:after-swap)
-    const prevHandler = sidebar._sidebarHandler;
+    const prevHandler = (sidebar as any)._sidebarHandler;
     if (prevHandler) {
       sidebar.removeEventListener('click', prevHandler);
     }
     sidebar.addEventListener('click', handler);
-    sidebar._sidebarHandler = handler;
+    (sidebar as any)._sidebarHandler = handler;
   }
 
   initSidebarScroll();

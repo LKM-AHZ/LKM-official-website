@@ -1,7 +1,8 @@
 @reference "tailwindcss";
 
 .nav {
-  @apply sticky top-24;
+  @apply sticky;
+  top: calc(4rem + 49px);
 }
 
 .linkList {

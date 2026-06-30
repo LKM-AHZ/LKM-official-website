@@ -30,6 +30,3 @@ pnpm-lock.yaml
 
 # python venv
 .venv/
-
-3.11
-22.12.0
