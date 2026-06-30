@@ -71,12 +71,13 @@ const { links = [], currentPath = '' } = Astro.props;
     };
 
     // Remove previous handler before re-attaching (prevents duplicates on astro:after-swap)
-    const prevHandler = (sidebar as any)._sidebarHandler;
+    const sidebarWithHandler = sidebar as HTMLElement & { _sidebarHandler?: EventListener };
+    const prevHandler = sidebarWithHandler._sidebarHandler;
     if (prevHandler) {
       sidebar.removeEventListener('click', prevHandler);
     }
     sidebar.addEventListener('click', handler);
-    (sidebar as any)._sidebarHandler = handler;
+    sidebarWithHandler._sidebarHandler = handler as EventListener;
   }
 
   initSidebarScroll();

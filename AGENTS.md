@@ -16,7 +16,7 @@ AstroWind is a free, open-source website template built with **Astro v6** and **
 | `npm run check`   | Run astro check + ESLint + Prettier |
 | `npm run fix`     | Auto-fix ESLint + Prettier issues   |
 
-**Node.js requirement:** >= 22.12.0
+**Node.js requirement:** >= 24.0.0
 
 ## Architecture
 

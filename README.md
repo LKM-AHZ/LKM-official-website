@@ -21,7 +21,7 @@
 
 ## 快速开始
 
-> 需要 **Node.js >= 22.12.0**
+> 需要 **Node.js >= 24.0.0**
 
 ### 安装 Node.js & pnpm
 
@@ -29,7 +29,7 @@
 
 ```powershell
 # 方式一：官方安装包
-# 下载 https://nodejs.org/ 安装 LTS 版（>= 22.12.0）
+# 下载 https://nodejs.org/ 安装 LTS 版（>= 24.0.0）
 
 # 方式二：使用 winget
 winget install OpenJS.NodeJS.LTS
@@ -42,7 +42,7 @@ corepack prepare pnpm@latest --activate
 **Linux (Debian/Ubuntu)：**
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 corepack enable
@@ -52,7 +52,7 @@ corepack prepare pnpm@latest --activate
 **macOS：**
 
 ```bash
-brew install node@22 pnpm
+brew install node@24 pnpm
 
 # 或使用 nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
@@ -65,7 +65,7 @@ corepack prepare pnpm@latest --activate
 验证安装：
 
 ```bash
-node -v   # >= v22.12.0
+node -v   # >= v24.0.0
 pnpm -v   # >= 11.0.0
 ```
 
