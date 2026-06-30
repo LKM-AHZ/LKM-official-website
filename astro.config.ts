@@ -12,7 +12,6 @@ import icon from 'astro-icon';
 import compress from 'astro-compress';
 import vue from '@astrojs/vue';
 import react from '@astrojs/react';
-import svelte from '@astrojs/svelte';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import type { AstroIntegration } from 'astro';
@@ -35,7 +34,6 @@ export default defineConfig({
     mdx(),
     vue(),
     react(),
-    svelte(),
     icon({
       include: {
         tabler: ['*'],

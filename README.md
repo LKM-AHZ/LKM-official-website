@@ -9,7 +9,7 @@
 - **Astro v6 静态站点生成**，PageSpeed Insights 评分优秀
 - **Tailwind CSS v4**，CSS-first 配置，支持暗色模式
 - **CSS Modules** 局部作用域样式，与 Tailwind 协同使用
-- **Vue / React / Svelte** 三种 UI 框架开箱即用
+- **Vue / React** UI 框架支持
 - **SEO 友好**：自动生成 sitemap、RSS、Open Graph / Twitter Card
 - **图片优化**：Astro Assets (Sharp) + Unpic CDN 双通道
 - **博客系统**：MD/MDX 支持，分类/标签过滤，分页，阅读时间，社交分享
@@ -485,8 +485,8 @@ pnpm run build   # 构建静态文件到 ./dist/
 
 ### UI 框架
 
-- 内置 `@astrojs/vue`、`@astrojs/react`、`@astrojs/svelte` 三种框架
-- 可在 `src/components/` 下创建 `.vue` / `.jsx` / `.tsx` / `.svelte` 组件
+- 内置 `@astrojs/vue`、`@astrojs/react` 两种框架
+- 可在 `src/components/` 下创建 `.vue` / `.jsx` / `.tsx` 组件
 
 ### 组件扩展
 
