@@ -32,26 +32,6 @@ export const headerData = {
       text: 'Pages',
       links: [
         {
-          text: 'Features (Anchor Link)',
-          href: getPermalink('/#features'),
-        },
-        {
-          text: 'Services',
-          href: getPermalink('/services'),
-        },
-        {
-          text: 'Pricing',
-          href: getPermalink('/pricing'),
-        },
-        {
-          text: 'About us',
-          href: getPermalink('/about'),
-        },
-        {
-          text: 'Contact',
-          href: getPermalink('/contact'),
-        },
-        {
           text: 'Terms',
           href: getPermalink('/terms'),
         },
@@ -121,7 +101,28 @@ export const headerData = {
     },
     {
       text: '关于我们',
-      href: getPermalink('/about'),
+      links: [
+        {
+          text: '管理团队',
+          href: getPermalink('/team'),
+        },
+        {
+          text: 'About',
+          href: getPermalink('/about'),
+        },
+        {
+          text: 'Services',
+          href: getPermalink('/services'),
+        },
+        {
+          text: 'Pricing',
+          href: getPermalink('/pricing'),
+        },
+        {
+          text: 'Contact',
+          href: getPermalink('/contact'),
+        },
+      ],
     },
   ],
   actions: [{ text: '联系我们', href: getPermalink('/contact') }],

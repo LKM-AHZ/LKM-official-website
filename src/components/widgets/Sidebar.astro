@@ -21,7 +21,11 @@ const { links = [], currentPath = '' } = Astro.props;
     links.length > 0 && (
       <ul class={styles.linkList}>
         {links.map(({ text, href, icon }) => {
-          const isActive = currentPath === href || currentPath.startsWith(href + '/');
+          const isActive = (() => {
+            const linkUrl = new URL(href, 'https://example.com');
+            if (linkUrl.hash) return currentPath === href;
+            return currentPath === href || currentPath.startsWith(href + '#');
+          })();
           return (
             <li>
               <a
@@ -47,6 +51,9 @@ const { links = [], currentPath = '' } = Astro.props;
     const sidebar = document.querySelector('[data-sidebar]');
     if (!sidebar) return;
 
+    const links = sidebar.querySelectorAll('a[href]');
+
+    // 点击平滑滚动
     const handler = (e: Event) => {
       const link = (e.target as HTMLElement).closest('a[href]');
       if (!link) return;
@@ -70,14 +77,78 @@ const { links = [], currentPath = '' } = Astro.props;
       }
     };
 
-    // Remove previous handler before re-attaching (prevents duplicates on astro:after-swap)
-    const sidebarWithHandler = sidebar as HTMLElement & { _sidebarHandler?: EventListener };
-    const prevHandler = sidebarWithHandler._sidebarHandler;
-    if (prevHandler) {
-      sidebar.removeEventListener('click', prevHandler);
+    // 根据当前滚动位置/URL hash 更新高亮
+    function updateActive() {
+      const currentHash = location.hash;
+      links.forEach((a) => {
+        const href = a.getAttribute('href');
+        if (!href) return;
+        const linkUrl = new URL(href, location.origin);
+        if (linkUrl.pathname !== location.pathname) return;
+
+        const isActive = linkUrl.hash
+          ? linkUrl.hash === currentHash
+          : !currentHash;
+        a.classList.toggle('bg-primary/10', isActive);
+        a.classList.toggle('text-primary', isActive);
+        a.classList.toggle('text-muted', !isActive);
+        a.classList.toggle('hover:text-default', !isActive);
+      });
     }
+
+    // 滚动监听
+    let scrollTicking = false;
+    function onScroll() {
+      if (!scrollTicking) {
+        requestAnimationFrame(() => {
+          const sections = [...links]
+            .map((a) => {
+              const href = a.getAttribute('href');
+              if (!href) return null;
+              const url = new URL(href, location.origin);
+              if (url.pathname !== location.pathname || !url.hash) return null;
+              return document.querySelector(url.hash);
+            })
+            .filter(Boolean) as HTMLElement[];
+
+          if (sections.length === 0) return;
+
+          let currentId = '';
+          for (const section of sections) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= 120) {
+              currentId = '#' + section.id;
+            }
+          }
+          if (currentId && location.hash !== currentId) {
+            history.replaceState(null, '', currentId);
+            updateActive();
+          } else if (!currentId && location.hash) {
+            // 滚动到顶部附近，清除 hash
+            history.replaceState(null, '', location.pathname);
+            updateActive();
+          }
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    }
+
+    // Remove previous handler before re-attaching (prevents duplicates on astro:after-swap)
+    const sidebarWithHandler = sidebar as HTMLElement & {
+      _sidebarHandler?: EventListener;
+      _scrollHandler?: EventListener;
+    };
+    const prevHandler = sidebarWithHandler._sidebarHandler;
+    const prevScroll = sidebarWithHandler._scrollHandler;
+    if (prevHandler) sidebar.removeEventListener('click', prevHandler);
+    if (prevScroll) window.removeEventListener('scroll', prevScroll);
     sidebar.addEventListener('click', handler);
     sidebarWithHandler._sidebarHandler = handler as EventListener;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    sidebarWithHandler._scrollHandler = onScroll as EventListener;
+
+    updateActive();
   }
 
   initSidebarScroll();
