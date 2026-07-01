@@ -28,3 +28,7 @@ pnpm-debug.log*
 
 # python venv
 .venv/
+
+# tools output
+tools/
+
