@@ -28,7 +28,7 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
 
 export default defineConfig({
   site: 'https://LKM-2014.github.io',
-  base: '/',
+  base: 'LKM-official-website',
 
   output: 'static',
 
