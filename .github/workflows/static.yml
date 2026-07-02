@@ -32,26 +32,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. 设置 Node.js 环境，并自动缓存依赖（加速后续构建）
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9 # 可以根据你本地的 pnpm 版本调整，比如 8 或 9
-
-      # 2. 设置 Node.js 环境，并缓存 pnpm 依赖
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm' # 关键：告诉 Actions 寻找 pnpm-lock.yaml
 
-      # 3. 使用 pnpm 安装依赖（等同于 npm ci）
+      # 2. 用 npm 安装依赖
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
-      # 4. 使用 pnpm 打包 Astro 项目
+      # 3. 用 npm 运行打包命令
       - name: Build Astro site
-        run: pnpm run build
+        run: npm run build
 
       # 4. 配置 GitHub Pages
       - name: Setup Pages
