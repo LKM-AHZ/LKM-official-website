@@ -27,7 +27,7 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
   hasExternalScripts ? (Array.isArray(items) ? items.map((item) => item()) : [items()]) : [];
 
 export default defineConfig({
-  site: 'https://LKM-2014.github.io',
+  site: 'https://Alma1314.github.io',
   base: '/LKM-official-website',
 
   output: 'static',
