@@ -1,6 +1,8 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+import { getPermalink } from '~/utils/permalinks';
+
 import Hero from '~/components/widgets/Hero.astro';
 // import Note from '~/components/widgets/Note.astro';
 // import Features from '~/components/widgets/Features.astro';
@@ -29,7 +31,7 @@ const metadata = {
       {
         variant: 'primary',
         text: '博客',
-        href: 'blog',
+        href: getPermalink('/blog'),
         target: '_self',
         icon: 'tabler:arrow-right',
       },
@@ -98,7 +100,7 @@ const metadata = {
         title: '更多成员',
         description: '点击查看完整管理团队',
         icon: '',
-        callToAction: { text: '查看全部 →', href: '/team' },
+        callToAction: { text: '查看全部 →', href: getPermalink('/team') },
       },
     ]}
   >

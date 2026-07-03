@@ -31,7 +31,7 @@ const sidebarLinks = [
     tagline="服务"
     title="让科学回归每一个人"
     subtitle="理科迷提供多种形式的科学传播与社区服务，从科普内容创作到学科交流社群，我们致力于打破知识壁垒，让更多人感受到科学的魅力。"
-    actions={[{ variant: 'primary', target: '_self', text: '加入我们', href: '/contact' }]}
+    actions={[{ variant: 'primary', target: '_self', text: '加入我们', href: getPermalink('/contact') }]}
     image={{
       src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
       alt: '理科迷服务',
@@ -142,7 +142,7 @@ const sidebarLinks = [
       {
         variant: 'primary',
         text: '联系我们',
-        href: '/contact',
+        href: getPermalink('/contact'),
       },
     ]}
     title="对理科迷感兴趣？"
