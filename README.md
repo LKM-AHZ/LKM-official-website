@@ -74,20 +74,20 @@ pnpm run dev
 
 ## 页面路由
 
-| 路由           | 文件                   | 布局          |
-| :------------- | :--------------------- | :------------ |
-| `/`            | `pages/index.astro`    | PageLayout    |
-| `/about`       | `pages/about.astro`    | SidebarLayout |
-| `/team`        | `pages/team.astro`     | PageLayout    |
-| `/services`    | `pages/services.astro` | SidebarLayout |
-| `/pricing`     | `pages/pricing.astro`  | SidebarLayout |
-| `/contact`     | `pages/contact.astro`  | SidebarLayout |
-| `/privacy`     | `pages/privacy.md`     | MarkdownLayout|
-| `/terms`       | `pages/terms.md`       | MarkdownLayout|
-| `/404`         | `pages/404.astro`      | PageLayout    |
-| `/rss.xml`     | `pages/rss.xml.ts`     | —             |
-| `/blog`        | `pages/[...blog]/`     | PageLayout    |
-| `/blog/<slug>` | `pages/[...blog]/`     | PageLayout    |
+| 路由           | 文件                   | 布局           |
+| :------------- | :--------------------- | :------------- |
+| `/`            | `pages/index.astro`    | PageLayout     |
+| `/about`       | `pages/about.astro`    | SidebarLayout  |
+| `/team`        | `pages/team.astro`     | PageLayout     |
+| `/services`    | `pages/services.astro` | SidebarLayout  |
+| `/pricing`     | `pages/pricing.astro`  | SidebarLayout  |
+| `/contact`     | `pages/contact.astro`  | SidebarLayout  |
+| `/privacy`     | `pages/privacy.md`     | MarkdownLayout |
+| `/terms`       | `pages/terms.md`       | MarkdownLayout |
+| `/404`         | `pages/404.astro`      | PageLayout     |
+| `/rss.xml`     | `pages/rss.xml.ts`     | —              |
+| `/blog`        | `pages/[...blog]/`     | PageLayout     |
+| `/blog/<slug>` | `pages/[...blog]/`     | PageLayout     |
 
 ---
 
@@ -121,7 +121,7 @@ ui:
 analytics:
   vendors:
     googleAnalytics:
-      id: null  # 填入 "G-XXXXXXXXXX" 启用
+      id: null # 填入 "G-XXXXXXXXXX" 启用
 ```
 
 导航结构定义在 `src/navigation.ts`，使用 `getPermalink()` 和 `getAsset()` 生成 URL。
@@ -193,10 +193,10 @@ pnpm run build   # 构建到 ./dist/
 
 `tools/` 目录包含 team 页面的生成工具：
 
-| 文件                | 说明                                 |
-| :------------------ | :----------------------------------- |
-| `工作簿1.xlsx`      | 团队成员源数据（Excel 表格）         |
-| `generate_team.py`  | 从 Excel 生成 `team.astro` 页面文件  |
+| 文件               | 说明                                |
+| :----------------- | :---------------------------------- |
+| `工作簿1.xlsx`     | 团队成员源数据（Excel 表格）        |
+| `generate_team.py` | 从 Excel 生成 `team.astro` 页面文件 |
 
 ---
 

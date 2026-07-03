@@ -25,12 +25,7 @@ const sidebarLinks = [
 ];
 ---
 
-<Layout
-  metadata={metadata}
-  topTabs={topTabs}
-  sidebarLinks={sidebarLinks}
-  currentPath={getPermalink('/about')}
->
+<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/about')}>
   <!-- Hero -->
   <HeroText tagline="关于我们">
     <Fragment slot="title">
@@ -111,8 +106,7 @@ const sidebarLinks = [
     items={[
       {
         title: '加入社区',
-        description:
-          '理科迷欢迎每一位热爱科学的伙伴。你可以通过官方群组加入我们，与志同道合的人一起交流、学习、成长。',
+        description: '理科迷欢迎每一位热爱科学的伙伴。你可以通过官方群组加入我们，与志同道合的人一起交流、学习、成长。',
         icon: 'tabler:user-plus',
       },
       {
