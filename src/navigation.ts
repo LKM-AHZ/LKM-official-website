@@ -100,7 +100,7 @@ export const headerData = {
       ],
     },
     {
-      text: '关于我们',
+      text: '七月团队',
       links: [
         {
           text: '管理团队',
@@ -133,7 +133,7 @@ export const footerData = {
     {
       title: '社区',
       links: [
-        { text: '关于我们', href: getPermalink('/about') },
+        { text: '七月团队', href: getPermalink('/about') },
         { text: '管理团队', href: getPermalink('/team') },
         { text: '发展历程', href: getPermalink('/#timeline') },
         { text: '博客', href: getBlogPermalink() },
