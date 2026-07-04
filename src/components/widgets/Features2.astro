@@ -38,9 +38,21 @@ const columnsClass =
         {items.map(({ title: itemTitle, description, icon, callToAction }) => (
           <div class="relative flex flex-col rounded-lg shadow-[0_4px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur border border-[#ffffff29] bg-white dark:bg-slate-900 p-6 intersect-once intersect-quarter intersect-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
             {(icon || defaultIcon) &&
-              (/^(https?:|\/)/.test(icon || defaultIcon || '') ? (
+              (/^(https?:)/.test(icon || defaultIcon || '') ? (
+                <img
+                  src={icon || defaultIcon || ''}
+                  alt={itemTitle || 'Avatar'}
+                  class="mb-6 w-12 h-12 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700"
+                />
+              ) : /^\//.test(icon || defaultIcon || '') ? (
                 <img
                   src={`${import.meta.env.BASE_URL}${(icon || defaultIcon || '')}`}
+                  alt={itemTitle || 'Avatar'}
+                  class="mb-6 w-12 h-12 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700"
+                />
+              ) : (icon || defaultIcon) ? (
+                <img
+                  src={icon || defaultIcon || ''}
                   alt={itemTitle || 'Avatar'}
                   class="mb-6 w-12 h-12 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700"
                 />
