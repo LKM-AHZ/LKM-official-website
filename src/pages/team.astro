@@ -10,30 +10,34 @@ const metadata = {
 
 const topTabs = [
   { text: '管理团队', href: getPermalink('/team') },
-  { text: 'About us', href: getPermalink('/about') },
-  { text: 'Services', href: getPermalink('/services') },
-  { text: 'Pricing', href: getPermalink('/pricing') },
-  { text: 'Contact', href: getPermalink('/contact') },
+  { text: '关于我们', href: getPermalink('/about') },
+  { text: '服务', href: getPermalink('/services') },
+  { text: '定价', href: getPermalink('/pricing') },
+  { text: '联系我们', href: getPermalink('/contact') },
 ];
+
+const base = import.meta.env.BASE_URL;
 
 const sidebarLinks = [
   { text: '创始人', href: getPermalink('/team#founder') },
-  { text: '总务组', href: getPermalink('/team#management') },
-  { text: '顾问组', href: getPermalink('/team#advisors') },
-  { text: '群务组', href: getPermalink('/team#affairs') },
+  { text: '总务部', href: getPermalink('/team#general') },
+  { text: '群务部', href: getPermalink('/team#affairs') },
+  { text: '新闻办', href: getPermalink('/team#news') },
+  { text: '顾问团', href: getPermalink('/team#advisors') },
+  { text: '技术委员会', href: getPermalink('/team#tech') },
+  { text: '专业委员会', href: getPermalink('/team#professional') },
 ];
-
 ---
 
 <Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/team')}>
   <!-- 创始人 -->
-  <Section title="创始人" subtitle="理科迷的起点，一切从这里开始" tagline="Founder" id="founder">
+  <Section title="创始人" subtitle="理科迷的起点，一切从这里开始" tagline="创始人" id="founder">
     <div class="max-w-2xl mx-auto">
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body items-center text-center">
           <div class="avatar mb-4">
             <div class="w-24 h-24 rounded-full">
-              <img src="/images/member/若有千寻.jpg" alt="可琪" class="w-24 h-24 rounded-full object-cover" />
+              <img src={`${base}images/member/若有千寻.jpg`} alt="可琪" class="w-24 h-24 rounded-full object-cover" />
             </div>
           </div>
           <h2 class="card-title text-2xl">可琪（若有千寻）</h2>
@@ -52,201 +56,510 @@ const sidebarLinks = [
     </div>
   </Section>
 
-  <!-- 总务组 -->
-  <Section id="management">
+  <!-- 七月团队 · 总务部 -->
+  <Section id="general">
     <div class="max-w-5xl mx-auto">
       <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-primary pb-1">七月团队 · 总务组</span>
+        <span class="border-b-2 border-primary pb-1">七月团队 · 总务部</span>
       </h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/千寻.jpg`} alt="千寻" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">千寻</h4>
+            <span class="text-base-content/60 text-sm">组长 · 活动策划部部长</span>
+            <p class="text-xs text-base-content/60 mt-2">
+              2019年入群，2024年下定决心重建理科迷，推动官方宣传账号建设与第二次社区复兴。
+            </p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月花.jpg`} alt="七月花" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月花</h4>
+            <p class="text-xs text-base-content/60 mt-2">一个有理想的博士</p>
+            <p class="text-xs text-info/70 mt-1 italic">"梦想：每个孩子都能接触科学"</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                鸟
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月知更鸟</h4>
+            <p class="text-xs text-base-content/60 mt-2">待填写，这位还是学生在沉淀当中（让我们期待他的成长吧～</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                鸿
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月阿鸿</h4>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                染
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月墨染</h4>
+            <p class="text-xs text-base-content/60 mt-2">双非物理，目前正跑路中</p>
+            <p class="text-xs text-info/70 mt-1 italic">"梦想：我必将大雪深埋"</p>
+            <p class="text-xs text-accent/70 mt-1">—— 卧薪尝胆三千日，大雪深埋终成金</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                枝
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月有枝</h4>
+            <p class="text-xs text-base-content/60 mt-2">小黑猫，前活动策划组组员，初中研讨会执行员</p>
+            <p class="text-xs text-info/70 mt-1 italic">"梦想：吃好喝好睡好玩好"</p>
+            <p class="text-xs text-accent/70 mt-1">—— 且停且忘且随风，且行且看且从容</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月逗.jpg`} alt="七月逗" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月逗</h4>
+            <span class="text-base-content/60 text-sm">组长</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月喵.jpg`} alt="七月喵" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月喵</h4>
+            <span class="text-base-content/60 text-sm">组长</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月丫.jpg`} alt="七月丫" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月丫</h4>
+            <span class="text-base-content/60 text-sm">组长</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                S
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">Spica</h4>
+            <span class="text-base-content/60 text-sm">总务组成员</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                烧
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月烧</h4>
+            <span class="text-base-content/60 text-sm">群务组监督</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                凡
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月凡</h4>
+            <span class="text-base-content/60 text-sm">总务组成员</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                T
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月Toy</h4>
+            <span class="text-base-content/60 text-sm">专务</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                希
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月希</h4>
+            <span class="text-base-content/60 text-sm">总务组成员</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                钗
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月钗</h4>
+            <span class="text-base-content/60 text-sm">总务组成员</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                铝
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月铝</h4>
+            <span class="text-base-content/60 text-sm">专务</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月焱.jpg`} alt="七月焱" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月焱</h4>
+            <span class="text-base-content/60 text-sm">总务组成员</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月雨.jpg`} alt="七月雨" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月雨</h4>
+            <span class="text-base-content/60 text-sm">总务组成员</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- 七月团队 · 群务部 -->
+  <Section id="affairs">
+    <div class="max-w-5xl mx-auto">
+      <h3 class="text-xl font-bold mb-6 text-center">
+        <span class="border-b-2 border-accent pb-1">七月团队 · 群务部</span>
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                水
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月止水</h4>
+            <p class="text-xs text-base-content/60 mt-2">努力学习中～</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img
+                  src={`${base}images/member/七月清汉.jpg`}
+                  alt="七月清汉"
+                  class="w-16 h-16 rounded-full object-cover"
+                />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月清汉</h4>
+            <p class="text-xs text-base-content/60 mt-2">保密awa（ps:其实是个宅女）</p>
+            <p class="text-xs text-info/70 mt-1 italic">"梦想：无义务告知"</p>
+            <p class="text-xs text-accent/70 mt-1">—— 欢迎来到我们的王国！</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                K
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月MK</h4>
+            <p class="text-xs text-base-content/60 mt-2">
+              10后，叫我MK就行。正在学习日语，喜欢数学（不是大佬喵）。最喜欢的动漫角色是《魔女之旅》的伊蕾娜。B站UID:1929696645
+            </p>
+            <p class="text-xs text-info/70 mt-1 italic">"梦想：拥有百万粉丝的UP"</p>
+            <p class="text-xs text-accent/70 mt-1">—— 你应当……ネバー•ギブ•アップ！</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月九.jpg`} alt="七月九" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月九</h4>
+            <span class="text-base-content/60 text-sm">群务组组长</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                弱
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">本群最弱玩家</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                德
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">道德同志</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                LI
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">L.I</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                面
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">面条</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                源
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">源泉</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                逸
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">无逸</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                湦
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月湦</h4>
+            <span class="text-base-content/60 text-sm">18级管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                澜
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">观澜千代</h4>
+            <span class="text-base-content/60 text-sm">信息群管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月熠.jpg`} alt="七月熠" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月熠</h4>
+            <span class="text-base-content/60 text-sm">兴趣群管理</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                上
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月上</h4>
+            <span class="text-base-content/60 text-sm">群务组成员</span>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                豹
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">海豹</h4>
+            <span class="text-base-content/60 text-sm">群务组成员</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- 新闻办 -->
+  <Section id="news">
+    <div class="max-w-5xl mx-auto">
+      <h3 class="text-xl font-bold mb-6 text-center">
+        <span class="border-b-2 border-info pb-1">新闻办</span>
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div
+                class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+              >
+                前
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月一前</h4>
+            <p class="text-xs text-base-content/60 mt-2">我是新闻办的一前</p>
+          </div>
+        </div>
+      </div>
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-4 text-center text-base-content/70">科普组</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月花.jpg" alt="七月花" class="w-16 h-16 rounded-full object-cover" />
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  染
                 </div>
               </div>
-              <h4 class="font-bold text-lg">七月花</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
-              <p class="text-xs text-base-content/60 mt-2">可琪淡出后接替创始人职责，每年维持理科迷基本运行的 SVIP 花费及物理部落运营，是理科迷最艰难时期的守护者。</p>
+              <h4 class="font-bold text-lg">七月星染</h4>
+              <p class="text-xs text-base-content/60 mt-2">
+                公益科普产业共同体成员，曙星科普社社长。从事公益科普事业三年余。曾领导主办龙年科幻大赛、第一届地月奖科幻征文，曾参与协办第二、三、四、五届寻翊奖科普征文，与up非村科普墙联创地质锤等优秀科普视频。
+              </p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：传播科学文化"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 马克思说过，科学技术是生产力。</p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/千寻.jpg" alt="千寻" class="w-16 h-16 rounded-full object-cover" />
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  理
                 </div>
               </div>
-              <h4 class="font-bold text-lg">千寻</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
-              <span class="text-accent font-semibold text-sm">活动策划部部长</span>
-              <p class="text-xs text-base-content/60 mt-2">2019年入群，2024年下定决心重建理科迷，推动官方宣传账号建设与第二次社区复兴，现任活动策划部部长。</p>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月逗.jpg" alt="七月逗" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月逗</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月喵.jpg" alt="七月喵" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月喵</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月丫.jpg" alt="七月丫" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月丫</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  S
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">Spica</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  烧
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月烧</h4>
-              <span class="text-accent font-semibold text-sm">群务组监督</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  凡
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月凡</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  T
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月Toy</h4>
-              <span class="text-info font-semibold text-sm">专务</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  希
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月希</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  九
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月九</h4>
-              <span class="text-accent font-semibold text-sm">群务组组长</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  钗
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月钗</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
-                  铝
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月铝</h4>
-              <span class="text-info font-semibold text-sm">专务</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月A.jpg" alt="七月A" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月A</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月清汉.jpg" alt="七月清汉" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月清汉</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月焱.jpg" alt="七月焱" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月焱</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月雨.jpg" alt="七月雨" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月雨</h4>
-              <span class="text-base-content/60 text-sm">总务组成员</span>
+              <h4 class="font-bold text-lg">七月吴理</h4>
+              <p class="text-xs text-base-content/60 mt-2">计算机广告制作专业中技</p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：活着，同时干点事吧"</p>
+              <p class="text-xs text-accent/70 mt-1">
+                —— 逆天不一定能改命，但是你所做的一切选择将会影响你的命，请慎重自己的选择
+              </p>
             </div>
           </div>
         </div>
@@ -254,51 +567,61 @@ const sidebarLinks = [
     </div>
   </Section>
 
-  <!-- 顾问组 -->
+  <!-- 顾问团 -->
   <Section id="advisors">
     <div class="max-w-5xl mx-auto">
-      <div>
-        <h3 class="text-xl font-bold mb-6 text-center">
-          <span class="border-b-2 border-secondary pb-1">七月团队 · 顾问组</span>
-        </h3>
+      <h3 class="text-xl font-bold mb-6 text-center">
+        <span class="border-b-2 border-secondary pb-1">顾问团</span>
+      </h3>
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-4 text-center text-base-content/70">团长</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
-                  up
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  g
                 </div>
               </div>
-              <h4 class="font-bold text-lg">upogg</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
+              <h4 class="font-bold text-lg">七月upogg</h4>
+              <p class="text-xs text-base-content/60 mt-2">学生</p>
+              <p class="text-xs text-accent/70 mt-1">—— 我以全部知识作为我的领域</p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
                   悠
                 </div>
               </div>
               <h4 class="font-bold text-lg">七月悠</h4>
-              <span class="text-primary font-semibold text-sm">组长</span>
+              <span class="text-base-content/60 text-sm">组长</span>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
                   糊
                 </div>
               </div>
               <h4 class="font-bold text-lg">七月糊-又</h4>
-              <span class="text-info font-semibold text-sm">总务组专务</span>
+              <span class="text-base-content/60 text-sm">总务组专务</span>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
                   铝
                 </div>
               </div>
@@ -309,7 +632,9 @@ const sidebarLinks = [
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
                   哔
                 </div>
               </div>
@@ -320,7 +645,9 @@ const sidebarLinks = [
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
                   乾
                 </div>
               </div>
@@ -331,7 +658,9 @@ const sidebarLinks = [
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-xl font-bold">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
                   Ry
                 </div>
               </div>
@@ -344,159 +673,225 @@ const sidebarLinks = [
     </div>
   </Section>
 
-  <!-- 群务组 -->
-  <Section id="affairs">
+  <!-- 技术委员会 -->
+  <Section id="tech">
     <div class="max-w-5xl mx-auto">
-      <div>
-        <h3 class="text-xl font-bold mb-6 text-center">
-          <span class="border-b-2 border-accent pb-1">七月团队 · 群务组</span>
-        </h3>
+      <h3 class="text-xl font-bold mb-6 text-center">
+        <span class="border-b-2 border-warning pb-1">技术委员会</span>
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={`${base}images/member/七月A.jpg`} alt="七月A" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">七月A</h4>
+            <span class="text-base-content/60 text-sm">技术委员会成员</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- 专业委员会 -->
+  <Section id="professional">
+    <div class="max-w-5xl mx-auto">
+      <h3 class="text-xl font-bold mb-6 text-center">
+        <span class="border-b-2 border-success pb-1">专业委员会</span>
+      </h3>
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-4 text-center text-base-content/70">数学组</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月九.jpg" alt="七月九" class="w-16 h-16 rounded-full object-cover" />
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  t
                 </div>
               </div>
-              <h4 class="font-bold text-lg">七月九</h4>
-              <span class="text-base-content/60 text-sm">群务组成员</span>
+              <h4 class="font-bold text-lg">七月Bcent</h4>
+              <p class="text-xs text-base-content/60 mt-2">一名人类</p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  弱
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  泠
                 </div>
               </div>
-              <h4 class="font-bold text-lg">本群最弱玩家</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
+              <h4 class="font-bold text-lg">七月阿泠</h4>
+              <p class="text-xs text-base-content/60 mt-2">某2数学专业本科生，数学爱好者，爱好方向是分析学和数论</p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：保研对面那个华一继续研究数学"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 万物皆数</p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  德
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  方
                 </div>
               </div>
-              <h4 class="font-bold text-lg">道德同志</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  LI
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">L.I</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  面
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">面条</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  源
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">源泉</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  逸
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">无逸</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  湦
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月湦</h4>
-              <span class="text-accent font-semibold text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  澜
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">观澜千代</h4>
-              <span class="text-base-content/60 text-sm">群务组成员</span>
+              <h4 class="font-bold text-lg">七月彼方</h4>
+              <p class="text-xs text-base-content/60 mt-2">分析与数值计算方向的硕士</p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
                 <div class="w-16 h-16 rounded-full">
-                  <img src="/images/member/七月熠.jpg" alt="七月熠" class="w-16 h-16 rounded-full object-cover" />
+                  <img
+                    src={`${base}images/member/七月有珠.jpeg`}
+                    alt="七月有珠"
+                    class="w-16 h-16 rounded-full object-cover"
+                  />
                 </div>
               </div>
-              <h4 class="font-bold text-lg">七月熠</h4>
-              <span class="text-base-content/60 text-sm">群务组成员</span>
+              <h4 class="font-bold text-lg">七月有珠</h4>
+              <p class="text-xs text-base-content/60 mt-2">可能是人（未必？）</p>
+              <p class="text-xs text-accent/70 mt-1">—— 活着大于死了</p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-md">
             <div class="card-body items-center text-center p-5">
               <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  上
+                <div class="w-16 h-16 rounded-full">
+                  <img
+                    src={`${base}images/member/七月Lichlet.jpeg`}
+                    alt="七月Lichlet"
+                    class="w-16 h-16 rounded-full object-cover"
+                  />
                 </div>
               </div>
-              <h4 class="font-bold text-lg">七月上</h4>
-              <span class="text-base-content/60 text-sm">群务组成员</span>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-md">
-            <div class="card-body items-center text-center p-5">
-              <div class="avatar mb-3">
-                <div class="w-16 h-16 rounded-full bg-neutral text-neutral-content flex items-center justify-center text-xl font-bold">
-                  豹
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">海豹</h4>
-              <span class="text-base-content/60 text-sm">群务组成员</span>
+              <h4 class="font-bold text-lg">七月Lichlet</h4>
+              <p class="text-xs text-base-content/60 mt-2">大一数学系学生</p>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- 千寻致意 -->
-      <div class="bg-base-200 rounded-lg p-6 text-center italic mt-12">
-        <p class="text-base-content/80 leading-relaxed">
-          「千寻，我代表现任总务组成员，活动策划部部长，为以上可琪以及可琪创立招募的团队成员，所做为了管理、以及发展延续，所做的一切努力表示敬意。
-        </p>
-        <p class="text-base-content/80 leading-relaxed mt-3">
-          知道大家都要为生活进行奔波了，无力来建设理科迷，但如果想继续建设，想转为新的管理团队成员，随时都可请联系我。」
-        </p>
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-4 text-center text-base-content/70">物理组</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body items-center text-center p-5">
+              <div class="avatar mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  O
+                </div>
+              </div>
+              <h4 class="font-bold text-lg">七月O</h4>
+              <p class="text-xs text-base-content/60 mt-2">
+                中国科学院国家天文台博士，研究方向：引力波理论、黑洞物理、广义相对论
+              </p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：能做自己喜欢的研究"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 学习过去，享受现在，期待未来</p>
+            </div>
+          </div>
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body items-center text-center p-5">
+              <div class="avatar mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  水
+                </div>
+              </div>
+              <h4 class="font-bold text-lg">七月汽水</h4>
+              <p class="text-xs text-base-content/60 mt-2">慕尼黑大学流体力学专业大一在读学生</p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：为中国流体出一份力"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 努力总会有收获</p>
+            </div>
+          </div>
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body items-center text-center p-5">
+              <div class="avatar mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  河
+                </div>
+              </div>
+              <h4 class="font-bold text-lg">七月星河</h4>
+              <p class="text-xs text-base-content/60 mt-2">
+                高中OIer+物化政er，蒟蒻一枚（欢迎关注洛谷wang12345566），因出了一些初中毒瘤题而误闯天家
+              </p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：为大家带来更多的tricks与灵感，同时膜拜更多大佬"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 没有站在光里的人，也有自己的闪光点——from hjh in luogu</p>
+            </div>
+          </div>
+        </div>
       </div>
-
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-4 text-center text-base-content/70">化学组</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body items-center text-center p-5">
+              <div class="avatar mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  离
+                </div>
+              </div>
+              <h4 class="font-bold text-lg">七月狄离</h4>
+              <p class="text-xs text-base-content/60 mt-2">
+                可以叫杨向青，化学竞赛生，历史最高全区第七名，中学生作文大赛最高国排347，喜欢研究化学与文学
+              </p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：成为一名优秀的教师"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 真正的大师，永远都怀着一颗学徒的心</p>
+            </div>
+          </div>
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body items-center text-center p-5">
+              <div class="avatar mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  水
+                </div>
+              </div>
+              <h4 class="font-bold text-lg">七月三尺水</h4>
+              <p class="text-xs text-base-content/60 mt-2">化学，爱爱爱它！（化学的狂热热爱者）</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-4 text-center text-base-content/70">生物组</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body items-center text-center p-5">
+              <div class="avatar mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center text-xl font-bold"
+                >
+                  米
+                </div>
+              </div>
+              <h4 class="font-bold text-lg">七月基米</h4>
+              <p class="text-xs text-base-content/60 mt-2">
+                新西兰11年级在读留学生，主修理科，英语弱项。
+                目前学的理科是物理生物数学，基本知识水平也就高中生水平吧，但是我会努力提升自己的！
+                喜欢写点自己的东西，有问题感谢大家指正！ 喜欢自己总结笔记等等，希望能对大家有所帮助！
+                喜欢发一些自己的日常或者搞抽象什么的，有的时候会携带一定量的负面情绪... 感谢大家！！！
+              </p>
+              <p class="text-xs text-info/70 mt-1 italic">"梦想：今年把明年的课学完，明年得吃奖学金，争取考上奥大？"</p>
+              <p class="text-xs text-accent/70 mt-1">—— 注意注意超大区来袭</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </Section>
 </Layout>

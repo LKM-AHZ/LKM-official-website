@@ -7,88 +7,87 @@ import Features2 from '~/components/widgets/Features2.astro';
 import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
-  title: 'Contact',
+  title: '联系我们',
 };
 
 const topTabs = [
   { text: '管理团队', href: getPermalink('/team') },
-  { text: 'About us', href: getPermalink('/about') },
-  { text: 'Services', href: getPermalink('/services') },
-  { text: 'Pricing', href: getPermalink('/pricing') },
-  { text: 'Contact', href: getPermalink('/contact') },
+  { text: '关于我们', href: getPermalink('/about') },
+  { text: '服务', href: getPermalink('/services') },
+  { text: '赞助与支持', href: getPermalink('/pricing') },
+  { text: '联系我们', href: getPermalink('/contact') },
 ];
 
 const sidebarLinks = [
-  { text: 'Send Message', href: getPermalink('/contact#form') },
-  { text: 'Support', href: getPermalink('/contact#support') },
+  { text: '发送消息', href: getPermalink('/contact#form') },
+  { text: '联系方式', href: getPermalink('/contact#support') },
 ];
 ---
 
 <Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/contact')}>
-  <!-- HeroText Widget ******************* -->
+  <!-- Hero -->
+  <HeroText tagline="联系我们" title="期待听到你的声音！" />
 
-  <HeroText tagline="Contact" title="Let's Connect!" />
-
+  <!-- 留言表单 -->
   <ContactUs
     id="form"
-    title="Drop us a message today!"
-    subtitle="For quicker answers, explore our FAQs section. You may find the solution you're looking  for right there! If not, our support team is delighted to help you."
+    title="给我们留言"
+    subtitle="如果你想加入理科迷、提出建议或合作意向，欢迎通过下方表单联系我们。也可以先看看常见问题，也许已经有了你想要的答案。"
     inputs={[
       {
         type: 'text',
         name: 'name',
-        label: 'Name',
+        label: '你的名字',
       },
       {
         type: 'email',
         name: 'email',
-        label: 'Email',
+        label: '电子邮箱',
       },
     ]}
     textarea={{
-      label: 'Message',
+      label: '留言内容',
     }}
     disclaimer={{
-      label:
-        'By submitting this contact form, you acknowledge and agree to the collection of your personal information.',
+      label: '提交此表单即表示你同意我们收集你的个人信息用于联系回复。',
     }}
-    description="Our support team typically responds within 24 business hours."
+    description="我们通常会在 24 小时内回复你的留言。"
   />
 
-  <!-- Features2 Widget ************** -->
-
+  <!-- 联系方式 -->
   <Features2
     id="support"
-    title="We are here to help!"
+    title="联系我们"
     items={[
       {
-        title: 'General support',
-        description: `Chat with us for inquiries related to account management, website navigation, payment issues, accessing purchased templates or general questions about the website's functionality.`,
+        title: '加入社区',
+        description: '通过官方 QQ 群组加入理科迷，与志同道合的伙伴一起交流。具体群号和入群方式请在留言中咨询。',
+        icon: 'tabler:users-group',
       },
       {
-        title: 'Contact sales',
-        description:
-          'Chat with us for questions about purchases, customization options, licensing for commercial use, inquiries about specific template, etc.',
+        title: '合作建议',
+        description: '如果你有科普内容合作、活动联办、技术支持等方面的合作意向，欢迎通过留言表单联系我们。',
+        icon: 'tabler:heart-handshake',
       },
       {
-        title: 'Technical support',
-        description:
-          'Chat with us when facing issues like template installation, problems editing difficulties, compatibility issues with software or download errors, or other technical challenges related to using the templates.',
+        title: '问题反馈',
+        description: '网站、文档库或社区的 Bug 反馈与功能建议，都可以通过留言表单提交，我们会认真处理每一条反馈。',
+        icon: 'tabler:bug',
       },
       {
-        title: 'Phone',
-        description: '+1 (234) 567-890',
-        icon: 'tabler:headset',
-      },
-      {
-        title: 'Email',
-        description: 'contact@support.com',
+        title: '邮箱',
+        description: 'almafox123@outlook.com',
         icon: 'tabler:mail',
       },
       {
-        title: 'Location',
-        description: '1234 Lorem Ipsum St, 12345, Miami, EEUU',
-        icon: 'tabler:map-pin',
+        title: 'GitHub',
+        description: 'github.com/LKM-official',
+        icon: 'tabler:brand-github',
+      },
+      {
+        title: 'B站',
+        description: '关注官方B站账号获取最新科普视频',
+        icon: 'tabler:brand-bilibili',
       },
     ]}
   />

@@ -1,264 +1,123 @@
 ---
 import Layout from '~/layouts/SidebarLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
-import Prices from '~/components/widgets/Pricing.astro';
-import FAQs from '~/components/widgets/FAQs.astro';
-import Steps from '~/components/widgets/Steps.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
-  title: 'Pricing',
+  title: '赞助与支持',
 };
 
 const topTabs = [
   { text: '管理团队', href: getPermalink('/team') },
-  { text: 'About us', href: getPermalink('/about') },
-  { text: 'Services', href: getPermalink('/services') },
-  { text: 'Pricing', href: getPermalink('/pricing') },
-  { text: 'Contact', href: getPermalink('/contact') },
+  { text: '关于我们', href: getPermalink('/about') },
+  { text: '服务', href: getPermalink('/services') },
+  { text: '赞助与支持', href: getPermalink('/pricing') },
+  { text: '联系我们', href: getPermalink('/contact') },
 ];
 
 const sidebarLinks = [
-  { text: 'Plans', href: getPermalink('/pricing#plans') },
-  { text: 'Features', href: getPermalink('/pricing#features') },
-  { text: 'Process', href: getPermalink('/pricing#process') },
-  { text: 'FAQ', href: getPermalink('/pricing#faq') },
+  { text: '支持方式', href: getPermalink('/pricing#support') },
+  { text: '常见问题', href: getPermalink('/pricing#faq') },
 ];
 ---
 
 <Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/pricing')}>
-  <!-- HeroText Widget ******************* -->
-
+  <!-- Hero -->
   <HeroText
-    tagline="Pricing"
-    title="Stellar Pricing for Every Journey"
-    subtitle="Choose the perfect plan that aligns with your cosmic goals."
+    tagline="赞助与支持"
+    title="支持理科迷，让科学传播走得更远"
+    subtitle="理科迷是一个非营利的科技爱好者社区。每一位成员的支持，都是我们持续前行的动力。"
   />
 
-  <!-- Pricing Widget ******************* -->
-
-  <Prices
-    id="plans"
-    title="Our prices"
-    subtitle="Only pay for what you need"
-    prices={[
-      {
-        title: 'basic',
-        subtitle: 'Optimal choice for personal use',
-        price: 29,
-        period: 'per month',
-        items: [
-          {
-            description: 'Etiam in libero, et volutpat',
-          },
-          {
-            description: 'Aenean ac nunc dolor tristique',
-          },
-          {
-            description: 'Cras scelerisque accumsan lib',
-          },
-          {
-            description: 'In hac habitasse',
-          },
-        ],
-        callToAction: {
-          target: '_blank',
-          text: 'Get started',
-          href: '#',
-        },
-      },
-      {
-        title: 'standard',
-        subtitle: 'Optimal choice for small teams',
-        price: 69,
-        period: 'Per Month',
-        items: [
-          {
-            description: 'Proin vel laoreet',
-          },
-          {
-            description: 'Ut efficitur habitasse egestas',
-          },
-          {
-            description: 'Volutpat hac curabitur',
-          },
-          {
-            description: 'Pellentesque blandit ut nibh',
-          },
-          {
-            description: 'Donec fringilla sem',
-          },
-        ],
-        callToAction: {
-          target: '_blank',
-          text: 'Get started',
-          href: '#',
-        },
-        hasRibbon: true,
-        ribbonTitle: 'popular',
-      },
-      {
-        title: 'premium',
-        subtitle: 'Optimal choice for companies',
-        price: 199,
-        period: 'Per Month',
-        items: [
-          {
-            description: 'Curabitur suscipit risus',
-          },
-          {
-            description: 'Aliquam habitasse malesuada',
-          },
-          {
-            description: 'Suspendisse sit amet blandit',
-          },
-          {
-            description: 'Suspendisse auctor blandit dui',
-          },
-        ],
-        callToAction: {
-          target: '_blank',
-          text: 'Get started',
-          href: '#',
-        },
-      },
-    ]}
-  />
-
-  <!-- Features3 Widget ************** -->
-
+  <!-- 支持方式 -->
   <Features3
-    id="features"
-    title="Price-related features"
-    subtitle="Discover the advantages of choosing our plans"
+    id="support"
+    title="如何支持我们"
+    subtitle="你的每一份力量，都能帮助理科迷变得更好。以下是你参与社区建设的几种方式。"
     columns={2}
     items={[
       {
-        title: 'Tiered Pricing Plans',
-        description: 'Choose from a range of pricing plans designed to accommodate different budgets and requirements.',
-        icon: 'tabler:stairs',
+        title: '加入社区',
+        description:
+          '最直接的方式就是加入理科迷官方 QQ 群组，参与讨论、分享知识。每一位活跃的成员都是社区最宝贵的财富。',
+        icon: 'tabler:users-plus',
       },
       {
-        title: 'Transparent Pricing',
-        description: 'Clearly displayed pricing details for each plan, with no hidden costs or unexpected charges.',
-        icon: 'tabler:flip-vertical',
+        title: '创作内容',
+        description:
+          '投稿科普文章、制作科普视频、翻译国外优质内容——你的创作能让更多人感受到科学的魅力。欢迎联系新闻办投稿。',
+        icon: 'tabler:pencil',
       },
       {
-        title: 'Secure Payment Methods',
-        description: 'Secure payment gateways to protect your financial information during transactions.',
-        icon: 'tabler:shield-lock',
+        title: '参与管理',
+        description:
+          '加入七月团队（总务部、群务部、新闻办、技术委员会等），参与社区日常运营与活动策划，为理科迷的发展贡献你的才能。',
+        icon: 'tabler:building-community',
       },
       {
-        title: 'Instant Access',
-        description: `Immediate access to your chosen plan's features and templates upon subscription.`,
-        icon: 'tabler:accessible',
+        title: '宣传推广',
+        description: '将理科迷的内容分享给你的朋友和同学，让更多热爱科学的伙伴知道我们的存在。每一个分享都是一次传播。',
+        icon: 'tabler:share',
       },
       {
-        title: 'Upgrade Value',
-        description: 'Upgrade to higher-tier plans to unlock more features and benefits for an enhanced experience.',
-        icon: 'tabler:chevrons-up',
+        title: '技术支持',
+        description:
+          '如果你擅长网站开发、UI 设计、服务器运维等技术，欢迎加入技术委员会，帮助理科迷建设更好的线上平台。',
+        icon: 'tabler:code',
       },
       {
-        title: '24H support',
-        description: 'Questions answered via live chat, email or phone, every calendar day.',
-        icon: 'tabler:headset',
+        title: '提出建议',
+        description:
+          '对理科迷有任何想法或建议？我们非常愿意倾听。通过联系我们页面提交你的反馈，我们认真对待每一条意见。',
+        icon: 'tabler:bulb',
       },
     ]}
     classes={{ container: 'max-w-5xl' }}
   />
 
-  <!-- Steps Widget ****************** -->
-
-  <Steps
-    id="process"
-    title="A guided journey from plans to creativity"
-    tagline="simplified process"
-    isReversed={true}
-    items={[
-      {
-        title: 'Explore plans',
-        icon: 'tabler:number-1',
-      },
-      {
-        title: 'Select a plan',
-        icon: 'tabler:number-2',
-      },
-      {
-        title: 'Sign Up / Log In',
-        icon: 'tabler:number-3',
-      },
-      {
-        title: 'Review order',
-        icon: 'tabler:number-4',
-      },
-      {
-        title: 'Enter payment details',
-        icon: 'tabler:number-5',
-      },
-      {
-        title: 'Confirmation',
-        icon: 'tabler:number-6',
-      },
-      {
-        title: 'Download and start using the template(s)',
-        icon: 'tabler:number-7',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1536816579748-4ecb3f03d72a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80',
-      alt: 'Steps image',
-    }}
-  />
-
-  <!-- FAQs Widget ******************* -->
-
-  <FAQs
+  <!-- FAQ -->
+  <Features3
     id="faq"
-    title="Pricing FAQs"
-    subtitle="Choosing the right plan is important, and we're here to answer your questions. If you have queries about our pricing options, you're in the right place."
-    columns={1}
+    title="常见问题"
+    subtitle="关于支持方式的一些常见疑问，也许能解答你的困惑。"
+    columns={2}
     items={[
       {
-        title: 'Do the plans come with customer support?',
-        description:
-          'Absolutely, all plans include access to our dedicated customer support to assist you with any queries or concerns.',
+        title: '理科迷是否需要付费？',
+        description: '不需要。理科迷是一个非营利社区，所有服务和内容均免费向社区成员开放。',
+        icon: 'tabler:free-rights',
       },
       {
-        title: 'Is there a trial period for the different plans?',
-        description:
-          "Unfortunately, we don't offer trial periods for the plans. However, you can check out our demo section to preview the quality of our templates.",
+        title: '我可以同时参与多个部门吗？',
+        description: '当然可以。我们鼓励成员跨部门协作。只要你有时间精力，欢迎在多个领域发挥你的才能。',
+        icon: 'tabler:layout-grid',
       },
       {
-        title: 'Can I switch between plans?',
-        description:
-          'Certainly! You can easily upgrade or downgrade your plan, at any time, to find the one that best suits your evolving requirements.',
+        title: '没有相关经验可以参与吗？',
+        description: '完全可以。理科迷欢迎每一位愿意学习和贡献的伙伴。只要你有热情，团队伙伴会帮助你快速上手。',
+        icon: 'tabler:user-heart',
       },
       {
-        title: 'What payment methods do you accept?',
-        description:
-          'We accept major credit cards and online payment methods to ensure a convenient and secure transaction process.',
-      },
-      {
-        title: 'Are there any hidden fees beyond the displayed cost?',
-        description:
-          'No, the subscription cost covers all the features and templates listed under each plan. There are no hidden fees or extra charges.',
+        title: '如何查看我的贡献记录？',
+        description: '目前社区的贡献记录主要通过群聊和网站展示。未来我们计划建立更完善的贡献追踪与展示系统。',
+        icon: 'tabler:history',
       },
     ]}
+    classes={{ container: 'max-w-5xl' }}
   />
 
-  <!-- CallToAction Widget *********** -->
-
+  <!-- CallToAction -->
   <CallToAction
-    title="Ready to boost your projects?"
-    subtitle="Join our community of satisfied customers who have transformed their work with our templates."
+    title="准备好为理科迷贡献一份力量了？"
+    subtitle="加入我们的社区，与志同道合的伙伴一起，让科学传播走得更远。"
     actions={[
       {
         variant: 'primary',
-        text: 'Get started now',
-        href: '/',
+        text: '联系我们',
+        href: getPermalink('/contact'),
       },
     ]}
   />

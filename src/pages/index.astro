@@ -1,6 +1,8 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+import { getPermalink } from '~/utils/permalinks';
+
 import Hero from '~/components/widgets/Hero.astro';
 // import Note from '~/components/widgets/Note.astro';
 // import Features from '~/components/widgets/Features.astro';
@@ -29,7 +31,7 @@ const metadata = {
       {
         variant: 'primary',
         text: '博客',
-        href: 'blog',
+        href: getPermalink('/blog'),
         target: '_self',
         icon: 'tabler:arrow-right',
       },
@@ -40,15 +42,15 @@ const metadata = {
         icon: 'tabler:brand-github',
       },
     ]}
-    image={{ src: '~/assets/images/hero-image.png', alt: 'AstroWind Hero Image' }}
+    image={{ src: '~/assets/images/hero-image.png', alt: '理科迷' }}
   >
     <Fragment slot="title">
       <div class="flex flex-col gap-4">
         <div>
-          The <span class="text-accent dark:text-cyan-100">Phientist</span> Lover!
+          <span class="text-accent dark:text-cyan-100">理科迷！</span>
         </div>
 
-        <span class="block mb-1 font-bold dark:text-white-600 tracking-wide"> 理科迷: 科技爱好者. </span>
+        <span class="block mb-1 font-bold dark:text-white-600 tracking-wide"> 科技爱好者社区 </span>
       </div>
     </Fragment>
     <Fragment slot="subtitle">
@@ -67,42 +69,38 @@ const metadata = {
     id="team"
     title="团队成员"
     subtitle="理科迷因为有你，所以更加精彩"
-    tagline="Team Members"
+    tagline="团队成员"
     items={[
       {
-        title: 'Timothy Starman',
-        description: '花有重开日，人无再少年',
-        icon: 'https://avatars.githubusercontent.com/u/81023606',
+        title: '千寻',
+        description: '2024年重建理科迷，推动社区第二次复兴',
+        icon: '/images/member/千寻.jpg',
       },
       {
-        title: 'Timothy Starman',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'https://avatars.githubusercontent.com/u/246130701',
+        title: '七月花',
+        description: '一个有理想的博士，梦想：每个孩子都能接触科学',
+        icon: '/images/member/七月花.jpg',
       },
       {
-        title: 'Timothy Starman',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'https://avatars.githubusercontent.com/u/81023606',
+        title: '七月墨染',
+        description: '双非物理，卧薪尝胆三千日，大雪深埋终成金',
+        icon: '/images/member/千寻.jpg',
       },
       {
-        title: 'Timothy Starman',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'https://avatars.githubusercontent.com/u/81023606',
+        title: '七月A',
+        description: '技术委员会成员',
+        icon: '/images/member/七月A.jpg',
       },
       {
-        title: 'Timothy Starman',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'https://avatars.githubusercontent.com/u/81023606',
+        title: '七月有枝',
+        description: '前活动策划组组员，且停且忘且随风，且行且看且从容',
+        icon: '/images/member/千寻.jpg',
       },
       {
-        title: 'Timothy Starman',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'https://avatars.githubusercontent.com/u/81023606',
+        title: '更多成员',
+        description: '点击查看完整管理团队',
+        icon: '',
+        callToAction: { text: '查看全部 →', href: getPermalink('/team') },
       },
     ]}
   >
@@ -111,7 +109,7 @@ const metadata = {
     </Fragment>
   </Features2>
 
-  <Section title="发展历程" subtitle="物换星移，春秋代序" tagline="Timeline" id="timeline">
+  <Section title="发展历程" subtitle="物换星移，春秋代序" tagline="发展历程" id="timeline">
     <div class="flex justify-center"></div>
     <Timeline
       items={[
@@ -174,8 +172,7 @@ const metadata = {
         {
           year: '2019.08.15',
           title: '千寻入群，短暂回暖',
-          description:
-            '千寻加入理科迷群聊，原本沉寂已久的群聊开始重现活力。',
+          description: '千寻加入理科迷群聊，原本沉寂已久的群聊开始重现活力。',
           iconName: 'tabler:user-plus',
         },
         {
@@ -202,8 +199,7 @@ const metadata = {
         {
           year: '2024.08.10',
           title: '官方宣传账号成立，首条视频走红',
-          description:
-            '理科迷官方宣传账号正式上线，首条视频获 7800+ 播放量，社区迅速恢复活跃，理科迷迎来新生。',
+          description: '理科迷官方宣传账号正式上线，首条视频获 7800+ 播放量，社区迅速恢复活跃，理科迷迎来新生。',
           iconName: 'tabler:brand-youtube',
         },
         {
@@ -491,38 +487,38 @@ const metadata = {
   <FAQs
     title="常见问题"
     subtitle="以下整理了用户关于 LKM 官方网站的常见疑问，帮助您快速了解项目特性和使用方式。"
-    tagline="FAQs"
+    tagline="常见问题"
     classes={{ container: 'max-w-6xl' }}
     items={[
       {
-        title: 'What tech stack does LKM use?',
+        title: '理科迷是什么？',
         description:
-          'Built with Astro v6 + Tailwind CSS v4 + CSS Modules, with built-in Vue, React, and Svelte UI framework support. All pages are statically generated for excellent performance and SEO.',
+          '理科迷是一个由普罗大众组成的科技爱好者社区，创立于 2014 年。我们打破专业门槛，让每一位热爱理性、崇尚科学的人都能在这里找到同频的伙伴，共同探索万物运转的奥秘。',
       },
       {
-        title: 'How do I get started?',
+        title: '如何加入理科迷？',
         description:
-          'Ensure Node.js >= 24.0.0, clone the project, run npm install to install dependencies, then npm run dev to start the dev server at localhost:4321.',
+          '你可以通过理科迷官方 QQ 群组加入我们。目前设有初中群和高中群两个分群，为不同学段的成员提供更精准的交流空间。具体群号请查看联系我们页面。',
       },
       {
-        title: 'How do I customize styles?',
+        title: '理科迷有哪些活动？',
         description:
-          'Two approaches are available: global theming via Tailwind CSS v4 @theme variables and @utility classes, or scoped styles using CSS Modules (.module.css files).',
+          '理科迷定期举办暑假活动、学科研讨会、科普内容创作等。七月团队·活动策划部负责统筹各项活动，欢迎关注官方宣传账号获取最新动态。',
       },
       {
-        title: 'What content formats are supported for blogging?',
+        title: '如何参与社区建设？',
         description:
-          'Markdown and MDX are both supported. The blog includes RSS feed generation, sitemap, category & tag filtering, reading time estimation, and social sharing.',
+          '理科迷是一个共建共享的社区。你可以加入管理团队（总务部、群务部、新闻办等），也可以投稿科普文章、参与暑假活动策划，或是帮忙宣传推广。',
       },
       {
-        title: 'How do I deploy to production?',
+        title: '理科迷有网站或文档库吗？',
         description:
-          'Run npm run build to generate static output in the dist/ directory. Deploy to Vercel, Netlify, GitHub Pages, or any static hosting service.',
+          '是的。理科迷拥有官方网站和文档库，支持文档存储与词条查阅功能。2026 年我们以更稳健的架构重建了官网，为你提供更好的在线体验。',
       },
       {
-        title: 'Which UI frameworks are supported?',
+        title: '有问题或建议怎么联系？',
         description:
-          'The project includes @astrojs/vue and @astrojs/react integrations. Create .vue or .jsx/.tsx components under src/components/ and use them in .astro files.',
+          '欢迎通过联系我们页面提交你的想法或问题。也可以直接在 QQ 群内向管理团队反馈，我们会认真对待每一条建议。',
       },
     ]}
   />

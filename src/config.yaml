@@ -1,7 +1,7 @@
 site:
   name: 理科迷
-  site: 'https://lkm-official-website.vercel.app'
-  base: '/'
+  site: 'https://LKM-2014.github.io'
+  base: '/LKM-official-website'
   trailingSlash: false
 
   googleSiteVerificationId: null
@@ -11,7 +11,7 @@ metadata:
   title:
     default: 理科迷
     template: '%s — LKM'
-  description: 'LKM 官方网站 — 基于 Astro v6 + Tailwind CSS v4 + CSS Modules 构建，支持 Vue / React。适用于企业官网、产品展示、博客等场景。'
+  description: '理科迷 (LKM) — 创立于 2014 年的科技爱好者社区。覆盖数学、物理、化学、生物、信息技术等多个学科，由普罗大众组成，让科学回归每一个人。'
   robots:
     index: true
     follow: true

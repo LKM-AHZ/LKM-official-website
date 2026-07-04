@@ -86,9 +86,7 @@ const { links = [], currentPath = '' } = Astro.props;
         const linkUrl = new URL(href, location.origin);
         if (linkUrl.pathname !== location.pathname) return;
 
-        const isActive = linkUrl.hash
-          ? linkUrl.hash === currentHash
-          : !currentHash;
+        const isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
         a.classList.toggle('bg-primary/10', isActive);
         a.classList.toggle('text-primary', isActive);
         a.classList.toggle('text-muted', !isActive);

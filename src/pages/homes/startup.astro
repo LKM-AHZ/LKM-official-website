@@ -1,6 +1,8 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+import { getPermalink } from '~/utils/permalinks';
+
 import Hero from '~/components/widgets/Hero.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
@@ -257,7 +259,7 @@ const metadata = {
         callToAction: {
           target: '_blank',
           text: 'Call us',
-          href: '/',
+          href: getPermalink('/'),
           variant: 'link',
         },
       },
@@ -267,7 +269,7 @@ const metadata = {
         callToAction: {
           target: '_blank',
           text: 'Write to us',
-          href: '/',
+          href: getPermalink('/'),
           variant: 'link',
         },
       },
@@ -277,7 +279,7 @@ const metadata = {
         callToAction: {
           target: '_blank',
           text: 'Start chatting',
-          href: '/',
+          href: getPermalink('/'),
           variant: 'link',
         },
       },
@@ -287,7 +289,7 @@ const metadata = {
         callToAction: {
           target: '_blank',
           text: 'Start chatting',
-          href: '/',
+          href: getPermalink('/'),
           variant: 'link',
         },
       },

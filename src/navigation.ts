@@ -29,14 +29,14 @@ export const headerData = {
       ],
     },
     {
-      text: 'Pages',
+      text: '页面',
       links: [
         {
-          text: 'Terms',
+          text: '条款',
           href: getPermalink('/terms'),
         },
         {
-          text: 'Privacy policy',
+          text: '隐私政策',
           href: getPermalink('/privacy'),
         },
       ],
@@ -82,19 +82,19 @@ export const headerData = {
           href: getPermalink('/blog/categories'),
         },
         {
-          text: 'Article',
+          text: '文章示例',
           href: getPermalink('get-started-website-with-astro-tailwind-css', 'post'),
         },
         {
-          text: 'Article (with MDX)',
+          text: '文章 (MDX)',
           href: getPermalink('markdown-elements-demo-post', 'post'),
         },
         {
-          text: 'Category Page',
+          text: '分类页面',
           href: getPermalink('tutorials', 'category'),
         },
         {
-          text: 'Tag Page',
+          text: '标签页面',
           href: getPermalink('astro', 'tag'),
         },
       ],
@@ -107,19 +107,19 @@ export const headerData = {
           href: getPermalink('/team'),
         },
         {
-          text: 'About',
+          text: '关于我们',
           href: getPermalink('/about'),
         },
         {
-          text: 'Services',
+          text: '服务',
           href: getPermalink('/services'),
         },
         {
-          text: 'Pricing',
+          text: '定价',
           href: getPermalink('/pricing'),
         },
         {
-          text: 'Contact',
+          text: '联系我们',
           href: getPermalink('/contact'),
         },
       ],
@@ -131,59 +131,40 @@ export const headerData = {
 export const footerData = {
   links: [
     {
-      title: 'Product',
+      title: '社区',
       links: [
-        { text: 'Features', href: '#' },
-        { text: 'Security', href: '#' },
-        { text: 'Team', href: '#' },
-        { text: 'Enterprise', href: '#' },
-        { text: 'Customer stories', href: '#' },
-        { text: 'Pricing', href: '#' },
-        { text: 'Resources', href: '#' },
+        { text: '关于我们', href: getPermalink('/about') },
+        { text: '管理团队', href: getPermalink('/team') },
+        { text: '发展历程', href: getPermalink('/#timeline') },
+        { text: '博客', href: getBlogPermalink() },
       ],
     },
     {
-      title: 'Platform',
+      title: '页面',
       links: [
-        { text: 'Developer API', href: '#' },
-        { text: 'Partners', href: '#' },
-        { text: 'Atom', href: '#' },
-        { text: 'Electron', href: '#' },
-        { text: 'AstroWind Desktop', href: '#' },
+        { text: '服务', href: getPermalink('/services') },
+        { text: '定价', href: getPermalink('/pricing') },
+        { text: '联系我们', href: getPermalink('/contact') },
+        { text: '常见问题', href: getPermalink('/#faq') },
       ],
     },
     {
-      title: 'Support',
+      title: '法律',
       links: [
-        { text: 'Docs', href: '#' },
-        { text: 'Community Forum', href: '#' },
-        { text: 'Professional Services', href: '#' },
-        { text: 'Skills', href: '#' },
-        { text: 'Status', href: '#' },
-      ],
-    },
-    {
-      title: 'Company',
-      links: [
-        { text: 'About', href: '#' },
-        { text: 'Blog', href: '#' },
-        { text: 'Careers', href: '#' },
-        { text: 'Press', href: '#' },
-        { text: 'Inclusion', href: '#' },
-        { text: 'Social Impact', href: '#' },
-        { text: 'Shop', href: '#' },
+        { text: '隐私政策', href: getPermalink('/privacy') },
+        { text: '使用条款', href: getPermalink('/terms') },
       ],
     },
   ],
   secondaryLinks: [
-    { text: 'Terms', href: getPermalink('/terms') },
-    { text: 'Privacy Policy', href: getPermalink('/privacy') },
+    { text: '使用条款', href: getPermalink('/terms') },
+    { text: '隐私政策', href: getPermalink('/privacy') },
   ],
   socialLinks: [
     { ariaLabel: 'RSS', icon: 'tabler:rss', href: getAsset('/rss.xml') },
     { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/LKM-official' },
   ],
   footNote: `
-    理科迷 LKM &copy; 2026 · All rights reserved.
+    理科迷 LKM &copy; 2026 · 保留所有权利。
   `,
 };

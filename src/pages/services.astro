@@ -1,243 +1,151 @@
 ---
 import CallToAction from '~/components/widgets/CallToAction.astro';
-import Content from '~/components/widgets/Content.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 import Hero from '~/components/widgets/Hero.astro';
-import Testimonials from '~/components/widgets/Testimonials.astro';
 import Layout from '~/layouts/SidebarLayout.astro';
 
 import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
-  title: 'Services',
+  title: '服务',
 };
 
 const topTabs = [
   { text: '管理团队', href: getPermalink('/team') },
-  { text: 'About us', href: getPermalink('/about') },
-  { text: 'Services', href: getPermalink('/services') },
-  { text: 'Pricing', href: getPermalink('/pricing') },
-  { text: 'Contact', href: getPermalink('/contact') },
+  { text: '关于我们', href: getPermalink('/about') },
+  { text: '服务', href: getPermalink('/services') },
+  { text: '定价', href: getPermalink('/pricing') },
+  { text: '联系我们', href: getPermalink('/contact') },
 ];
 
 const sidebarLinks = [
-  { text: 'Templates', href: getPermalink('/services#templates') },
-  { text: 'Features', href: getPermalink('/services#features') },
-  { text: 'Benefits', href: getPermalink('/services#benefits') },
-  { text: 'Testimonials', href: getPermalink('/services#testimonials') },
+  { text: '科普内容', href: getPermalink('/services#content') },
+  { text: '社区活动', href: getPermalink('/services#events') },
+  { text: '知识平台', href: getPermalink('/services#platform') },
 ];
 ---
 
 <Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/services')}>
-  <!-- Hero Widget ******************* -->
-
+  <!-- Hero -->
   <Hero
-    tagline="Services"
-    title="Elevate your projects with our stunning templates"
-    subtitle="Explore our meticulously crafted templates tailored to various industries and purposes. From captivating presentations to functional website designs, we offer the tools you need to succeed."
-    actions={[{ variant: 'primary', target: '_blank', text: 'Start exploring', href: '/' }]}
+    tagline="服务"
+    title="让科学回归每一个人"
+    subtitle="理科迷提供多种形式的科学传播与社区服务，从科普内容创作到学科交流社群，我们致力于打破知识壁垒，让更多人感受到科学的魅力。"
+    actions={[{ variant: 'primary', target: '_self', text: '加入我们', href: getPermalink('/contact') }]}
     image={{
       src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      alt: 'AstroWind Hero Image',
+      alt: '理科迷服务',
     }}
   />
 
-  <!-- Features2 Widget ************** -->
-
+  <!-- 科普内容 -->
   <Features2
-    id="templates"
-    title="Explore our diverse templates"
-    subtitle="Discover our selection below to streamline and elevate your projects."
+    id="content"
+    title="科普内容创作"
+    subtitle="由团队成员和社区成员共创的高质量科普内容，覆盖多个学科领域。"
     columns={3}
     items={[
       {
-        title: 'Educational',
+        title: '科技新闻',
+        description: '追踪全球科技前沿动态，用通俗易懂的语言解读最新科学发现与技术突破，让你第一时间掌握科技脉搏。',
+        icon: 'tabler:news',
+      },
+      {
+        title: '学科科普',
         description:
-          'By harmonizing instructional design and visual appeal, templates streamline content creation for varied materials, expediting development and cultivating engaging educational spaces.',
-        icon: 'tabler:school',
+          '覆盖数学、物理、化学、生物、信息技术等核心学科，从基础概念到前沿理论，循序渐进带你进入科学的世界。',
+        icon: 'tabler:atom',
       },
       {
-        title: 'Interior Design',
-        description:
-          'Crafting functional, visually appealing spaces for residential and commercial use. Templates emphasize layout, colors, and furniture setups, offering a versatile toolkit for your design vision.',
-        icon: 'tabler:home-star',
+        title: '视频科普',
+        description: '通过B站等视频平台发布科普视频，以生动直观的方式呈现科学知识，让抽象的公式和理论变得眼见为实。',
+        icon: 'tabler:video',
       },
       {
-        title: 'Photography',
-        description: `Empowering photographers, our templates facilitate captivating storytelling. With a keen focus on layout, galleries, and typography, they cater to both professionals and enthusiasts.`,
-        icon: 'tabler:photo',
+        title: '专题深度',
+        description: '针对热门科学话题推出系列专题文章，深入浅出地剖析背后的科学原理，培养批判性思维和科学素养。',
+        icon: 'tabler:file-text',
       },
       {
-        title: 'E-commerce',
-        description:
-          'Developing engaging online stores, our E-commerce templates ensure a dynamic presence to effectively showcase products. Ideal for startups or revamps.',
-        icon: 'tabler:shopping-cart',
+        title: '知识竞赛',
+        description: '定期举办线上学科知识竞赛，寓教于乐，激发学习兴趣，在轻松的氛围中检验和巩固所学知识。',
+        icon: 'tabler:trophy',
       },
       {
-        title: 'Blog',
-        description:
-          'With attention to typography, these templates empower effective content presentation for writers at any stage, ensuring visually engaging and user-friendly blogs.',
-        icon: 'tabler:article',
-      },
-      {
-        title: 'Business',
-        description:
-          'Providing polished options for effective visual communication, these templates empower both startups and established companies for a professional brand presence.',
-        icon: 'tabler:building-store',
-      },
-      {
-        title: 'Branding',
-        description:
-          'Offering pre-designed elements for a consistent brand identity, including logos and marketing materials. Ideal for new ventures or revamps.',
-        icon: 'tabler:arrow-big-up-lines',
-      },
-      {
-        title: 'Medical',
-        description: `From presentations to patient forms, these tools enhance communication effectiveness for healthcare professionals. Ideal for medical practices and research pursuits.`,
-        icon: 'tabler:vaccine',
-      },
-      {
-        title: 'Fashion Design',
-        description:
-          'With attention to detail, customization, and contemporary design, they empower designers to showcase ideas cohesively. Ideal for all levels of designers.',
-        icon: 'tabler:tie',
+        title: '资源分享',
+        description: '整理和分享优质学习资料、书籍推荐、在线课程等学习资源，帮助社区成员找到最适合自己的学习路径。',
+        icon: 'tabler:books',
       },
     ]}
   />
 
-  <!-- Content Widget **************** -->
-
-  <Content
-    isReversed
+  <!-- 社区活动 -->
+  <Features2
+    id="events"
+    title="社区活动"
+    subtitle="从线上研讨到暑假活动，理科迷为社区成员提供丰富多彩的互动体验。"
+    columns={2}
     items={[
       {
-        title: 'High-Quality Designs',
+        title: '暑假活动',
         description:
-          'Our templates feature top-tier designs that ensure a professional and polished appearance for your projects.',
-        icon: 'tabler:wand',
+          '一年一度的暑假主题活动，由七月团队·活动策划部统筹组织。汇集线上讲座、学科研讨、趣味竞赛等多种形式，是社区每年最大的盛事。',
+        icon: 'tabler:sun',
       },
       {
-        title: 'Customization Tools',
-        description:
-          'Tailor each template to your unique needs with user-friendly customization tools that let you personalize colors, fonts, and content.',
-        icon: 'tabler:settings',
-      },
-      {
-        title: 'Pre-Designed Elements',
-        description:
-          'Save time and effort with our ready-to-use elements, including graphics, icons, and layouts that enhance the visual appeal of your creations.',
+        title: '学科研讨会',
+        description: '由专业委员会委员和各学科爱好者共同参与，定期举办专题研讨，针对特定科学话题展开深入讨论与交流。',
         icon: 'tabler:presentation',
       },
       {
-        title: 'Preview and Mockup Views',
-        description:
-          'Visualize the final outcome before making any changes using our preview and mockup views, ensuring your projects meet your expectations.',
-        icon: 'tabler:carousel-horizontal',
+        title: '社群交流',
+        description: '设有初中群和高中群两个官方 QQ 群组，以及各学科分群，为不同学段的成员提供精准、高效的交流空间。',
+        icon: 'tabler:messages',
+      },
+      {
+        title: '宣传推广',
+        description: '通过官方宣传账号在 B 站等平台持续输出，扩大社区影响力，吸引更多热爱科学的伙伴加入我们。',
+        icon: 'tabler:brand-youtube',
       },
     ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1525909002-1b05e0c869d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
-      alt: 'Features Image',
-    }}
-  >
-    <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2" id="features">Main Features</h3>
-    </Fragment>
-  </Content>
-
-  <!-- Content Widget **************** -->
-
-  <Content
-    isAfterContent
-    items={[
-      {
-        title: 'Time Savings',
-        description:
-          'Streamline your workflow, enabling you to create stunning materials efficiently and allocate more time to your core tasks.',
-        icon: 'tabler:clock',
-      },
-      {
-        title: 'Professional Appearance',
-        description:
-          'Elevate your projects with the polished and sophisticated look that our templates provide, making a lasting impression on your audience.',
-        icon: 'tabler:school',
-      },
-      {
-        title: 'Cost-Efficiency',
-        description:
-          'Benefit from cost savings by avoiding the need for custom design work, as our templates offer professional-grade designs at a fraction of the cost.',
-        icon: 'tabler:coin',
-      },
-      {
-        title: 'Instant Download',
-        description:
-          'Enjoy immediate access to your chosen templates upon purchase, enabling you to begin working on your projects without delay.',
-        icon: 'tabler:file-download',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1552664688-cf412ec27db2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80',
-      alt: 'Benefits Image',
-    }}
-  >
-    <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2" id="benefits">Benefits</h3>
-    </Fragment>
-  </Content>
-
-  <!-- Testimonials Widget *********** -->
-
-  <Testimonials
-    id="testimonials"
-    title="Words from real customers"
-    testimonials={[
-      {
-        testimonial: `The designs are not only visually appealing but also highly professional. The templates have saved me a significant amount of time while helping me make a lasting impression on my clients.`,
-        name: 'Emily Kennedy',
-        job: 'Front-end developer',
-        image: {
-          src: 'https://images.unsplash.com/photo-1618835962148-cf177563c6c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=930&q=80',
-          alt: 'Emily Kennedy Image',
-        },
-      },
-      {
-        testimonial: `It beautifully showcases my work, with its clean and elegant design that lets my photographs shine. Customization was a breeze, even for a non-tech person like me. The result is a professional and immersive portfolio that's garnered numerous compliments.`,
-        name: 'Sarah Hansen',
-        job: 'Photographer',
-        image: {
-          src: 'https://images.unsplash.com/photo-1561406636-b80293969660?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80',
-          alt: 'Sarah Hansen Image',
-        },
-      },
-      {
-        testimonial: `I discovered these templates and I'm impressed by their variety and quality. They've helped me establish a consistent brand image across my marketing and social platforms, elevating my business's overall appearance.`,
-        name: 'Mark Wilkinson',
-        job: 'Small business owner',
-        image: {
-          src: 'https://images.unsplash.com/photo-1545167622-3a6ac756afa4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=824&q=80',
-          alt: 'Mark Wilkinson Image',
-        },
-      },
-    ]}
-    callToAction={{
-      target: '_blank',
-      text: 'More testimonials...',
-      href: 'https://github.com/arthelokyo/astrowind',
-      icon: 'tabler:chevron-right',
-    }}
   />
 
-  <!-- CallToAction Widget *********** -->
+  <!-- 知识平台 -->
+  <Features2
+    id="platform"
+    title="知识平台"
+    subtitle="理科迷正在建设面向社区成员的知识管理平台，助力学习与协作。"
+    columns={3}
+    items={[
+      {
+        title: '官方网站',
+        description: '理科迷的线上门户，集成社区介绍、团队展示、博客文章、文档资源等功能，是我们面向公众的第一窗口。',
+        icon: 'tabler:world-www',
+      },
+      {
+        title: '文档库',
+        description:
+          '支持文档存储与词条查阅功能的知识平台，社区成员可以在这里查找和贡献学科知识，共建共享属于理科迷的知识宝库。',
+        icon: 'tabler:database',
+      },
+      {
+        title: '博客系统',
+        description: '支持 Markdown 和 MDX 格式的文章发布，分类与标签过滤、阅读时间估算、RSS 订阅等功能一应俱全。',
+        icon: 'tabler:article',
+      },
+    ]}
+  />
 
+  <!-- CallToAction -->
   <CallToAction
     actions={[
       {
         variant: 'primary',
-        text: 'Start exploring',
-        href: '/',
+        text: '联系我们',
+        href: getPermalink('/contact'),
       },
     ]}
-    title="Dive into our template collection"
-    subtitle="Whether you're in business, design, or education, our templates are here to elevate your projects."
+    title="对理科迷感兴趣？"
+    subtitle="无论你是想加入社区、投稿科普文章，还是提出合作建议，我们都非常欢迎。"
   />
 </Layout>

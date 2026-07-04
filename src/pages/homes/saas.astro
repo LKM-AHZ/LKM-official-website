@@ -1,6 +1,8 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+import { getPermalink } from '~/utils/permalinks';
+
 import Header from '~/components/widgets/Header.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
@@ -313,7 +315,7 @@ const metadata = {
     subtitle="Have questions? Feel free to contact us using the form below. We're here to help!"
     callToAction={{
       text: 'Contact us',
-      href: '/',
+      href: getPermalink('/'),
     }}
     items={[
       {

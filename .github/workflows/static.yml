@@ -22,40 +22,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "24"
+          cache: "pnpm"
 
-      # 2. 用 npm 安装依赖
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
-      # 3. 用 npm 运行打包命令
-      - name: Build Astro site
-        run: npm run build
+      - name: Build
+        run: pnpm run build
 
-      # 4. 配置 GitHub Pages
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      # 5. 上传生成的静态文件 (dist 目录)
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: './dist'
 
-      # 6. 部署到 GitHub Pages
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
