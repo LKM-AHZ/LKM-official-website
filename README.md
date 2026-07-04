@@ -25,19 +25,19 @@ pnpm install
 pnpm run dev
 ```
 
-浏览器访问 `http://localhost:4321`。
+浏览器访问 `http://localhost:4321/LKM-official-website`。
 
 ---
 
 ## 命令
 
-| 命令               | 说明                            |
-| :----------------- | :------------------------------ |
-| `pnpm run dev`     | 启动开发服务器 `localhost:4321` |
-| `pnpm run build`   | 生产构建，输出到 `./dist/`      |
-| `pnpm run preview` | 本地预览生产构建                |
-| `pnpm run check`   | 类型检查 + ESLint + Prettier    |
-| `pnpm run fix`     | 自动修复 ESLint + Prettier      |
+| 命令               | 说明                                                 |
+| :----------------- | :--------------------------------------------------- |
+| `pnpm run dev`     | 启动开发服务器 `localhost:4321/LKM-official-website` |
+| `pnpm run build`   | 生产构建，输出到 `./dist/`                           |
+| `pnpm run preview` | 本地预览生产构建                                     |
+| `pnpm run check`   | 类型检查 + ESLint + Prettier                         |
+| `pnpm run fix`     | 自动修复 ESLint + Prettier                           |
 
 ---
 

@@ -29,8 +29,8 @@ export const findImage = async (
   imagePath?: string | ImageMetadata | null
 ): Promise<string | ImageMetadata | undefined | null> => {
   if (typeof imagePath !== 'string') return imagePath;
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('/'))
-    return imagePath;
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  if (imagePath.startsWith('/')) return `${import.meta.env.BASE_URL}${imagePath.replace(/^\//, '')}`;
   if (!imagePath.startsWith('~/assets/images')) return imagePath;
 
   const images = loadLocalImages();
