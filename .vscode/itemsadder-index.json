@@ -1,1 +1,63 @@
-{"version":1,"files":{"/Users/tim/development/web/LKM-official-website/.astro/collections/post.schema.json":{"mtimeMs":1783141720122.1816,"size":2520},"/Users/tim/development/web/LKM-official-website/.astro/data-store.json":{"mtimeMs":1783138602242.0364,"size":10044},"/Users/tim/development/web/LKM-official-website/.astro/settings.json":{"mtimeMs":1783140534087.726,"size":58},"/Users/tim/development/web/LKM-official-website/.github/workflows/actions.yaml":{"mtimeMs":1783138476238.975,"size":1558},"/Users/tim/development/web/LKM-official-website/.github/workflows/static.yml":{"mtimeMs":1783139296507.3713,"size":1490},"/Users/tim/development/web/LKM-official-website/package.json":{"mtimeMs":1782999665477.2124,"size":2462},"/Users/tim/development/web/LKM-official-website/pnpm-lock.yaml":{"mtimeMs":1783002656727.8218,"size":275543},"/Users/tim/development/web/LKM-official-website/pnpm-workspace.yaml":{"mtimeMs":1781968227078.7664,"size":45},"/Users/tim/development/web/LKM-official-website/sandbox.config.json":{"mtimeMs":1781871176783.5396,"size":196},"/Users/tim/development/web/LKM-official-website/src/assets/favicons/apple-touch-icon.png":{"mtimeMs":1781871176783.8577,"size":5498},"/Users/tim/development/web/LKM-official-website/src/assets/images/app-store.png":{"mtimeMs":1781871176784.423,"size":11251},"/Users/tim/development/web/LKM-official-website/src/assets/images/default.png":{"mtimeMs":1781871176786.1458,"size":405450},"/Users/tim/development/web/LKM-official-website/src/assets/images/google-play.png":{"mtimeMs":1781871176786.591,"size":13307},"/Users/tim/development/web/LKM-official-website/src/assets/images/hero-image.png":{"mtimeMs":1781871176789.003,"size":551662},"/Users/tim/development/web/LKM-official-website/src/config.yaml":{"mtimeMs":1783138485746.7705,"size":1333},"/Users/tim/development/web/LKM-official-website/tsconfig.json":{"mtimeMs":1781955304432.3003,"size":284},"/Users/tim/development/web/LKM-official-website/vscode.tailwind.json":{"mtimeMs":1781871176805.5852,"size":288}},"assets":[],"definitions":[]}
+{
+  "version": 1,
+  "files": {
+    "/Users/tim/development/web/LKM-official-website/.astro/collections/post.schema.json": {
+      "mtimeMs": 1783141720122.1816,
+      "size": 2520
+    },
+    "/Users/tim/development/web/LKM-official-website/.astro/data-store.json": {
+      "mtimeMs": 1783138602242.0364,
+      "size": 10044
+    },
+    "/Users/tim/development/web/LKM-official-website/.astro/settings.json": {
+      "mtimeMs": 1783140534087.726,
+      "size": 58
+    },
+    "/Users/tim/development/web/LKM-official-website/.github/workflows/actions.yaml": {
+      "mtimeMs": 1783138476238.975,
+      "size": 1558
+    },
+    "/Users/tim/development/web/LKM-official-website/.github/workflows/static.yml": {
+      "mtimeMs": 1783139296507.3713,
+      "size": 1490
+    },
+    "/Users/tim/development/web/LKM-official-website/package.json": { "mtimeMs": 1782999665477.2124, "size": 2462 },
+    "/Users/tim/development/web/LKM-official-website/pnpm-lock.yaml": { "mtimeMs": 1783002656727.8218, "size": 275543 },
+    "/Users/tim/development/web/LKM-official-website/pnpm-workspace.yaml": {
+      "mtimeMs": 1781968227078.7664,
+      "size": 45
+    },
+    "/Users/tim/development/web/LKM-official-website/sandbox.config.json": {
+      "mtimeMs": 1781871176783.5396,
+      "size": 196
+    },
+    "/Users/tim/development/web/LKM-official-website/src/assets/favicons/apple-touch-icon.png": {
+      "mtimeMs": 1781871176783.8577,
+      "size": 5498
+    },
+    "/Users/tim/development/web/LKM-official-website/src/assets/images/app-store.png": {
+      "mtimeMs": 1781871176784.423,
+      "size": 11251
+    },
+    "/Users/tim/development/web/LKM-official-website/src/assets/images/default.png": {
+      "mtimeMs": 1781871176786.1458,
+      "size": 405450
+    },
+    "/Users/tim/development/web/LKM-official-website/src/assets/images/google-play.png": {
+      "mtimeMs": 1781871176786.591,
+      "size": 13307
+    },
+    "/Users/tim/development/web/LKM-official-website/src/assets/images/hero-image.png": {
+      "mtimeMs": 1781871176789.003,
+      "size": 551662
+    },
+    "/Users/tim/development/web/LKM-official-website/src/config.yaml": { "mtimeMs": 1783138485746.7705, "size": 1333 },
+    "/Users/tim/development/web/LKM-official-website/tsconfig.json": { "mtimeMs": 1781955304432.3003, "size": 284 },
+    "/Users/tim/development/web/LKM-official-website/vscode.tailwind.json": {
+      "mtimeMs": 1781871176805.5852,
+      "size": 288
+    }
+  },
+  "assets": [],
+  "definitions": []
+}

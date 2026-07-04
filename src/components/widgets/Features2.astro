@@ -46,11 +46,11 @@ const columnsClass =
                 />
               ) : /^\//.test(icon || defaultIcon || '') ? (
                 <img
-                  src={`${import.meta.env.BASE_URL}${(icon || defaultIcon || '')}`}
+                  src={`${import.meta.env.BASE_URL}${icon || defaultIcon || ''}`}
                   alt={itemTitle || 'Avatar'}
                   class="mb-6 w-12 h-12 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700"
                 />
-              ) : (icon || defaultIcon) ? (
+              ) : icon || defaultIcon ? (
                 <img
                   src={icon || defaultIcon || ''}
                   alt={itemTitle || 'Avatar'}
