@@ -35,6 +35,7 @@ const sidebarLinks = [
   { text: '创始人', href: getPermalink('/team#founder') },
   { text: '总务部', href: getPermalink('/team#general') },
   { text: '群务部', href: getPermalink('/team#affairs') },
+  { text: '活动策划部', href: getPermalink('/team#events') },
   { text: '新闻办', href: getPermalink('/team#news') },
   { text: '顾问团', href: getPermalink('/team#advisors') },
   { text: '技术委员会', href: getPermalink('/team#tech') },
@@ -75,6 +76,11 @@ const sidebarLinks = [
       <h3 class="text-xl font-bold mb-6 text-center">
         <span class="border-b-2 border-primary pb-1">七月团队 · 总务部</span>
       </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队部门职责是统筹和规划相关事宜，引领团队能够互相协作，落实我们共同的宗旨和目标。总务部更适合有多线程处理能力以及执行能力的成员，会有跨部门的需要。
+      </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="card bg-base-100 shadow-md">
           <div class="card-body items-center text-center p-5">
@@ -313,6 +319,11 @@ const sidebarLinks = [
       <h3 class="text-xl font-bold mb-6 text-center">
         <span class="border-b-2 border-accent pb-1">七月团队 · 群务部</span>
       </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队部门职责是负责各个平台上面社群秩序，把握群内风向，确保群处于活跃并且持续有效的学习讨论氛围当中，有情况的时候第一时间处理。群务部更适合有常驻某一平台社群的成员，并具备一定的应急处理能力。
+      </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="card bg-base-100 shadow-md">
           <div class="card-body items-center text-center p-5">
@@ -513,12 +524,44 @@ const sidebarLinks = [
     </div>
   </Section>
 
+  <!-- 七月团队 · 活动策划部 -->
+  <Section id="events">
+    <div class="max-w-5xl mx-auto">
+      <h3 class="text-xl font-bold mb-6 text-center">
+        <span class="border-b-2 border-warning pb-1">七月团队 · 活动策划部</span>
+      </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队负责的是各个平台上面的活动，一条龙从策划开始一直到执行，下管专业委员会，给大家带来更多更好的活动和体验，让大家能够真正的学到知识。适合有灵感、有创意并有能把这些全部落实的行动力加入。
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body items-center text-center p-5">
+            <div class="avatar mb-3">
+              <div class="w-16 h-16 rounded-full">
+                <img src={千寻.src} alt="千寻" class="w-16 h-16 rounded-full object-cover" />
+              </div>
+            </div>
+            <h4 class="font-bold text-lg">千寻</h4>
+            <span class="text-base-content/60 text-sm">部长</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
   <!-- 新闻办 -->
   <Section id="news">
     <div class="max-w-5xl mx-auto">
       <h3 class="text-xl font-bold mb-6 text-center">
         <span class="border-b-2 border-info pb-1">新闻办</span>
       </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队部门职责是负责各平台宣传账号的持续运营以及外交事宜，持续宣传输出并扩大影响能力，并为此向大众输出科普内容，促进传播知识。新闻办下属科普项目组及翻译项目组，为科普事业繁荣昌盛，以及中外科技爱好者能有所知识共享，破除信息差和壁垒。
+      </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="card bg-base-100 shadow-md">
           <div class="card-body items-center text-center p-5">
@@ -582,6 +625,11 @@ const sidebarLinks = [
       <h3 class="text-xl font-bold mb-6 text-center">
         <span class="border-b-2 border-secondary pb-1">顾问团</span>
       </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队部门职责是属于理科迷的外部顾问，为理科迷的工作组、项目组事业提供相应的支持，如法律询问、其他社会组织团体等等。
+      </p>
       <div class="mb-8">
         <h4 class="text-md font-bold mb-4 text-center text-base-content/70">团长</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -686,8 +734,13 @@ const sidebarLinks = [
   <Section id="tech">
     <div class="max-w-5xl mx-auto">
       <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-warning pb-1">技术委员会</span>
+        <span class="border-b-2 border-error pb-1">技术委员会</span>
       </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队部门职责是负责各平台、各活动的相应技术开发与维护，未来将给大家带来更多实用性更强更好的开源项目。需要有编程知识、网站搭建等能力。
+      </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="card bg-base-100 shadow-md">
           <div class="card-body items-center text-center p-5">
@@ -710,6 +763,11 @@ const sidebarLinks = [
       <h3 class="text-xl font-bold mb-6 text-center">
         <span class="border-b-2 border-success pb-1">专业委员会</span>
       </h3>
+      <p
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200/60 rounded-box text-center text-sm text-base-content/70 leading-relaxed"
+      >
+        该团队部门职责是负责活动、项目等诸多提供专业知识，充实各个专业实际内容。成员是已经确定了想要在这方面深耕的，未来会下管学术项目组，带来更好的学术交流等内容。
+      </p>
       <div class="mb-8">
         <h4 class="text-md font-bold mb-4 text-center text-base-content/70">数学组</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
