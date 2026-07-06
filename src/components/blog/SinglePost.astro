@@ -67,12 +67,12 @@ const { post, url, headings = [] } = Astro.props;
           </div>
 
           <h1
-            class="px-4 sm:px-6 max-w-3xl mx-auto text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading"
+            class="px-4 sm:px-6 max-w-3xl mx-auto text-[40px] md:text-[56px] font-semibold leading-[1.07] tracking-[-0.005em] font-heading text-[#1d1d1f] dark:text-white"
           >
             {post.title}
           </h1>
           <p
-            class="max-w-3xl mx-auto mt-4 mb-8 px-4 sm:px-6 text-xl md:text-2xl text-muted dark:text-slate-400 text-justify"
+            class="max-w-3xl mx-auto mt-4 mb-8 px-4 sm:px-6 text-[17px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
           >
             {post.excerpt}
           </p>
@@ -81,7 +81,7 @@ const { post, url, headings = [] } = Astro.props;
             post.image ? (
               <Image
                 src={post.image}
-                class="max-w-full lg:max-w-[900px] mx-auto mb-6 sm:rounded-md bg-gray-400 dark:bg-slate-700"
+                class="max-w-full lg:max-w-[900px] mx-auto mb-6 sm:rounded-[18px] bg-gray-100 dark:bg-gray-700"
                 widths={[400, 900]}
                 sizes="(max-width: 900px) 400px, 900px"
                 alt={post?.excerpt || ''}

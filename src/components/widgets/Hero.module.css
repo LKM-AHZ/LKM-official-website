@@ -5,13 +5,13 @@
 }
 
 .heroBody {
-  @apply text-center pb-10 md:pb-16 max-w-5xl mx-auto;
+  @apply text-center pb-10 md:pb-[80px] max-w-5xl mx-auto;
 }
 
 .heroHeading {
-  @apply text-5xl md:text-6xl font-bold mb-4 dark:text-gray-200;
+  @apply text-[40px] md:text-[56px] font-semibold mb-4 leading-[1.07] tracking-[-0.005em] text-[#1d1d1f] dark:text-white;
 }
 
 .heroSubtitle {
-  @apply text-xl mb-6 dark:text-slate-300;
+  @apply text-[17px] sm:text-[21px] mb-6 text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed;
 }

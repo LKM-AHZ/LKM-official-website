@@ -1,35 +1,55 @@
 @import 'tailwindcss';
 /* @plugin "daisyui"; */
 @plugin "daisyui" {
-  themes: false; /* 关键 1：彻底禁用 daisyUI 所有的自带主题颜色，防止改掉你本来的颜色系统 */
-  root: '#never-match-this'; /* 关键 2：把 daisyUI 注入全局的变量隔离，不让它挂载到 :root 下影响全局 */
-
-  /* 选填：如果你只想打包特定组件来减少包体积，可以在这里指定，例如： */
-  /* include: modal, collapse, toggle; */
+  themes: false;
+  root: '#never-match-this';
 }
 @plugin "@tailwindcss/typography";
 
-/* @variant dark (&:where(.dark, .dark *)); */
 @variant dark (&:where(.dark, [data-theme="dark"], .dark *, [data-theme="dark"] *));
 
 @custom-variant intersect (&:not([no-intersect]));
 
 @theme {
-  --color-primary: var(--aw-color-primary);
-  --color-secondary: var(--aw-color-secondary);
-  --color-accent: var(--aw-color-accent);
-  --color-default: var(--aw-color-text-default);
-  --color-muted: var(--aw-color-text-muted);
+  /* ── Apple 色彩系统 ── */
+  --color-primary: #0066cc; /* Action Blue — 唯一交互色 */
+  --color-primary-hover: #0071e3; /* 悬停微亮 */
+  --color-primary-on-dark: #2997ff; /* 暗色 tile 上的链接蓝 */
+  --color-secondary: #1d1d1f; /* 近黑色墨水 */
+  --color-accent: #0066cc; /* 强调色 = Action Blue */
+  --color-default: #1d1d1f; /* 默认文字色 */
+  --color-muted: #7a7a7a; /* 次要文字色 */
+  --color-canvas-parchment: #f5f5f7; /* Apple 羊皮纸色 */
+  --color-canvas-white: #ffffff; /* 纯白画布 */
+  --color-tile-dark: #272729; /* 深色 tile */
+  --color-tile-dark-2: #2a2a2c; /* 深色 tile 变体 */
+  --color-tile-dark-3: #252527; /* 深色 tile 变体 */
+  --color-hairline: #e0e0e0; /* 1px 分割线 */
+  --color-divider-soft: #f0f0f0; /* 软分割 */
+  --color-surface-pearl: #fafafc; /* 珍珠按钮底色 */
 
+  /* ── 字体系统 ──
+     Apple 优先 SF Pro → 中文保留 Noto Sans SC */
   --font-sans:
-    'Noto Sans SC', 'var(--aw-font-sans, ui-sans-serif)', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-serif: 'var(--aw-font-serif, ui-serif)', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-  --font-heading: 'Noto Sans SC', 'var(--aw-font-heading, ui-sans-serif)', ui-sans-serif, system-ui, sans-serif;
-  --font-mono:
-    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-heading:
+    'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --animate-fade: fadeInUp 1s both;
+  /* ── 阴影 ──
+     唯一阴影：产品/卡片影像权重 */
+  --shadow-product: 0 5px 30px rgba(0, 0, 0, 0.22);
+
+  /* ── 圆角 Apple 阶梯 ── */
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+
+  /* ── 动画 ── */
+  --animate-fade: fadeInUp 0.8s both;
 
   @keyframes fadeInUp {
     0% {
@@ -43,49 +63,84 @@
   }
 }
 
+/* ── 页面背景 utility ── */
 @utility bg-page {
-  background-color: var(--aw-color-bg-page);
+  background-color: var(--color-canvas-white);
 }
 
 @utility bg-dark {
-  background-color: var(--aw-color-bg-page-dark);
+  background-color: var(--color-canvas-parchment);
 }
 
 @utility bg-light {
-  background-color: var(--aw-color-bg-page);
+  background-color: var(--color-canvas-white);
 }
 
 @utility text-page {
-  color: var(--aw-color-text-page);
+  color: var(--color-default);
 }
 
 @utility text-muted {
-  color: var(--aw-color-text-muted);
+  color: var(--color-muted);
 }
 
+/* ── Apple 风格按钮系统 ── */
+
 @utility btn {
-  @apply inline-flex items-center justify-center rounded-full border-gray-400 border bg-transparent font-medium text-center text-base text-page leading-snug transition py-3.5 px-6 md:px-8 ease-in duration-200 focus:ring-blue-500 focus:ring-offset-blue-200 focus:ring-2 focus:ring-offset-2 hover:bg-gray-100 hover:border-gray-600 dark:text-slate-300 dark:border-slate-500 dark:hover:bg-slate-800 dark:hover:border-slate-800 cursor-pointer;
+  @apply inline-flex items-center justify-center rounded-full font-medium text-center transition
+    ease-in duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-[#0071e3] cursor-pointer
+    select-none active:scale-95;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.022em;
+  padding: 11px 22px;
+  min-height: 44px;
 }
 
 @utility btn-primary {
-  @apply btn font-semibold bg-primary text-white border-primary hover:bg-secondary hover:border-secondary hover:text-white dark:text-white dark:bg-primary dark:border-primary dark:hover:border-secondary dark:hover:bg-secondary;
+  @apply btn;
+  background-color: #0066cc;
+  color: #ffffff;
+  border: none;
 }
 
 @utility btn-secondary {
   @apply btn;
+  background-color: transparent;
+  color: #0066cc;
+  border: 1px solid #0066cc;
 }
 
 @utility btn-tertiary {
-  @apply btn border-none shadow-none text-muted hover:text-gray-900 dark:text-gray-400 dark:hover:text-white;
+  @apply btn;
+  background-color: transparent;
+  color: #7a7a7a;
+  border: none;
+  padding: 8px 16px;
 }
 
+/* ── 按钮 hover 状态（不能用 @utility + 伪类） ── */
+@layer base {
+  .btn-primary:hover {
+    background-color: #0071e3;
+  }
+  .btn-secondary:hover {
+    background-color: rgba(0, 102, 204, 0.06);
+  }
+  .btn-tertiary:hover {
+    color: #1d1d1f;
+  }
+}
+
+/* ── Header 滚动样式 (保留 frosted glass) ── */
 #header.scroll > div:first-child {
-  @apply bg-page md:bg-white/90 md:backdrop-blur-md;
-  box-shadow: 0 0.375rem 1.5rem 0 rgb(140 152 164 / 13%);
+  @apply bg-page md:bg-white/85 md:backdrop-blur-xl;
+  box-shadow: 0 0.5px 0 0 rgba(0, 0, 0, 0.08);
 }
 .dark #header.scroll > div:first-child,
 #header.scroll.dark > div:first-child {
-  @apply bg-page md:bg-[#030621e6] border-b border-gray-500/20;
+  @apply bg-[#1d1d1f]/90 border-b border-white/10;
   box-shadow: none;
 }
 
@@ -127,65 +182,124 @@
 }
 
 /* ==========================================================================
-   全站中文字体、字距与呼吸感全局优化 (已修复非文章区域的对齐冲突)
+   全站 Apple 风格排版优化
    ========================================================================== */
 
 @layer base {
-  /* 1. 作用于全站 html / body 级别的字距 */
   html,
   body {
-    letter-spacing: 0.04em; /* 全局字间距微调，让所有非标题文本都舒展开 */
+    letter-spacing: -0.022em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #ffffff;
+    color: #1d1d1f;
   }
 
-  /* 2. 全局基础文本标签（移除了 text-align: justify，不再破坏原有对齐） */
+  /* Body — Apple 17px 标准 */
   p {
-    line-height: 1.25; /* 全局段落行高保持在 1.75 */
-    margin-bottom: 1.25rem; /* 全局段落默认下边距 */
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.47;
+    letter-spacing: -0.022em;
+    margin-bottom: 1.25rem;
+    color: #1d1d1f;
   }
 
-  /* 3. 全局标题字距微调 */
+  /* 标题系统 — 负字间距 + weight 600 */
+  h1 {
+    font-family: var(--font-heading);
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1.07;
+    letter-spacing: -0.005em;
+  }
+
+  h2 {
+    font-family: var(--font-heading);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  h3 {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.14;
+    letter-spacing: 0.004em;
+  }
+
+  h4 {
+    font-family: var(--font-heading);
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.19;
+    letter-spacing: 0.011em;
+  }
+
+  h5 {
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.24;
+    letter-spacing: -0.022em;
+  }
+
+  h6 {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.29;
+    letter-spacing: -0.016em;
+  }
+}
+
+.dark {
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6 {
-    letter-spacing: 0.02em; /* 防止中文字大块挤压 */
-    font-weight: 700;
+  h6,
+  p {
+    color: #ffffff;
+  }
+  body {
+    background-color: #000000;
+    color: #ffffff;
+  }
+  p {
+    color: #cccccc;
   }
 }
 
 @layer utilities {
   /* ==========================================================================
-     专门针对文章、长文本排版优化的局部样式（应用于 .prose 容器）
+     .prose 文章内部排版
      ========================================================================== */
 
-  /* 1. 仅在文章内部开启中文两端对齐和大字距、大行高 */
   .prose p,
   .prose li,
   .prose ol,
   .prose ul {
-    letter-spacing: 0.02em !important;
-    line-height: 1.85 !important;
-    color: #2d3748 !important;
-    text-align: justify; /* 两端对齐安全地隔离在文章区域内 */
+    letter-spacing: -0.022em !important;
+    line-height: 1.47 !important;
+    color: #1d1d1f !important;
+    text-align: justify;
     text-justify: inter-ideograph;
   }
 
   .dark .prose p,
   .dark .prose li {
-    color: #e2e8f0 !important;
+    color: #cccccc !important;
   }
 
-  /* 2. 文章内段落之间的间距 */
   .prose p {
     margin-top: 1.25rem !important;
     margin-bottom: 1.25rem !important;
   }
 
-  /* 3. 文章内标题留白 */
   .prose h2 {
     margin-top: 3rem !important;
     margin-bottom: 1.25rem !important;
@@ -196,7 +310,6 @@
     margin-bottom: 1rem !important;
   }
 
-  /* 4. 列表与引用块、行内代码（保持一致） */
   .prose li {
     margin-top: 0.75rem !important;
     margin-bottom: 0.75rem !important;
@@ -211,17 +324,17 @@
 
   .prose blockquote {
     font-style: normal;
-    letter-spacing: 0.04em !important;
+    letter-spacing: -0.022em !important;
     border-left-width: 4px;
-    border-left-color: rgb(59, 130, 246) !important;
-    background-color: rgba(59, 130, 246, 0.04);
+    border-left-color: #0066cc !important;
+    background-color: rgba(0, 102, 204, 0.04);
     padding: 1.25rem 1.75rem !important;
     margin: 2rem 0 !important;
-    border-radius: 0 0.75rem 0.75rem 0;
+    border-radius: 0 8px 8px 0;
   }
 
   .dark .prose blockquote {
-    background-color: rgba(59, 130, 246, 0.08);
+    background-color: rgba(41, 151, 255, 0.08);
   }
 
   .prose blockquote p::before,
@@ -233,7 +346,7 @@
     background-color: #f1f5f9 !important;
     color: #e04343 !important;
     padding: 0.2rem 0.4rem !important;
-    border-radius: 0.375rem !important;
+    border-radius: 5px !important;
     font-size: 0.88em !important;
     font-weight: 600 !important;
     letter-spacing: 0px !important;

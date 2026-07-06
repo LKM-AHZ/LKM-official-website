@@ -32,7 +32,12 @@ const { links = [], currentPath = '' } = Astro.props;
                 href={href}
                 class:list={[
                   styles.link,
-                  isActive ? 'bg-primary/10 text-primary' : [styles.linkInactive, 'text-muted hover:text-default'],
+                  isActive
+                    ? 'bg-[#0066cc]/10 text-[#0066cc] font-semibold'
+                    : [
+                        styles.linkInactive,
+                        'text-[#7a7a7a] hover:text-[#1d1d1f] dark:text-[#cccccc] dark:hover:text-white',
+                      ],
                 ]}
               >
                 {icon && <Icon name={icon} class={styles.icon} />}
@@ -73,6 +78,7 @@ const { links = [], currentPath = '' } = Astro.props;
         if (target) {
           target.scrollIntoView({ behavior: 'smooth' });
           history.replaceState(null, '', hash);
+          updateActive();
         }
       }
     };
@@ -87,10 +93,11 @@ const { links = [], currentPath = '' } = Astro.props;
         if (linkUrl.pathname !== location.pathname) return;
 
         const isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
-        a.classList.toggle('bg-primary/10', isActive);
-        a.classList.toggle('text-primary', isActive);
-        a.classList.toggle('text-muted', !isActive);
-        a.classList.toggle('hover:text-default', !isActive);
+        a.classList.toggle('bg-[#0066cc]/10', isActive);
+        a.classList.toggle('text-[#0066cc]', isActive);
+        a.classList.toggle('font-semibold', isActive);
+        a.classList.toggle('text-[#7a7a7a]', !isActive);
+        a.classList.toggle('hover:text-[#1d1d1f]', !isActive);
       });
     }
 

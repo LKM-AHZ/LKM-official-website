@@ -35,9 +35,9 @@ const showEndLine = index < total - 1;
   </div>
 
   <div class:list={[isEven ? 'timeline-start mb-10 md:text-end' : 'timeline-end md:mb-10']}>
-    <time class="font-mono italic">{year}</time>
-    <div class="text-lg font-black">{title}</div>
-    <p class="text-sm text-base-content/80 leading-relaxed max-w-xl dark:text-white">{description}</p>
+    <time class="font-mono text-[12px] text-[#7a7a7a] dark:text-[#cccccc]">{year}</time>
+    <div class="text-[17px] font-semibold text-[#1d1d1f] dark:text-white">{title}</div>
+    <p class="text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed max-w-xl">{description}</p>
   </div>
 
   {showEndLine && <hr />}

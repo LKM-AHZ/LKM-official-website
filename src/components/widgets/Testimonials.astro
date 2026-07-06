@@ -27,24 +27,26 @@ const {
       testimonials &&
         testimonials.map(({ title, testimonial, name, job, image }) => (
           <div class="flex h-auto intersect-once motion-safe:md:intersect:animate-fade motion-safe:md:opacity-0 intersect-quarter">
-            <div class="flex flex-col p-4 md:p-6 rounded-md shadow-xl dark:shadow-none dark:border dark:border-slate-600">
-              {title && <h2 class="text-lg font-medium leading-6 pb-4">{title}</h2>}
+            <div class="flex flex-col p-4 md:p-6 rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
+              {title && (
+                <h2 class="text-[17px] font-semibold leading-6 pb-3 text-[#1d1d1f] dark:text-white">{title}</h2>
+              )}
               {testimonial && (
                 <blockquote class="flex-auto">
-                  <p class="text-muted">" {testimonial} "</p>
+                  <p class="text-[17px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed">" {testimonial} "</p>
                 </blockquote>
               )}
 
-              <hr class="border-slate-200 dark:border-slate-600 my-4" />
+              <hr class="border-[#e0e0e0] dark:border-white/10 my-4" />
 
               <div class="flex items-center">
                 {image && (
-                  <div class="h-10 w-10 rounded-full border border-slate-200 dark:border-slate-600">
+                  <div class="h-10 w-10 rounded-full border border-[#e0e0e0] dark:border-white/10 overflow-hidden">
                     {typeof image === 'string' ? (
                       <Fragment set:html={image} />
                     ) : (
                       <Image
-                        class="h-10 w-10 rounded-full border border-slate-200 dark:border-slate-600 min-w-full min-h-full"
+                        class="h-10 w-10 rounded-full min-w-full min-h-full object-cover"
                         width={40}
                         height={40}
                         layout="fixed"
@@ -56,8 +58,8 @@ const {
                 )}
 
                 <div class="grow ml-3 rtl:ml-0 rtl:mr-3">
-                  {name && <p class="text-base font-semibold">{name}</p>}
-                  {job && <p class="text-xs text-muted">{job}</p>}
+                  {name && <p class="text-[17px] font-semibold text-[#1d1d1f] dark:text-white">{name}</p>}
+                  {job && <p class="text-[12px] text-[#7a7a7a] dark:text-[#cccccc]">{job}</p>}
                 </div>
               </div>
             </div>

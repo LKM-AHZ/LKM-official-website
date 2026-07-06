@@ -14,7 +14,7 @@ const { tabs = [], currentPath = '' } = Astro.props;
 
 {
   tabs.length > 0 && (
-    <div class="sticky top-16 z-30 border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur">
+    <div class="sticky top-[56px] z-30 border-b border-[#e0e0e0] dark:border-white/10 bg-white/80 dark:bg-[#1d1d1f]/80 backdrop-blur-xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <nav class="flex gap-0 overflow-x-auto" aria-label="Section tabs">
           {tabs.map(({ text, href }) => {
@@ -26,10 +26,10 @@ const { tabs = [], currentPath = '' } = Astro.props;
               <a
                 href={href}
                 class:list={[
-                  'whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 transition-colors duration-150',
+                  'whitespace-nowrap px-4 py-3 text-[14px] font-normal border-b-2 transition-colors duration-150',
                   isActive
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted hover:text-default hover:border-gray-300',
+                    ? 'border-[#0066cc] text-[#0066cc] font-semibold'
+                    : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:text-[#cccccc] dark:hover:text-white hover:border-[#e0e0e0]',
                 ]}
               >
                 {text}
