@@ -67,19 +67,17 @@ const { links = [], currentPath = '' } = Astro.props;
       if (!href) return;
 
       const url = new URL(href, location.origin);
-      const isSamePage = url.pathname === location.pathname;
+      const isSamePage = url.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '');
       const hash = url.hash;
 
-      if (!hash) return;
+      if (!hash || !isSamePage) return;
 
-      if (isSamePage) {
-        e.preventDefault();
-        const target = document.querySelector(hash);
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth' });
-          history.replaceState(null, '', hash);
-          updateActive();
-        }
+      e.preventDefault();
+      const target = document.querySelector(hash);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+        history.replaceState(null, '', hash);
+        updateActive();
       }
     };
 
@@ -121,11 +119,13 @@ const { links = [], currentPath = '' } = Astro.props;
 
           if (sections.length === 0) return;
 
+          // 找到最接近视口顶部且已滚过的 section
           let currentId = '';
           for (const section of sections) {
             const rect = section.getBoundingClientRect();
             if (rect.top <= 120) {
               currentId = '#' + section.id;
+              // 不 break，取最后一个满足条件的（最靠下的可见 section）
             }
           }
           if (currentId && location.hash !== currentId) {
