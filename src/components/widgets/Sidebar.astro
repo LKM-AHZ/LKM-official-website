@@ -90,14 +90,17 @@ const { links = [], currentPath = '' } = Astro.props;
         const href = a.getAttribute('href');
         if (!href) return;
         const linkUrl = new URL(href, location.origin);
-        if (linkUrl.pathname !== location.pathname) return;
+        // 标准化比较 pathname（去掉末尾 /）
+        if (linkUrl.pathname.replace(/\/$/, '') !== location.pathname.replace(/\/$/, '')) return;
 
         const isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
-        a.classList.toggle('bg-[#0066cc]/10', isActive);
-        a.classList.toggle('text-[#0066cc]', isActive);
-        a.classList.toggle('font-semibold', isActive);
-        a.classList.toggle('text-[#7a7a7a]', !isActive);
-        a.classList.toggle('hover:text-[#1d1d1f]', !isActive);
+        if (isActive) {
+          a.classList.add('bg-[#0066cc]/10', 'text-[#0066cc]', 'font-semibold');
+          a.classList.remove('text-[#7a7a7a]', 'hover:text-[#1d1d1f]');
+        } else {
+          a.classList.remove('bg-[#0066cc]/10', 'text-[#0066cc]', 'font-semibold');
+          a.classList.add('text-[#7a7a7a]', 'hover:text-[#1d1d1f]');
+        }
       });
     }
 
@@ -111,7 +114,7 @@ const { links = [], currentPath = '' } = Astro.props;
               const href = a.getAttribute('href');
               if (!href) return null;
               const url = new URL(href, location.origin);
-              if (url.pathname !== location.pathname || !url.hash) return null;
+              if (url.pathname.replace(/\/$/, '') !== location.pathname.replace(/\/$/, '') || !url.hash) return null;
               return document.querySelector(url.hash);
             })
             .filter(Boolean) as HTMLElement[];
