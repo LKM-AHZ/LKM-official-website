@@ -12,32 +12,31 @@
 
 @theme {
   /* ── Apple 色彩系统 ── */
-  --color-primary: #0066cc;           /* Action Blue — 唯一交互色 */
-  --color-primary-hover: #0071e3;     /* 悬停微亮 */
-  --color-primary-on-dark: #2997ff;   /* 暗色 tile 上的链接蓝 */
-  --color-secondary: #1d1d1f;         /* 近黑色墨水 */
-  --color-accent: #0066cc;            /* 强调色 = Action Blue */
-  --color-default: #1d1d1f;           /* 默认文字色 */
-  --color-muted: #7a7a7a;             /* 次要文字色 */
-  --color-canvas-parchment: #f5f5f7;  /* Apple 羊皮纸色 */
-  --color-canvas-white: #ffffff;       /* 纯白画布 */
-  --color-tile-dark: #272729;          /* 深色 tile */
-  --color-tile-dark-2: #2a2a2c;       /* 深色 tile 变体 */
-  --color-tile-dark-3: #252527;       /* 深色 tile 变体 */
-  --color-hairline: #e0e0e0;          /* 1px 分割线 */
-  --color-divider-soft: #f0f0f0;      /* 软分割 */
-  --color-surface-pearl: #fafafc;     /* 珍珠按钮底色 */
+  --color-primary: #0066cc; /* Action Blue — 唯一交互色 */
+  --color-primary-hover: #0071e3; /* 悬停微亮 */
+  --color-primary-on-dark: #2997ff; /* 暗色 tile 上的链接蓝 */
+  --color-secondary: #1d1d1f; /* 近黑色墨水 */
+  --color-accent: #0066cc; /* 强调色 = Action Blue */
+  --color-default: #1d1d1f; /* 默认文字色 */
+  --color-muted: #7a7a7a; /* 次要文字色 */
+  --color-canvas-parchment: #f5f5f7; /* Apple 羊皮纸色 */
+  --color-canvas-white: #ffffff; /* 纯白画布 */
+  --color-tile-dark: #272729; /* 深色 tile */
+  --color-tile-dark-2: #2a2a2c; /* 深色 tile 变体 */
+  --color-tile-dark-3: #252527; /* 深色 tile 变体 */
+  --color-hairline: #e0e0e0; /* 1px 分割线 */
+  --color-divider-soft: #f0f0f0; /* 软分割 */
+  --color-surface-pearl: #fafafc; /* 珍珠按钮底色 */
 
   /* ── 字体系统 ──
      Apple 优先 SF Pro → 中文保留 Noto Sans SC */
   --font-sans:
-    'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
+    'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   --font-heading:
-    'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  --font-mono:
-    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* ── 阴影 ──
      唯一阴影：产品/卡片影像权重 */
@@ -257,7 +256,13 @@
 }
 
 .dark {
-  h1, h2, h3, h4, h5, h6, p {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
     color: #ffffff;
   }
   body {

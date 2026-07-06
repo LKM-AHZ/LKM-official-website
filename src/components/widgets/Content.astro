@@ -53,7 +53,11 @@ const columnsClass =
   <div class="mx-auto max-w-7xl p-4 md:px-8">
     <div class={`md:flex ${isReversed ? 'md:flex-row-reverse' : ''} md:gap-16`}>
       <div class="md:basis-1/2 self-center">
-        {content && <div class="mb-12 text-[17px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed" set:html={content} />}
+        {
+          content && (
+            <div class="mb-12 text-[17px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed" set:html={content} />
+          )
+        }
 
         {
           callToAction && (
@@ -83,7 +87,10 @@ const columnsClass =
                       )}
                       {description && (
                         <p
-                          class:list={[{ 'mt-1': itemTitle }, 'text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed ml-2 rtl:ml-0 rtl:mr-2']}
+                          class:list={[
+                            { 'mt-1': itemTitle },
+                            'text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed ml-2 rtl:ml-0 rtl:mr-2',
+                          ]}
                           set:html={description}
                         />
                       )}

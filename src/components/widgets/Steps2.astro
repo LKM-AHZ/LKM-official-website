@@ -55,11 +55,18 @@ const {
                 <li class="flex md:-mx-4">
                   <div class="pr-4 sm:pl-4 rtl:pr-0 rtl:pl-4 rtl:sm:pl-0 rtl:sm:pr-4">
                     <span class="flex w-12 h-12 mx-auto items-center justify-center rounded-full bg-[#0066cc]/10 text-[#0066cc]">
-                      {icon ? <Icon name={icon} class="w-5 h-5 icon-bold" /> : <span class="text-lg font-semibold">{index + 1}</span>}
+                      {icon ? (
+                        <Icon name={icon} class="w-5 h-5 icon-bold" />
+                      ) : (
+                        <span class="text-lg font-semibold">{index + 1}</span>
+                      )}
                     </span>
                   </div>
                   <div class="pl-4 rtl:pl-0 rtl:pr-4">
-                    <h3 class="mb-2 text-[17px] font-semibold font-heading text-[#1d1d1f] dark:text-white" set:html={title2} />
+                    <h3
+                      class="mb-2 text-[17px] font-semibold font-heading text-[#1d1d1f] dark:text-white"
+                      set:html={title2}
+                    />
                     <p class="text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed" set:html={description} />
                   </div>
                 </li>

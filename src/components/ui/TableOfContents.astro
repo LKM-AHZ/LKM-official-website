@@ -19,7 +19,11 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
       <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
         {filteredHeadings.map((heading) => (
           <li class={`toc-item transition-all duration-200 ${heading.depth === 3 ? 'pl-4' : ''}`}>
-            <a href={`#${heading.slug}`} class="hover:text-[#0066cc] dark:hover:text-[#2997ff] block py-0.5 text-[14px] text-[#7a7a7a] dark:text-[#cccccc]" data-toc-link>
+            <a
+              href={`#${heading.slug}`}
+              class="hover:text-[#0066cc] dark:hover:text-[#2997ff] block py-0.5 text-[14px] text-[#7a7a7a] dark:text-[#cccccc]"
+              data-toc-link
+            >
               {heading.text}
             </a>
           </li>

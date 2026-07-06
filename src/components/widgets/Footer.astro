@@ -34,7 +34,10 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme 
     <div class="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-[64px]">
       <div class="col-span-12 lg:col-span-4">
         <div class="mb-2">
-          <a class="inline-block text-[17px] font-semibold text-[#1d1d1f] dark:text-white no-underline" href={getHomePermalink()}>{SITE?.name}</a>
+          <a
+            class="inline-block text-[17px] font-semibold text-[#1d1d1f] dark:text-white no-underline"
+            href={getHomePermalink()}>{SITE?.name}</a
+          >
         </div>
         <div class="text-[12px] text-[#7a7a7a] flex gap-1">
           {
