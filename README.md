@@ -1,6 +1,14 @@
-# LKM Official Website
+# LKM Official Website · 理科迷官方网站
 
-理科迷 (LKM) 官方网站 — 基于 **[AstroWind](https://github.com/arthelokyo/astrowind)** 模板构建，采用 **Astro v6 + Tailwind CSS v4** 纯静态站点。
+[![Astro](https://img.shields.io/badge/Astro-v6-FF5D01?logo=astro)](https://astro.build)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org)
+
+理科迷 (LKM) 组织的官方网站，基于 [AstroWind](https://github.com/arthelokyo/astrowind) 模板构建，采用 **Astro v6 + Tailwind CSS v4** 的纯静态站点。
+
+The official website of the LKM (LiKeMi) open-source organization — a static site built with **Astro v6 + Tailwind CSS v4**, based on the [AstroWind](https://github.com/arthelokyo/astrowind) template.
+
+> 📖 For AI agent instructions, see [AGENTS.md](./AGENTS.md).
 
 ---
 
