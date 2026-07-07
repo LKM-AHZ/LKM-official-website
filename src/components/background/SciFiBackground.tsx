@@ -1,6 +1,6 @@
 // src/components/background/SciFiBackground.tsx
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { SciFiRenderer } from './sci-fi-renderer';
 
 export default function SciFiBackground() {
@@ -8,14 +8,6 @@ export default function SciFiBackground() {
   const rendererRef = useRef<SciFiRenderer | null>(null);
   const darkRef = useRef(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    rendererRef.current?.setMouse(e.clientX, e.clientY);
-  }, []);
-
-  const handleClick = useCallback((e: MouseEvent) => {
-    rendererRef.current?.click(e.clientX, e.clientY);
-  }, []);
 
   // 初始化 & 销毁
   useEffect(() => {
@@ -36,8 +28,14 @@ export default function SciFiBackground() {
     renderer.start();
     rendererRef.current = renderer;
 
-    document.body.addEventListener('mousemove', handleMouseMove, { passive: true });
-    document.body.addEventListener('click', handleClick, { passive: true });
+    const handleMouseMoveDpr = (e: MouseEvent) => {
+      rendererRef.current?.setMouse(e.clientX * dpr, e.clientY * dpr);
+    };
+    const handleClickDpr = (e: MouseEvent) => {
+      rendererRef.current?.click(e.clientX * dpr, e.clientY * dpr);
+    };
+    document.body.addEventListener('mousemove', handleMouseMoveDpr, { passive: true });
+    document.body.addEventListener('click', handleClickDpr, { passive: true });
 
     const handleResize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -51,12 +49,12 @@ export default function SciFiBackground() {
     // 触摸事件 (移动端)
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        renderer.setMouse(e.touches[0].clientX, e.touches[0].clientY);
+        renderer.setMouse(e.touches[0].clientX * dpr, e.touches[0].clientY * dpr);
       }
     };
     const handleTouchEnd = (e: TouchEvent) => {
       if (e.changedTouches.length > 0) {
-        renderer.click(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        renderer.click(e.changedTouches[0].clientX * dpr, e.changedTouches[0].clientY * dpr);
       }
     };
     document.body.addEventListener('touchmove', handleTouchMove, { passive: true });
@@ -83,8 +81,8 @@ export default function SciFiBackground() {
       observer.disconnect();
       renderer.destroy();
       rendererRef.current = null;
-      document.body.removeEventListener('mousemove', handleMouseMove);
-      document.body.removeEventListener('click', handleClick);
+      document.body.removeEventListener('mousemove', handleMouseMoveDpr);
+      document.body.removeEventListener('click', handleClickDpr);
       window.removeEventListener('resize', handleResize);
       document.body.removeEventListener('touchmove', handleTouchMove);
       document.body.removeEventListener('touchend', handleTouchEnd);
