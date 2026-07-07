@@ -94,9 +94,11 @@ pnpm run dev
 
 ---
 
-## 配置系统
+## 配置系统 · Configuration
 
-配置文件 `src/config.yaml` 通过 `vendor/integration/` 注入为 Vite 虚拟模块，供页面和组件引用：
+配置文件 `src/config.yaml` 通过 `vendor/integration/` 注入为 Vite 虚拟模块：
+
+The site config is loaded as a Vite virtual module `astrowind:config`:
 
 ```ts
 import { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } from 'astrowind:config';
@@ -128,11 +130,11 @@ analytics:
       id: null # 填入 "G-XXXXXXXXXX" 启用
 ```
 
-导航结构定义在 `src/navigation.ts`，使用 `getPermalink()` 和 `getAsset()` 生成 URL。
+导航结构定义在 `src/navigation.ts`，使用 `getPermalink()` 和 `getAsset()` 生成 URL。 / Navigation is in `src/navigation.ts`.
 
 ---
 
-## 样式系统
+## 样式系统 · Styling
 
 **Tailwind CSS v4** — CSS-first 配置，入口文件 `src/assets/styles/tailwind.css`：
 
@@ -157,7 +159,7 @@ analytics:
 
 ---
 
-## 内容管理
+## 内容管理 · Content
 
 在 `src/data/post/` 下创建 `.md` 或 `.mdx` 文件：
 
