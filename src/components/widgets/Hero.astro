@@ -25,12 +25,12 @@ const {
   {...id ? { id } : {}}
   data-hero-section
 >
-  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+  <div class="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
     <slot name="bg">
       {bg ? <Fragment set:html={bg} /> : null}
     </slot>
   </div>
-  <div class={styles.heroInner}>
+  <div class={styles.heroInner + ' relative z-10'}>
     <div class="py-16 md:py-[80px]">
       <div class={styles.heroBody}>
         {
