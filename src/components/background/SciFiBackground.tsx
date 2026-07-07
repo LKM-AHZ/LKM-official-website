@@ -5,20 +5,24 @@ import { SciFiRenderer } from './sci-fi-renderer';
 
 export default function SciFiBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<SciFiRenderer | null>(null);
   const darkRef = useRef(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const dprRef = useRef(1);
 
   // 初始化 & 销毁
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
+    dprRef.current = dpr;
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
 
     const isMobile = window.innerWidth < 768;
     darkRef.current = document.documentElement.classList.contains('dark');
@@ -29,56 +33,56 @@ export default function SciFiBackground() {
     rendererRef.current = renderer;
 
     const handleMouseMoveDpr = (e: MouseEvent) => {
-      rendererRef.current?.setMouse(e.clientX * dpr, e.clientY * dpr);
+      const r = container.getBoundingClientRect();
+      rendererRef.current?.setMouse(
+        (e.clientX - r.left) * dprRef.current,
+        (e.clientY - r.top) * dprRef.current
+      );
     };
     const handleClickDpr = (e: MouseEvent) => {
-      rendererRef.current?.click(e.clientX * dpr, e.clientY * dpr);
+      const r = container.getBoundingClientRect();
+      rendererRef.current?.click(
+        (e.clientX - r.left) * dprRef.current,
+        (e.clientY - r.top) * dprRef.current
+      );
     };
     document.body.addEventListener('mousemove', handleMouseMoveDpr, { passive: true });
     document.body.addEventListener('click', handleClickDpr, { passive: true });
 
     const handleResize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
+      dprRef.current = dpr;
+      const r = container.getBoundingClientRect();
+      canvas.width = r.width * dpr;
+      canvas.height = r.height * dpr;
+      canvas.style.width = `${r.width}px`;
+      canvas.style.height = `${r.height}px`;
     };
     window.addEventListener('resize', handleResize);
 
     // 触摸事件 (移动端)
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        renderer.setMouse(e.touches[0].clientX * dpr, e.touches[0].clientY * dpr);
+        const r = container.getBoundingClientRect();
+        renderer.setMouse(
+          (e.touches[0].clientX - r.left) * dprRef.current,
+          (e.touches[0].clientY - r.top) * dprRef.current
+        );
       }
     };
     const handleTouchEnd = (e: TouchEvent) => {
       if (e.changedTouches.length > 0) {
-        renderer.click(e.changedTouches[0].clientX * dpr, e.changedTouches[0].clientY * dpr);
+        const r = container.getBoundingClientRect();
+        renderer.click(
+          (e.changedTouches[0].clientX - r.left) * dprRef.current,
+          (e.changedTouches[0].clientY - r.top) * dprRef.current
+        );
       }
     };
     document.body.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.body.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-    // IntersectionObserver：哨兵在视口中 → start，离开 → stop
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          renderer.start();
-        } else {
-          renderer.stop();
-        }
-      },
-      { threshold: 0 }
-    );
-
-    const sentinel = sentinelRef.current;
-    if (sentinel) {
-      observer.observe(sentinel);
-    }
-
     return () => {
-      observer.disconnect();
       renderer.destroy();
       rendererRef.current = null;
       document.body.removeEventListener('mousemove', handleMouseMoveDpr);
@@ -101,31 +105,17 @@ export default function SciFiBackground() {
   }, []);
 
   return (
-    <>
+    <div ref={containerRef} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }} aria-hidden="true">
       <canvas
         ref={canvasRef}
         style={{
-          position: 'fixed',
+          position: 'absolute',
           inset: 0,
-          zIndex: 0,
           pointerEvents: 'none',
           display: 'block',
         }}
         aria-hidden="true"
       />
-      <div
-        ref={sentinelRef}
-        style={{
-          position: 'fixed',
-          top: '100vh',
-          left: 0,
-          width: '100%',
-          height: 1,
-          zIndex: -1,
-          pointerEvents: 'none',
-        }}
-        aria-hidden="true"
-      />
-    </>
+    </div>
   );
 }
