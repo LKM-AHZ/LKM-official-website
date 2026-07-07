@@ -50,35 +50,6 @@ export const headerData = {
         },
       ],
     },
-    // {
-    //   text: 'Landing',
-    //   links: [
-    //     {
-    //       text: 'Lead Generation',
-    //       href: getPermalink('/landing/lead-generation'),
-    //     },
-    //     {
-    //       text: 'Long-form Sales',
-    //       href: getPermalink('/landing/sales'),
-    //     },
-    //     {
-    //       text: 'Click-Through',
-    //       href: getPermalink('/landing/click-through'),
-    //     },
-    //     {
-    //       text: 'Product Details (or Services)',
-    //       href: getPermalink('/landing/product'),
-    //     },
-    //     {
-    //       text: 'Coming Soon or Pre-Launch',
-    //       href: getPermalink('/landing/pre-launch'),
-    //     },
-    //     {
-    //       text: 'Subscription',
-    //       href: getPermalink('/landing/subscription'),
-    //     },
-    //   ],
-    // },
     {
       text: '博客',
       links: [
@@ -89,22 +60,6 @@ export const headerData = {
         {
           text: '所有分类',
           href: getPermalink('/blog/categories'),
-        },
-        {
-          text: '文章示例',
-          href: getPermalink('get-started-website-with-astro-tailwind-css', 'post'),
-        },
-        {
-          text: '文章 (MDX)',
-          href: getPermalink('markdown-elements-demo-post', 'post'),
-        },
-        {
-          text: '分类页面',
-          href: getPermalink('tutorials', 'category'),
-        },
-        {
-          text: '标签页面',
-          href: getPermalink('astro', 'tag'),
         },
       ],
     },
