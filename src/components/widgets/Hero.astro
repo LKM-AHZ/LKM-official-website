@@ -107,14 +107,14 @@ const {
   <!-- 下拉按钮 -->
   {
     nextSectionId && (
-      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
         <button
           type="button"
-          class="flex flex-col items-center gap-1 text-[#7a7a7a] dark:text-[#cccccc] hover:text-[#0066cc] dark:hover:text-[#2997ff] transition-colors cursor-pointer"
+          class="flex flex-col items-center gap-0.5 text-[#7a7a7a] dark:text-[#cccccc] hover:text-[#0066cc] dark:hover:text-[#2997ff] transition-colors cursor-pointer p-2"
           data-hero-scroll-down
           aria-label="向下滚动"
         >
-          <svg class="w-5 h-5 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="w-8 h-8 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
@@ -132,43 +132,42 @@ const {
         const target = document.getElementById(nextSectionId);
         if (!target) return;
 
-        const scrollTo = (to) => {
-          if ('scrollBehavior' in document.documentElement.style) {
-            window.scrollTo({ top: to.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
-          } else {
-            window.scrollTo(0, to.getBoundingClientRect().top + window.scrollY);
-          }
+        const scrollDown = () => {
+          target.scrollIntoView({ behavior: 'auto', block: 'start' });
         };
-
-        const scrollDown = () => scrollTo(target);
 
         // 下拉按钮
         hero.querySelector('[data-hero-scroll-down]')?.addEventListener('click', scrollDown);
 
-        // 滚轮事件
-        hero.addEventListener('wheel', (e) => {
-          if (e.deltaY > 0) {
-            e.preventDefault();
-            scrollDown();
-          }
+        // 滚轮：在 Hero 区域可见时向下滚动就跳转
+        window.addEventListener('wheel', (e) => {
+          if (e.deltaY <= 0) return;
+          const rect = hero.getBoundingClientRect();
+          if (rect.bottom <= 0) return; // hero 已离开视口
+          e.preventDefault();
+          scrollDown();
         }, { passive: false });
 
-        // 键盘事件
-        hero.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-            e.preventDefault();
-            scrollDown();
-          }
+        // 键盘
+        window.addEventListener('keydown', (e) => {
+          if (e.key !== 'ArrowDown' && e.key !== 'PageDown' && e.key !== ' ') return;
+          const rect = hero.getBoundingClientRect();
+          if (rect.bottom <= 0) return;
+          e.preventDefault();
+          scrollDown();
         });
 
         // 触屏下滑
         let touchStartY = 0;
-        hero.addEventListener('touchstart', (e) => {
+        window.addEventListener('touchstart', (e) => {
           touchStartY = e.touches[0].clientY;
         }, { passive: true });
-        hero.addEventListener('touchend', (e) => {
+        window.addEventListener('touchend', (e) => {
           const dy = touchStartY - e.changedTouches[0].clientY;
-          if (dy > 50) scrollDown();
+          if (dy <= 50) return;
+          const rect = hero.getBoundingClientRect();
+          if (rect.bottom <= 0) return;
+          scrollDown();
         }, { passive: true });
       })();
     </script>
