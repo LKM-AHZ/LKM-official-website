@@ -125,12 +125,11 @@ const {
 
 {
   nextSectionId && (
-    <script is:inline>
+    <script define:vars={{ nextSectionId }}>
       (() => {
-        function init() {
         const hero = document.querySelector('[data-hero-section]');
         if (!hero) return;
-        const target = document.getElementById({JSON.stringify(nextSectionId)});
+        const target = document.getElementById(nextSectionId);
         if (!target) return;
 
         const scrollTo = (to) => {
@@ -171,12 +170,6 @@ const {
           const dy = touchStartY - e.changedTouches[0].clientY;
           if (dy > 50) scrollDown();
         }, { passive: true });
-        }
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', init);
-        } else {
-          init();
-        }
       })();
     </script>
   )
