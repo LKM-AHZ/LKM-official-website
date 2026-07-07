@@ -6,7 +6,6 @@ import DepartmentSection from '~/components/DepartmentSection.astro';
 
 import type { ImageMetadata } from 'astro';
 
-import type { Member } from '~/data/members';
 import {
   founderMembers,
   generalMembers,
@@ -224,7 +223,7 @@ const sidebarLinks = [
             {group.desc}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {group.members.map((m: Member) => (
+            {group.members.map((m) => (
               <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
             ))}
           </div>
@@ -260,7 +259,7 @@ const sidebarLinks = [
         <div class="mb-8">
           <h4 class="text-md font-bold mb-2 text-center text-[#7a7a7a] dark:text-[#cccccc]">{group.label}</h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {group.members.map((m: Member) => (
+            {group.members.map((m) => (
               <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
             ))}
           </div>
