@@ -39,6 +39,7 @@ export default function SciFiBackground() {
     document.body.addEventListener('click', handleClick, { passive: true });
 
     const handleResize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       canvas.style.width = `${window.innerWidth}px`;

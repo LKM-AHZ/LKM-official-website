@@ -1,6 +1,6 @@
 // src/components/background/sci-fi-renderer.ts
 
-import { COLORS, FPS_ADAPTIVE, FLOW_LINE_COUNT } from './sci-fi-config';
+import { COLORS, FPS_ADAPTIVE, FLOW_LINE_COUNT, LINK_DISTANCE } from './sci-fi-config';
 import { FRAGMENT_SHADER, VERTEX_SHADER } from './sci-fi-shaders';
 
 interface Particle {
@@ -403,8 +403,169 @@ export class SciFiRenderer {
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
     gl.drawArrays(gl.POINTS, 0, allParticles.length);
 
+    // ── draw connecting lines between nearby background particles ──
+    this.drawLinks(colors);
+
     // restore default blending
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  }
+
+  /**
+   * Draw connecting lines between background particles within a distance threshold,
+   * using a spatial grid to avoid O(n^2) comparisons.
+   */
+  private drawLinks(colors: typeof COLORS.light): void {
+    const gl = this.gl;
+    const linkDistance = this.isMobile ? LINK_DISTANCE.mobile : LINK_DISTANCE.desktop;
+    const lineAlpha = colors.line[3]; // alpha from config line color
+
+    // Build spatial grid for background particles only
+    const cellSize = linkDistance;
+    const gridWidth = Math.ceil(this.canvas.width / cellSize);
+    const gridHeight = Math.ceil(this.canvas.height / cellSize);
+    const grid: number[][] = Array.from({ length: gridWidth * gridHeight }, () => []);
+
+    // Bucket particles by cell
+    for (let i = 0; i < this.bgParticles.length; i++) {
+      const p = this.bgParticles[i];
+      const cx = Math.floor(p.x / cellSize);
+      const cy = Math.floor(p.y / cellSize);
+      if (cx >= 0 && cx < gridWidth && cy >= 0 && cy < gridHeight) {
+        grid[cy * gridWidth + cx].push(i);
+      }
+    }
+
+    // Check each cell and its right, down, down-right, down-left neighbors
+    // Direction offsets: right(1,0), down(0,1), down-right(1,1), down-left(-1,1)
+    const neighborOffsets = [
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [-1, 1],
+    ];
+
+    // Pre-allocate a reasonable buffer; grow as needed
+    const lineVertices: number[] = [];
+
+    for (let cy = 0; cy < gridHeight; cy++) {
+      for (let cx = 0; cx < gridWidth; cx++) {
+        const cellIdx = cy * gridWidth + cx;
+        const cellParticles = grid[cellIdx];
+        if (cellParticles.length === 0) continue;
+
+        // Pairs within same cell
+        for (let a = 0; a < cellParticles.length; a++) {
+          const i = cellParticles[a];
+          const pi = this.bgParticles[i];
+          for (let b = a + 1; b < cellParticles.length; b++) {
+            const j = cellParticles[b];
+            const pj = this.bgParticles[j];
+            const dx = pi.x - pj.x;
+            const dy = pi.y - pj.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < linkDistance) {
+              const alpha = (1 - dist / linkDistance) * lineAlpha;
+              lineVertices.push(pi.x, pi.y, alpha);
+              lineVertices.push(pj.x, pj.y, alpha);
+            }
+          }
+        }
+
+        // Pairs with neighbor cells
+        for (const [ox, oy] of neighborOffsets) {
+          const nx = cx + ox;
+          const ny = cy + oy;
+          if (nx < 0 || nx >= gridWidth || ny < 0 || ny >= gridHeight) continue;
+          const neighborIdx = ny * gridWidth + nx;
+          const neighborParticles = grid[neighborIdx];
+          if (neighborParticles.length === 0) continue;
+
+          for (let a = 0; a < cellParticles.length; a++) {
+            const i = cellParticles[a];
+            const pi = this.bgParticles[i];
+            for (let b = 0; b < neighborParticles.length; b++) {
+              const j = neighborParticles[b];
+              const pj = this.bgParticles[j];
+              const dx = pi.x - pj.x;
+              const dy = pi.y - pj.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < linkDistance) {
+                const alpha = (1 - dist / linkDistance) * lineAlpha;
+                lineVertices.push(pi.x, pi.y, alpha);
+                lineVertices.push(pj.x, pj.y, alpha);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (lineVertices.length === 0) return;
+
+    // Draw lines: switch to standard alpha blending, set u_color to line color
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    // Temporarily set u_color to the line color (the shader uses u_color)
+    // u_lineColor exists but the fragment shader ignores it for particle rendering
+    // For lines we just set u_color to the line color values
+    gl.uniform4f(this.uColor, colors.line[0], colors.line[1], colors.line[2], 1.0);
+
+    // Create a simple buffer for line positions only (x, y, alpha per vertex)
+    const lineData = new Float32Array(lineVertices.length);
+    for (let i = 0; i < lineVertices.length; i++) {
+      lineData[i] = lineVertices[i];
+    }
+
+    // For line drawing we need a different vertex layout: just position(2) + alpha(1)
+    // We override the attribute pointer to read only position and use u_color for color.
+    // Simplest approach: use a separate VAO/buffer combo, or reuse buffer with adjusted stride.
+    // We'll reuse the same buffer and VAO by temporarily binding new attribute layout.
+
+    // Since the vertex data has different layout (3 floats per vertex: x,y,alpha)
+    // and the existing VAO expects 7 floats, we create a temporary setup.
+    // The cleanest approach: upload to buffer, create a temp VAO with position-only layout.
+
+    // Use existing buffer but with a different stride
+    const vertexCount = lineData.length / 3;
+
+    // Temporarily change buffer and attribute layout
+    // Store current VAO to restore later
+    const tempVao = gl.createVertexArray();
+    gl.bindVertexArray(tempVao);
+
+    // Setup vertex layout: x,y,alpha per vertex (3 floats, stride=12 bytes)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, lineData, gl.DYNAMIC_DRAW);
+
+    // a_position (location 0): x,y at offset 0, stride 12
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
+
+    // a_velocity (location 1): disabled -> defaults to (0,0), so particles stay static
+    gl.disableVertexAttribArray(1);
+
+    // a_size (location 2): disabled -> defaults to 0 (gl_PointSize=0, irrelevant for LINES)
+    gl.disableVertexAttribArray(2);
+
+    // a_alpha (location 3): alpha at offset 8 (2 floats in), stride 12
+    gl.enableVertexAttribArray(3);
+    gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+
+    // a_type (location 4): disabled -> defaults to 0 (background type)
+    gl.disableVertexAttribArray(4);
+
+    gl.drawArrays(gl.LINES, 0, vertexCount);
+
+    // Cleanup and restore
+    gl.deleteVertexArray(tempVao);
+    gl.bindVertexArray(this.vao);
+
+    // Restore original u_color for particles
+    gl.uniform4fv(this.uColor, [...colors.particle]);
+
+    // Restore buffer with particle data and original stride
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    this.setupAttributes();
   }
 
   private updateFps(dt: number): void {
