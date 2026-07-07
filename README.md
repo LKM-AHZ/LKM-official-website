@@ -12,21 +12,11 @@ The official website of the LKM (LiKeMi) open-source organization — a static s
 
 ---
 
-## 快速开始
+## 快速开始 · Quick Start
 
 > **Node.js >= 24.0.0** | **pnpm >= 11.0.0**
 
 ```bash
-# 安装 Node.js
-# Windows: winget install OpenJS.NodeJS.LTS
-# Linux:   curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs
-# macOS:   brew install node@24
-
-# 启用 pnpm
-corepack enable
-corepack prepare pnpm@latest --activate
-
-# 克隆并启动
 git clone https://github.com/LKM-2014/LKM-official-website.git
 cd LKM-official-website
 pnpm install
@@ -37,15 +27,15 @@ pnpm run dev
 
 ---
 
-## 命令
+## 命令 · Commands
 
-| 命令               | 说明                                                 |
-| :----------------- | :--------------------------------------------------- |
-| `pnpm run dev`     | 启动开发服务器 `localhost:4321/LKM-official-website` |
-| `pnpm run build`   | 生产构建，输出到 `./dist/`                           |
-| `pnpm run preview` | 本地预览生产构建                                     |
-| `pnpm run check`   | 类型检查 + ESLint + Prettier                         |
-| `pnpm run fix`     | 自动修复 ESLint + Prettier                           |
+| 命令 | 说明 |
+| :--- | :--- |
+| `pnpm run dev` | 启动开发服务器 / Start dev server at `localhost:4321/LKM-official-website` |
+| `pnpm run build` | 生产构建到 `./dist/` / Production build to `./dist/` |
+| `pnpm run preview` | 本地预览生产构建 / Preview production build locally |
+| `pnpm run check` | 类型检查 + ESLint + Prettier / Type check + Lint |
+| `pnpm run fix` | 自动修复 ESLint + Prettier / Auto-fix lint issues |
 
 ---
 
