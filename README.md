@@ -75,22 +75,22 @@ pnpm run dev
 
 ---
 
-## 页面路由
+## 页面路由 · Routes
 
-| 路由           | 文件                   | 布局           |
-| :------------- | :--------------------- | :------------- |
-| `/`            | `pages/index.astro`    | PageLayout     |
-| `/about`       | `pages/about.astro`    | SidebarLayout  |
-| `/team`        | `pages/team.astro`     | PageLayout     |
-| `/services`    | `pages/services.astro` | SidebarLayout  |
-| `/pricing`     | `pages/pricing.astro`  | SidebarLayout  |
-| `/contact`     | `pages/contact.astro`  | SidebarLayout  |
-| `/privacy`     | `pages/privacy.md`     | MarkdownLayout |
-| `/terms`       | `pages/terms.md`       | MarkdownLayout |
-| `/404`         | `pages/404.astro`      | PageLayout     |
-| `/rss.xml`     | `pages/rss.xml.ts`     | —              |
-| `/blog`        | `pages/[...blog]/`     | PageLayout     |
-| `/blog/<slug>` | `pages/[...blog]/`     | PageLayout     |
+| Route | Path | Source | Layout |
+| :--- | :--- | :--- | :--- |
+| 首页 / Home | `/` | `pages/index.astro` | PageLayout |
+| 关于 / About | `/about` | `pages/about.astro` | SidebarLayout |
+| 团队 / Team | `/team` | `pages/team.astro` | PageLayout |
+| 服务 / Services | `/services` | `pages/services.astro` | SidebarLayout |
+| 定价 / Pricing | `/pricing` | `pages/pricing.astro` | SidebarLayout |
+| 联系 / Contact | `/contact` | `pages/contact.astro` | SidebarLayout |
+| 隐私 / Privacy | `/privacy` | `pages/privacy.md` | MarkdownLayout |
+| 条款 / Terms | `/terms` | `pages/terms.md` | MarkdownLayout |
+| 404 | `/404` | `pages/404.astro` | PageLayout |
+| RSS | `/rss.xml` | `pages/rss.xml.ts` | — |
+| 博客 / Blog | `/blog` | `pages/[...blog]/` | PageLayout |
+| 文章 / Post | `/blog/<slug>` | `pages/[...blog]/` | PageLayout |
 
 ---
 
