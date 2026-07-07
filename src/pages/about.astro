@@ -3,19 +3,12 @@ import HeroText from '~/components/widgets/HeroText.astro';
 import Steps2 from '~/components/widgets/Steps2.astro';
 import Layout from '~/layouts/SidebarLayout.astro';
 
+import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
   title: '关于我们',
 };
-
-const topTabs = [
-  { text: '管理团队', href: getPermalink('/team') },
-  { text: '关于我们', href: getPermalink('/about') },
-  { text: '服务', href: getPermalink('/services') },
-  { text: '定价', href: getPermalink('/pricing') },
-  { text: '联系我们', href: getPermalink('/contact') },
-];
 
 const sidebarLinks = [
   { text: '概览', href: getPermalink('/about') },
@@ -25,7 +18,7 @@ const sidebarLinks = [
 ];
 ---
 
-<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/about')}>
+<Layout metadata={metadata} topTabs={teamTopTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/about')}>
   <!-- Hero -->
   <HeroText tagline="关于我们">
     <Fragment slot="title">

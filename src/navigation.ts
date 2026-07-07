@@ -1,5 +1,14 @@
 import { getPermalink, getBlogPermalink, getAsset, getHomePermalink } from './utils/permalinks';
 
+/** 管理团队 / 关于 / 服务等页面的共享顶部导航 Tab */
+export const teamTopTabs = [
+  { text: '管理团队', href: getPermalink('/team') },
+  { text: '关于我们', href: getPermalink('/about') },
+  { text: '服务', href: getPermalink('/services') },
+  { text: '赞助与支持', href: getPermalink('/pricing') },
+  { text: '联系我们', href: getPermalink('/contact') },
+];
+
 export const headerData = {
   links: [
     {
@@ -115,7 +124,7 @@ export const headerData = {
           href: getPermalink('/services'),
         },
         {
-          text: '定价',
+          text: '赞助与支持',
           href: getPermalink('/pricing'),
         },
         {
