@@ -8,51 +8,59 @@ export interface Props {
   desc?: string;
   dream?: string;
   quote?: string;
-  /** "sm" (default) for department members, "lg" for founder-type cards */
   size?: 'sm' | 'lg';
+  style?: string;  // inline style 用于 animation-delay
 }
 
-const { name, avatar, role, desc, dream, quote, size = 'sm' } = Astro.props;
+const { name, avatar, role, desc, dream, quote, size = 'sm', style = '' } = Astro.props;
 const isLg = size === 'lg';
 ---
 
-<div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/8 bg-white dark:bg-[#1a1a1c]">
-  <div class="p-5 flex flex-col items-center text-center">
-    <div class="mb-3">
+<div
+  class="rounded-[18px] border border-[#e0e0e0] dark:border-white/8 bg-white dark:bg-[#1a1a1c] animate-fade"
+  style={style}
+>
+  <!-- 手机端：水平布局 | 桌面端：垂直布局 -->
+  <div class="p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
+    <div class="shrink-0 sm:mb-3">
       {
         avatar ? (
           <img
             src={avatar.src}
             alt={name}
-            class={isLg ? 'w-24 h-24 rounded-full object-cover' : 'w-16 h-16 rounded-full object-cover'}
+            class={isLg
+              ? 'w-16 h-16 sm:w-24 sm:h-24 rounded-full object-cover'
+              : 'w-10 h-10 sm:w-16 sm:h-16 rounded-full object-cover'}
           />
         ) : (
           <div
-            class={
-              isLg
-                ? 'w-24 h-24 rounded-full bg-[#d1d1d6] text-[#98989d] dark:bg-[#3a3a3c] flex items-center justify-center text-lg font-semibold'
-                : 'w-16 h-16 rounded-full bg-[#d1d1d6] text-[#98989d] dark:bg-[#3a3a3c] flex items-center justify-center text-lg font-semibold'
-            }
+            class={isLg
+              ? 'w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-[#d1d1d6] text-[#98989d] dark:bg-[#3a3a3c] flex items-center justify-center text-lg font-semibold'
+              : 'w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#d1d1d6] text-[#98989d] dark:bg-[#3a3a3c] flex items-center justify-center text-lg font-semibold'}
           >
             {name.replace('七月', '').charAt(0) || name.charAt(0)}
           </div>
         )
       }
     </div>
-    {
-      isLg ? (
-        <h2 class="text-[21px] font-semibold text-[#1d1d1f] dark:text-white">{name}</h2>
-      ) : (
-        <h4 class="font-bold text-lg text-[#1d1d1f] dark:text-white">{name}</h4>
-      )
-    }
-    {
-      role && (
-        <span class={isLg ? 'text-[#0066cc] font-semibold' : 'text-xs text-[#7a7a7a] dark:text-[#cccccc]'}>{role}</span>
-      )
-    }
-    {desc && <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">{desc}</p>}
-    {dream && <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">{dream}</p>}
-    {quote && <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">{quote}</p>}
+    <div class="flex-1 min-w-0">
+      {
+        isLg ? (
+          <h2 class="text-[21px] font-semibold text-[#1d1d1f] dark:text-white">{name}</h2>
+        ) : (
+          <h4 class="font-bold text-lg text-[#1d1d1f] dark:text-white">{name}</h4>
+        )
+      }
+      {
+        role && (
+          <span class={isLg
+            ? 'text-[#0066cc] font-semibold'
+            : 'text-xs text-[#7a7a7a] dark:text-[#cccccc]'}>{role}</span>
+        )
+      }
+      {desc && <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-1">{desc}</p>}
+      {dream && <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">{dream}</p>}
+      {quote && <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">{quote}</p>}
+    </div>
   </div>
 </div>
