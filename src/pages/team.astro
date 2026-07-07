@@ -1,47 +1,112 @@
 ---
 import Layout from '~/layouts/SidebarLayout.astro';
 import Section from '~/components/widgets/Section.astro';
+import MemberCard from '~/components/MemberCard.astro';
+import DepartmentSection from '~/components/DepartmentSection.astro';
+
+import type { ImageMetadata } from 'astro';
+
+import {
+  founderMembers,
+  generalMembers,
+  affairsMembers,
+  eventsMembers,
+  newsMembers,
+  newsSubGroups,
+  advisorMembers,
+  techMembers,
+  professionalSubGroups,
+  projectMembers,
+  alumniMembers,
+} from '~/data/members';
 
 import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
-import 若有千寻 from '~/assets/images/member/若有千寻.jpg';
-import 千寻 from '~/assets/images/member/千寻.jpg';
-import 七月花 from '~/assets/images/member/七月花.jpg';
-import 七月清汉 from '~/assets/images/member/七月清汉.jpg';
-import 七月A from '~/assets/images/member/七月A.jpg';
-import 七月有珠 from '~/assets/images/member/七月有珠.jpeg';
-import 七月Lichlet from '~/assets/images/member/七月Lichlet.jpeg';
-import 七月知更鸟 from '~/assets/images/member/七月知更鸟.jpeg';
-import 七月阿鸿 from '~/assets/images/member/七月阿鸿.jpeg';
-import 七月墨染 from '~/assets/images/member/七月墨染.png';
-import 七月有枝 from '~/assets/images/member/七月有枝.jpeg';
-import 七月止水 from '~/assets/images/member/七月止水.png';
-import 七月爱畅依间 from '~/assets/images/member/七月爱畅依间.jpeg';
-import 七月夏 from '~/assets/images/member/七月夏.jpeg';
-import 七月清浅 from '~/assets/images/member/七月清浅.jpeg';
-import 七月badragon from '~/assets/images/member/七月badragon.jpeg';
-import 七月三七 from '~/assets/images/member/七月三七.jpeg';
-import 七月MK from '~/assets/images/member/七月MK.png';
-import 七月赤 from '~/assets/images/member/七月赤.jpeg';
-import 七月草薙铃 from '~/assets/images/member/七月草薙铃.png';
-import 七月一前 from '~/assets/images/member/七月一前.png';
-import 七月星染 from '~/assets/images/member/七月星染.png';
-import 七月吴理 from '~/assets/images/member/七月吴理.png';
-import 七月upogg from '~/assets/images/member/七月upogg.jpeg';
-import 七月大雄 from '~/assets/images/member/七月大雄.jpeg';
-import 七月JoshuaXue from '~/assets/images/member/七月Joshua Xue.png';
-import 七月 from '~/assets/images/member/七月.png';
-import 七月Bcent from '~/assets/images/member/七月Bcent.jpeg';
-import 七月阿泠 from '~/assets/images/member/七月阿泠.jpeg';
-import 七月彼方 from '~/assets/images/member/七月彼方.jpeg';
-import 七月胡冰阳 from '~/assets/images/member/七月胡冰阳.jpeg';
-import 七月O from '~/assets/images/member/七月O.png';
-import 七月汽水 from '~/assets/images/member/七月汽水.png';
-import 七月星河 from '~/assets/images/member/七月星河.png';
-import 七月tetrodotoxin from '~/assets/images/member/七月tetrodotoxin.jpeg';
-import 七月狄离 from '~/assets/images/member/七月狄离.png';
-import 七月文 from '~/assets/images/member/七月文.jpeg';
+// --- 图片映射：avatarKey → ImageMetadata ---
+// 用到的图片文件名：
+import img_若有千寻 from '~/assets/images/member/若有千寻.jpg';
+import img_千寻 from '~/assets/images/member/千寻.jpg';
+import img_七月花 from '~/assets/images/member/七月花.jpg';
+import img_七月A from '~/assets/images/member/七月A.jpg';
+import img_七月有珠 from '~/assets/images/member/七月有珠.jpeg';
+import img_七月Lichlet from '~/assets/images/member/七月Lichlet.jpeg';
+import img_七月知更鸟 from '~/assets/images/member/七月知更鸟.jpeg';
+import img_七月阿鸿 from '~/assets/images/member/七月阿鸿.jpeg';
+import img_七月墨染 from '~/assets/images/member/七月墨染.png';
+import img_七月有枝 from '~/assets/images/member/七月有枝.jpeg';
+import img_七月止水 from '~/assets/images/member/七月止水.png';
+import img_七月清汉 from '~/assets/images/member/七月清汉.jpg';
+import img_七月爱畅依间 from '~/assets/images/member/七月爱畅依间.jpeg';
+import img_七月夏 from '~/assets/images/member/七月夏.jpeg';
+import img_七月清浅 from '~/assets/images/member/七月清浅.jpeg';
+import img_七月badragon from '~/assets/images/member/七月badragon.jpeg';
+import img_七月三七 from '~/assets/images/member/七月三七.jpeg';
+import img_七月MK from '~/assets/images/member/七月MK.png';
+import img_七月赤 from '~/assets/images/member/七月赤.jpeg';
+import img_七月草薙铃 from '~/assets/images/member/七月草薙铃.png';
+import img_七月一前 from '~/assets/images/member/七月一前.png';
+import img_七月星染 from '~/assets/images/member/七月星染.png';
+import img_七月吴理 from '~/assets/images/member/七月吴理.png';
+import img_七月upogg from '~/assets/images/member/七月upogg.jpeg';
+import img_七月大雄 from '~/assets/images/member/七月大雄.jpeg';
+import img_七月JoshuaXue from '~/assets/images/member/七月Joshua Xue.png';
+import img_七月 from '~/assets/images/member/七月.png';
+import img_七月Bcent from '~/assets/images/member/七月Bcent.jpeg';
+import img_七月阿泠 from '~/assets/images/member/七月阿泠.jpeg';
+import img_七月彼方 from '~/assets/images/member/七月彼方.jpeg';
+import img_七月胡冰阳 from '~/assets/images/member/七月胡冰阳.jpeg';
+import img_七月O from '~/assets/images/member/七月O.png';
+import img_七月汽水 from '~/assets/images/member/七月汽水.png';
+import img_七月星河 from '~/assets/images/member/七月星河.png';
+import img_七月tetrodotoxin from '~/assets/images/member/七月tetrodotoxin.jpeg';
+import img_七月狄离 from '~/assets/images/member/七月狄离.png';
+import img_七月文 from '~/assets/images/member/七月文.jpeg';
+
+const avatarMap: Record<string, ImageMetadata> = {
+  '若有千寻.jpg': img_若有千寻,
+  '千寻.jpg': img_千寻,
+  '七月花.jpg': img_七月花,
+  '七月A.jpg': img_七月A,
+  '七月有珠.jpeg': img_七月有珠,
+  '七月Lichlet.jpeg': img_七月Lichlet,
+  '七月知更鸟.jpeg': img_七月知更鸟,
+  '七月阿鸿.jpeg': img_七月阿鸿,
+  '七月墨染.png': img_七月墨染,
+  '七月有枝.jpeg': img_七月有枝,
+  '七月止水.png': img_七月止水,
+  '七月清汉.jpg': img_七月清汉,
+  '七月爱畅依间.jpeg': img_七月爱畅依间,
+  '七月夏.jpeg': img_七月夏,
+  '七月清浅.jpeg': img_七月清浅,
+  '七月badragon.jpeg': img_七月badragon,
+  '七月三七.jpeg': img_七月三七,
+  '七月MK.png': img_七月MK,
+  '七月赤.jpeg': img_七月赤,
+  '七月草薙铃.png': img_七月草薙铃,
+  '七月一前.png': img_七月一前,
+  '七月星染.png': img_七月星染,
+  '七月吴理.png': img_七月吴理,
+  '七月upogg.jpeg': img_七月upogg,
+  '七月大雄.jpeg': img_七月大雄,
+  '七月Joshua Xue.png': img_七月JoshuaXue,
+  '七月.png': img_七月,
+  '七月Bcent.jpeg': img_七月Bcent,
+  '七月阿泠.jpeg': img_七月阿泠,
+  '七月彼方.jpeg': img_七月彼方,
+  '七月胡冰阳.jpeg': img_七月胡冰阳,
+  '七月O.png': img_七月O,
+  '七月汽水.png': img_七月汽水,
+  '七月星河.png': img_七月星河,
+  '七月tetrodotoxin.jpeg': img_七月tetrodotoxin,
+  '七月狄离.png': img_七月狄离,
+  '七月文.jpeg': img_七月文,
+};
+
+function getAvatar(key?: string): ImageMetadata | undefined {
+  if (!key) return undefined;
+  return avatarMap[key];
+}
 
 const metadata = {
   title: '管理团队 —— 理科迷',
@@ -58,745 +123,99 @@ const sidebarLinks = [
   { text: '专业委员会', href: getPermalink('/team#professional') },
   { text: '已离开成员', href: getPermalink('/team#alumni') },
 ];
-
-// Helper func to render a name's first character avatar
-const getAvatar = (name: string) => {
-  const first = name.replace('七月', '').charAt(0) || name.charAt(0);
-  return first;
-};
 ---
 
 <Layout metadata={metadata} topTabs={teamTopTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/team')}>
   <!-- 创始人 -->
   <Section title="创始人" subtitle="理科迷的起点，一切从这里开始" tagline="创始人" id="founder">
     <div class="max-w-2xl mx-auto">
-      <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-        <div class="p-5 flex flex-col items-center text-center">
-          <div class="mb-4">
-            <div class="w-24 h-24 rounded-full">
-              <img src={若有千寻.src} alt="可琪" class="w-24 h-24 rounded-full object-cover" />
-            </div>
-          </div>
-          <h2 class="text-[21px] font-semibold text-[#1d1d1f] dark:text-white">可琪（若有千寻）</h2>
-          <span class="text-[#0066cc] font-semibold">创始人</span>
-          <p class="text-[#7a7a7a] dark:text-[#cccccc] mt-3 leading-relaxed">
-            2014年8月1日，可琪创立了最初群聊——〔理科迷宅基地〕。他是理科迷最初的创始者，群里现有很多现有事物和框架，都是在他所做的事情之上建立起来的。
-          </p>
-          <p class="text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed">
-            可琪创立了腾讯"物理部落"和微信公众号，吸引了大量科技爱好者；组建了最初的理科迷分群体系和七月团队管理架构。2018年因学业原因逐渐淡出，但理科迷的一切，都源于他的开创。
-          </p>
-          <div class="mt-4 text-sm text-[#999999] dark:text-[#999] italic">
-            「可琪现在不在，但他确确实实是理科迷最初的创始者。」
-          </div>
-        </div>
-      </div>
+      {founderMembers.map((m) => (
+        <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} size="lg" desc={m.desc} quote={m.quote} />
+      ))}
     </div>
   </Section>
 
-  <!-- 七月团队 · 总务部 -->
-  <Section id="general">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#0066cc] pb-1">七月团队 · 总务部</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队部门职责是统筹和规划相关事宜，引领团队能够互相协作，落实我们共同的宗旨和目标。总务部更适合有多线程处理能力以及执行能力的成员，会有跨部门的需要。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 七月花 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月花.src} alt="七月花" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月花</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">一个有理想的PHD</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：每个孩子都能接触科学"</p>
-          </div>
-        </div>
-        <!-- 七月知更鸟 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月知更鸟.src} alt="七月知更鸟" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月知更鸟</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-              待填写，这位还是学生在沉淀当中（让我们期待他的成长吧～
-            </p>
-          </div>
-        </div>
-        <!-- 七月阿鸿 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月阿鸿.src} alt="七月阿鸿" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月阿鸿</h4>
-          </div>
-        </div>
-        <!-- 七月墨染 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月墨染.src} alt="七月墨染" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月墨染</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">双非物理，目前正跑路中</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：我必将大雪深埋"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 卧薪尝胆三千日，大雪深埋终成金</p>
-          </div>
-        </div>
-        <!-- 七月有枝 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月有枝.src} alt="七月有枝" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月有枝</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">小黑猫，前活动策划组组员，初中研讨会执行员</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：吃好喝好睡好玩好"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 且停且忘且随风，且行且看且从容</p>
-          </div>
-        </div>
-        <!-- 七月千寻 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={千寻.src} alt="千寻" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月千寻</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">活动策划部部长</span>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-              19年初二时加入理科迷，现在我是一个待打工人。无论是过去的哥哥姐姐们，还是现在比我小的弟弟妹妹们，我都不希望我的遗憾能够出现在他们身上，也希望在未来更多的人能够喜欢理工科。
-            </p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">
-              "梦想：让理科迷能够做大做强，践行宗旨。最眼前的还是要实行短期目标，建设一个成熟完整的线上管理团队。"
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
+  <!-- 总务部 -->
+  <DepartmentSection id="general" title="七月团队 · 总务部" borderColor="#0066cc" desc="该团队部门职责是统筹和规划相关事宜，引领团队能够互相协作，落实我们共同的宗旨和目标。总务部更适合有多线程处理能力以及执行能力的成员，会有跨部门的需要。">
+    {generalMembers.map((m) => (
+      <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+    ))}
+  </DepartmentSection>
 
-  <!-- 七月团队 · 群务部 -->
-  <Section id="affairs">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#0066cc]/60 pb-1">七月团队 · 群务部</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队部门职责是负责各个平台上面社群秩序，把握群内风向，确保群处于活跃并且持续有效的学习讨论氛围当中，有情况的时候第一时间处理。群务部更适合有常驻某一平台社群的成员，并具备一定的应急处理能力。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 七月止水 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月止水.src} alt="七月止水" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月止水</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">努力学习中～</p>
-          </div>
-        </div>
-        <!-- 七月清汉 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月清汉.src} alt="七月清汉" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月清汉</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">保密awa</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：无义务告知"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— WELCOME TO OUR KINGDOM ！</p>
-          </div>
-        </div>
-        <!-- 七月爱畅依间 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月爱畅依间.src} alt="七月爱畅依间" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月爱畅依间</h4>
-          </div>
-        </div>
-        <!-- 七月夏 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月夏.src} alt="七月夏" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月夏</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">是一只小夏</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：成为一本百科全书"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 敬不完美的明天</p>
-          </div>
-        </div>
-        <!-- 七月清浅 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月清浅.src} alt="七月清浅" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月清浅</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">略微潜水人，知识储量不丰富（</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：成为一名科研工作者"</p>
-          </div>
-        </div>
-        <!-- 七月badragon （初中） -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月badragon.src} alt="七月badragon" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月badragon</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">初中</span>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">关注理科迷谢谢喵</p>
-          </div>
-        </div>
-        <!-- 七月三七 （初中） -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月三七.src} alt="七月三七" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月三七</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">初中</span>
-          </div>
-        </div>
-        <!-- 七月MK -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月MK.src} alt="七月MK" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月MK</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-              10后，叫我MK就行。正在学习日语，喜欢数学（不是大佬喵）。最喜欢的动漫角色是《魔女之旅》的伊蕾娜。B站UID:1929696645
-            </p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：拥有百万粉丝的UP"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 你应当……ネバー•ギブ•アップ！</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
+  <!-- 群务部 -->
+  <DepartmentSection id="affairs" title="七月团队 · 群务部" borderColor="#0066cc" desc="该团队部门职责是负责各个平台上面社群秩序，把握群内风向，确保群处于活跃并且持续有效的学习讨论氛围当中，有情况的时候第一时间处理。群务部更适合有常驻某一平台社群的，并有一定的应急处理能力。">
+    {affairsMembers.map((m) => (
+      <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} dream={m.dream} quote={m.quote} />
+    ))}
+  </DepartmentSection>
 
-  <!-- 七月团队 · 活动策划部 -->
-  <Section id="events">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#f59e0b] pb-1">七月团队 · 活动策划部</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队负责的是各个平台上面的活动，一条龙从策划开始一直到执行，下管专业委员会，给大家带来更多更好的活动和体验，让大家能够真正的学到知识。适合有灵感、有创意并有能把这些全部落实的行动力加入。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 千寻 (部长) -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={千寻.src} alt="千寻" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">千寻</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">部长</span>
-          </div>
-        </div>
-        <!-- 七月赤 （常驻） -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月赤.src} alt="七月赤" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月赤</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">常驻</span>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-              辽宁省某省重点高中毕业，26年报考目标东北地区985高校
-            </p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：做一名大国工匠"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 干惊天动地事，做隐姓埋名人</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
+  <!-- 活动策划部 -->
+  <DepartmentSection id="events" title="七月团队 · 活动策划部" borderColor="#f59e0b" desc="该团队负责的是各个平台上面的活动，一条龙从策划开始，一直到执行，下管专业委员会，给大家带来更多更好的活动和体验，让大家能够真正的学到知识。适合有灵感、有创意并由能把这些全部落实的行动力加入。">
+    {eventsMembers.map((m) => (
+      <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} dream={m.dream} quote={m.quote} />
+    ))}
+  </DepartmentSection>
 
   <!-- 新闻办 -->
-  <Section id="news">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#38bdf8] pb-1">新闻办</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队部门职责是负责各平台宣传账号的持续运营以及外交事宜，持续宣传输出并扩大影响能力，并为此向大众输出科普内容，促进传播知识。新闻办下属科普项目组及翻译项目组，为科普事业繁荣昌盛，以及中外科技爱好者能有所知识共享，破除信息差和壁垒。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 七月草薙铃 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月草薙铃.src} alt="七月草薙铃" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月草薙铃</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">一个不存在,但是希望祝福大家的人.</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">
-              "梦想：让大家开心,到达知识的Sekai边缘."
-            </p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— We must know,we will know.</p>
-          </div>
-        </div>
-        <!-- 七月一前 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月一前.src} alt="七月一前" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月一前</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">我是新闻办的一前</p>
-          </div>
-        </div>
-      </div>
-      <!-- 科普组 -->
-      <div class="mt-8">
-        <h4 class="text-md font-bold mb-4 text-center text-[#7a7a7a] dark:text-[#cccccc]">科普组</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月星染.src} alt="七月星染" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月星染</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                公益科普产业共同体成员，曙星科普社社长。从事公益科普事业三年余。曾领导主办龙年科幻大赛、第一届地月奖科幻征文，曾参与协办第二、三、四、五届寻翊奖科普征文，与up非村科普墙联创地质锤等优秀科普视频。
-              </p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：传播科学文化"</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 马克思说过，科学技术是生产力。</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月吴理.src} alt="七月吴理" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月吴理</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">计算机广告制作专业中技</p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：活着，同时干点事吧"</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">
-                —— 逆天不一定能改命，但是你所做的一切选择将会影响你的命，请慎重自己的选择
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+  <DepartmentSection id="news" title="新闻办" borderColor="#38bdf8" desc="该团队部门职责是负责各平台宣传账号的持续运营，以及外交事宜，持续宣传输出并扩大影响能力，并为此向大众输出科普内容，促进传播知识。新闻办会下属一个科普项目组，以及翻译项目组，为科普事业繁荣昌盛，以及中外科技爱好者能有所知识共享，破除信息差和壁垒。" noGrid>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {newsMembers.map((m) => (
+        <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+      ))}
     </div>
-  </Section>
+    {Object.entries(newsSubGroups).map(([key, group]) => (
+      <div class="mt-8">
+        <h4 class="text-md font-bold mb-2 text-center text-[#7a7a7a] dark:text-[#cccccc]">{group.label}</h4>
+        <p class="max-w-3xl mx-auto mb-4 px-6 py-3 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[13px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed">
+          {group.desc}
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {group.members.map((m) => (
+            <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+          ))}
+        </div>
+      </div>
+    ))}
+  </DepartmentSection>
 
   <!-- 顾问团 -->
-  <Section id="advisors">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#6b7280] pb-1">顾问团</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队部门职责是属于理科迷的外部顾问，为理科迷的工作组、项目组事业提供相应的支持，如法律询问、其他社会组织团体等等。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 七月upogg (团长) -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月upogg.src} alt="七月upogg" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月upogg</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">团长</span>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">学生</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 我以全部知识作为我的领域</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
-
-  <!-- 技术委员会 -->
-  <Section id="tech">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#ef4444] pb-1">技术委员会</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队部门职责是负责各平台、各活动的相应技术开发与维护，未来将给大家带来更多实用性更强更好的开源项目。需要有编程知识、网站搭建等能力。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 七月可分数列 (会长) -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div
-                class="w-16 h-16 rounded-full bg-[#e5e5e7] text-[#7a7a7a] dark:bg-gray-700 dark:text-[#cccccc] flex items-center justify-center text-lg font-semibold"
-              >
-                可
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月可分数列</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">会长</span>
-          </div>
-        </div>
-        <!-- 七月A -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月A.src} alt="七月A" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月A</h4>
-            <span class="text-[#7a7a7a] dark:text-[#cccccc] text-sm">技术委员会成员</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
-
-  <!-- 教材项目组 -->
-  <Section id="textbook">
-    <div class="max-w-5xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#38bdf8] pb-1">教材项目组</span>
-      </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        负责理科迷教材、文档、教程等内容的编写与维护，致力于为社区提供优质的学习资源。
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 七月大雄 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月大雄.src} alt="七月大雄" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月大雄</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">什么都好奇一点</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：理想很多"</p>
-          </div>
-        </div>
-        <!-- 七月Joshua Xue -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月JoshuaXue.src} alt="七月Joshua Xue" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月Joshua Xue</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-              Joshua Xue，一位数学爱好者，想让所有人都能轻松学上数学
-            </p>
-          </div>
-        </div>
-        <!-- 七月 -->
-        <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-          <div class="p-5 flex flex-col items-center text-center">
-            <div class="mb-3">
-              <div class="w-16 h-16 rounded-full">
-                <img src={七月.src} alt="七月" class="w-16 h-16 rounded-full object-cover" />
-              </div>
-            </div>
-            <h4 class="font-bold text-lg">七月</h4>
-            <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">吃喝拉撒</p>
-            <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：成为verity"</p>
-            <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 哎呦我去</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
+  <DepartmentSection id="advisors" title="顾问团" borderColor="#6b7280" desc="该团队部门职责是属于理科迷的外部顾问，为理科迷的工作组，项目组事业提供相应的支持，如法律询问、其他社会组织团体等等。">
+    {advisorMembers.map((m) => (
+      <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} quote={m.quote} />
+    ))}
+  </DepartmentSection>
 
   <!-- 专业委员会 -->
-  <Section id="professional">
+  <DepartmentSection id="professional" title="专业委员会" borderColor="#22c55e" desc="该团队部门职责是负责活动、项目等诸多提供专业知识，充实各个专业实际内容。成员是已经确定了想要在这方面深耕的，未来会下管学术项目组，带来更好的学术交流等内容。" noGrid>
+    {Object.entries(professionalSubGroups).map(([key, group]) => (
+      <div class="mb-8">
+        <h4 class="text-md font-bold mb-2 text-center text-[#7a7a7a] dark:text-[#cccccc]">{group.label}</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {group.members.map((m) => (
+            <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+          ))}
+        </div>
+      </div>
+    ))}
+  </DepartmentSection>
+
+  <!-- 技术委员会 -->
+  <DepartmentSection id="tech" title="技术委员会" borderColor="#ef4444" desc="该团队部门职责是负责各平台、各活动的相应技术上的技术开发与维护，未来将给大家带来更多实用性更强更好的开源项目。需要有编程知识，网站搭建等能。">
+    {techMembers.map((m) => (
+      <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} dream={m.dream} />
+    ))}
+  </DepartmentSection>
+
+  <!-- 项目团队成员 -->
+  <Section id="project">
     <div class="max-w-5xl mx-auto">
       <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#22c55e] pb-1">专业委员会</span>
+        <span class="border-b-2 border-[#9ca3af] pb-1">项目团队成员</span>
       </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        该团队部门职责是负责活动、项目等诸多提供专业知识，充实各个专业实际内容。成员是已经确定了想要在这方面深耕的，未来会下管学术项目组，带来更好的学术交流等内容。
-      </p>
-      <!-- 数学组 -->
-      <div class="mb-8">
-        <h4 class="text-md font-bold mb-4 text-center text-[#7a7a7a] dark:text-[#cccccc]">数学组</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月Bcent.src} alt="七月Bcent" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月Bcent</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">一名人类</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月阿泠.src} alt="七月阿泠" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月阿泠</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                某2数学专业本科生，数学爱好者，爱好方向是分析学和数论
-              </p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">
-                "梦想：保研对面那个华一继续研究数学"
-              </p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 万物皆数</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月彼方.src} alt="七月彼方" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月彼方</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">分析与数值计算方向的硕士</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月有珠.src} alt="七月有珠" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月有珠</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">可能是人（未必？）</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 活着大于死了</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月Lichlet.src} alt="七月Lichlet" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月Lichlet</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">大一数学系学生</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月胡冰阳.src} alt="七月胡冰阳" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月胡冰阳</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">男，23岁，本科学历……</p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：理想是成为一名数学家"</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 书山有路勤为径，学海无涯苦作舟。</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- 物理组 -->
-      <div class="mb-8">
-        <h4 class="text-md font-bold mb-4 text-center text-[#7a7a7a] dark:text-[#cccccc]">物理组</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月O.src} alt="七月O" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月O</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                中国科学院国家天文台博士，研究方向：引力波理论、黑洞物理、广义相对论
-              </p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：能做自己喜欢的研究"</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 学习过去，享受现在，期待未来</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月汽水.src} alt="七月汽水" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月汽水</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">慕尼黑大学流体力学专业大一在读学生</p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：为中国流体出一份力"</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 努力总会有收获</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月星河.src} alt="七月星河" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月星河</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                高中OIer+物化政er，蒟蒻一枚（欢迎关注洛谷wang12345566），因出了一些初中毒瘤题而误闯天家
-              </p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">
-                "梦想：为大家带来更多的tricks与灵感，同时膜拜更多大佬"
-              </p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">
-                —— 没有站在光里的人，也有自己的闪光点——from hjh in luogu
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- 化学组 -->
-      <div class="mb-8">
-        <h4 class="text-md font-bold mb-4 text-center text-[#7a7a7a] dark:text-[#cccccc]">化学组</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月tetrodotoxin.src} alt="七月tetrodotoxin" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月tetrodotoxin</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                有机化学方向研究生在读，前化学竞赛生。网名是河豚毒素，一个结构优雅的有机小分子，全合成史上的经典之作（虽然我本人其实是做方法学的）。私下大概算是不太重度的二次元，附庸风雅的艺术爱好者。
-              </p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月狄离.src} alt="七月狄离" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月狄离</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                可以叫杨向青，化学竞赛生，历史最高全区第七名，中学生作文大赛最高国排347，喜欢研究化学与文学
-              </p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：成为一名优秀的教师"</p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 真正的大师，永远都怀着一颗学徒的心</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div class="w-16 h-16 rounded-full">
-                  <img src={七月文.src} alt="七月文" class="w-16 h-16 rounded-full object-cover" />
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月文</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">打摆子的好选手</p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">"梦想：想不干嘛就不干嘛"</p>
-            </div>
-          </div>
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div
-                  class="w-16 h-16 rounded-full bg-[#e5e5e7] text-[#7a7a7a] dark:bg-gray-700 dark:text-[#cccccc] flex items-center justify-center text-lg font-semibold"
-                >
-                  三
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月三尺水</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">化学，爱爱爱它！（化学的狂热热爱者）</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- 生物组 -->
-      <div class="mb-8">
-        <h4 class="text-md font-bold mb-4 text-center text-[#7a7a7a] dark:text-[#cccccc]">生物组</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729]">
-            <div class="card-body items-center text-center p-5">
-              <div class="mb-3">
-                <div
-                  class="w-16 h-16 rounded-full bg-[#e5e5e7] text-[#7a7a7a] dark:bg-gray-700 dark:text-[#cccccc] flex items-center justify-center text-lg font-semibold"
-                >
-                  基
-                </div>
-              </div>
-              <h4 class="font-bold text-lg">七月基米</h4>
-              <p class="text-xs text-[#7a7a7a] dark:text-[#cccccc] mt-2">
-                新西兰11年级在读留学生，主修理科，英语弱项。目前学的理科是物理生物数学，基本知识水平也就高中生水平吧，但是我会努力提升自己的！喜欢写点自己的东西，有问题感谢大家指正！喜欢自己总结笔记等等，希望能对大家有所帮助！喜欢发一些自己的日常或者搞抽象什么的，有的时候会携带一定量的负面情绪...
-                感谢大家！！！
-              </p>
-              <p class="text-xs text-[#0066cc]/80 dark:text-[#2997ff]/80 mt-1 italic">
-                "梦想：今年把明年的课学完，明年得吃奖学金，争取考上奥大？"
-              </p>
-              <p class="text-xs text-[#0066cc]/70 dark:text-[#2997ff]/70 mt-1">—— 注意注意超大区来袭</p>
-            </div>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projectMembers.map((m) => (
+          <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+        ))}
       </div>
     </div>
   </Section>
@@ -807,60 +226,13 @@ const getAvatar = (name: string) => {
       <h3 class="text-xl font-bold mb-6 text-center">
         <span class="border-b-2 border-[#9ca3af] pb-1">已离开或失联成员</span>
       </h3>
-      <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
-      >
-        以下成员曾为理科迷作出贡献，因各种原因现无法联系，理科迷的大门永远向你们打开。
+      <p class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#272729] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed">
+        以下成员曾为理科迷作出贡献，因各种原因现无法联系，不管如何理科迷的大门永远向你们打开。
       </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {
-          [
-            { name: '七月逗', role: '组长' },
-            { name: '七月喵', role: '组长' },
-            { name: '七月丫', role: '组长' },
-            { name: 'Spica', role: '总务组成员' },
-            { name: '七月烧', role: '群务组监督' },
-            { name: '七月凡', role: '总务组成员' },
-            { name: '七月Toy', role: '专务' },
-            { name: '七月希', role: '总务组成员' },
-            { name: '七月钗', role: '总务组成员' },
-            { name: '七月铝', role: '专务 / 顾问组成员' },
-            { name: '七月焱', role: '总务组成员' },
-            { name: '七月雨', role: '总务组成员' },
-            { name: '七月九', role: '群务组组长' },
-            { name: '本群最弱玩家', role: '18级管理' },
-            { name: '道德同志', role: '18级管理' },
-            { name: 'L.I', role: '18级管理' },
-            { name: '面条', role: '18级管理' },
-            { name: '源泉', role: '18级管理' },
-            { name: '无逸', role: '18级管理' },
-            { name: '七月湦', role: '18级管理' },
-            { name: '观澜千代', role: '信息群管理' },
-            { name: '七月熠', role: '兴趣群管理' },
-            { name: '七月上', role: '群务组成员' },
-            { name: '海豹', role: '群务组成员' },
-            { name: '七月悠', role: '组长' },
-            { name: '七月糊-又', role: '总务组专务' },
-            { name: '七月哔', role: '顾问组成员' },
-            { name: '乾坤胤', role: '顾问组成员' },
-            { name: 'Ryan', role: '顾问组成员' },
-          ].map((member) => {
-            const avatarChar = getAvatar(member.name);
-            return (
-              <div class="rounded-[18px] border border-[#e0e0e0] dark:border-white/10 bg-white dark:bg-[#272729] opacity-75">
-                <div class="p-5 flex flex-col items-center text-center">
-                  <div class="mb-3">
-                    <div class="w-16 h-16 rounded-full bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500 flex items-center justify-center text-xl font-bold">
-                      {avatarChar}
-                    </div>
-                  </div>
-                  <h4 class="font-bold text-lg text-[#7a7a7a] dark:text-[#cccccc]">{member.name}</h4>
-                  <span class="text-[#999999] dark:text-[#999] text-sm">{member.role}</span>
-                </div>
-              </div>
-            );
-          })
-        }
+        {alumniMembers.map((m) => (
+          <MemberCard name={m.name} role={m.role} />
+        ))}
       </div>
     </div>
   </Section>
