@@ -168,7 +168,14 @@ export class SciFiRenderer {
     // a_size (location 2): unused → leave disabled
     // a_alpha (location 3): alpha at offset 8 (2 floats in)
     gl.enableVertexAttribArray(3);
-    gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+    gl.vertexAttribPointer(
+      3,
+      1,
+      gl.FLOAT,
+      false,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      2 * Float32Array.BYTES_PER_ELEMENT
+    );
 
     // a_type (location 4): unused → leave disabled (defaults to 0)
 
@@ -337,21 +344,21 @@ export class SciFiRenderer {
       if (distToMouse < 200 && distToMouse > 0.01) {
         const strength = ((200 - distToMouse) / 200) * 40;
         const invDist = 1 / distToMouse;
-        p.vx += (dx * invDist) * strength * cappedDt;
-        p.vy += (dy * invDist) * strength * cappedDt;
+        p.vx += dx * invDist * strength * cappedDt;
+        p.vy += dy * invDist * strength * cappedDt;
       }
 
       // 点击推开
       if (this.mouseDown && distToMouse < 150 && distToMouse > 0.01) {
         const invDist = 1 / distToMouse;
         const strength = ((150 - distToMouse) / 150) * 200;
-        p.vx -= (dx * invDist) * strength * cappedDt;
-        p.vy -= (dy * invDist) * strength * cappedDt;
+        p.vx -= dx * invDist * strength * cappedDt;
+        p.vy -= dy * invDist * strength * cappedDt;
       }
 
       // 布朗噪声漂移, 原着色器: hash(gl_VertexID * seed + u_time * freq) - 0.5
-      const noiseX = this.hash(i * 1.3 + performance.now() / 1000 * 0.7) - 0.5;
-      const noiseY = this.hash(i * 2.1 + performance.now() / 1000 * 0.6) - 0.5;
+      const noiseX = this.hash(i * 1.3 + (performance.now() / 1000) * 0.7) - 0.5;
+      const noiseY = this.hash(i * 2.1 + (performance.now() / 1000) * 0.6) - 0.5;
       p.vx += noiseX * 30 * cappedDt;
       p.vy += noiseY * 30 * cappedDt;
 
@@ -436,11 +443,7 @@ export class SciFiRenderer {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
     // merge all particles into a single draw call
-    const allParticles = [
-      ...this.bgParticles,
-      ...this.bursts,
-      ...this.flowLines.flatMap((l) => l.particles),
-    ];
+    const allParticles = [...this.bgParticles, ...this.bursts, ...this.flowLines.flatMap((l) => l.particles)];
     const data = new Float32Array(allParticles.length * 7);
 
     for (let i = 0; i < allParticles.length; i++) {
@@ -623,13 +626,13 @@ export class SciFiRenderer {
     for (let i = 0; i < vertexCount; i++) {
       const src = i * 3;
       const dst = i * 7;
-      glowData[dst] = lineData[src];       // x
+      glowData[dst] = lineData[src]; // x
       glowData[dst + 1] = lineData[src + 1]; // y
-      glowData[dst + 2] = 0;                // vx unused
-      glowData[dst + 3] = 0;                // vy unused
-      glowData[dst + 4] = 5;                // size — glow dot thickness
+      glowData[dst + 2] = 0; // vx unused
+      glowData[dst + 3] = 0; // vy unused
+      glowData[dst + 4] = 5; // size — glow dot thickness
       glowData[dst + 5] = lineData[src + 2]; // alpha from line
-      glowData[dst + 6] = 0;                // type=bg
+      glowData[dst + 6] = 0; // type=bg
     }
 
     gl.bindVertexArray(this.vao);

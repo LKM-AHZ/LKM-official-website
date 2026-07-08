@@ -74,9 +74,7 @@ const {
       </div>
       {
         image && (
-          <div
-            class="intersect-once intersect-no-queue intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
-          >
+          <div class="intersect-once intersect-no-queue intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
             <div class="relative m-auto max-w-5xl">
               {typeof image === 'string' ? (
                 <Fragment set:html={image} />
@@ -99,6 +97,4 @@ const {
       }
     </div>
   </div>
-
-
 </section>

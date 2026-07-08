@@ -34,23 +34,19 @@ export default function SciFiBackground() {
 
     // Cache rect for event handlers instead of reading per-event
     let canvasRect = canvas.getBoundingClientRect();
-    const updateRect = () => { canvasRect = canvas.getBoundingClientRect(); };
+    const updateRect = () => {
+      canvasRect = canvas.getBoundingClientRect();
+    };
     window.addEventListener('scroll', updateRect, { passive: true });
     window.addEventListener('resize', updateRect);
 
     const handleMouseMoveDpr = (e: MouseEvent) => {
       updateRect();
-      rendererRef.current?.setMouse(
-        (e.clientX - canvasRect.left) * dpr,
-        (e.clientY - canvasRect.top) * dpr
-      );
+      rendererRef.current?.setMouse((e.clientX - canvasRect.left) * dpr, (e.clientY - canvasRect.top) * dpr);
     };
     const handleClickDpr = (e: MouseEvent) => {
       updateRect();
-      rendererRef.current?.click(
-        (e.clientX - canvasRect.left) * dpr,
-        (e.clientY - canvasRect.top) * dpr
-      );
+      rendererRef.current?.click((e.clientX - canvasRect.left) * dpr, (e.clientY - canvasRect.top) * dpr);
     };
     // Listen on document.body so mouse events fire even over text/content above the canvas
     document.body.addEventListener('mousemove', handleMouseMoveDpr, { passive: true });
