@@ -2,7 +2,7 @@
 
 .nav {
   @apply sticky;
-  top: calc(4rem + 49px);
+  top: calc(4rem + 70px);
 }
 
 .linkList {

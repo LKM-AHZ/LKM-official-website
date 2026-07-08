@@ -9,6 +9,13 @@ export interface Member {
   quote?: string;
 }
 
+/** 子群组接口 */
+export interface SubGroup {
+  label: string;
+  desc?: string;
+  members: Member[];
+}
+
 /** 创始人 */
 export const founderMembers: Member[] = [
   {
@@ -123,7 +130,7 @@ export const newsMembers: Member[] = [
 ];
 
 /** 新闻办下属小组 */
-export const newsSubGroups = {
+export const newsSubGroups: Record<string, SubGroup> = {
   production: {
     label: '制作组',
     desc: '负责各平台、各活动关于宣传相关的制作，如有UI设计，海报制作，可视化等等，对于美工会有一定的要求，适合有相应能力的人加入。',
@@ -168,7 +175,7 @@ export const techMembers: Member[] = [
 ];
 
 /** 专业委员会下属各学科组 */
-export const professionalSubGroups = {
+export const professionalSubGroups: Record<string, SubGroup> = {
   math: {
     label: '数学组',
     members: [

@@ -414,7 +414,7 @@ export class SciFiRenderer {
    * Draw connecting lines between background particles within a distance threshold,
    * using a spatial grid to avoid O(n^2) comparisons.
    */
-  private drawLinks(colors: typeof COLORS.light): void {
+  private drawLinks(colors: typeof COLORS.light | typeof COLORS.dark): void {
     const gl = this.gl;
     const linkDistance = this.isMobile ? LINK_DISTANCE.mobile : LINK_DISTANCE.desktop;
     const lineAlpha = colors.line[3]; // alpha from config line color

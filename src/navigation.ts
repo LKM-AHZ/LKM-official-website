@@ -51,6 +51,15 @@ export const headerData = {
       ],
     },
     {
+      text: '文档库',
+      links: [
+        {
+          text: '文档首页',
+          href: getPermalink('/docs'),
+        },
+      ],
+    },
+    {
       text: '七月团队',
       links: [
         {
@@ -64,10 +73,6 @@ export const headerData = {
         {
           text: '服务',
           href: getPermalink('/services'),
-        },
-        {
-          text: '文档库',
-          href: getPermalink('/docs'),
         },
         {
           text: '赞助与支持',

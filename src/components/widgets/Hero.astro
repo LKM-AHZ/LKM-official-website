@@ -125,50 +125,34 @@ const {
 
 {
   nextSectionId && (
-    <script define:vars={{ nextSectionId }}>
+    <script is:inline define:vars={{ nextSectionId }}>
       (() => {
         const hero = document.querySelector('[data-hero-section]');
         if (!hero) return;
-        const target = document.getElementById(nextSectionId);
+        const targetId = nextSectionId;
+        const target = document.getElementById(targetId);
         if (!target) return;
 
         const scrollDown = () => {
-          target.scrollIntoView({ behavior: 'auto', block: 'start' });
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
         // 下拉按钮
         hero.querySelector('[data-hero-scroll-down]')?.addEventListener('click', scrollDown);
 
-        // 滚轮：在 Hero 区域可见时向下滚动就跳转
+        // 滚轮：在 Hero 可见时向下滚动即跳转，只触发一次防止多次 wheel 累积
+        let scrolled = false;
         window.addEventListener('wheel', (e) => {
           if (e.deltaY <= 0) return;
           const rect = hero.getBoundingClientRect();
-          if (rect.bottom <= 0) return; // hero 已离开视口
+          if (rect.bottom < 1) return; // hero 已离开视口
+          if (scrolled) return;
+          scrolled = true;
           e.preventDefault();
           scrollDown();
+          // 跳转后等动画结束再恢复
+          setTimeout(() => { scrolled = false; }, 600);
         }, { passive: false });
-
-        // 键盘
-        window.addEventListener('keydown', (e) => {
-          if (e.key !== 'ArrowDown' && e.key !== 'PageDown' && e.key !== ' ') return;
-          const rect = hero.getBoundingClientRect();
-          if (rect.bottom <= 0) return;
-          e.preventDefault();
-          scrollDown();
-        });
-
-        // 触屏下滑
-        let touchStartY = 0;
-        window.addEventListener('touchstart', (e) => {
-          touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-        window.addEventListener('touchend', (e) => {
-          const dy = touchStartY - e.changedTouches[0].clientY;
-          if (dy <= 50) return;
-          const rect = hero.getBoundingClientRect();
-          if (rect.bottom <= 0) return;
-          scrollDown();
-        }, { passive: true });
       })();
     </script>
   )

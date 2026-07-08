@@ -191,7 +191,7 @@
     letter-spacing: -0.022em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: transparent;
+    background-color: #ffffff;
     color: #1d1d1f;
   }
 
@@ -266,7 +266,7 @@
     color: #ffffff;
   }
   body {
-    background-color: transparent;
+    background-color: #1d1d1f;
     color: #ffffff;
   }
   p {
