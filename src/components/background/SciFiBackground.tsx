@@ -93,6 +93,7 @@ export default function SciFiBackground() {
       document.body.removeEventListener('click', handleClickDpr);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', updateRect);
+      window.removeEventListener('resize', updateRect);
       document.body.removeEventListener('touchmove', handleTouchMove);
       document.body.removeEventListener('touchend', handleTouchEnd);
     };
