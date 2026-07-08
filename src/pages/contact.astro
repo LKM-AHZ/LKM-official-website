@@ -4,19 +4,12 @@ import HeroText from '~/components/widgets/HeroText.astro';
 import ContactUs from '~/components/widgets/Contact.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
+import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
   title: '联系我们',
 };
-
-const topTabs = [
-  { text: '管理团队', href: getPermalink('/team') },
-  { text: '关于我们', href: getPermalink('/about') },
-  { text: '服务', href: getPermalink('/services') },
-  { text: '赞助与支持', href: getPermalink('/pricing') },
-  { text: '联系我们', href: getPermalink('/contact') },
-];
 
 const sidebarLinks = [
   { text: '发送消息', href: getPermalink('/contact#form') },
@@ -24,7 +17,7 @@ const sidebarLinks = [
 ];
 ---
 
-<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/contact')}>
+<Layout metadata={metadata} topTabs={teamTopTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/contact')}>
   <!-- Hero -->
   <HeroText tagline="联系我们" title="期待听到你的声音！" />
 

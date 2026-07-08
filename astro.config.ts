@@ -35,8 +35,12 @@ export default defineConfig({
   integrations: [
     sitemap(),
     mdx(),
-    vue(),
-    react(),
+    vue({
+      include: ['**/*.vue'],
+    }),
+    react({
+      include: ['**/*.tsx', '**/*.jsx'],
+    }),
     icon({
       include: {
         tabler: ['*'],

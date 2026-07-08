@@ -1,6 +1,10 @@
 # build output
 dist/
 .output/
+docs/
+!src/data/docs/
+!src/components/docs/
+!src/pages/docs/
 
 # dependencies
 node_modules/

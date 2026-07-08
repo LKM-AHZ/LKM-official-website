@@ -4,19 +4,12 @@ import Features2 from '~/components/widgets/Features2.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Layout from '~/layouts/SidebarLayout.astro';
 
+import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
 const metadata = {
   title: '服务',
 };
-
-const topTabs = [
-  { text: '管理团队', href: getPermalink('/team') },
-  { text: '关于我们', href: getPermalink('/about') },
-  { text: '服务', href: getPermalink('/services') },
-  { text: '定价', href: getPermalink('/pricing') },
-  { text: '联系我们', href: getPermalink('/contact') },
-];
 
 const sidebarLinks = [
   { text: '科普内容', href: getPermalink('/services#content') },
@@ -25,7 +18,7 @@ const sidebarLinks = [
 ];
 ---
 
-<Layout metadata={metadata} topTabs={topTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/services')}>
+<Layout metadata={metadata} topTabs={teamTopTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/services')}>
   <!-- Hero -->
   <Hero
     tagline="服务"

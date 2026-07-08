@@ -3,9 +3,8 @@ import Layout from '~/layouts/PageLayout.astro';
 
 import { getPermalink } from '~/utils/permalinks';
 
+import SciFiBackground from '~/components/background/SciFiBackground.astro';
 import Hero from '~/components/widgets/Hero.astro';
-// import Note from '~/components/widgets/Note.astro';
-// import Features from '~/components/widgets/Features.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
 import avatar千寻 from '~/assets/images/member/千寻.jpg';
@@ -14,14 +13,10 @@ import avatar七月A from '~/assets/images/member/七月A.jpg';
 import avatar七月墨染 from '~/assets/images/member/七月墨染.png';
 import avatar七月有枝 from '~/assets/images/member/七月有枝.jpeg';
 
-// import Content from '~/components/widgets/Content.astro';
 import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
 import Timeline from '~/components/widgets/Timeline.astro';
 import Section from '~/components/widgets/Section.astro';
-// import Stats from '~/components/widgets/Stats.astro';
-// import CallToAction from '~/components/widgets/CallToAction.astro';
-// import TimelineSection from '~/components/widgets/TimelineSection.astro';
 const metadata = {
   title: '理科迷 —— 科技爱好者',
   ignoreTitleTemplate: true,
@@ -48,7 +43,6 @@ const metadata = {
         icon: 'tabler:brand-github',
       },
     ]}
-    image={{ src: '~/assets/images/hero-image.png', alt: '理科迷' }}
   >
     <Fragment slot="title">
       <div class="flex flex-col gap-4">
@@ -70,6 +64,9 @@ const metadata = {
         <strong class="font-semibold text-[#0066cc] dark:text-[#2997ff] mr-1">Here!</strong>
         科学脱离了象牙塔的刻板与高冷，变成了每一个普通人对世界发问的好奇心。我们打破专业门槛，让每一位热爱理性、崇尚科学的“普通人”，都能在这里找到同频的伙伴，共同探索万物运转的奥秘。
       </span>
+    </Fragment>
+    <Fragment slot="bg">
+      <SciFiBackground />
     </Fragment>
   </Hero>
 
@@ -257,232 +254,6 @@ const metadata = {
     />
   </Section>
 
-  <!-- <Steps2
-    title="只需三步，轻松搞定"
-    subtitle="来看看我们的核心服务流程，高效、透明、简单。"
-    items={[
-      {
-        title: '第一步：下载并安装',
-        description: '前往应用商店或官网下载最新版本的客户端，一键完成安装。',
-        icon: 'tabler:download',
-      },
-      {
-        title: '第二步：配置你的偏好',
-        description: '根据引导选择你喜欢的主题、语言以及需要同步的云端服务。',
-        icon: 'tabler:settings',
-      },
-      {
-        title: '第三步：开始享受高效生活',
-        description: '一切准备就绪！现在你可以尽情探索它的强大功能了。',
-        icon: 'tabler:rocket',
-      },
-    ]}
-  /> -->
-
-  <!-- Note Widget ******************* -->
-
-  <!-- <Note title="Philosophy:" description="Simplicity, Best Practices and High Performance" /> -->
-
-  <!-- Features Widget *************** -->
-
-  <!-- <Features
-      id="features"
-      tagline="Features"
-      title="What you get with AstroWind"
-      subtitle="One of the most professional and comprehensive templates currently on the market. Most starred & forked Astro theme in 2022, 2023, 2024 and 2025."
-      items={[
-        {
-          title: 'Astro + Tailwind CSS Integration',
-          description:
-            'A seamless integration between two great frameworks that offer high productivity, performance and versatility. Now powered by Tailwind CSS v4.',
-          icon: 'tabler:brand-tailwind',
-        },
-        {
-          title: 'Ready-to-use Components',
-          description:
-            'Widgets made with Tailwind CSS v4 ready to be used in Marketing Websites, SaaS, Blogs, Personal Profiles, Small Business...',
-          icon: 'tabler:components',
-        },
-        {
-          title: 'Best Practices',
-          description:
-            'Creating secure, efficient, and user-friendly websites that deliver exceptional experiences and lasting value.',
-          icon: 'tabler:list-check',
-        },
-        {
-          title: 'Excellent Page Speed',
-          description:
-            'Having a good page speed impacts organic search ranking, improves user experience (UI/UX) and increase conversion rates.',
-          icon: 'tabler:rocket',
-        },
-        {
-          title: 'Search Engine Optimization (SEO)',
-          description:
-            "SEO lies in its ability to enhance a website's visibility, driving organic traffic and enabling it to reach a wider audience.",
-          icon: 'tabler:arrows-right-left',
-        },
-        {
-          title: 'Open to new ideas and contributions',
-          description:
-            'Embracing a culture that is open to new ideas and contributions is integral fostering innovation, collaboration, and a dynamic user experience.',
-          icon: 'tabler:bulb',
-        },
-      ]}
-    /> -->
-
-  <!-- Content Widget **************** -->
-
-  <!-- <Content
-      isReversed
-      tagline="Inside template"
-      title="AstroWind's Blueprint: Fun Meets Functionality!"
-      items={[
-        {
-          title: 'Built on top of Astro v6',
-          description:
-            'Benefiting from the performance and developer-friendly features of this modern static site generator.',
-        },
-        {
-          title: 'Styled using Tailwind CSS v4',
-          description:
-            'Facilitating rapid design and consistent styling with this highly popular utility-first CSS framework.',
-        },
-        {
-          title: 'Cross-browser compatibility',
-          description:
-            'Ensure your website looks and functions consistently across various web browsers, delivering a seamless experience to all users.',
-        },
-      ]}
-      image={{
-        src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        alt: 'Colorful Image',
-      }}
-    >
-      <Fragment slot="content">
-        <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
-          Building on modern foundations
-        </h3>
-        Gain a competitive advantage by incorporating industry leading practices
-      </Fragment>
-
-      <Fragment slot="bg">
-        <div class="absolute inset-0 bg-[#f5f5f7] dark:bg-transparent"></div>
-      </Fragment>
-    </Content> -->
-
-  <!-- Content Widget **************** -->
-
-  <!-- <Content
-      isAfterContent
-      items={[
-        {
-          title: 'High level of customization',
-          description: `Tailor the template effortlessly to match your brand's identity and requirements, making your website distinct and saving you time.`,
-        },
-        {
-          title: 'Multiple layout possibilities',
-          description:
-            'Explore various layout options to find the structure that best presents your content, enhancing user engagement and navigation.',
-        },
-        {
-          title: 'Fully responsive design',
-          description:
-            "Ensure your website's optimal performance on various devices and screen sizes, providing a consistent and enjoyable user experience.",
-        },
-        {
-          title: 'Integration of media',
-          description:
-            'Seamlessly incorporate images, videos, and multimedia elements that enhance your content and engage visitors effectively.',
-        },
-      ]}
-      image={{
-        src: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2194&q=80',
-        alt: 'Blueprint Image',
-      }}
-    >
-      <Fragment slot="content">Ensure your online presence truly represents you.</Fragment>
-
-      <Fragment slot="bg">
-        <div class="absolute inset-0 bg-[#f5f5f7] dark:bg-transparent"></div>
-      </Fragment>
-    </Content> -->
-
-  <!-- Content Widget **************** -->
-
-  <!-- <Content
-      isReversed
-      isAfterContent
-      items={[
-        {
-          title: 'Enhanced user engagement',
-          description:
-            'Captivate your audience with interactive elements, intuitive navigation, and visually appealing layouts, encouraging longer visits.',
-        },
-        {
-          title: 'Continuous improvement',
-          description:
-            'Ensure your website stays aligned with the latest trends and technologies through regular updates and enhancements.',
-        },
-        {
-          title: 'Time and resource efficiency',
-          description:
-            'Skip the time-consuming process of building a website from scratch and launch your online presence sooner with AstroWind.',
-        },
-        {
-          title: 'Community support',
-          description: `Join the growing AstroWind community for insights, resources, and assistance, ensuring you're never alone on your web development journey.`,
-        },
-      ]}
-      image={{
-        src: 'https://images.unsplash.com/photo-1611462985358-60d3498e0364?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-        alt: 'Astronauts Image',
-      }}
-    >
-      <Fragment slot="content">Designed to foster growth and success.</Fragment>
-
-      <Fragment slot="bg">
-        <div class="absolute inset-0 bg-[#f5f5f7] dark:bg-transparent"></div>
-      </Fragment>
-    </Content> -->
-
-  <!-- Steps Widget ****************** -->
-
-  <!-- <Steps
-      title="Get your dream website up and running in no time with AstroWind."
-      items={[
-        {
-          title: 'Step 1: <span class="font-medium">Download</span>',
-          description:
-            "Kickstart with GitHub! Either fork the AstroWind template or simply click 'Use this template'. Your canvas awaits, ready for your digital masterpiece. In just a few clicks, you've already set the foundation.",
-          icon: 'tabler:package',
-        },
-        {
-          title: 'Step 2: <span class="font-medium">Add content</span>',
-          description:
-            "Pour your vision into it. Add images, text, and all that jazz to breathe life into your digital space. Remember, it's the content that tells your story, so make it captivating.",
-          icon: 'tabler:letter-case',
-        },
-        {
-          title: 'Step 3: <span class="font-medium">Customize styles</span>',
-          description:
-            'Give it your personal touch. Tailor colors, fonts, and layouts until it feels just right. Your unique flair, amplified by AstroWind! Precision in design ensures a seamless user experience.',
-          icon: 'tabler:paint',
-        },
-        {
-          title: 'Ready!',
-          icon: 'tabler:check',
-        },
-      ]}
-      image={{
-        src: 'https://images.unsplash.com/photo-1616198814651-e71f960c3180?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80',
-        alt: 'Steps image',
-      }}
-    /> -->
-
-  <!-- Features2 Widget ************** -->
-
-  <!-- HighlightedPosts Widget ******* -->
-
   <BlogLatestPosts
     id="update"
     title="最近更新"
@@ -493,6 +264,7 @@ const metadata = {
   <!-- FAQs Widget ******************* -->
 
   <FAQs
+    id="faq"
     title="常见问题"
     subtitle="以下整理了用户关于 LKM 官方网站的常见疑问，帮助您快速了解项目特性和使用方式。"
     tagline="常见问题"
@@ -530,38 +302,4 @@ const metadata = {
       },
     ]}
   />
-
-  <!-- Stats Widget ****************** -->
-
-  <!-- <Stats
-      stats={[
-        { title: 'Downloads', amount: '132K' },
-        { title: 'Stars', amount: '24.8K' },
-        { title: 'Forks', amount: '10.3K' },
-        { title: 'Users', amount: '48.4K' },
-      ]}
-    /> -->
-
-  <!-- CallToAction Widget *********** -->
-
-  <!-- <CallToAction
-      actions={[
-        {
-          variant: 'primary',
-          text: 'Get template',
-          href: 'https://github.com/arthelokyo/astrowind',
-          target: '_blank',
-          icon: 'tabler:download',
-        },
-      ]}
-    >
-      <Fragment slot="title">
-        Astro&nbsp;+&nbsp;<br class="block sm:hidden" /><span class="sm:whitespace-nowrap">Tailwind CSS</span>
-      </Fragment>
-
-      <Fragment slot="subtitle">
-        Be very surprised by these huge fake numbers you are seeing on this page. <br class="hidden md:inline" />Don't
-        waste more time! :P
-      </Fragment>
-    </CallToAction> -->
 </Layout>
