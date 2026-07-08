@@ -4,10 +4,10 @@
 export const COLORS = {
   light: {
     bg: [0.0, 0.0, 0.0, 0.0], // 透明，让 CSS body 背景透过
-    particle: [0.0, 0.4, 0.8, 1.0], // #0066cc
-    line: [0.0, 0.4, 0.8, 0.2], // rgba(0,102,204,0.2)
-    glow: [0.0, 0.4, 0.8, 0.35],
-    accent: [0.0, 0.44, 0.89, 1.0], // #0071e3 流光线
+    particle: [0.35, 0.13, 0.62, 1.0], // #5921a1 稍亮紫
+    line: [0.35, 0.13, 0.62, 0.5], // rgba(89,33,161,0.5) 提高alpha
+    glow: [0.35, 0.13, 0.62, 0.55],
+    accent: [0.42, 0.18, 0.71, 1.0], // #6b2eb5 流光线
   },
   dark: {
     bg: [0.0, 0.0, 0.0, 0.0], // 透明，让 CSS body 背景透过
@@ -40,7 +40,10 @@ export const LINK_DISTANCE = {
 export const MOUSE_ATTRACT_RADIUS = 200;
 
 /** 鼠标拖尾参数 */
-export const TRAIL_COUNT = 6;
+export const TRAIL_MAX = {
+  desktop: 20,
+  mobile: 8,
+} as const;
 export const TRAIL_LIFETIME = 2000; // ms
 
 /** 点击扰动参数 */

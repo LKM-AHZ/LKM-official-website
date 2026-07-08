@@ -4,63 +4,23 @@ export const VERTEX_SHADER = `#version 300 es
 precision highp float;
 
 // ── per-vertex attributes ──
-in vec2 a_position;      // 粒子当前位置 (x, y)
-in vec2 a_velocity;       // 粒子速度
+in vec2 a_position;      // 粒子当前位置 (x, y) — JS 侧已更新
+in vec2 a_velocity;       // 未使用 (保留以兼容 buffer layout)
 in float a_size;          // 粒子大小
 in float a_alpha;         // 基础透明度
 in float a_type;          // 0=background, 1=trail, 2=burst, 3=flowline
 
 // ── uniforms ──
 uniform vec2 u_resolution;    // 画布分辨率
-uniform float u_time;         // 运行时间 (秒)
-uniform vec2 u_mouse;         // 鼠标位置 (px)
-uniform float u_mouseDown;    // 点击状态
-uniform float u_dt;           // 帧间隔 (秒)
 
 // ── outputs to fragment shader ──
 out float v_alpha;
 out float v_type;
 out float v_size;
 
-// ── 伪随机 ──
-float hash(float n) {
-  return fract(sin(n) * 43758.5453123);
-}
-
 void main() {
-  // 指数衰减速度 (阻尼)
-  vec2 vel = a_velocity * exp(-0.5 * u_dt);
-
-  // 鼠标吸引: 距离平方反比
-  vec2 toMouse = u_mouse - a_position;
-  float distToMouse = length(toMouse);
-  float attractStrength = 0.0;
-  if (distToMouse < 200.0 && distToMouse > 0.01) {
-    attractStrength = (200.0 - distToMouse) / 200.0 * 40.0;
-    vel += normalize(toMouse) * attractStrength * u_dt;
-  }
-
-  // 点击扰动: 推开周围粒子
-  if (u_mouseDown > 0.5 && distToMouse < 150.0 && distToMouse > 0.01) {
-    vel -= normalize(toMouse) * (150.0 - distToMouse) / 150.0 * 200.0 * u_dt;
-  }
-
-  // 布朗噪声漂移
-  float noiseX = hash(float(gl_VertexID) * 1.3 + u_time * 0.7) - 0.5;
-  float noiseY = hash(float(gl_VertexID) * 2.1 + u_time * 0.6) - 0.5;
-  vel += vec2(noiseX, noiseY) * 30.0 * u_dt;
-
-  // 速度钳制
-  float speed = length(vel);
-  if (speed > 60.0) {
-    vel = vel / speed * 60.0;
-  }
-
-  // 更新位置
-  vec2 pos = a_position + vel * u_dt;
-
-  // 循环边界
-  pos = mod(pos + u_resolution, u_resolution);
+  // 循环边界 (GPU 端轻量处理)
+  vec2 pos = mod(a_position + u_resolution, u_resolution);
 
   // NDC 转换
   vec2 ndc = (pos / u_resolution) * 2.0 - 1.0;
@@ -84,7 +44,6 @@ in float v_size;
 
 uniform vec4 u_color;       // 当前主题颜色
 uniform vec4 u_glowColor;   // 光晕颜色
-uniform vec3 u_lineColor;   // 连线颜色 (仅用于连线，碎片着色器绘制粒子本身)
 
 out vec4 fragColor;
 

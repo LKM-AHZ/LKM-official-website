@@ -15,8 +15,6 @@ const {
   image = await Astro.slots.render('image'),
 
   id,
-  bg = await Astro.slots.render('bg'),
-  nextSectionId,
 } = Astro.props;
 ---
 
@@ -25,10 +23,8 @@ const {
   {...id ? { id } : {}}
   data-hero-section
 >
-  <div class="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
-    <slot name="bg">
-      {bg ? <Fragment set:html={bg} /> : null}
-    </slot>
+  <div class="absolute inset-0 z-0" aria-hidden="true">
+    <slot name="bg" />
   </div>
   <div class={styles.heroInner + ' relative z-10'}>
     <div class="py-16 md:py-[80px]">
@@ -104,56 +100,5 @@ const {
     </div>
   </div>
 
-  <!-- 下拉按钮 -->
-  {
-    nextSectionId && (
-      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-        <button
-          type="button"
-          class="flex flex-col items-center gap-0.5 text-[#7a7a7a] dark:text-[#cccccc] hover:text-[#0066cc] dark:hover:text-[#2997ff] transition-colors cursor-pointer p-2"
-          data-hero-scroll-down
-          aria-label="向下滚动"
-        >
-          <svg class="w-8 h-8 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-      </div>
-    )
-  }
+
 </section>
-
-{
-  nextSectionId && (
-    <script is:inline define:vars={{ nextSectionId }}>
-      (() => {
-        const hero = document.querySelector('[data-hero-section]');
-        if (!hero) return;
-        const targetId = nextSectionId;
-        const target = document.getElementById(targetId);
-        if (!target) return;
-
-        const scrollDown = () => {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-
-        // 下拉按钮
-        hero.querySelector('[data-hero-scroll-down]')?.addEventListener('click', scrollDown);
-
-        // 滚轮：在 Hero 可见时向下滚动即跳转，只触发一次防止多次 wheel 累积
-        let scrolled = false;
-        window.addEventListener('wheel', (e) => {
-          if (e.deltaY <= 0) return;
-          const rect = hero.getBoundingClientRect();
-          if (rect.bottom < 1) return; // hero 已离开视口
-          if (scrolled) return;
-          scrolled = true;
-          e.preventDefault();
-          scrollDown();
-          // 跳转后等动画结束再恢复
-          setTimeout(() => { scrolled = false; }, 600);
-        }, { passive: false });
-      })();
-    </script>
-  )
-}

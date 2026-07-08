@@ -32,51 +32,57 @@ export default function SciFiBackground() {
       rendererRef.current = renderer;
     });
 
+    // Cache rect for event handlers instead of reading per-event
+    let canvasRect = canvas.getBoundingClientRect();
+    const updateRect = () => { canvasRect = canvas.getBoundingClientRect(); };
+    window.addEventListener('scroll', updateRect, { passive: true });
+    window.addEventListener('resize', updateRect);
+
     const handleMouseMoveDpr = (e: MouseEvent) => {
-      const r = canvas.getBoundingClientRect();
+      updateRect();
       rendererRef.current?.setMouse(
-        (e.clientX - r.left) * dpr,
-        (e.clientY - r.top) * dpr
+        (e.clientX - canvasRect.left) * dpr,
+        (e.clientY - canvasRect.top) * dpr
       );
     };
     const handleClickDpr = (e: MouseEvent) => {
-      const r = canvas.getBoundingClientRect();
+      updateRect();
       rendererRef.current?.click(
-        (e.clientX - r.left) * dpr,
-        (e.clientY - r.top) * dpr
+        (e.clientX - canvasRect.left) * dpr,
+        (e.clientY - canvasRect.top) * dpr
       );
     };
+    // Listen on document.body so mouse events fire even over text/content above the canvas
     document.body.addEventListener('mousemove', handleMouseMoveDpr, { passive: true });
     document.body.addEventListener('click', handleClickDpr, { passive: true });
 
     const handleResize = () => {
-      const r = canvas.getBoundingClientRect();
-      canvas.width = r.width * dpr;
-      canvas.height = r.height * dpr;
-      canvas.style.width = `${r.width}px`;
-      canvas.style.height = `${r.height}px`;
+      updateRect();
+      canvas.width = canvasRect.width * dpr;
+      canvas.height = canvasRect.height * dpr;
+      canvas.style.width = `${canvasRect.width}px`;
+      canvas.style.height = `${canvasRect.height}px`;
     };
     window.addEventListener('resize', handleResize);
 
     // 触摸事件 (移动端)
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        const r = canvas.getBoundingClientRect();
         rendererRef.current?.setMouse(
-          (e.touches[0].clientX - r.left) * dpr,
-          (e.touches[0].clientY - r.top) * dpr
+          (e.touches[0].clientX - canvasRect.left) * dpr,
+          (e.touches[0].clientY - canvasRect.top) * dpr
         );
       }
     };
     const handleTouchEnd = (e: TouchEvent) => {
       if (e.changedTouches.length > 0) {
-        const r = canvas.getBoundingClientRect();
         rendererRef.current?.click(
-          (e.changedTouches[0].clientX - r.left) * dpr,
-          (e.changedTouches[0].clientY - r.top) * dpr
+          (e.changedTouches[0].clientX - canvasRect.left) * dpr,
+          (e.changedTouches[0].clientY - canvasRect.top) * dpr
         );
       }
     };
+    // Touch events on body for the same reason — content layer blocks canvas events
     document.body.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.body.addEventListener('touchend', handleTouchEnd, { passive: true });
 
@@ -86,6 +92,7 @@ export default function SciFiBackground() {
       document.body.removeEventListener('mousemove', handleMouseMoveDpr);
       document.body.removeEventListener('click', handleClickDpr);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', updateRect);
       document.body.removeEventListener('touchmove', handleTouchMove);
       document.body.removeEventListener('touchend', handleTouchEnd);
     };
@@ -111,7 +118,6 @@ export default function SciFiBackground() {
         inset: 0,
         width: '100%',
         height: '100%',
-        pointerEvents: 'none',
       }}
       aria-hidden="true"
     />
