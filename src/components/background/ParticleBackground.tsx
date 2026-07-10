@@ -50,6 +50,9 @@ export default function ParticleBackground() {
   const options = {
     preset: "stars",
     fullScreen: false,
+    background: {
+      color: "transparent",
+    },
     particles: {
       number: {
         value: isMobile ? 40 : 70,

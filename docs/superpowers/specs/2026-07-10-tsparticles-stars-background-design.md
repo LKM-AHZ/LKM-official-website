@@ -32,6 +32,14 @@ src/components/background/
 ├── ParticleBackground.tsx     # React 组件，加载 stars 预设并覆盖配置
 ```
 
+## CSS 隔离
+
+tsParticles 创建的 `<canvas>` 是 React 生成的 DOM，不自动获得 Astro scoped class。隔离策略：
+
+- `ParticleBackground.astro` 用 Tailwind 类将 wrapper 设为 `absolute inset-0 z-0`，继承 Hero `bg` slot 的已有约束
+- 无需自定义 `<style>`，完全通过 Tailwind 和 Hero 已有的 `absolute inset-0 z-0` 容器双重约束
+- Canvas `pointer-events: none` 防止拦截 Hero 内容的点击
+
 ## 架构
 
 ```
