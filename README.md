@@ -43,34 +43,34 @@ pnpm run dev
 
 ```
 /
-├── .github/workflows/        # CI / CD (GitHub Actions)
-├── public/                   # 静态资源 / Static assets (robots.txt, _headers, images/)
+├── .github/workflows/             # CI / CD (GitHub Actions)
+├── public/                        # 静态资源 / Static assets (robots.txt, _headers, images/)
 ├── src/
 │   ├── assets/
-│   │   ├── favicons/         # 网站图标
-│   │   ├── images/           # 本地图片 / Local images
-│   │   └── styles/tailwind.css   # Tailwind v4 入口：主题、工具类、插件
+│   │   ├── favicons/              # 网站图标
+│   │   ├── images/                # 本地图片 / Local images
+│   │   └── styles/tailwind.css    # Tailwind v4 入口：主题、工具类、插件
 │   ├── components/
-│   │   ├── background/       # 动态背景 / Dynamic backgrounds (WebGL2 Sci-Fi)
-│   │   ├── blog/             # 博客组件 / Blog components
-│   │   ├── common/           # 通用组件 / Shared (Image, Metadata, Analytics 等)
-│   │   ├── ui/               # 基础 UI 组件 / Primitives (Button, Form, Headline 等)
-│   │   └── widgets/          # 页面部件 / Page sections (Hero, Header, Footer 等)
+│   │   ├── background/            # 动态背景 / Dynamic backgrounds (WebGL2 Sci-Fi)
+│   │   ├── blog/                  # 博客组件 / Blog components
+│   │   ├── common/                # 通用组件 / Shared (Image, Metadata, Analytics 等)
+│   │   ├── ui/                    # 基础 UI 组件 / Primitives (Button, Form, Headline 等)
+│   │   └── widgets/               # 页面部件 / Page sections (Hero, Header, Footer 等)
 │   ├── data/
-│   │   ├── members.ts        # 团队成员数据 / Team member data
-│   │   └── post/             # 博客文章 / Blog posts (.md / .mdx)
-│   ├── layouts/              # 页面布局 / Layouts
-│   ├── pages/                # 文件路由 / File-based routing
-│   ├── utils/                # 工具函数 / Utilities (blog, images, permalinks)
-│   ├── config.yaml           # 站点主配置 / Site configuration
-│   ├── content.config.ts     # 内容集合 Schema
-│   ├── navigation.ts         # 导航结构
-│   └── types.d.ts            # TypeScript 类型定义
-├── tools/                    # 辅助工具 / Helper scripts (team 页面生成)
-├── vendor/integration/       # 自定义 Astro 集成 / Config loader
-├── AGENTS.md                 # AI Agent 指令 / AI agent instructions
-├── astro.config.ts           # Astro 配置
-└── tsconfig.json             # TypeScript 配置
+│   │   ├── members.ts             # 团队成员数据 / Team member data
+│   │   └── post/                  # 博客文章 / Blog posts (.md / .mdx)
+│   ├── layouts/                   # 页面布局 / Layouts
+│   ├── pages/                     # 文件路由 / File-based routing
+│   ├── utils/                     # 工具函数 / Utilities (blog, images, permalinks)
+│   ├── config.yaml                # 站点主配置 / Site configuration
+│   ├── content.config.ts          # 内容集合 Schema
+│   ├── navigation.ts              # 导航结构
+│   └── types.d.ts                 # TypeScript 类型定义
+├── tools/                         # 辅助工具 / Helper scripts (team 页面生成)
+├── vendor/integration/            # 自定义 Astro 集成 / Config loader
+├── AGENTS.md                      # AI Agent 指令 / AI agent instructions
+├── astro.config.ts                # Astro 配置
+└── tsconfig.json                  # TypeScript 配置
 ```
 
 ---
