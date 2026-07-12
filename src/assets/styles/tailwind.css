@@ -4,7 +4,7 @@
 @plugin 'daisyui';
 
 @plugin "daisyui/theme" {
-  name: "lkm-light";
+  name: 'lkm-light';
   default: true;
   color-scheme: light;
   --color-base-100: #ffffff;
@@ -29,7 +29,7 @@
 }
 
 @plugin "daisyui/theme" {
-  name: "lkm-dark";
+  name: 'lkm-dark';
   color-scheme: dark;
   --color-base-100: #010102;
   --color-base-200: #0f1011;

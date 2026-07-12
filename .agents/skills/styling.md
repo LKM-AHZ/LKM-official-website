@@ -81,7 +81,7 @@ header 背景、`WidgetWrapper.astro` 的 `isDark` 区块背景）。
 
 ```css
 @plugin "daisyui/theme" {
-  name: "lkm-light";
+  name: 'lkm-light';
   --color-primary: #0066cc;
   --color-base-100: #ffffff;
   /* ... */

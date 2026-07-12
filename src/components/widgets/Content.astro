@@ -53,11 +53,7 @@ const columnsClass =
   <div class="mx-auto max-w-7xl p-4 md:px-8">
     <div class={`md:flex ${isReversed ? 'md:flex-row-reverse' : ''} md:gap-16`}>
       <div class="md:basis-1/2 self-center">
-        {
-          content && (
-            <div class="mb-12 text-[17px] text-neutral leading-relaxed" set:html={content} />
-          )
-        }
+        {content && <div class="mb-12 text-[17px] text-neutral leading-relaxed" set:html={content} />}
 
         {
           callToAction && (

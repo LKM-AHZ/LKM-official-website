@@ -31,11 +31,7 @@ const showEndLine = index < total - 1;
 <li class="tl-item">
   {/* ===================== 移动端（<md）：保持原样不变 ===================== */}
   <div class="relative pb-10 last:pb-0 md:hidden">
-    {
-      showEndLine && (
-        <span class="absolute left-4 top-8 -ml-px h-full w-0.5 bg-base-300" aria-hidden="true" />
-      )
-    }
+    {showEndLine && <span class="absolute left-4 top-8 -ml-px h-full w-0.5 bg-base-300" aria-hidden="true" />}
     <div class="absolute left-0 top-0 z-10 flex h-8 w-8 items-center justify-center">
       <Icon name={iconName} class:list={['h-8 w-8', iconColor]} />
     </div>

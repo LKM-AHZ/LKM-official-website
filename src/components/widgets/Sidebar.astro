@@ -34,10 +34,7 @@ const { links = [], currentPath = '' } = Astro.props;
                   styles.link,
                   isActive
                     ? 'bg-primary/10 text-primary font-semibold'
-                    : [
-                        styles.linkInactive,
-                        'text-neutral hover:text-base-content',
-                      ],
+                    : [styles.linkInactive, 'text-neutral hover:text-base-content'],
                 ]}
               >
                 {icon && <Icon name={icon} class={styles.icon} />}

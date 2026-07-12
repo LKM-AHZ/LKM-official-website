@@ -32,9 +32,7 @@ const metadata = {
     {
       Array.from(docsByCategory.entries()).map(([category, docs]) => (
         <section class="mb-10">
-          <h2 class="text-[13px] font-semibold uppercase tracking-wider text-primary mb-3 px-2">
-            {category}
-          </h2>
+          <h2 class="text-[13px] font-semibold uppercase tracking-wider text-primary mb-3 px-2">{category}</h2>
           <ul class="divide-y divide-base-300">
             {docs.map((doc) => (
               <DocListItem doc={doc} href={getPermalink(`/docs/${doc.id}`)} />

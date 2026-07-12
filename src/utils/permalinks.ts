@@ -143,4 +143,6 @@ export const applyGetPermalinks = (menu: unknown = {}): unknown => {
  * 列表项与详情页对同一 post 用相同 prefix + permalink，得到相同 name 以配对 morph。
  */
 export const transitionName = (prefix: string, permalink: string): string =>
-  `${prefix}-${String(permalink).replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+  `${prefix}-${String(permalink)
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')}`;

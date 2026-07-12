@@ -30,15 +30,15 @@ const classes = ['btn', variantClass, className].filter(Boolean).join(' ');
     <a
       class={classes}
       href={href}
-      {...target ? { target } : {}}
-      {...target === '_blank' ? { rel: 'noopener noreferrer' } : {}}
+      {...(target ? { target } : {})}
+      {...(target === '_blank' ? { rel: 'noopener noreferrer' } : {})}
       {...rest}
     >
       <Fragment set:html={text} />
       {icon && <Icon name={icon} class="w-5 h-5 inline-block" />}
     </a>
   ) : (
-    <button class={classes} {...isSubmit ? { type } : { type: 'button' }} {...rest}>
+    <button class={classes} {...(isSubmit ? { type } : { type: 'button' })} {...rest}>
       <Fragment set:html={text} />
       {icon && <Icon name={icon} class="w-5 h-5 inline-block" />}
     </button>

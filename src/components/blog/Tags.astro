@@ -28,10 +28,7 @@ const { tags, class: className = 'text-sm', title = undefined, isCategory = fals
             {!APP_BLOG?.tag?.isEnabled ? (
               tag.title
             ) : (
-              <a
-                href={getPermalink(tag.slug, isCategory ? 'category' : 'tag')}
-                class="text-neutral hover:text-primary"
-              >
+              <a href={getPermalink(tag.slug, isCategory ? 'category' : 'tag')} class="text-neutral hover:text-primary">
                 {tag.title}
               </a>
             )}

@@ -50,12 +50,7 @@ const posts = APP_BLOG.isEnabled ? await findPostsByIds(postIds) : [];
           </div>
         )}
 
-        {information && (
-          <p
-            class="text-[17px] text-neutral lg:max-w-md leading-relaxed"
-            set:html={information}
-          />
-        )}
+        {information && <p class="text-[17px] text-neutral lg:max-w-md leading-relaxed" set:html={information} />}
       </div>
 
       <Grid posts={posts} />

@@ -12,7 +12,9 @@ const { doc, href } = Astro.props;
 const { data } = doc;
 ---
 
-<li class="border-b border-base-300 last:border-0 intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+<li
+  class="border-b border-base-300 last:border-0 intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+>
   <a
     href={href}
     class="flex items-center justify-between px-2 py-4 -mx-2 rounded-lg hover:bg-base-200 transition-colors group"
@@ -22,9 +24,7 @@ const { data } = doc;
         name="tabler:file-text"
         class="w-5 h-5 flex-shrink-0 text-primary group-hover:scale-110 transition-transform"
       />
-      <span
-        class="text-[15px] font-medium text-base-content truncate group-hover:text-primary transition-colors"
-      >
+      <span class="text-[15px] font-medium text-base-content truncate group-hover:text-primary transition-colors">
         {data.title}
       </span>
     </div>
@@ -33,9 +33,7 @@ const { data } = doc;
         data.tags && data.tags.length > 0 && (
           <span class="hidden sm:flex items-center gap-1.5">
             {data.tags.slice(0, 2).map((tag) => (
-              <span class="text-xs px-2 py-0.5 rounded-full bg-base-300 text-neutral">
-                {tag}
-              </span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-base-300 text-neutral">{tag}</span>
             ))}
           </span>
         )
