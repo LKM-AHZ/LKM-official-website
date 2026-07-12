@@ -244,7 +244,14 @@ const sidebarLinks = [
   >
     {
       advisorMembers.map((m) => (
-        <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} dream={m.dream} quote={m.quote} />
+        <MemberCard
+          name={m.name}
+          avatar={getAvatar(m.avatarKey)}
+          role={m.role}
+          desc={m.desc}
+          dream={m.dream}
+          quote={m.quote}
+        />
       ))
     }
   </DepartmentSection>
@@ -280,7 +287,14 @@ const sidebarLinks = [
   >
     {
       techMembers.map((m) => (
-        <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} dream={m.dream} quote={m.quote} />
+        <MemberCard
+          name={m.name}
+          avatar={getAvatar(m.avatarKey)}
+          role={m.role}
+          desc={m.desc}
+          dream={m.dream}
+          quote={m.quote}
+        />
       ))
     }
   </DepartmentSection>
@@ -313,7 +327,18 @@ const sidebarLinks = [
         以下成员曾为理科迷作出贡献，因各种原因现无法联系，不管如何理科迷的大门永远向你们打开。
       </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {alumniMembers.map((m) => <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} role={m.role} desc={m.desc} dream={m.dream} quote={m.quote} />)}
+        {
+          alumniMembers.map((m) => (
+            <MemberCard
+              name={m.name}
+              avatar={getAvatar(m.avatarKey)}
+              role={m.role}
+              desc={m.desc}
+              dream={m.dream}
+              quote={m.quote}
+            />
+          ))
+        }
       </div>
     </div>
   </Section>
