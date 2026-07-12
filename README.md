@@ -43,13 +43,13 @@ pnpm run dev
 
 ```
 /
-├── .github/workflows/        # CI / CD (GitHub Actions)
-├── public/                   # 静态资源 / Static assets (robots.txt, _headers, images/)
+├── .github/workflows/             # CI / CD (GitHub Actions)
+├── public/                        # 静态资源 / Static assets (robots.txt, _headers, images/)
 ├── src/
 │   ├── assets/
-│   │   ├── favicons/         # 网站图标
-│   │   ├── images/           # 本地图片 / Local images
-│   │   └── styles/tailwind.css   # Tailwind v4 入口：主题、工具类、插件
+│   │   ├── favicons/              # 网站图标
+│   │   ├── images/                # 本地图片 / Local images
+│   │   └── styles/tailwind.css    # Tailwind v4 入口：主题、工具类、插件
 │   ├── components/
 │   │   ├── background/       # 动态背景 / Dynamic background (tsParticles 星空)
 │   │   ├── blog/             # 博客组件 / Blog components
