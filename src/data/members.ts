@@ -24,6 +24,7 @@ export const founderMembers: Member[] = [
     role: '创始人',
     desc: '2014年8月1日，可琪创立了最初群聊——〔理科迷宅基地〕。他是理科迷最初的创始者，群里现有很多现有事物和框架，都是在他所做的事情之上建立起来的。可琪创立了腾讯「物理部落」和微信公众号，吸引了大量科技爱好者；组建了最初的理科迷分群体系和七月团队管理架构。2018年因学业原因逐渐淡出，但理科迷的一切，都源于他的开创。',
     quote: '「可琪现在不在，但他确确实实是理科迷最初的创始者。」',
+    dream: '梦想：让知识流入千家万户'
   },
 ];
 
@@ -51,7 +52,7 @@ export const generalMembers: Member[] = [
     avatarKey: '七月komoyume.jpeg',
     desc: '机器人学家',
     dream: '梦想：科技改变世界',
-    quote: '致敬对这个世界满怀期待的你',
+    quote: '—— 致敬对这个世界满怀期待的你',
   },
   {
     name: '七月千寻',
@@ -177,7 +178,7 @@ export const advisorMembers: Member[] = [
 
 /** 技术委员会 */
 export const techMembers: Member[] = [
-  { name: '七月可分数列', role: '会长', desc: '平凡的ICPCer' },
+  { name: '七月可分数列', role: '算法爱好者', desc: '平凡的ICPCer' },
   { name: '七月A', avatarKey: '七月A.jpg', desc: '网站开发的主要牛马', dream: '以后不要当牛马' },
 ];
 
