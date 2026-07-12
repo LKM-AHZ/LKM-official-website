@@ -150,7 +150,7 @@ const sidebarLinks = [
   <DepartmentSection
     id="general"
     title="七月团队 · 总务部"
-    borderColor="#0066cc"
+    borderColor="var(--color-primary)"
     desc="该团队部门职责是统筹和规划相关事宜，引领团队能够互相协作，落实我们共同的宗旨和目标。总务部更适合有多线程处理能力以及执行能力的成员，会有跨部门的需要。"
   >
     {
@@ -164,7 +164,7 @@ const sidebarLinks = [
   <DepartmentSection
     id="affairs"
     title="七月团队 · 群务部"
-    borderColor="#0066cc"
+    borderColor="var(--color-primary)"
     desc="该团队部门职责是负责各个平台上面社群秩序，把握群内风向，确保群处于活跃并且持续有效的学习讨论氛围当中，有情况的时候第一时间处理。群务部更适合有常驻某一平台社群的，并有一定的应急处理能力。"
   >
     {
@@ -185,7 +185,7 @@ const sidebarLinks = [
   <DepartmentSection
     id="events"
     title="七月团队 · 活动策划部"
-    borderColor="#f59e0b"
+    borderColor="var(--color-warning)"
     desc="该团队负责的是各个平台上面的活动，一条龙从策划开始，一直到执行，下管专业委员会，给大家带来更多更好的活动和体验，让大家能够真正的学到知识。适合有灵感、有创意并由能把这些全部落实的行动力加入。"
   >
     {
@@ -206,7 +206,7 @@ const sidebarLinks = [
   <DepartmentSection
     id="news"
     title="新闻办"
-    borderColor="#38bdf8"
+    borderColor="var(--color-info)"
     desc="该团队部门职责是负责各平台宣传账号的持续运营，以及外交事宜，持续宣传输出并扩大影响能力，并为此向大众输出科普内容，促进传播知识。新闻办会下属一个科普项目组，以及翻译项目组，为科普事业繁荣昌盛，以及中外科技爱好者能有所知识共享，破除信息差和壁垒。"
     noGrid
   >
@@ -220,8 +220,8 @@ const sidebarLinks = [
     {
       Object.entries(newsSubGroups).map(([, group]) => (
         <div class="mt-8">
-          <h4 class="text-md font-bold mb-2 text-center text-[#7a7a7a] dark:text-[#cccccc]">{group.label}</h4>
-          <p class="max-w-3xl mx-auto mb-4 px-6 py-3 bg-[#f5f5f7] dark:bg-[#1a1a1c] rounded-[11px] text-center text-[13px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed">
+          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
+          <p class="max-w-3xl mx-auto mb-4 px-6 py-3 bg-base-200 border border-base-300 rounded-[8px] text-center text-[13px] text-neutral leading-relaxed">
             {group.desc}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -238,7 +238,7 @@ const sidebarLinks = [
   <DepartmentSection
     id="advisors"
     title="顾问团"
-    borderColor="#6b7280"
+    borderColor="var(--color-neutral)"
     desc="该团队部门职责是属于理科迷的外部顾问，为理科迷的工作组，项目组事业提供相应的支持，如法律询问、其他社会组织团体等等。"
   >
     {
@@ -252,14 +252,14 @@ const sidebarLinks = [
   <DepartmentSection
     id="professional"
     title="专业委员会"
-    borderColor="#22c55e"
+    borderColor="var(--color-success)"
     desc="该团队部门职责是负责活动、项目等诸多提供专业知识，充实各个专业实际内容。成员是已经确定了想要在这方面深耕的，未来会下管学术项目组，带来更好的学术交流等内容。"
     noGrid
   >
     {
       Object.entries(professionalSubGroups).map(([, group]) => (
         <div class="mb-8">
-          <h4 class="text-md font-bold mb-2 text-center text-[#7a7a7a] dark:text-[#cccccc]">{group.label}</h4>
+          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.members.map((m) => (
               <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
@@ -274,7 +274,7 @@ const sidebarLinks = [
   <DepartmentSection
     id="tech"
     title="技术委员会"
-    borderColor="#ef4444"
+    borderColor="var(--color-error)"
     desc="该团队部门职责是负责各平台、各活动的相应技术上的技术开发与维护，未来将给大家带来更多实用性更强更好的开源项目。需要有编程知识，网站搭建等能。"
   >
     {
@@ -286,9 +286,9 @@ const sidebarLinks = [
 
   <!-- 项目团队成员 -->
   <Section id="project">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#9ca3af] pb-1">项目团队成员</span>
+        <span class="border-b-2 border-base-300 pb-1">项目团队成员</span>
       </h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {
@@ -302,12 +302,12 @@ const sidebarLinks = [
 
   <!-- 已离开成员 -->
   <Section id="alumni">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-[#9ca3af] pb-1">已离开或失联成员</span>
+        <span class="border-b-2 border-base-300 pb-1">已离开或失联成员</span>
       </h3>
       <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#1a1a1c] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed"
+        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed"
       >
         以下成员曾为理科迷作出贡献，因各种原因现无法联系，不管如何理科迷的大门永远向你们打开。
       </p>

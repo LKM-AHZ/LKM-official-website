@@ -136,3 +136,13 @@ export const applyGetPermalinks = (menu: unknown = {}): unknown => {
   }
   return menu;
 };
+
+/**
+ * 为 View Transition 生成合法且唯一的 name。
+ * View Transition name 不允许 `/` 等字符，故把非字母数字替换为 `-`。
+ * 列表项与详情页对同一 post 用相同 prefix + permalink，得到相同 name 以配对 morph。
+ */
+export const transitionName = (prefix: string, permalink: string): string =>
+  `${prefix}-${String(permalink)
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')}`;

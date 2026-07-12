@@ -35,13 +35,13 @@ const posts = APP_BLOG.isEnabled ? await findPostsByIds(postIds) : [];
 {
   APP_BLOG.isEnabled ? (
     <WidgetWrapper id={id} isDark={isDark} containerClass={classes?.container as string} bg={bg}>
-      <div class="flex flex-col lg:justify-between lg:flex-row mb-8">
+      <div class="flex flex-col lg:justify-between lg:flex-row mb-8 intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
         {title && (
           <div class="md:max-w-sm">
             <h2 class="text-[40px] font-semibold tracking-[-0.005em] group font-heading mb-2" set:html={title} />
             {APP_BLOG.list.isEnabled && linkText && linkUrl && (
               <a
-                class="text-[#0066cc] hover:text-[#0071e3] transition ease-in duration-200 block mb-6 lg:mb-0"
+                class="text-primary hover:text-primary/80 transition ease-in duration-200 block mb-6 lg:mb-0"
                 href={linkUrl}
               >
                 {linkText} »
@@ -50,12 +50,7 @@ const posts = APP_BLOG.isEnabled ? await findPostsByIds(postIds) : [];
           </div>
         )}
 
-        {information && (
-          <p
-            class="text-[17px] text-[#7a7a7a] dark:text-[#cccccc] lg:max-w-md leading-relaxed"
-            set:html={information}
-          />
-        )}
+        {information && <p class="text-[17px] text-neutral lg:max-w-md leading-relaxed" set:html={information} />}
       </div>
 
       <Grid posts={posts} />

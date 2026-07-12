@@ -21,19 +21,19 @@ export const headerData = {
         },
         {
           text: '团队成员',
-          href: getPermalink('#team'),
+          href: getPermalink('/#team'),
         },
         {
           text: '发展历程',
-          href: getPermalink('#timeline'),
+          href: getPermalink('/#timeline'),
         },
         {
           text: '最近更新',
-          href: getPermalink('#update'),
+          href: getPermalink('/#update'),
         },
         {
           text: '常见问题',
-          href: getPermalink('#faq'),
+          href: getPermalink('/#faq'),
         },
       ],
     },
@@ -95,7 +95,7 @@ export const footerData = {
       links: [
         { text: '七月团队', href: getPermalink('/about') },
         { text: '管理团队', href: getPermalink('/team') },
-        { text: '发展历程', href: getPermalink('#timeline') },
+        { text: '发展历程', href: getPermalink('/#timeline') },
         { text: '博客', href: getBlogPermalink() },
       ],
     },
@@ -105,7 +105,7 @@ export const footerData = {
         { text: '服务', href: getPermalink('/services') },
         { text: '支持我们', href: getPermalink('/pricing') },
         { text: '联系我们', href: getPermalink('/contact') },
-        { text: '常见问题', href: getPermalink('#faq') },
+        { text: '常见问题', href: getPermalink('/#faq') },
       ],
     },
     {

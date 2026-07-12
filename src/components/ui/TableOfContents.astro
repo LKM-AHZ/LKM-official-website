@@ -14,16 +14,12 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 
 {
   filteredHeadings.length > 0 && (
-    <nav class="toc-container sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto hidden xl:block w-64 p-4 border-l border-[#e0e0e0] dark:border-white/10">
-      <h3 class="text-[12px] font-semibold uppercase tracking-wider text-[#7a7a7a] dark:text-[#cccccc] mb-3">目录</h3>
-      <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+    <nav class="toc-container sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto hidden xl:block w-64 p-4 border-l border-base-300">
+      <h3 class="text-[12px] font-semibold uppercase tracking-wider text-neutral mb-3">目录</h3>
+      <ul class="space-y-2 text-sm text-base-content/60">
         {filteredHeadings.map((heading) => (
           <li class={`toc-item transition-all duration-200 ${heading.depth === 3 ? 'pl-4' : ''}`}>
-            <a
-              href={`#${heading.slug}`}
-              class="hover:text-[#0066cc] dark:hover:text-[#2997ff] block py-0.5 text-[14px] text-[#7a7a7a] dark:text-[#cccccc]"
-              data-toc-link
-            >
+            <a href={`#${heading.slug}`} class="hover:text-primary block py-0.5 text-[14px] text-neutral" data-toc-link>
               {heading.text}
             </a>
           </li>
@@ -57,22 +53,20 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
             // 移除旧的高亮
             if (activeLink) {
               activeLink.classList.remove(
-                'text-[#0066cc]',
-                'dark:text-[#2997ff]',
+                'text-primary',
                 'font-semibold',
                 'border-l-2',
-                'border-[#0066cc]',
+                'border-primary',
                 '-ml-[17px]',
                 'pl-[15px]'
               );
             }
             // 添加新高亮
             correspondingLink.classList.add(
-              'text-[#0066cc]',
-              'dark:text-[#2997ff]',
+              'text-primary',
               'font-semibold',
               'border-l-2',
-              'border-[#0066cc]',
+              'border-primary',
               '-ml-[17px]',
               'pl-[15px]'
             );

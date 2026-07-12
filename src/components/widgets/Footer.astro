@@ -20,32 +20,30 @@ export interface Props {
   secondaryLinks: Array<Link>;
   socialLinks: Array<Link>;
   footNote?: string;
-  theme?: string;
 }
 
-const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme = 'light' } = Astro.props;
+const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Astro.props;
 ---
 
-<footer class:list={[{ dark: theme === 'dark' }, 'relative border-t border-gray-200 dark:border-white/10 not-prose']}>
-  <div class="bg-[#f5f5f7] dark:bg-[#1d1d1f] absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+<footer class:list={['relative border-t border-base-300 not-prose']} transition:persist>
+  <div class="bg-base-100 absolute inset-0 pointer-events-none" aria-hidden="true"></div>
   <div
-    class="relative max-w-7xl mx-auto px-4 sm:px-6 dark:text-[#7a7a7a] intersect-once intersect-quarter intersect-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+    class="relative max-w-7xl mx-auto px-4 md:px-6 text-neutral intersect-once intersect-quarter intersect-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
   >
     <div class="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-[64px]">
       <div class="col-span-12 lg:col-span-4">
         <div class="mb-2">
-          <a
-            class="inline-block text-[17px] font-semibold text-[#1d1d1f] dark:text-white no-underline"
-            href={getHomePermalink()}>{SITE?.name}</a
+          <a class="inline-block text-[17px] font-semibold text-base-content no-underline" href={getHomePermalink()}
+            >{SITE?.name}</a
           >
         </div>
-        <div class="text-[12px] text-[#7a7a7a] flex gap-1">
+        <div class="text-[12px] text-neutral flex gap-1">
           {
             secondaryLinks.map(({ text, href }, index) => (
               <>
                 {index !== 0 ? ' · ' : ''}
                 <a
-                  class="text-[12px] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white hover:underline transition duration-150 ease-in-out"
+                  class="text-[12px] text-neutral hover:text-base-content hover:underline transition duration-150 ease-in-out"
                   href={href}
                   set:html={text}
                 />
@@ -57,13 +55,13 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme 
       {
         links.map(({ title, links }) => (
           <div class="col-span-6 md:col-span-3 lg:col-span-2">
-            <div class="text-[14px] font-semibold text-[#1d1d1f] dark:text-white mb-2">{title}</div>
+            <div class="text-[14px] font-semibold text-base-content mb-2">{title}</div>
             {links && Array.isArray(links) && links.length > 0 && (
               <ul class="text-[12px] leading-[2.41]">
                 {links.map(({ text, href, ariaLabel }) => (
                   <li class="mb-2">
                     <a
-                      class="text-[12px] text-[#7a7a7a] hover:text-[#1d1d1f] hover:underline dark:text-[#cccccc] dark:hover:text-white transition duration-150 ease-in-out"
+                      class="text-[12px] text-neutral hover:text-base-content hover:underline transition duration-150 ease-in-out"
                       href={href}
                       aria-label={ariaLabel}
                     >
@@ -77,14 +75,14 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme 
         ))
       }
     </div>
-    <div class="md:flex md:items-center md:justify-between py-6 md:py-8 border-t border-gray-200 dark:border-white/10">
+    <div class="md:flex md:items-center md:justify-between py-6 md:py-8 border-t border-base-300">
       {
         socialLinks?.length ? (
           <ul class="flex mb-4 md:order-1 -ml-2 md:ml-4 md:mb-0 rtl:ml-0 rtl:-mr-2 rtl:md:ml-0 rtl:md:mr-4">
             {socialLinks.map(({ ariaLabel, href, text, icon }) => (
               <li>
                 <a
-                  class="text-[#7a7a7a] dark:text-[#cccccc] hover:text-[#1d1d1f] dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-[#0066cc] rounded-[8px] text-sm p-2.5 inline-flex items-center"
+                  class="text-neutral hover:text-base-content focus:outline-none focus:ring-2 focus:ring-primary rounded-[8px] text-sm p-2.5 inline-flex items-center"
                   aria-label={ariaLabel}
                   href={href}
                 >
@@ -99,7 +97,7 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme 
         )
       }
 
-      <div class="text-[12px] mr-4 text-[#7a7a7a] dark:text-[#cccccc]">
+      <div class="text-[12px] mr-4 text-neutral">
         <Fragment set:html={footNote} />
       </div>
     </div>

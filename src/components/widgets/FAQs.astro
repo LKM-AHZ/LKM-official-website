@@ -40,19 +40,14 @@ const columnsClass =
               <div class="flex justify-center">
                 <Icon
                   name={icon || 'tabler:chevron-right'}
-                  class="flex-shrink-0 mt-0.5 w-5 h-5 text-[#0066cc] mr-2 rtl:mr-0 rtl:ml-2"
+                  class="flex-shrink-0 mt-0.5 w-5 h-5 text-primary mr-2 rtl:mr-0 rtl:ml-2"
                 />
               </div>
               <div class="mt-0.5">
-                {itemTitle && (
-                  <h3 class="text-[17px] font-semibold text-[#1d1d1f] dark:text-white leading-snug">{itemTitle}</h3>
-                )}
+                {itemTitle && <h3 class="text-[17px] font-semibold text-base-content leading-snug">{itemTitle}</h3>}
                 {description && (
                   <p
-                    class:list={[
-                      { 'mt-2': itemTitle },
-                      'text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed',
-                    ]}
+                    class:list={[{ 'mt-2': itemTitle }, 'text-[14px] text-neutral leading-relaxed']}
                     set:html={description}
                   />
                 )}

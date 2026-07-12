@@ -43,15 +43,16 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
   class:list={[
     { sticky: isSticky, relative: !isSticky },
     'top-0 z-40 flex-none mx-auto w-full transition-[opacity] ease-in-out',
-    'border-b border-black/5 dark:border-white/10',
+    'border-b border-base-300',
   ]}
+  transition:persist="site-header"
   {...isSticky ? { 'data-aw-sticky-header': true } : {}}
   {...id ? { id } : {}}
 >
-  <div class="absolute inset-0 backdrop-blur-xl bg-white/80 dark:bg-[#1d1d1f]/90"></div>
+  <div class="absolute inset-0 bg-base-100"></div>
   <div
     class:list={[
-      'relative text-default py-2.5 px-3 md:px-6 mx-auto w-full',
+      'relative text-default py-2.5 px-4 md:px-6 mx-auto w-full',
       {
         'md:flex md:justify-between': position !== 'center',
       },
@@ -83,17 +84,17 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
                 <>
                   <button
                     type="button"
-                    class="hover:text-[#0066cc] dark:hover:text-[#2997ff] dark:text-white/90 px-4 py-3 flex items-center whitespace-nowrap"
+                    class="hover:text-primary text-base-content px-4 py-3 flex items-center whitespace-nowrap"
                   >
                     {text}{' '}
                     <Icon name="tabler:chevron-down" class="w-3.5 h-3.5 ml-0.5 rtl:ml-0 rtl:mr-0.5 hidden md:inline" />
                   </button>
-                  <ul class="dropdown-menu md:backdrop-blur-md rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 dark:md:bg-[#1d1d1f]/95 md:min-w-[200px] drop-shadow-xl dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.15)]">
+                  <ul class="dropdown-menu md:backdrop-blur-md rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-base-100/95 md:min-w-[200px] drop-shadow-xl">
                     {links.map(({ text: text2, href: href2 }) => (
                       <li>
                         <a
                           class:list={[
-                            'first:rounded-t last:rounded-b md:hover:bg-gray-50 dark:text-white/80 hover:text-[#0066cc] dark:hover:text-[#2997ff] dark:hover:bg-white/5 py-2 px-5 block whitespace-no-wrap',
+                            'first:rounded-t last:rounded-b hover:bg-base-200 text-base-content/90 hover:text-primary py-2 px-5 block whitespace-no-wrap',
                             { 'aw-link-active': href2 === currentPath },
                           ]}
                           href={href2}
@@ -107,7 +108,7 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
               ) : (
                 <a
                   class:list={[
-                    'hover:text-[#0066cc] dark:hover:text-[#2997ff] dark:text-white/90 px-4 py-3 flex items-center whitespace-nowrap',
+                    'hover:text-primary text-base-content px-4 py-3 flex items-center whitespace-nowrap',
                     { 'aw-link-active': href === currentPath },
                   ]}
                   href={href}
@@ -132,7 +133,7 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
           {
             showRssFeed && (
               <a
-                class="text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center"
+                class="text-neutral hover:bg-base-300 focus:outline-none focus:ring-4 focus:ring-base-300 rounded-lg text-sm p-2.5 inline-flex items-center"
                 aria-label="RSS 订阅"
                 href={getAsset('/rss.xml')}
               >

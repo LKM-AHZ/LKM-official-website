@@ -42,18 +42,15 @@ const columnsClass =
                 <div class="flex justify-center">
                   <Icon
                     name={icon || defaultIcon}
-                    class="w-7 h-7 mr-2 rtl:mr-0 rtl:ml-2 text-white bg-[#0066cc] rounded-full md:w-11 md:h-11 md:p-2.5 p-1.5 mr-4 rtl:ml-4 rtl:mr-0"
+                    class="w-7 h-7 mr-2 rtl:mr-0 rtl:ml-2 text-primary-content bg-primary rounded-full md:w-11 md:h-11 md:p-2.5 p-1.5 mr-4 rtl:ml-4 rtl:mr-0"
                   />
                 </div>
               )}
               <div class="mt-0.5">
-                {itemTitle && <h3 class="text-[17px] font-semibold text-[#1d1d1f] dark:text-white">{itemTitle}</h3>}
+                {itemTitle && <h3 class="text-[17px] font-semibold text-base-content">{itemTitle}</h3>}
                 {description && (
                   <p
-                    class:list={[
-                      { 'mt-2': itemTitle },
-                      'text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed',
-                    ]}
+                    class:list={[{ 'mt-2': itemTitle }, 'text-[14px] text-neutral leading-relaxed']}
                     set:html={description}
                   />
                 )}

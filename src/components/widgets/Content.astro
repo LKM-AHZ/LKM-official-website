@@ -47,17 +47,13 @@ const columnsClass =
     classes={{
       container: 'max-w-xl sm:mx-auto lg:max-w-2xl',
       title: 'text-[40px] font-semibold tracking-[-0.005em] mb-3 font-heading',
-      subtitle: 'max-w-3xl mx-auto sm:text-center text-[17px] text-[#7a7a7a] dark:text-[#cccccc]',
+      subtitle: 'max-w-3xl mx-auto sm:text-center text-[17px] text-neutral',
     }}
   />
   <div class="mx-auto max-w-7xl p-4 md:px-8">
     <div class={`md:flex ${isReversed ? 'md:flex-row-reverse' : ''} md:gap-16`}>
       <div class="md:basis-1/2 self-center">
-        {
-          content && (
-            <div class="mb-12 text-[17px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed" set:html={content} />
-          )
-        }
+        {content && <div class="mb-12 text-[17px] text-neutral leading-relaxed" set:html={content} />}
 
         {
           callToAction && (
@@ -76,12 +72,12 @@ const columnsClass =
                     <div class="flex justify-center">
                       <Icon
                         name={icon || 'tabler:check'}
-                        class="flex h-5 w-5 items-center justify-center rounded-full bg-[#0066cc]/10 text-[#0066cc] p-1 mr-2 rtl:mr-0 rtl:ml-2"
+                        class="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary p-1 mr-2 rtl:mr-0 rtl:ml-2"
                       />
                     </div>
                     <div class="mt-0.5">
                       {itemTitle && (
-                        <h3 class="text-[17px] font-semibold leading-6 text-[#1d1d1f] dark:text-white ml-2 rtl:ml-0 rtl:mr-2">
+                        <h3 class="text-[17px] font-semibold leading-6 text-base-content ml-2 rtl:ml-0 rtl:mr-2">
                           {itemTitle}
                         </h3>
                       )}
@@ -89,7 +85,7 @@ const columnsClass =
                         <p
                           class:list={[
                             { 'mt-1': itemTitle },
-                            'text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed ml-2 rtl:ml-0 rtl:mr-2',
+                            'text-[14px] text-neutral leading-relaxed ml-2 rtl:ml-0 rtl:mr-2',
                           ]}
                           set:html={description}
                         />
@@ -98,7 +94,7 @@ const columnsClass =
                         <div
                           class:list={[
                             { 'mt-3': itemTitle || description },
-                            'text-lg font-medium leading-6 dark:text-white ml-2 rtl:ml-0 rtl:mr-2',
+                            'text-lg font-medium leading-6 text-base-content ml-2 rtl:ml-0 rtl:mr-2',
                           ]}
                         >
                           <Button variant="link" {...callToAction} />
@@ -120,7 +116,7 @@ const columnsClass =
                 <Fragment set:html={image} />
               ) : (
                 <Image
-                  class="mx-auto w-full rounded-[18px] bg-gray-100 dark:bg-gray-700 overflow-hidden"
+                  class="mx-auto w-full rounded-[16px] bg-base-300 overflow-hidden"
                   width={500}
                   height={500}
                   widths={[400, 768]}

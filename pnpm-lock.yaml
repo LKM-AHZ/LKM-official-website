@@ -44,9 +44,6 @@ importers:
       astro-seo:
         specifier: ^1.1.0
         version: 1.1.0(prettier-plugin-astro@0.14.1)(prettier@3.9.4)(typescript@5.9.3)
-      daisyui:
-        specifier: ^5.5.23
-        version: 5.6.6
       katex:
         specifier: ^0.17.0
         version: 0.17.0
@@ -123,6 +120,9 @@ importers:
       astro-eslint-parser:
         specifier: ^1.4.0
         version: 1.4.0
+      daisyui:
+        specifier: ^5.6.16
+        version: 5.6.16
       eslint:
         specifier: ^10.4.0
         version: 10.6.0(jiti@2.7.0)
@@ -2030,8 +2030,8 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
-  daisyui@5.6.6:
-    resolution: {integrity: sha512-UFiuIZYucF7ylrnY3PT1SqwaEbVB10mqTZRyeRchZk0bud+HihYLLhXdxGDVmR/ftrM9G9YVr9FFPRVVIZJ5hA==}
+  daisyui@5.6.16:
+    resolution: {integrity: sha512-A5/IrcFCXyfzQ7M2fnKVPfMbKCVu0xeM7/G22gK1XRcp2dgA39kvFOeEAK8f2KpJJQJ+s9Jc5pZoJoYsPEJ8JQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -5997,7 +5997,7 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  daisyui@5.6.6: {}
+  daisyui@5.6.16: {}
 
   debug@4.4.3:
     dependencies:
