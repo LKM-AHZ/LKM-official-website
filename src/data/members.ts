@@ -157,14 +157,14 @@ export const newsSubGroups: Record<string, SubGroup> = {
         avatarKey: '七月星染.png',
         desc: '公益科普产业共同体成员，曙星科普社社长。从事公益科普事业三年余。曾领导主办龙年科幻大赛、第一届地月奖科幻征文，曾参与协办第二、三、四、五届寻翊奖科普征文，与up非村科普墙联创地质锤等优秀科普视频。',
         dream: '梦想：传播科学文化',
-        quote: '—— 马克思说过，科学技术是生产力。',
+        quote: '马克思说过，科学技术是生产力。',
       },
       {
         name: '七月吴理',
         avatarKey: '七月吴理.png',
         desc: '计算机广告制作专业中技',
         dream: '梦想：活着，同时干点事吧',
-        quote: '—— 逆天不一定能改命，但是你所做的一切选择将会影响你的命，请慎重自己的选择',
+        quote: '逆天不一定能改命，但是你所做的一切选择将会影响你的命，请慎重自己的选择',
       },
     ],
   },
@@ -172,7 +172,7 @@ export const newsSubGroups: Record<string, SubGroup> = {
 
 /** 顾问团 */
 export const advisorMembers: Member[] = [
-  { name: '七月upogg', avatarKey: '七月upogg.jpeg', role: '团长', desc: '学生', quote: '—— 我以全部知识作为我的领域' },
+  { name: '七月upogg', avatarKey: '七月upogg.jpeg', role: '团长', desc: '学生', quote: '我以全部知识作为我的领域' },
 ];
 
 /** 技术委员会 */
@@ -192,7 +192,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
         avatarKey: '七月阿泠.jpeg',
         desc: '某2数学专业本科生，数学爱好者，爱好方向是分析学和数论',
         dream: '梦想：保研对面那个华一继续研究数学',
-        quote: '—— 万物皆数',
+        quote: '万物皆数',
       },
       { name: '七月彼方', avatarKey: '七月彼方.jpeg', desc: '分析与数值计算方向的硕士' },
       { name: '七月有珠', avatarKey: '七月有珠.jpeg', desc: '可能是人（未必？）', quote: '—— 活着大于死了' },
@@ -202,7 +202,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
         avatarKey: '七月胡冰阳.jpeg',
         desc: '男， 23 岁，本科学历……',
         dream: '梦想：理想是成为一名数学家',
-        quote: '—— 书山有路勤为径，学海无涯苦作舟。',
+        quote: '书山有路勤为径，学海无涯苦作舟。',
       },
     ],
   },
@@ -214,21 +214,21 @@ export const professionalSubGroups: Record<string, SubGroup> = {
         avatarKey: '七月O.png',
         desc: '中国科学院国家天文台博士，研究方向：引力波理论、黑洞物理、广义相对论',
         dream: '梦想：能做自己喜欢的研究',
-        quote: '—— 学习过去，享受现在，期待未来',
+        quote: '学习过去，享受现在，期待未来',
       },
       {
         name: '七月汽水',
         avatarKey: '七月汽水.png',
         desc: '慕尼黑大学流体力学专业大一在读学生',
         dream: '梦想：为中国流体出一份力',
-        quote: '—— 努力总会有收获',
+        quote: '努力总会有收获',
       },
       {
         name: '七月星河',
         avatarKey: '七月星河.png',
         desc: '高中OIer+物化政er，蒟蒻一枚（欢迎关注洛谷wang12345566），因出了一些初中毒瘤题而误闯天家',
         dream: '梦想：为大家带来更多的tricks与灵感，同时膜拜更多大佬',
-        quote: '—— 没有站在光里的人，也有自己的闪光点——from hjh in luogu',
+        quote: '没有站在光里的人，也有自己的闪光点——from hjh in luogu',
       },
     ],
   },
@@ -245,7 +245,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
         avatarKey: '七月狄离.png',
         desc: '可以叫杨向青，化学竞赛生，历史最高全区第七名，中学生作文大赛最高国排347，喜欢研究化学与文学',
         dream: '梦想：成为一名优秀的教师',
-        quote: '—— 真正的大师，永远都怀着一颗学徒的心',
+        quote: '真正的大师，永远都怀着一颗学徒的心',
       },
       { name: '七月文', avatarKey: '七月文.jpeg', desc: '打摆子的好选手', dream: '梦想：想不干嘛就不干嘛' },
       { name: '七月三尺水', desc: '化学，爱爱爱它！（化学的狂热热爱者）' },
@@ -258,7 +258,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
         name: '七月基米',
         desc: '新西兰11年级在读留学生，主修理科，英语弱项。目前学的理科是物理生物数学，基本知识水平也就高中生水平吧，但是我会努力提升自己的！喜欢写点自己的东西，有问题感谢大家指正！喜欢自己总结笔记等等，希望能对大家有所帮助！喜欢发一些自己的日常或者搞抽象什么的，有的时候会携带一定量的负面情绪... 感谢大家！！！',
         dream: '梦想：今年把明年的课学完，明年得吃奖学金，争取考上奥大？',
-        quote: '—— 注意注意超大区来袭',
+        quote: '注意注意超大区来袭',
       },
     ],
   },
@@ -268,7 +268,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
 export const projectMembers: Member[] = [
   { name: '七月大雄', avatarKey: '七月大雄.jpeg', desc: '什么都好奇一点', dream: '梦想：理想很多' },
   { name: '七月Joshua Xue', avatarKey: '七月Joshua Xue.png', desc: '一位数学爱好者，想让所有人都能轻松学上数学' },
-  { name: '七月', avatarKey: '七月.png', desc: '吃喝拉撒', dream: '梦想：成为verity', quote: '—— 哎呦我去' },
+  { name: '七月', avatarKey: '七月.png', desc: '吃喝拉撒', dream: '梦想：成为verity', quote: '哎呦我去' },
 ];
 
 /** 已离开或失联成员（无 avatarKey） */
