@@ -21,7 +21,9 @@ const {
 ---
 
 <WidgetWrapper id={id} isDark={isDark} containerClass={`max-w-6xl mx-auto ${classes?.container ?? ''}`} bg={bg}>
-  <div class={`flex flex-col gap-8 md:gap-12 md:flex-row ${isReversed ? 'md:flex-row-reverse' : ''}`}>
+  <div
+    class={`flex flex-col gap-8 md:gap-12 md:flex-row intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade ${isReversed ? 'md:flex-row-reverse' : ''}`}
+  >
     <div class={`w-full lg:w-1/2 gap-8 md:gap-12 ${isReversed ? 'lg:ml-16 md:ml-8 ml-0' : 'lg:mr-16 md:mr-8 mr-0'}`}>
       <Headline
         title={title}
@@ -30,7 +32,7 @@ const {
         classes={{
           container: 'text-center md:text-left rtl:md:text-right mb-4 md:mb-8',
           title: 'mb-4 text-[40px] font-semibold tracking-[-0.005em] font-heading',
-          subtitle: 'mb-6 text-[17px] text-[#7a7a7a] dark:text-[#cccccc]',
+          subtitle: 'mb-6 text-[17px] text-neutral',
           // ...((classes?.headline as {}) ?? {}),
         }}
       />
@@ -54,7 +56,7 @@ const {
             ? items.map(({ title: title2, description, icon }, index) => (
                 <li class="flex md:-mx-4">
                   <div class="pr-4 sm:pl-4 rtl:pr-0 rtl:pl-4 rtl:sm:pl-0 rtl:sm:pr-4">
-                    <span class="flex w-12 h-12 mx-auto items-center justify-center rounded-full bg-[#0066cc]/10 text-[#0066cc]">
+                    <span class="flex w-12 h-12 mx-auto items-center justify-center rounded-full bg-primary/10 text-primary">
                       {icon ? (
                         <Icon name={icon} class="w-5 h-5 icon-bold" />
                       ) : (
@@ -63,11 +65,8 @@ const {
                     </span>
                   </div>
                   <div class="pl-4 rtl:pl-0 rtl:pr-4">
-                    <h3
-                      class="mb-2 text-[17px] font-semibold font-heading text-[#1d1d1f] dark:text-white"
-                      set:html={title2}
-                    />
-                    <p class="text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed" set:html={description} />
+                    <h3 class="mb-2 text-[17px] font-semibold font-heading text-base-content" set:html={title2} />
+                    <p class="text-[14px] text-neutral leading-relaxed" set:html={description} />
                   </div>
                 </li>
               ))

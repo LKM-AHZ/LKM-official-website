@@ -108,6 +108,12 @@ export default defineConfig({
     resolve: {
       alias: {
         '~': path.resolve(__dirname, './src'),
+        // pnpm strict mode does not hoist @tsparticles/engine; point to the
+        // .pnpm store copy so Vite SSR & Rollup can resolve the import.
+        '@tsparticles/engine': path.resolve(
+          __dirname,
+          'node_modules/.pnpm/@tsparticles+engine@4.3.1/node_modules/@tsparticles/engine/esm/index.js'
+        ),
       },
     },
   },

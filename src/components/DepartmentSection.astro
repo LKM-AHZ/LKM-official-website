@@ -14,13 +14,13 @@ const { id, title, borderColor, desc, noGrid = false } = Astro.props;
 ---
 
 <Section id={id}>
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-7xl mx-auto">
     <h3 class="text-xl font-bold mb-2 text-center">
       <span class="border-b-2 pb-1" style={`border-color: ${borderColor}`}>{title}</span>
     </h3>
     {
       desc && (
-        <p class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-[#f5f5f7] dark:bg-[#1a1a1c] rounded-[11px] text-center text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed">
+        <p class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed card-hover intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
           {desc}
         </p>
       )

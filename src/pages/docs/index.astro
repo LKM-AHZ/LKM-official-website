@@ -3,6 +3,7 @@ import Layout from '~/layouts/PageLayout.astro';
 import { getCollection } from 'astro:content';
 import DocListItem from '~/components/docs/DocListItem.astro';
 import { getPermalink } from '~/utils/permalinks';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 
 const allDocs = await getCollection('docs', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
@@ -22,19 +23,17 @@ const metadata = {
 ---
 
 <Layout metadata={metadata}>
-  <div class="max-w-3xl mx-auto px-4 py-12 md:py-20">
+  <WidgetWrapper width="narrow" spacing="default">
     <div class="mb-12">
-      <h1 class="text-[28px] md:text-[40px] font-bold tracking-tight text-[#1d1d1f] dark:text-white mb-3">文档库</h1>
-      <p class="text-[17px] text-[#7a7a7a] dark:text-[#cccccc]">理科迷社区文档，帮助你快速了解和使用社区的各项功能</p>
+      <h1 class="text-[28px] md:text-[40px] font-bold tracking-tight text-base-content mb-3">文档库</h1>
+      <p class="text-[17px] text-neutral">理科迷社区文档，帮助你快速了解和使用社区的各项功能</p>
     </div>
 
     {
       Array.from(docsByCategory.entries()).map(([category, docs]) => (
         <section class="mb-10">
-          <h2 class="text-[13px] font-semibold uppercase tracking-wider text-[#0066cc] dark:text-[#2997ff] mb-3 px-2">
-            {category}
-          </h2>
-          <ul class="divide-y divide-gray-100 dark:divide-gray-800">
+          <h2 class="text-[13px] font-semibold uppercase tracking-wider text-primary mb-3 px-2">{category}</h2>
+          <ul class="divide-y divide-base-300">
             {docs.map((doc) => (
               <DocListItem doc={doc} href={getPermalink(`/docs/${doc.id}`)} />
             ))}
@@ -42,5 +41,5 @@ const metadata = {
         </section>
       ))
     }
-  </div>
+  </WidgetWrapper>
 </Layout>

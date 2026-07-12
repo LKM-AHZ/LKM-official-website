@@ -65,6 +65,7 @@ export default [
       'dist',
       'node_modules',
       '.github',
+      'reference',
       'types.generated.d.ts',
       '.astro',
       'src/components/blog/SinglePost.astro',

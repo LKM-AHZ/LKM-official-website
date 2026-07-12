@@ -3,7 +3,7 @@ import Layout from '~/layouts/PageLayout.astro';
 
 import { getPermalink } from '~/utils/permalinks';
 
-import SciFiBackground from '~/components/background/SciFiBackground.astro';
+import ParticleBackground from '~/components/background/ParticleBackground.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
@@ -44,29 +44,27 @@ const metadata = {
       },
     ]}
   >
+    <Fragment slot="bg">
+      <ParticleBackground />
+    </Fragment>
     <Fragment slot="title">
       <div class="flex flex-col gap-4">
         <div>
-          <span class="text-[#0066cc] dark:text-[#2997ff]">理科迷！</span>
+          <span class="text-primary">理科迷！</span>
         </div>
 
-        <span class="block mb-1 font-semibold tracking-[-0.005em] text-[#1d1d1f] dark:text-white">
-          科技爱好者社区
-        </span>
+        <span class="block mb-1 font-semibold tracking-[-0.005em] text-base-content"> 科技爱好者社区 </span>
       </div>
     </Fragment>
     <Fragment slot="subtitle">
-      <span class="block text-[17px] font-normal text-[#7a7a7a] dark:text-[#cccccc] mb-2 leading-relaxed">
+      <span class="block text-[17px] font-normal text-neutral mb-2 leading-relaxed">
         由普罗大众组成的科技爱好者社区
       </span>
 
-      <span class="text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed hidden sm:inline">
-        <strong class="font-semibold text-[#0066cc] dark:text-[#2997ff] mr-1">Here!</strong>
+      <span class="text-[14px] text-neutral leading-relaxed hidden sm:inline">
+        <strong class="font-semibold text-primary mr-1">Here!</strong>
         科学脱离了象牙塔的刻板与高冷，变成了每一个普通人对世界发问的好奇心。我们打破专业门槛，让每一位热爱理性、崇尚科学的“普通人”，都能在这里找到同频的伙伴，共同探索万物运转的奥秘。
       </span>
-    </Fragment>
-    <Fragment slot="bg">
-      <SciFiBackground />
     </Fragment>
   </Hero>
 
@@ -110,7 +108,7 @@ const metadata = {
     ]}
   >
     <Fragment slot="bg">
-      <div class="absolute inset-0 bg-[#f5f5f7] dark:bg-transparent"></div>
+      <div class="absolute inset-0 bg-base-200"></div>
     </Fragment>
   </Features2>
 
@@ -268,7 +266,7 @@ const metadata = {
     title="常见问题"
     subtitle="以下整理了用户关于 LKM 官方网站的常见疑问，帮助您快速了解项目特性和使用方式。"
     tagline="常见问题"
-    classes={{ container: 'max-w-6xl' }}
+    classes={{ container: 'max-w-4xl mx-auto' }}
     items={[
       {
         title: '理科迷是什么？',

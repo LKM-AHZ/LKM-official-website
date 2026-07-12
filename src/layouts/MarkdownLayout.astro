@@ -16,150 +16,16 @@ const metadata: MetaData = {
 ---
 
 <Layout metadata={metadata}>
-  <section class="px-4 py-16 sm:px-6 mx-auto lg:px-8 lg:py-20 max-w-4xl">
+  <section class="px-4 md:px-6 py-16 md:py-20 lg:py-24 mx-auto max-w-4xl">
     <h1
-      class="font-semibold font-heading text-[40px] md:text-[56px] leading-[1.07] tracking-[-0.005em] text-[#1d1d1f] dark:text-white"
+      class="font-semibold font-heading text-[40px] md:text-[56px] leading-[1.07] tracking-[-0.005em] text-base-content"
     >
       {frontmatter.title}
     </h1>
     <div
-      class="mx-auto prose prose-base max-w-4xl dark:prose-invert dark:prose-headings:text-slate-300 prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-md prose-img:shadow-lg mt-8"
+      class="mx-auto prose prose-base max-w-4xl prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-primary prose-img:rounded-md prose-img:shadow-lg mt-8"
     >
       <slot />
     </div>
   </section>
 </Layout>
-
-<!-- <style is:global>
-  /* ==========================================================================
-   全新优化：英文保持原样，中文字距微调，行距与段距全面收紧
-   ========================================================================== */
-
-.markdown-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* 1. 基础文本与标题：全面缩小行距与段底边距 */
-.markdown-body p {
-  line-height: 1.6;        /* 行间距从 1.75 缩小至 1.6 */
-  margin-bottom: 0.85rem;  /* 全局段落底边距从 1.25rem 缩小 */
-}
-
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
-  font-weight: 700;
-  letter-spacing: normal;  /* 英文标题不加宽 */
-}
-
-/* 针对中文标题或声明了 lang="zh" 的容器微调字距 */
-.markdown-body :lang(zh) h1,
-.markdown-body :lang(zh) h2,
-.markdown-body :lang(zh) h3 {
-  letter-spacing: 0.01em;  /* 仅中文标题微调 */
-}
-
-
-/* ==========================================================================
-   2. 针对 .prose 容器的深度排版优化
-   ========================================================================== */
-
-/* 文章内部核心文本：大幅收紧行高，默认不改变 letter-spacing 保护英文 */
-.markdown-body .prose p,
-.markdown-body .prose li,
-.markdown-body .prose ol,
-.markdown-body .prose ul {
-  line-height: 1.65;       /* 文章行高从 1.85 显著缩小至 1.65 */
-  color: #2d3748;
-  text-align: justify; 
-  text-justify: inter-ideograph;
-}
-
-/* 【核心改动】利用 :lang(zh) 伪类，只有当页面或容器为中文时，才开启中文字距 */
-/* 提示：建议在你的 html 标签上加上 lang="zh" 或是这个包裹层加上 lang="zh" */
-.markdown-body:lang(zh) .prose p,
-.markdown-body:lang(zh) .prose li {
-  letter-spacing: 0.02em;  /* 从 0.05em 大幅缩小，既有呼吸感又不会让英文散架 */
-}
-
-/* 暗黑模式适配 */
-:where(.dark) .markdown-body .prose p,
-:where(.dark) .markdown-body .prose li {
-  color: #e2e8f0;
-}
-
-/* 3. 段落与标题之间的间距全面缩小（呼吸感更紧凑） */
-.markdown-body .prose p {
-  margin-top: 1rem;       /* 从 1.5rem 缩小至 1rem */
-  margin-bottom: 1rem;    /* 从 1.5rem 缩小至 1rem */
-}
-
-.markdown-body .prose h2 {
-  margin-top: 2rem;       /* 从 3rem 缩小至 2rem */
-  margin-bottom: 0.85rem; /* 从 1.25rem 缩小 */
-}
-
-.markdown-body .prose h3 {
-  margin-top: 1.5rem;     /* 从 2.25rem 缩小至 1.5rem */
-  margin-bottom: 0.75rem; /* 从 1rem 缩小 */
-}
-
-/* 4. 列表与引用块的间距收紧 */
-.markdown-body .prose li {
-  margin-top: 0.4rem;     /* 从 0.75rem 缩小 */
-  margin-bottom: 0.4rem;  /* 从 0.75rem 缩小 */
-}
-
-.markdown-body .prose ul,
-.markdown-body .prose ol {
-  margin-top: 1rem;       /* 从 1.5rem 缩小 */
-  margin-bottom: 1rem;    /* 从 1.5rem 缩小 */
-  padding-left: 1.5em;
-}
-
-/* 引用块（保持精致，略微收紧上下留白） */
-.markdown-body .prose blockquote {
-  font-style: normal;
-  border-left-width: 4px;
-  border-left-color: rgb(59, 130, 246);
-  background-color: rgba(59, 130, 246, 0.04);
-  padding: 1rem 1.5rem;   /* 从 1.25/1.75 稍微收紧 */
-  margin: 1.5rem 0;       /* 从 2rem 缩小至 1.5rem */
-  border-radius: 0 0.75rem 0.75rem 0;
-}
-
-:where(.dark) .markdown-body .prose blockquote {
-  background-color: rgba(59, 130, 246, 0.08);
-}
-
-.markdown-body .prose blockquote p::before,
-.markdown-body .prose blockquote p::after {
-  content: '';
-}
-
-/* 行内代码（保持原样） */
-.markdown-body .prose code:not(pre code) {
-  background-color: #f1f5f9;
-  color: #e04343;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.375rem;
-  font-size: 0.88em;
-  font-weight: 600;
-  letter-spacing: 0px;   /* 强制代码间距为 0 */
-  margin: 0 0.2em;
-}
-
-:where(.dark) .markdown-body .prose code:not(pre code) {
-  background-color: #1e293b;
-  color: #f87171;
-}
-
-.markdown-body .prose code:not(pre code)::before,
-.markdown-body .prose code:not(pre code)::after {
-  content: '';
-}
-</style> -->

@@ -1,5 +1,6 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 import { fetchPosts } from '~/utils/blog';
 import { getPermalink } from '~/utils/permalinks';
 import type { Taxonomy } from '~/types';
@@ -38,10 +39,10 @@ const metadata = {
 ---
 
 <Layout metadata={metadata}>
-  <section class="px-4 md:px-6 py-12 sm:py-16 lg:py-20 mx-auto max-w-4xl">
+  <WidgetWrapper width="narrow" spacing="default">
     <header class="mb-8">
       <h1 class="text-4xl md:text-5xl font-bold leading-tight tracking-tighter font-heading">所有分类</h1>
-      <p class="text-muted mt-4 text-xl">
+      <p class="text-neutral mt-4 text-xl">
         浏览 {categories.length} 个分类中的所有文章
       </p>
     </header>
@@ -51,13 +52,11 @@ const metadata = {
         categories.map(({ category, count }) => (
           <a
             href={getPermalink(category.slug, 'category')}
-            class="block p-6 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all hover:shadow-lg group"
+            class="block p-6 bg-base-100 rounded-lg border border-base-300 hover:border-primary transition-all hover:shadow-lg group"
           >
             <div class="flex flex-col h-full">
-              <h2 class="text-xl font-semibold mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                {category.title}
-              </h2>
-              <p class="text-muted text-sm mt-auto">
+              <h2 class="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">{category.title}</h2>
+              <p class="text-neutral text-sm mt-auto">
                 {count} {count === 1 ? '篇文章' : '篇文章'}
               </p>
             </div>
@@ -69,9 +68,9 @@ const metadata = {
     {
       categories.length === 0 && (
         <div class="text-center py-12">
-          <p class="text-muted text-lg">暂无分类</p>
+          <p class="text-neutral text-lg">暂无分类</p>
         </div>
       )
     }
-  </section>
+  </WidgetWrapper>
 </Layout>

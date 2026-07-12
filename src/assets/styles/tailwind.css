@@ -1,33 +1,62 @@
 @import 'tailwindcss';
-/* @plugin "daisyui"; */
-@plugin "daisyui" {
-  themes: false;
-  root: '#never-match-this';
-}
-@plugin "@tailwindcss/typography";
 
-@variant dark (&:where(.dark, [data-theme="dark"], .dark *, [data-theme="dark"] *));
+@plugin '@tailwindcss/typography';
+@plugin 'daisyui';
+
+@plugin "daisyui/theme" {
+  name: 'lkm-light';
+  default: true;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #f5f5f7;
+  --color-base-300: #e0e0e0;
+  --color-base-content: #1d1d1f;
+  --color-neutral: #7a7a7a;
+  --color-neutral-content: #ffffff;
+  --color-primary: #0066cc;
+  --color-primary-content: #ffffff;
+  --color-secondary: #1d1d1f;
+  --color-secondary-content: #ffffff;
+  --color-accent: #0066cc;
+  --color-accent-content: #ffffff;
+  --color-info: #38bdf8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --radius-box: 12px;
+  --radius-field: 8px;
+  --radius-selector: 6px;
+}
+
+@plugin "daisyui/theme" {
+  name: 'lkm-dark';
+  color-scheme: dark;
+  --color-base-100: #010102;
+  --color-base-200: #0f1011;
+  --color-base-300: #141516;
+  --color-base-content: #f7f8f8;
+  --color-neutral: #8a8f98;
+  --color-neutral-content: #010102;
+  --color-primary: #5e6ad2;
+  --color-primary-content: #ffffff;
+  --color-secondary: #d0d6e0;
+  --color-secondary-content: #010102;
+  --color-accent: #5e6ad2;
+  --color-accent-content: #ffffff;
+  --color-info: #38bdf8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --radius-box: 12px;
+  --radius-field: 8px;
+  --radius-selector: 6px;
+}
+
+@custom-variant dark (&:where([data-theme='lkm-dark'], [data-theme='lkm-dark'] *));
 
 @custom-variant intersect (&:not([no-intersect]));
 
 @theme {
-  /* ── Apple 色彩系统 ── */
-  --color-primary: #0066cc; /* Action Blue — 唯一交互色 */
-  --color-primary-hover: #0071e3; /* 悬停微亮 */
-  --color-primary-on-dark: #2997ff; /* 暗色 tile 上的链接蓝 */
-  --color-secondary: #1d1d1f; /* 近黑色墨水 */
-  --color-accent: #0066cc; /* 强调色 = Action Blue */
-  --color-default: #1d1d1f; /* 默认文字色 */
-  --color-muted: #7a7a7a; /* 次要文字色 */
-  --color-canvas-parchment: #f5f5f7; /* Apple 羊皮纸色 */
-  --color-canvas-white: #ffffff; /* 纯白画布 */
-  --color-tile-dark: #1a1a1c; /* 深色 tile */
-  --color-tile-dark-2: #2a2a2c; /* 深色 tile 变体 */
-  --color-tile-dark-3: #252527; /* 深色 tile 变体 */
-  --color-hairline: #e0e0e0; /* 1px 分割线 */
-  --color-divider-soft: #f0f0f0; /* 软分割 */
-  --color-surface-pearl: #fafafc; /* 珍珠按钮底色 */
-
   /* ── 字体系统 ──
      Apple 优先 SF Pro → 中文保留 Noto Sans SC */
   --font-sans:
@@ -38,14 +67,12 @@
     sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* ── 阴影 ──
-     唯一阴影：产品/卡片影像权重 */
-  --shadow-product: 0 5px 30px rgba(0, 0, 0, 0.22);
-
-  /* ── 圆角 Apple 阶梯 ── */
-  --radius-sm: 8px;
-  --radius-md: 11px;
-  --radius-lg: 18px;
+  /* ── 圆角 Linear 阶梯 ── */
+  --radius-xs: 4px; /* 小徽章/chip */
+  --radius-sm: 6px; /* 内联 tag */
+  --radius-md: 8px; /* 按钮、输入框 */
+  --radius-lg: 12px; /* 卡片 */
+  --radius-xl: 16px; /* 大面板/图片 */
   --radius-pill: 9999px;
 
   /* ── 动画 ── */
@@ -63,85 +90,9 @@
   }
 }
 
-/* ── 页面背景 utility ── */
-@utility bg-page {
-  background-color: var(--color-canvas-white);
-}
-
-@utility bg-dark {
-  background-color: var(--color-canvas-parchment);
-}
-
-@utility bg-light {
-  background-color: var(--color-canvas-white);
-}
-
-@utility text-page {
-  color: var(--color-default);
-}
-
-@utility text-muted {
-  color: var(--color-muted);
-}
-
-/* ── Apple 风格按钮系统 ── */
-
-@utility btn {
-  @apply inline-flex items-center justify-center rounded-full font-medium text-center transition
-    ease-in duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-[#0071e3] cursor-pointer
-    select-none active:scale-95;
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 1.47;
-  letter-spacing: -0.022em;
-  padding: 11px 22px;
-  min-height: 44px;
-}
-
-@utility btn-primary {
-  @apply btn;
-  background-color: #0066cc;
-  color: #ffffff;
-  border: none;
-}
-
-@utility btn-secondary {
-  @apply btn;
-  background-color: transparent;
-  color: #0066cc;
-  border: 1px solid #0066cc;
-}
-
-@utility btn-tertiary {
-  @apply btn;
-  background-color: transparent;
-  color: #7a7a7a;
-  border: none;
-  padding: 8px 16px;
-}
-
-/* ── 按钮 hover 状态（不能用 @utility + 伪类） ── */
-@layer base {
-  .btn-primary:hover {
-    background-color: #0071e3;
-  }
-  .btn-secondary:hover {
-    background-color: rgba(0, 102, 204, 0.06);
-  }
-  .btn-tertiary:hover {
-    color: #1d1d1f;
-  }
-}
-
-/* ── Header 滚动样式 (保留 frosted glass) ── */
+/* ── Header 滚动样式 (实心 base) ── */
 #header.scroll > div:first-child {
-  @apply bg-page md:bg-white/85 md:backdrop-blur-xl;
-  box-shadow: 0 0.5px 0 0 rgba(0, 0, 0, 0.08);
-}
-.dark #header.scroll > div:first-child,
-#header.scroll.dark > div:first-child {
-  @apply bg-[#1d1d1f]/90 border-b border-white/10;
-  box-shadow: none;
+  @apply bg-base-100 border-b border-base-300;
 }
 
 #header.expanded nav {
@@ -191,8 +142,8 @@
     letter-spacing: -0.022em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #ffffff;
-    color: #1d1d1f;
+    background: var(--color-base-100);
+    color: var(--color-base-content);
   }
 
   /* Body — Apple 17px 标准 */
@@ -202,7 +153,7 @@
     line-height: 1.47;
     letter-spacing: -0.022em;
     margin-bottom: 1.25rem;
-    color: #1d1d1f;
+    color: var(--color-base-content);
   }
 
   /* 标题系统 — 负字间距 + weight 600 */
@@ -252,25 +203,6 @@
     font-weight: 600;
     line-height: 1.29;
     letter-spacing: -0.016em;
-  }
-}
-
-.dark {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  p {
-    color: #ffffff;
-  }
-  body {
-    background-color: #1d1d1f;
-    color: #ffffff;
-  }
-  p {
-    color: #cccccc;
   }
 }
 
@@ -338,14 +270,9 @@
   .prose ul {
     letter-spacing: -0.022em !important;
     line-height: 1.47 !important;
-    color: #1d1d1f !important;
+    color: var(--color-base-content) !important;
     text-align: justify;
     text-justify: inter-ideograph;
-  }
-
-  .dark .prose p,
-  .dark .prose li {
-    color: #cccccc !important;
   }
 
   .prose p {
@@ -379,15 +306,11 @@
     font-style: normal;
     letter-spacing: -0.022em !important;
     border-left-width: 4px;
-    border-left-color: #0066cc !important;
-    background-color: rgba(0, 102, 204, 0.04);
+    border-left-color: var(--color-primary) !important;
+    background-color: color-mix(in oklab, var(--color-primary) 6%, transparent);
     padding: 1.25rem 1.75rem !important;
     margin: 2rem 0 !important;
     border-radius: 0 8px 8px 0;
-  }
-
-  .dark .prose blockquote {
-    background-color: rgba(41, 151, 255, 0.08);
   }
 
   .prose blockquote p::before,
@@ -396,8 +319,8 @@
   }
 
   .prose code:not(pre code) {
-    background-color: #f1f5f9 !important;
-    color: #e04343 !important;
+    background-color: var(--color-base-200) !important;
+    color: var(--color-error) !important;
     padding: 0.2rem 0.4rem !important;
     border-radius: 5px !important;
     font-size: 0.88em !important;
@@ -406,13 +329,41 @@
     margin: 0 0.2em !important;
   }
 
-  .dark .prose code:not(pre code) {
-    background-color: #1e293b !important;
-    color: #f87171 !important;
-  }
-
   .prose code:not(pre code)::before,
   .prose code:not(pre code)::after {
     content: '' !important;
+  }
+}
+
+/* ==========================================================================
+   卡片 hover 微反馈（全站统一）
+   ========================================================================== */
+@utility card-hover {
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card-hover:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--color-base-content) 20%, transparent);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* ==========================================================================
+   View Transitions — 克制的根过渡淡入淡出
+   ========================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 250ms;
+  animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }

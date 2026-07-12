@@ -5,10 +5,23 @@ import { twMerge } from 'tailwind-merge';
 
 export interface Props extends Widget {
   containerClass?: string;
+  width?: 'wide' | 'narrow';
+  spacing?: 'default' | 'compact';
   ['as']?: HTMLTag;
 }
 
-const { id, isDark = false, containerClass = '', bg, as = 'section' } = Astro.props;
+const {
+  id,
+  isDark = false,
+  containerClass = '',
+  width = 'wide',
+  spacing = 'default',
+  bg,
+  as = 'section',
+} = Astro.props;
+
+const widthClass = width === 'narrow' ? 'max-w-4xl' : 'max-w-7xl';
+const spacingClass = spacing === 'compact' ? 'py-12 md:py-16' : 'py-16 md:py-20 lg:py-24';
 
 const WrapperTag = as;
 ---
@@ -16,22 +29,15 @@ const WrapperTag = as;
 <WrapperTag class="relative not-prose scroll-mt-[72px]" {...id ? { id } : {}}>
   <div class="absolute inset-0 pointer-events-none -z-[1]" aria-hidden="true">
     <slot name="bg">
-      {
-        bg ? (
-          <Fragment set:html={bg} />
-        ) : (
-          <div class:list={['absolute inset-0', { 'bg-dark dark:bg-transparent': isDark }]} />
-        )
-      }
+      {bg ? <Fragment set:html={bg} /> : <div class:list={['absolute inset-0', { 'bg-base-200': isDark }]} />}
     </slot>
   </div>
   <div
     class:list={[
       twMerge(
-        'relative mx-auto max-w-7xl px-4 md:px-6 py-16 md:py-20 lg:py-[80px] text-default intersect-once intersect-quarter intersect-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade',
+        `relative mx-auto ${widthClass} px-4 md:px-6 ${spacingClass} text-default intersect-once intersect-quarter intersect-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade`,
         containerClass
       ),
-      { dark: isDark },
     ]}
   >
     <slot />

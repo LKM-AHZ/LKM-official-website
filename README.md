@@ -51,7 +51,7 @@ pnpm run dev
 │   │   ├── images/           # 本地图片 / Local images
 │   │   └── styles/tailwind.css   # Tailwind v4 入口：主题、工具类、插件
 │   ├── components/
-│   │   ├── background/       # 动态背景 / Dynamic backgrounds (WebGL2 Sci-Fi)
+│   │   ├── background/       # 动态背景 / Dynamic background (tsParticles 星空)
 │   │   ├── blog/             # 博客组件 / Blog components
 │   │   ├── common/           # 通用组件 / Shared (Image, Metadata, Analytics 等)
 │   │   ├── ui/               # 基础 UI 组件 / Primitives (Button, Form, Headline 等)
@@ -66,7 +66,6 @@ pnpm run dev
 │   ├── content.config.ts     # 内容集合 Schema
 │   ├── navigation.ts         # 导航结构
 │   └── types.d.ts            # TypeScript 类型定义
-├── tools/                    # 辅助工具 / Helper scripts (team 页面生成)
 ├── vendor/integration/       # 自定义 Astro 集成 / Config loader
 ├── AGENTS.md                 # AI Agent 指令 / AI agent instructions
 ├── astro.config.ts           # Astro 配置
@@ -81,7 +80,7 @@ pnpm run dev
 | :-------------- | :------------- | :--------------------- | :------------- |
 | 首页 / Home     | `/`            | `pages/index.astro`    | PageLayout     |
 | 关于 / About    | `/about`       | `pages/about.astro`    | SidebarLayout  |
-| 团队 / Team     | `/team`        | `pages/team.astro`     | PageLayout     |
+| 团队 / Team     | `/team`        | `pages/team.astro`     | SidebarLayout  |
 | 服务 / Services | `/services`    | `pages/services.astro` | SidebarLayout  |
 | 定价 / Pricing  | `/pricing`     | `pages/pricing.astro`  | SidebarLayout  |
 | 联系 / Contact  | `/contact`     | `pages/contact.astro`  | SidebarLayout  |
@@ -148,14 +147,11 @@ analytics:
   --color-primary: ...;
   --font-heading: ...;
 }
-
-@utility btn { ... }
-@utility btn-primary { ... }
 ```
 
 **CSS Modules** — `.module.css` 文件自动局部作用域化，需在顶部加 `@reference "tailwindcss"` 以使用 `@apply`。
 
-**DaisyUI + KaTeX** — 组件库与数学公式渲染支持。
+**Shoelace + KaTeX** — 组件库与数学公式渲染支持。
 
 ---
 
@@ -196,14 +192,9 @@ pnpm run build   # 构建到 ./dist/
 
 ---
 
-## 辅助工具 · Tooling
+## 团队成员数据 · Team Data
 
-`tools/` 目录包含 team 页面的生成工具：
-
-| 文件               | 说明                                                    |
-| :----------------- | :------------------------------------------------------ |
-| `工作簿1.xlsx`     | 团队成员源数据（Excel 表格）/ Team member source data   |
-| `generate_team.py` | 从 Excel 生成 team 页面 / Generate team page from Excel |
+团队成员数据集中维护在 `src/data/members.ts`，按部门/小组分组导出（创始人、总务部、群务部、活动策划部、新闻办、顾问团、技术委员会、专业委员会等）。`src/pages/team.astro` 通过 `avatarMap` 将 `avatarKey` 映射到 `src/assets/images/member/` 下的头像图片，配合 `MemberCard` / `DepartmentSection` 组件渲染。
 
 ---
 
@@ -222,7 +213,7 @@ UI 层         src/components/ui/ (Button, Form, Headline, Timeline...)
   ↓
 Common 层     src/components/common/ (Image, Metadata, Analytics...)
   ↓
-Background 层  src/components/background/ (WebGL2 Sci-Fi 动态背景)
+Background 层  src/components/background/ (tsParticles 星空动态背景)
   ↓
 数据层        src/data/post/ + src/utils/
 ```
@@ -233,14 +224,14 @@ Background 层  src/components/background/ (WebGL2 Sci-Fi 动态背景)
 
 - **Astro v6** 静态站点生成 / Static site generation，PageSpeed Insights 评分优秀
 - **Tailwind CSS v4** CSS-first 配置 / CSS-first config，暗色模式 / Dark mode
-- **WebGL2 Sci-Fi 动态背景** / Dynamic sci-fi 3D background
+- **tsParticles 星空动态背景** / Dynamic starfield particle background（首页 Hero，暗色/移动端自适应）
 - **CSS Modules** 局部作用域样式 / Locally scoped styles
 - **Vue 3 + React 19** 双 UI 框架支持 / Dual UI framework support
 - **SEO 友好** / SEO: Sitemap, RSS, Open Graph, Twitter Card
 - **图片优化** / Image optimization: Sharp + Unpic CDN
 - **博客系统** / Blog: MD/MDX, 分类/标签, 分页, KaTeX 公式
 - **View Transitions** SPA 风格页面切换 / SPA-style page transitions
-- **DaisyUI + KaTeX** 组件库 + 数学公式 / Component library + math rendering
+- **Shoelace + KaTeX** 组件库 + 数学公式 / Component library + math rendering
 - **团队成员数据驱动** / Data-driven team page
 - **多平台部署** / Multi-platform deploy: Vercel, Netlify, any static host
 - **AI Agent 指令** / AI agent instructions in [AGENTS.md](./AGENTS.md)

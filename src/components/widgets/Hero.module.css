@@ -9,9 +9,11 @@
 }
 
 .heroHeading {
-  @apply text-[40px] md:text-[56px] font-semibold mb-4 leading-[1.07] tracking-[-0.005em] text-[#1d1d1f] dark:text-white;
+  @apply text-[40px] md:text-[56px] font-semibold mb-4 leading-[1.07] tracking-[-0.005em];
+  color: var(--color-base-content);
 }
 
 .heroSubtitle {
-  @apply text-[17px] sm:text-[21px] mb-6 text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed;
+  @apply text-[17px] sm:text-[21px] mb-6 leading-relaxed;
+  color: var(--color-neutral);
 }
