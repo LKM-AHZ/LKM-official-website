@@ -29,6 +29,7 @@ pnpm-debug.log*
 .claude
 .codex
 .codegraph
+.superpowers/
 
 # python venv
 .venv/
