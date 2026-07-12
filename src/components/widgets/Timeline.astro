@@ -17,7 +17,7 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<ul class="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical w-full">
+<ul class="relative w-full">
   {
     items.map((item, index) => (
       <TimelineItem

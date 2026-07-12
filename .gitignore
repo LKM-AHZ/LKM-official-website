@@ -36,3 +36,5 @@ pnpm-debug.log*
 # tools output
 tools/
 
+# reference material (astro templates, not committed)
+reference/astro-templates/

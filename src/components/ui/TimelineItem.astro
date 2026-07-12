@@ -23,22 +23,38 @@ const {
 } = Astro.props;
 
 const isEven = index % 2 === 0;
-const showStartLine = index > 0;
 const showEndLine = index < total - 1;
 ---
 
-<li>
-  {showStartLine && <hr />}
+<li class="relative pb-10 last:pb-0 md:grid md:grid-cols-[1fr_2rem_1fr] md:items-start md:gap-x-6">
+  {/* 中轴竖线：移动端贴左(left-4)，桌面端居中(left-1/2) */}
+  {
+    showEndLine && (
+      <span
+        class="absolute left-4 top-8 -ml-px h-full w-0.5 bg-base-300 md:left-1/2"
+        aria-hidden="true"
+      />
+    )
+  }
 
-  <div class="timeline-middle">
+  {/* 节点图标：移动端 absolute 贴左；桌面端进入 grid 中列 */}
+  <div
+    class="absolute left-0 top-0 z-10 flex h-8 w-8 items-center justify-center md:static md:col-start-2 md:justify-self-center"
+  >
     <Icon name={iconName} class:list={['h-8 w-8', iconColor]} />
   </div>
 
-  <div class:list={[isEven ? 'timeline-start mb-10 md:text-end' : 'timeline-end md:mb-10']}>
-    <time class="font-mono text-[12px] text-[#7a7a7a] dark:text-[#cccccc]">{year}</time>
-    <div class="text-[17px] font-semibold text-[#1d1d1f] dark:text-white">{title}</div>
-    <p class="text-[14px] text-[#7a7a7a] dark:text-[#cccccc] leading-relaxed max-w-xl">{description}</p>
+  {/* 内容：移动端统一右侧(pl-12)；桌面端奇偶交错左右 */}
+  <div class:list={['pl-12 md:pl-0', isEven ? 'md:col-start-1 md:text-end' : 'md:col-start-3']}>
+    <time class="font-mono text-[12px] text-neutral">{year}</time>
+    <div class="text-[17px] font-semibold text-base-content">{title}</div>
+    <p
+      class:list={[
+        'text-[14px] text-neutral leading-relaxed max-w-xl',
+        isEven ? 'md:ml-auto' : '',
+      ]}
+    >
+      {description}
+    </p>
   </div>
-
-  {showEndLine && <hr />}
 </li>

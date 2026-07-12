@@ -1,22 +1,23 @@
-import { Particles, ParticlesProvider } from "@tsparticles/react";
-import { loadStarsPreset } from "@tsparticles/preset-stars";
-import { useCallback, useEffect, useState } from "react";
+import { Particles, ParticlesProvider } from '@tsparticles/react';
+import { loadStarsPreset } from '@tsparticles/preset-stars';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const MOBILE_BREAKPOINT = 768;
 
 function getIsDark(): boolean {
-  if (typeof document === "undefined") return true;
-  return document.documentElement.classList.contains("dark");
+  if (typeof document === 'undefined') return true;
+  return document.documentElement.getAttribute('data-theme') === 'lkm-dark';
 }
 
 function getIsMobile(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   return window.innerWidth < MOBILE_BREAKPOINT;
 }
 
 export default function ParticleBackground() {
-  const [isDark, setIsDark] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  // 惰性初始化：client:only 下 document 已存在，首帧即取到正确主题，避免闪烁
+  const [isDark, setIsDark] = useState(getIsDark);
+  const [isMobile, setIsMobile] = useState(getIsMobile);
 
   useEffect(() => {
     setIsDark(getIsDark());
@@ -27,15 +28,15 @@ export default function ParticleBackground() {
     });
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["class"],
+      attributeFilter: ['data-theme'],
     });
 
     const onResize = () => setIsMobile(getIsMobile());
-    window.addEventListener("resize", onResize);
+    window.addEventListener('resize', onResize);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
@@ -43,52 +44,55 @@ export default function ParticleBackground() {
   // with the stars preset. Without ParticlesProvider, the Particles
   // component never fires its load() because loaded context stays false.
   const engineInit = useCallback(async () => {
-    const engine = await import("@tsparticles/engine");
+    const engine = await import('@tsparticles/engine');
     await loadStarsPreset(engine.tsParticles);
   }, []);
 
-  const options = {
-    preset: "stars",
-    fullScreen: false,
-    background: {
-      color: "transparent",
-    },
-    particles: {
-      number: {
-        value: isMobile ? 40 : 70,
+  const options = useMemo(
+    () => ({
+      preset: 'stars',
+      fullScreen: false,
+      background: {
+        color: 'transparent',
       },
-      color: {
-        value: isDark ? ["#2997ff", "#ffffff"] : ["#f59e0b", "#fbbf24"],
-      },
-      move: {
-        enable: true,
-        speed: 0.3,
-        random: true,
-        straight: false,
-      },
-    },
-    interactivity: {
-      events: {
-        onHover: {
+      particles: {
+        number: {
+          value: isMobile ? 40 : 70,
+        },
+        color: {
+          value: isDark ? ['#5e6ad2', '#ffffff'] : ['#f59e0b', '#fbbf24'],
+        },
+        move: {
           enable: true,
-          mode: "grab",
-        },
-        onClick: {
-          enable: true,
-          mode: "repulse",
+          speed: 0.3,
+          random: true,
+          straight: false,
         },
       },
-      modes: {
-        grab: {
-          distance: 140,
+      interactivity: {
+        events: {
+          onHover: {
+            enable: true,
+            mode: 'grab',
+          },
+          onClick: {
+            enable: true,
+            mode: 'repulse',
+          },
         },
-        repulse: {
-          distance: 100,
-          duration: 0.4,
+        modes: {
+          grab: {
+            distance: 140,
+          },
+          repulse: {
+            distance: 100,
+            duration: 0.4,
+          },
         },
       },
-    },
-  };
+    }),
+    [isDark, isMobile]
+  );
 
   return (
     <ParticlesProvider init={engineInit}>
@@ -96,11 +100,11 @@ export default function ParticleBackground() {
         id="tsparticles"
         options={options}
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 0,
-          width: "100%",
-          height: "100%",
+          width: '100%',
+          height: '100%',
         }}
       />
     </ParticlesProvider>

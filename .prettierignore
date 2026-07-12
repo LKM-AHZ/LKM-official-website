@@ -4,3 +4,5 @@ node_modules
 .changeset
 pnpm-lock.yaml
 package-lock.json
+.superpowers
+reference
