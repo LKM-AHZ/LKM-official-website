@@ -6,3 +6,4 @@ pnpm-lock.yaml
 package-lock.json
 .superpowers
 reference
+src/vendor

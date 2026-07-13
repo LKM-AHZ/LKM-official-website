@@ -31,6 +31,14 @@ export default [
     files: ['**/*.{js,jsx,astro}'],
     rules: {
       'no-mixed-spaces-and-tabs': ['error', 'smart-tabs'],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
     },
   },
   {
@@ -61,14 +69,6 @@ export default [
     },
   },
   {
-    ignores: [
-      'dist',
-      'node_modules',
-      '.github',
-      'reference',
-      'types.generated.d.ts',
-      '.astro',
-      'src/components/blog/SinglePost.astro',
-    ],
+    ignores: ['dist', 'node_modules', '.github', 'reference', 'types.generated.d.ts', '.astro'],
   },
 ];
