@@ -121,8 +121,8 @@ export const footerData = {
     { text: '隐私政策', href: getPermalink('/privacy') },
   ],
   socialLinks: [
-    { ariaLabel: 'RSS', icon: 'tabler:rss', href: getAsset('/rss.xml') },
     { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/LKM-AHZ' },
+    { ariaLabel: 'RSS', icon: 'tabler:rss', href: getAsset('/rss.xml') },
   ],
   footNote: `
     理科迷 LKM &copy; 2026 · 保留所有权利。
