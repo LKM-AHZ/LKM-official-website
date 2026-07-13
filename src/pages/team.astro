@@ -24,8 +24,8 @@ import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
 // 自动导入所有成员头像
-const avatarModules = import.meta.glob('~/assets/images/member/*.{jpg,jpeg,png}', { 
-  eager: true 
+const avatarModules = import.meta.glob('~/assets/images/member/*.{jpg,jpeg,png}', {
+  eager: true,
 });
 
 // 缓存映射表，避免重复查找
@@ -33,22 +33,22 @@ const avatarCache = new Map<string, ImageMetadata>();
 
 function getAvatar(filename?: string): ImageMetadata | undefined {
   if (!filename) return undefined;
-  
+
   // 如果缓存中有，直接返回
   if (avatarCache.has(filename)) {
     return avatarCache.get(filename);
   }
-  
+
   // 构建完整路径（与 glob 中的路径匹配）
   const fullPath = `/src/assets/images/member/${filename}`;
   const module = avatarModules[fullPath];
-  
+
   if (module && typeof module === 'object' && 'default' in module) {
     const image = module.default as ImageMetadata;
     avatarCache.set(filename, image);
     return image;
   }
-  
+
   // 如果找不到图片，返回 undefined（组件内部会处理默认头像）
   return undefined;
 }
