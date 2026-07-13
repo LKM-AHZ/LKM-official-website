@@ -17,7 +17,7 @@ The official website of the LKM (LiKeMi) open-source organization — a static s
 > **Node.js >= 24.0.0** | **pnpm >= 11.0.0**
 
 ```bash
-git clone https://github.com/LKM-2014/LKM-official-website.git
+git clone https://github.com/LKM-AHZ/LKM-official-website.git
 cd LKM-official-website
 pnpm install
 pnpm run dev
@@ -108,7 +108,7 @@ import { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } from 'astrowind:config'
 ```yaml
 site:
   name: 'LKM'
-  site: 'https://LKM-2014.github.io'
+  site: 'https://LKM-AHZ.github.io'
   base: '/LKM-official-website'
 metadata:
   title:

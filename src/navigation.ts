@@ -122,7 +122,7 @@ export const footerData = {
   ],
   socialLinks: [
     { ariaLabel: 'RSS', icon: 'tabler:rss', href: getAsset('/rss.xml') },
-    { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/LKM-official' },
+    { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/LKM-AHZ' },
   ],
   footNote: `
     理科迷 LKM &copy; 2026 · 保留所有权利。
