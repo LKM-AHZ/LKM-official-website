@@ -3,6 +3,8 @@
 [![Astro](https://img.shields.io/badge/Astro-v6-FF5D01?logo=astro)](https://astro.build)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![Three.js](https://img.shields.io/badge/Three.js-0.178-000000?logo=threedotjs)](https://threejs.org)
 
 理科迷 (LKM) 组织的官方网站，基于 [AstroWind](https://github.com/arthelokyo/astrowind) 模板构建，采用 **Astro v6 + Tailwind CSS v4** 的纯静态站点。
 
@@ -51,7 +53,7 @@ pnpm run dev
 │   │   ├── images/                # 本地图片 / Local images
 │   │   └── styles/tailwind.css    # Tailwind v4 入口：主题、工具类、插件
 │   ├── components/
-│   │   ├── background/       # 动态背景 / Dynamic background (tsParticles 星空)
+│   │   ├── background/       # 动态背景 / Dynamic background (interactive-backgrounds, 13 种可切换效果)
 │   │   ├── blog/             # 博客组件 / Blog components
 │   │   ├── common/           # 通用组件 / Shared (Image, Metadata, Analytics 等)
 │   │   ├── ui/               # 基础 UI 组件 / Primitives (Button, Form, Headline 等)
@@ -66,6 +68,7 @@ pnpm run dev
 │   ├── content.config.ts     # 内容集合 Schema
 │   ├── navigation.ts         # 导航结构
 │   └── types.d.ts            # TypeScript 类型定义
+├── src/vendor/interactive-backgrounds/  # Vendored 背景组件源码
 ├── vendor/integration/       # 自定义 Astro 集成 / Config loader
 ├── AGENTS.md                 # AI Agent 指令 / AI agent instructions
 ├── astro.config.ts           # Astro 配置
@@ -213,7 +216,7 @@ UI 层         src/components/ui/ (Button, Form, Headline, Timeline...)
   ↓
 Common 层     src/components/common/ (Image, Metadata, Analytics...)
   ↓
-Background 层  src/components/background/ (tsParticles 星空动态背景)
+Background 层  src/components/background/ (13 种可切换动态背景：极光/数字雨/星座/DNA/星云等，3D 核苷酸模型可拖拽旋转)
   ↓
 数据层        src/data/post/ + src/utils/
 ```
@@ -224,14 +227,15 @@ Background 层  src/components/background/ (tsParticles 星空动态背景)
 
 - **Astro v6** 静态站点生成 / Static site generation，PageSpeed Insights 评分优秀
 - **Tailwind CSS v4** CSS-first 配置 / CSS-first config，暗色模式 / Dark mode
-- **tsParticles 星空动态背景** / Dynamic starfield particle background（首页 Hero，暗色/移动端自适应）
+- **13 种可切换动态背景** / 13 switchable interactive backgrounds（极光、数字雨、星座、DNA 2D/3D、星云等，自适应深浅主题）
+- **3D 核苷酸模型** / 3D nucleotide ball-and-stick models（腺嘌呤/胸腺嘧啶/鸟嘌呤/胞嘧啶完整结构，可拖拽旋转）
 - **CSS Modules** 局部作用域样式 / Locally scoped styles
 - **Vue 3 + React 19** 双 UI 框架支持 / Dual UI framework support
 - **SEO 友好** / SEO: Sitemap, RSS, Open Graph, Twitter Card
 - **图片优化** / Image optimization: Sharp + Unpic CDN
 - **博客系统** / Blog: MD/MDX, 分类/标签, 分页, KaTeX 公式
 - **View Transitions** SPA 风格页面切换 / SPA-style page transitions
-- **Shoelace + KaTeX** 组件库 + 数学公式 / Component library + math rendering
+- **daisyUI v5 + KaTeX** 组件库 + 数学公式 / Component library + math rendering
 - **团队成员数据驱动** / Data-driven team page
 - **多平台部署** / Multi-platform deploy: Vercel, Netlify, any static host
 - **AI Agent 指令** / AI agent instructions in [AGENTS.md](./AGENTS.md)
