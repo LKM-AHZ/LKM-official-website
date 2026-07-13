@@ -23,92 +23,38 @@ import {
 import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
-// --- 图片映射：avatarKey → ImageMetadata ---
-// 用到的图片文件名：
-import img_若有千寻 from '~/assets/images/member/若有千寻.jpg';
-import img_千寻 from '~/assets/images/member/千寻.jpg';
-import img_七月花 from '~/assets/images/member/七月花.jpg';
-import img_七月A from '~/assets/images/member/七月A.jpg';
-import img_七月有珠 from '~/assets/images/member/七月有珠.jpeg';
-import img_七月Lichlet from '~/assets/images/member/七月Lichlet.jpeg';
-import img_七月知更鸟 from '~/assets/images/member/七月知更鸟.jpeg';
-import img_七月阿鸿 from '~/assets/images/member/七月阿鸿.jpeg';
-import img_七月墨染 from '~/assets/images/member/七月墨染.png';
-import img_七月有枝 from '~/assets/images/member/七月有枝.jpeg';
-import img_七月komoyume from '~/assets/images/member/七月komoyume.jpeg';
-import img_七月止水 from '~/assets/images/member/七月止水.png';
-import img_七月清汉 from '~/assets/images/member/七月清汉.jpg';
-import img_七月爱畅依间 from '~/assets/images/member/七月爱畅依间.jpeg';
-import img_七月夏 from '~/assets/images/member/七月夏.jpeg';
-import img_七月清浅 from '~/assets/images/member/七月清浅.jpeg';
-import img_七月badragon from '~/assets/images/member/七月badragon.jpeg';
-import img_七月三七 from '~/assets/images/member/七月三七.jpeg';
-import img_七月MK from '~/assets/images/member/七月MK.png';
-import img_七月赤 from '~/assets/images/member/七月赤.jpeg';
-import img_七月草薙铃 from '~/assets/images/member/七月草薙铃.png';
-import img_七月一前 from '~/assets/images/member/七月一前.png';
-import img_七月星染 from '~/assets/images/member/七月星染.png';
-import img_七月吴理 from '~/assets/images/member/七月吴理.png';
-import img_七月upogg from '~/assets/images/member/七月upogg.jpeg';
-import img_七月大雄 from '~/assets/images/member/七月大雄.jpeg';
-import img_七月JoshuaXue from '~/assets/images/member/七月Joshua Xue.png';
-import img_七月 from '~/assets/images/member/七月.png';
-import img_七月Bcent from '~/assets/images/member/七月Bcent.jpeg';
-import img_七月阿泠 from '~/assets/images/member/七月阿泠.jpeg';
-import img_七月彼方 from '~/assets/images/member/七月彼方.jpeg';
-import img_七月胡冰阳 from '~/assets/images/member/七月胡冰阳.jpeg';
-import img_七月O from '~/assets/images/member/七月O.png';
-import img_七月汽水 from '~/assets/images/member/七月汽水.png';
-import img_七月星河 from '~/assets/images/member/七月星河.png';
-import img_七月tetrodotoxin from '~/assets/images/member/七月tetrodotoxin.jpeg';
-import img_七月狄离 from '~/assets/images/member/七月狄离.png';
-import img_七月文 from '~/assets/images/member/七月文.jpeg';
+// 自动导入所有成员头像
+const avatarModules = import.meta.glob('~/assets/images/member/*.{jpg,jpeg,png}', {
+  eager: true,
+});
 
-const avatarMap: Record<string, ImageMetadata> = {
-  '若有千寻.jpg': img_若有千寻,
-  '千寻.jpg': img_千寻,
-  '七月花.jpg': img_七月花,
-  '七月A.jpg': img_七月A,
-  '七月有珠.jpeg': img_七月有珠,
-  '七月Lichlet.jpeg': img_七月Lichlet,
-  '七月知更鸟.jpeg': img_七月知更鸟,
-  '七月阿鸿.jpeg': img_七月阿鸿,
-  '七月墨染.png': img_七月墨染,
-  '七月有枝.jpeg': img_七月有枝,
-  '七月komoyume.jpeg': img_七月komoyume,
-  '七月止水.png': img_七月止水,
-  '七月清汉.jpg': img_七月清汉,
-  '七月爱畅依间.jpeg': img_七月爱畅依间,
-  '七月夏.jpeg': img_七月夏,
-  '七月清浅.jpeg': img_七月清浅,
-  '七月badragon.jpeg': img_七月badragon,
-  '七月三七.jpeg': img_七月三七,
-  '七月MK.png': img_七月MK,
-  '七月赤.jpeg': img_七月赤,
-  '七月草薙铃.png': img_七月草薙铃,
-  '七月一前.png': img_七月一前,
-  '七月星染.png': img_七月星染,
-  '七月吴理.png': img_七月吴理,
-  '七月upogg.jpeg': img_七月upogg,
-  '七月大雄.jpeg': img_七月大雄,
-  '七月Joshua Xue.png': img_七月JoshuaXue,
-  '七月.png': img_七月,
-  '七月Bcent.jpeg': img_七月Bcent,
-  '七月阿泠.jpeg': img_七月阿泠,
-  '七月彼方.jpeg': img_七月彼方,
-  '七月胡冰阳.jpeg': img_七月胡冰阳,
-  '七月O.png': img_七月O,
-  '七月汽水.png': img_七月汽水,
-  '七月星河.png': img_七月星河,
-  '七月tetrodotoxin.jpeg': img_七月tetrodotoxin,
-  '七月狄离.png': img_七月狄离,
-  '七月文.jpeg': img_七月文,
-};
+// 缓存映射表，避免重复查找
+const avatarCache = new Map<string, ImageMetadata>();
 
-function getAvatar(key?: string): ImageMetadata | undefined {
-  if (!key) return undefined;
-  return avatarMap[key];
+function getAvatar(filename?: string): ImageMetadata | undefined {
+  if (!filename) return undefined;
+
+  // 如果缓存中有，直接返回
+  if (avatarCache.has(filename)) {
+    return avatarCache.get(filename);
+  }
+
+  // 构建完整路径（与 glob 中的路径匹配）
+  const fullPath = `/src/assets/images/member/${filename}`;
+  const module = avatarModules[fullPath];
+
+  if (module && typeof module === 'object' && 'default' in module) {
+    const image = module.default as ImageMetadata;
+    avatarCache.set(filename, image);
+    return image;
+  }
+
+  // 如果找不到图片，返回 undefined（组件内部会处理默认头像）
+  return undefined;
 }
+
+// 导出 getAvatar 供子组件使用
+export { getAvatar };
 
 const metadata = {
   title: '管理团队 —— 理科迷',
