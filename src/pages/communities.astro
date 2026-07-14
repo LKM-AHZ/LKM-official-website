@@ -1,0 +1,48 @@
+---
+import Layout from '~/layouts/SidebarLayout.astro';
+import CommunityCard from '~/components/CommunityCard.astro';
+import CommunitySection from '~/components/CommunitySection.astro';
+
+import { communityCategories, communityNote } from '~/data/communities';
+import { teamTopTabs } from '~/navigation';
+import { getPermalink } from '~/utils/permalinks';
+
+const metadata = {
+  title: 'QQ社群 —— 理科迷',
+};
+
+const sidebarLinks = [
+  { text: '爱好者总群', href: getPermalink('/communities#general') },
+  { text: '年级分段分群', href: getPermalink('/communities#grades') },
+  { text: '群体分类分群', href: getPermalink('/communities#groups') },
+  { text: '自然/基础学科', href: getPermalink('/communities#basic') },
+  { text: '应用科学', href: getPermalink('/communities#applied') },
+  { text: '兴趣板块社团', href: getPermalink('/communities#hobby') },
+  { text: '常驻活动', href: getPermalink('/communities#events') },
+  { text: '原始老群', href: getPermalink('/communities#legacy') },
+];
+
+const sectionIds = ['general', 'grades', 'groups', 'basic', 'applied', 'hobby', 'events', 'legacy'];
+---
+
+<Layout
+  metadata={metadata}
+  topTabs={teamTopTabs}
+  sidebarLinks={sidebarLinks}
+  currentPath={getPermalink('/communities')}
+>
+  {
+    communityCategories.map((cat, i) => (
+      <CommunitySection id={sectionIds[i]} title={cat.label} intro={cat.intro}>
+        {cat.groups.map((g) => (
+          <CommunityCard name={g.name} qqGroup={g.qqGroup} desc={g.desc} isQQChannel={g.isQQChannel} />
+        ))}
+      </CommunitySection>
+    ))
+  }
+
+  <!-- 底部注记 -->
+  <div class="max-w-7xl mx-auto mt-4">
+    <p class="text-center text-sm text-neutral/60 italic">{communityNote}</p>
+  </div>
+</Layout>

@@ -1,0 +1,29 @@
+---
+import Section from '~/components/widgets/Section.astro';
+
+export interface Props {
+  title: string;
+  intro?: string;
+  id?: string;
+}
+
+const { title, intro, id } = Astro.props;
+---
+
+<Section id={id}>
+  <div class="max-w-7xl mx-auto">
+    <h3 class="text-xl font-bold mb-2 text-center">
+      <span class="border-b-2 border-primary pb-1">{title}</span>
+    </h3>
+    {
+      intro && (
+        <p class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed card-hover intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+          {intro}
+        </p>
+      )
+    }
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <slot />
+    </div>
+  </div>
+</Section>
