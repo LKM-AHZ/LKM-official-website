@@ -1,14 +1,14 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useRef, useState } from 'react';
 import { useColorMode } from './useColorMode';
-const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStrandColor, className = '', particleColor: propParticleColor, connectionColor: propConnectionColor, rippleColor: propRippleColor, color: propColor, _constfill = 'white', _text = '' }) => {
+const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStrandColor, className = '', particleColor: propParticleColor, connectionColor: propConnectionColor, rippleColor: propRippleColor,
+ }) => {
     const mode = useColorMode();
     const sparkColor = propSparkColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');
     const strandColor = propStrandColor || (mode === 'dark' ? 'rgba(64,224,208,0.6)' : 'rgba(0,0,0,0.2)');
     const particleColor = propParticleColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');
     const connectionColor = propConnectionColor || (mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)');
     const rippleColor = propRippleColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.08)');
-    const _color = propColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');
     const canvasRef = useRef(null);
     const animationRef = useRef();
     const particlesRef = useRef([]);
@@ -50,7 +50,6 @@ const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStran
             const centerX = dimensions.width / 2;
             const centerY = dimensions.height / 2;
             const angle1 = Math.atan2(basePair.y1 - centerY, basePair.x1 - centerX);
-            const _angle2 = Math.atan2(basePair.y2 - centerY, basePair.x2 - centerX);
             // Set initial velocity for explosion effect
             basePair.velocityX = Math.cos(angle1) * 10;
             basePair.velocityY = Math.sin(angle1) * 10;
@@ -66,20 +65,6 @@ const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStran
         });
     };
     // Function to create spark at position
-    const _createSparks = (x, y, count) => {
-        for (let i = 0; i < count; i++) {
-            particlesRef.current.push({
-                x,
-                y,
-                vx: (Math.random() - 0.5) * 10,
-                vy: (Math.random() - 0.5) * 10,
-                size: Math.random() * 2 + 1,
-                opacity: Math.random() * 0.8 + 0.2,
-                angle: Math.random() * Math.PI * 2,
-                speed: Math.random() * 0.05 + 0.02
-            });
-        }
-    };
     useEffect(() => {
         const updateDimensions = () => {
             setDimensions({
@@ -149,7 +134,8 @@ const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStran
                 const startX2 = Math.random() * dimensions.width;
                 const startY2 = Math.random() * dimensions.height;
                 // Target positions (will be calculated later)
-                const _targetY = i * 25;
+
+
                 basePairsRef.current.push({
                     base1,
                     base2,
@@ -532,7 +518,6 @@ const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStran
             ctx.strokeStyle = gradient1;
             ctx.lineWidth = 4;
             ctx.lineCap = 'round';
-            let _prevX1 = 0, _prevY1 = 0;
             for (let y = -100; y < helixHeight; y += verticalSpacing) {
                 const waveAmplitude = Math.sin(waveOffset + y * 0.01) * 10;
                 const x1 = centerX + Math.sin(y * frequency + t) * (amplitude + waveAmplitude);
@@ -545,8 +530,6 @@ const DNASparkBackground = ({ sparkColor: propSparkColor, strandColor: propStran
                     ctx.globalAlpha = 0.3 + scale1 * 0.7;
                     ctx.lineTo(x1, y);
                 }
-                _prevX1 = x1;
-                _prevY1 = y;
             }
             ctx.stroke();
             // Draw second backbone strand

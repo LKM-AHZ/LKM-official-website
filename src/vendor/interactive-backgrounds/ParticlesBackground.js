@@ -1,7 +1,8 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useRef } from 'react';
 import { useColorMode } from './useColorMode';
-const ParticlesBackground = ({ particleCount = null, mouseRadius = 150, particleColor: propParticleColor, connectionColor: propConnectionColor, rippleColor: propRippleColor, className = '', particleSizeMin = 0.5, particleSizeMax = 3, particleSpeedMultiplier = 1, connectionDistance = 120, connectionOpacityMultiplier = 0.3, _rippleMaxRadius = 150, rippleGrowthRate = 3, rippleLineWidth = 2 }) => {
+const ParticlesBackground = ({ particleCount = null, mouseRadius = 150, particleColor: propParticleColor, connectionColor: propConnectionColor, rippleColor: propRippleColor, className = '', particleSizeMin = 0.5, particleSizeMax = 3, particleSpeedMultiplier = 1, connectionDistance = 120, connectionOpacityMultiplier = 0.3, 
+rippleGrowthRate = 3, rippleLineWidth = 2 }) => {
     const mode = useColorMode();
     // Theme-aware color defaults
     const particleColor = propParticleColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');

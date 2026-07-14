@@ -2,15 +2,14 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useColorMode } from './useColorMode';
-const DNASparkBackground3D = ({ sparkColor: propSparkColor, strandColor: propStrandColor, className = '', particleColor: propParticleColor, connectionColor: propConnectionColor, rippleColor: propRippleColor, color: propColor, _constfill = 'white', _text = '', basePairCount = 40, helixRadius = 25, helixHeight = 400, _basePairSpacing = 10, backboneSegments = 100, backboneRadius = 2, baseSphereRadius = 4, baseSphereSegments = 16, particleCount = 100, particleSize = 1, particleSpeedMin = 0.01, particleSpeedMax = 0.03, glowRadius = 30, glowIntensityMultiplier = 0.3, cameraOrbitRadius = 200, cameraOrbitSpeed = 0.1, dnaRotationSpeed = 0.2, particleOrbitalAmplitude = 0.1, rippleGrowthRate = 0.1, rippleFadeRate = 0.02 }) => {
+const DNASparkBackground3D = ({ sparkColor: propSparkColor, strandColor: propStrandColor, className = '', particleColor: propParticleColor, connectionColor: propConnectionColor, rippleColor: propRippleColor, basePairCount = 40, helixRadius = 25, helixHeight = 400, backboneSegments = 100, backboneRadius = 2, baseSphereRadius = 4, baseSphereSegments = 16, particleCount = 100, particleSize = 1, particleSpeedMin = 0.01, particleSpeedMax = 0.03, glowRadius = 30, glowIntensityMultiplier = 0.3, cameraOrbitRadius = 200, cameraOrbitSpeed = 0.1, dnaRotationSpeed = 0.2, particleOrbitalAmplitude = 0.1, rippleGrowthRate = 0.1, rippleFadeRate = 0.02 }) => {
     const mode = useColorMode();
     const sparkColor = propSparkColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');
     const strandColor = propStrandColor || (mode === 'dark' ? 'rgba(64,224,208,0.6)' : 'rgba(0,0,0,0.2)');
     const particleColor = propParticleColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');
     const connectionColor = propConnectionColor || (mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)');
     const rippleColor = propRippleColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.08)');
-    const _color = propColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)');
-    const mountRef = useRef(null);
+        const mountRef = useRef(null);
     const sceneRef = useRef();
     const rendererRef = useRef();
     const cameraRef = useRef();
@@ -631,7 +630,7 @@ const DNASparkBackground3D = ({ sparkColor: propSparkColor, strandColor: propStr
             const normY = (idx - 1.5) / 4; // -0.375, -0.125, 0.125, 0.375
             const wx = sideMul * halfW * 0.45;
             const wy = -normY * halfH * 1.3;
-            const _wz = 60; // forward of DNA origin toward camera
+
 
             const group = buildNucleotide(s.base, wx, wy);
             scene.add(group);

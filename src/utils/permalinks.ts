@@ -42,12 +42,23 @@ export const getCanonical = (path = ''): string | URL => {
 export const getPermalink = (slug = '', type = 'page'): string => {
   let permalink: string;
 
+  // Detect hash-only links (e.g. '#team') — prepend base path
+  if (slug.startsWith('#') || slug.startsWith('javascript:')) {
+    return slug;
+  }
+
+  // Detect URL with hash (e.g. '/#team') — handle base + hash correctly
+  const hashIndex = slug.indexOf('#');
+  if (hashIndex > 0) {
+    const pathPart = slug.substring(0, hashIndex);
+    const hashPart = slug.substring(hashIndex);
+    return definitivePermalink(createPath(pathPart)) + hashPart;
+  }
+
   if (
     slug.startsWith('https://') ||
     slug.startsWith('http://') ||
-    slug.startsWith('://') ||
-    slug.startsWith('#') ||
-    slug.startsWith('javascript:')
+    slug.startsWith('://')
   ) {
     return slug;
   }

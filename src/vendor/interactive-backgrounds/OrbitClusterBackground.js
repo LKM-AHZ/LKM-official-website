@@ -1,7 +1,8 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useRef } from 'react';
 import { useColorMode } from './useColorMode';
-const OrbitClusterBackground = ({ clusterCount = 6, particlesPerCluster = 25, color: propColor, className = '', orbitDistanceMin = 20, orbitDistanceMax = 80, orbitSpeedMin = 0.001, orbitSpeedMax = 0.004, particleSizeMin = 0.8, particleSizeMax = 2.5, _gravityWarpStrength = 20, _gravityWarpDecay = 0.9, parallaxMultiplier = 0.001 }) => {
+const OrbitClusterBackground = ({ clusterCount = 6, particlesPerCluster = 25, color: propColor, className = '', orbitDistanceMin = 20, orbitDistanceMax = 80, orbitSpeedMin = 0.001, orbitSpeedMax = 0.004, particleSizeMin = 0.8, particleSizeMax = 2.5, 
+parallaxMultiplier = 0.001 }) => {
     const mode = useColorMode();
     const color = propColor || (mode === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)');
     const canvasRef = useRef(null);

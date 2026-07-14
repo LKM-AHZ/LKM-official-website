@@ -180,15 +180,21 @@ import { UI } from 'astrowind:config';
   function handleAnchorScroll() {
     const hash = location.hash;
     if (hash) {
-      const target = document.querySelector(hash);
-      if (target) {
-        // Defer to ensure DOM is fully painted after View Transition
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            target.scrollIntoView({ behavior: 'smooth' });
-          });
-        });
-      }
+      let attempts = 0;
+      const maxAttempts = 10;
+      const tryScroll = () => {
+        const target = document.querySelector(hash);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        } else if (attempts < maxAttempts) {
+          attempts++;
+          requestAnimationFrame(tryScroll);
+        }
+      };
+      // Defer to ensure DOM is fully painted after View Transition
+      requestAnimationFrame(() => {
+        requestAnimationFrame(tryScroll);
+      });
     }
   }
 

@@ -1,8 +1,6 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useRef } from 'react';
-import { useColorMode } from './useColorMode';
 const DreamyHaloBackground = ({ baseHue = 280, className = '', blurOverlay = true, overlayOpacity = 0.3, haloCount = 20, haloRadiusMin = 50, haloRadiusMax = 150, pulseAmplitude = 20, saturation = 100, lightness = 85, }) => {
-    const _mode = useColorMode();
     const canvasRef = useRef(null);
     const animationRef = useRef(null);
     useEffect(() => {
