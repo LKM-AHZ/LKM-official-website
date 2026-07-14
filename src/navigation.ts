@@ -7,6 +7,7 @@ export const teamTopTabs = [
   { text: '服务', href: getPermalink('/services') },
   { text: '赞助与支持', href: getPermalink('/pricing') },
   { text: '联系我们', href: getPermalink('/contact') },
+  { text: 'QQ社群', href: getPermalink('/communities') },
 ];
 
 export const headerData = {
@@ -81,6 +82,10 @@ export const headerData = {
         {
           text: '联系我们',
           href: getPermalink('/contact'),
+        },
+        {
+          text: 'QQ社群',
+          href: getPermalink('/communities'),
         },
       ],
     },

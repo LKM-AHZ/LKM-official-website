@@ -9,14 +9,14 @@ import type { ImageMetadata } from 'astro';
 import {
   founderMembers,
   generalMembers,
-  affairsMembers,
+  affairsSubGroups,
   eventsMembers,
   newsMembers,
   newsSubGroups,
   advisorMembers,
   techMembers,
   professionalSubGroups,
-  projectMembers,
+  projectSubGroups,
   alumniMembers,
 } from '~/data/members';
 
@@ -80,7 +80,7 @@ const sidebarLinks = [
       {
         founderMembers.map((m) => (
           <MemberCard
-            name={m.name}
+            name={m.name ?? '匿名成员'}
             avatar={getAvatar(m.avatarKey)}
             role={m.role}
             size="lg"
@@ -102,7 +102,13 @@ const sidebarLinks = [
   >
     {
       generalMembers.map((m) => (
-        <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+        <MemberCard
+          name={m.name ?? '匿名成员'}
+          avatar={getAvatar(m.avatarKey)}
+          desc={m.desc}
+          dream={m.dream}
+          quote={m.quote}
+        />
       ))
     }
   </DepartmentSection>
@@ -113,17 +119,24 @@ const sidebarLinks = [
     title="七月团队 · 群务部"
     borderColor="#3b82f6"
     desc="该团队部门职责是负责各个平台上面社群秩序，把握群内风向，确保群处于活跃并且持续有效的学习讨论氛围当中，有情况的时候第一时间处理。群务部更适合有常驻某一平台社群的，并有一定的应急处理能力。"
+    noGrid
   >
     {
-      affairsMembers.map((m) => (
-        <MemberCard
-          name={m.name}
-          avatar={getAvatar(m.avatarKey)}
-          role={m.role}
-          desc={m.desc}
-          dream={m.dream}
-          quote={m.quote}
-        />
+      Object.entries(affairsSubGroups).map(([, group]) => (
+        <div class="mb-8">
+          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {group.members.map((m) => (
+              <MemberCard
+                name={m.name ?? '匿名成员'}
+                avatar={getAvatar(m.avatarKey)}
+                desc={m.desc}
+                dream={m.dream}
+                quote={m.quote}
+              />
+            ))}
+          </div>
+        </div>
       ))
     }
   </DepartmentSection>
@@ -138,7 +151,7 @@ const sidebarLinks = [
     {
       eventsMembers.map((m) => (
         <MemberCard
-          name={m.name}
+          name={m.name ?? '匿名成员'}
           avatar={getAvatar(m.avatarKey)}
           role={m.role}
           desc={m.desc}
@@ -160,7 +173,13 @@ const sidebarLinks = [
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {
         newsMembers.map((m) => (
-          <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+          <MemberCard
+            name={m.name ?? '匿名成员'}
+            avatar={getAvatar(m.avatarKey)}
+            desc={m.desc}
+            dream={m.dream}
+            quote={m.quote}
+          />
         ))
       }
     </div>
@@ -173,7 +192,13 @@ const sidebarLinks = [
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.members.map((m) => (
-              <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+              <MemberCard
+                name={m.name ?? '匿名成员'}
+                avatar={getAvatar(m.avatarKey)}
+                desc={m.desc}
+                dream={m.dream}
+                quote={m.quote}
+              />
             ))}
           </div>
         </div>
@@ -191,7 +216,7 @@ const sidebarLinks = [
     {
       advisorMembers.map((m) => (
         <MemberCard
-          name={m.name}
+          name={m.name ?? '匿名成员'}
           avatar={getAvatar(m.avatarKey)}
           role={m.role}
           desc={m.desc}
@@ -216,7 +241,13 @@ const sidebarLinks = [
           <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.members.map((m) => (
-              <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
+              <MemberCard
+                name={m.name ?? '匿名成员'}
+                avatar={getAvatar(m.avatarKey)}
+                desc={m.desc}
+                dream={m.dream}
+                quote={m.quote}
+              />
             ))}
           </div>
         </div>
@@ -234,7 +265,7 @@ const sidebarLinks = [
     {
       techMembers.map((m) => (
         <MemberCard
-          name={m.name}
+          name={m.name ?? '匿名成员'}
           avatar={getAvatar(m.avatarKey)}
           role={m.role}
           desc={m.desc}
@@ -245,21 +276,37 @@ const sidebarLinks = [
     }
   </DepartmentSection>
 
-  <!-- 项目团队成员 -->
-  <Section id="project">
-    <div class="max-w-7xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
-        <span class="border-b-2 border-base-300 pb-1">项目团队成员</span>
-      </h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {
-          projectMembers.map((m) => (
-            <MemberCard name={m.name} avatar={getAvatar(m.avatarKey)} desc={m.desc} dream={m.dream} quote={m.quote} />
-          ))
-        }
-      </div>
-    </div>
-  </Section>
+  <!-- 项目团队 -->
+  <DepartmentSection
+    id="project"
+    title="项目团队"
+    borderColor="#14b8a6"
+    desc="项目团队负责理科迷的各项实际项目推进，从教材编写到科普传播，将想法落地为成果。"
+    noGrid
+  >
+    {
+      Object.entries(projectSubGroups).map(([, group]) => (
+        <div class="mb-8">
+          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
+          {group.members.length > 0 ? (
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {group.members.map((m) => (
+                <MemberCard
+                  name={m.name ?? '匿名成员'}
+                  avatar={getAvatar(m.avatarKey)}
+                  desc={m.desc}
+                  dream={m.dream}
+                  quote={m.quote}
+                />
+              ))}
+            </div>
+          ) : (
+            <p class="text-center text-sm text-neutral/50 py-6">暂无成员，期待你的加入</p>
+          )}
+        </div>
+      ))
+    }
+  </DepartmentSection>
 
   <!-- 已离开成员 -->
   <Section id="alumni">
@@ -276,7 +323,7 @@ const sidebarLinks = [
         {
           alumniMembers.map((m) => (
             <MemberCard
-              name={m.name}
+              name={m.name ?? '匿名成员'}
               avatar={getAvatar(m.avatarKey)}
               role={m.role}
               desc={m.desc}

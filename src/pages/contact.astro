@@ -54,8 +54,12 @@ const sidebarLinks = [
     items={[
       {
         title: '加入社区',
-        description: '通过官方 QQ 群组加入理科迷，与志同道合的伙伴一起交流。具体群号和入群方式请在留言中咨询。',
+        description: '理科迷拥有完善的QQ社群体系，涵盖年级分群、学科分群、兴趣社团等数十个群组。',
         icon: 'tabler:users-group',
+        callToAction: {
+          text: '查看全部社群',
+          href: getPermalink('/communities'),
+        },
       },
       {
         title: '合作建议',
