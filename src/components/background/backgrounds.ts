@@ -41,7 +41,6 @@ export type BackgroundId =
   | 'dna-spark-3d'
   | 'dreamy-halo'
   | 'fluid-smoke-flow'
-
   | 'orbit-cluster'
   | 'particles'
   | 'quantum-web'

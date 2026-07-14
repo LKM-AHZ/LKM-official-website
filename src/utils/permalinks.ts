@@ -55,11 +55,7 @@ export const getPermalink = (slug = '', type = 'page'): string => {
     return definitivePermalink(createPath(pathPart)) + hashPart;
   }
 
-  if (
-    slug.startsWith('https://') ||
-    slug.startsWith('http://') ||
-    slug.startsWith('://')
-  ) {
+  if (slug.startsWith('https://') || slug.startsWith('http://') || slug.startsWith('://')) {
     return slug;
   }
 
