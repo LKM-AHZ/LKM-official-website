@@ -8,7 +8,7 @@ import DNASparkBackground from '~/vendor/interactive-backgrounds/DNASparkBackgro
 import DNASparkBackground3D from '~/vendor/interactive-backgrounds/DNASparkBackground3D';
 import DreamyHaloBackground from '~/vendor/interactive-backgrounds/DreamyHaloBackground';
 import FluidSmokeFlowBackground from '~/vendor/interactive-backgrounds/FluidSmokeFlowBackground';
-import NebulaBackground from '~/vendor/interactive-backgrounds/NebulaBackground';
+
 import OrbitClusterBackground from '~/vendor/interactive-backgrounds/OrbitClusterBackground';
 import ParticlesBackground from '~/vendor/interactive-backgrounds/ParticlesBackground';
 import QuantumWebBackground from '~/vendor/interactive-backgrounds/QuantumWebBackground';
@@ -41,7 +41,7 @@ export type BackgroundId =
   | 'dna-spark-3d'
   | 'dreamy-halo'
   | 'fluid-smoke-flow'
-  | 'nebula'
+
   | 'orbit-cluster'
   | 'particles'
   | 'quantum-web'
@@ -116,15 +116,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     theme: 'dark',
     darkProps: { particleColor: '#5e6ad2' },
   },
-  {
-    id: 'nebula',
-    name: '星云',
-    component: NebulaBackground,
-    icon: '🌌',
-    theme: 'both',
-    darkProps: { baseColor: '#5e6ad2', glowColor: '#818cf8' },
-    lightProps: { baseColor: '#f59e0b', glowColor: '#fbbf24' },
-  },
+
   {
     id: 'orbit-cluster',
     name: '轨道集群',
@@ -148,7 +140,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     component: QuantumWebBackground,
     icon: '🕸',
     theme: 'dark',
-    darkProps: { quantumColor: '#5e6ad2', normalColor: '#818cf8', labelColor: '#ffffff', labelBg: '#1e1b4b' },
+    darkProps: { quantumColor: '#5e6ad2', normalColor: '#818cf8' },
   },
   {
     id: 'text-particles',
@@ -156,6 +148,6 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     component: TextParticlesBackground,
     icon: '🔤',
     theme: 'light',
-    lightProps: { color: '#f59e0b', text: '理科迷', fontSize: 300 },
+    lightProps: { color: '#3b82f6', text: '理科迷', fontSize: 300 },
   },
 ];

@@ -6,7 +6,7 @@ interface TimelineData {
   year: string;
   title: string;
   description: string;
-  iconColor?: string; // 支持单个数据项自定义颜色
+  iconColor?: string;
   iconName?: string;
 }
 
@@ -18,9 +18,13 @@ const { items } = Astro.props;
 ---
 
 <div class="tl-wrap relative w-full">
-  {/* 桌面端连接线：SVG 由脚本按圆点实际位置绘制（竖-圆角-横-圆角-竖，形状与折角一致） */}
-  <svg class="tl-svg hidden md:block" aria-hidden="true" fill="none" data-tl-svg>
-    <path data-tl-path fill="none" stroke="var(--color-base-300)" stroke-width="3" stroke-linecap="round"></path>
+  {/* 桌面端连接线 */}
+  <svg class="tl-svg hidden md:block" aria-hidden="true" fill="none" data-tl-svg-desktop>
+    <path data-tl-path fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round"></path>
+  </svg>
+  {/* 移动端连接线 */}
+  <svg class="tl-svg md:hidden" aria-hidden="true" fill="none" data-tl-svg-mobile>
+    <path data-tl-path fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round"></path>
   </svg>
 
   <ul class="relative w-full" data-tl-list>
@@ -44,7 +48,6 @@ const { items } = Astro.props;
   .tl-wrap {
     position: relative;
   }
-  /* SVG 覆盖整个时间线，位于圆点/文字下层 */
   .tl-svg {
     position: absolute;
     inset: 0;
@@ -56,19 +59,17 @@ const { items } = Astro.props;
 </style>
 
 <script>
-  const CORNER_RADIUS = 20; // 圆角半径(px)，与原折角一致
+  const CORNER_RADIUS = 20;
 
-  function buildPath(dots: { x: number; y: number }[]): string {
+  function buildPath(dots) {
     if (dots.length < 2) return '';
     let d = `M ${dots[0].x},${dots[0].y}`;
     for (let i = 0; i < dots.length - 1; i++) {
       const a = dots[i];
       const b = dots[i + 1];
       const ymid = (a.y + b.y) / 2;
-      // 圆角半径不超过半段高度，避免相邻圆角重叠
       const r = Math.min(CORNER_RADIUS, Math.abs(ymid - a.y), Math.abs(b.y - ymid));
       const dir = b.x > a.x ? 1 : -1;
-      // 竖直下降 → 圆角拐向 b.x → 水平 → 圆角拐向下 → 竖直到 b
       d += ` L ${a.x},${ymid - r}`;
       d += ` Q ${a.x},${ymid} ${a.x + dir * r},${ymid}`;
       d += ` L ${b.x - dir * r},${ymid}`;
@@ -78,45 +79,40 @@ const { items } = Astro.props;
     return d;
   }
 
-  function drawTimeline(wrap: Element) {
-    const svg = wrap.querySelector<SVGSVGElement>('[data-tl-svg]');
-    const path = wrap.querySelector<SVGPathElement>('[data-tl-path]');
-    const list = wrap.querySelector<HTMLElement>('[data-tl-list]');
-    if (!svg || !path || !list) return;
-
-    // 仅桌面端绘制（SVG 在移动端 hidden）
-    if (getComputedStyle(svg).display === 'none') return;
-
+  function drawOne(wrap, svg, dotEls, straight) {
+    const path = svg.querySelector('[data-tl-path]');
+    if (!path) return;
     const wrapRect = wrap.getBoundingClientRect();
-    const dots = Array.from(list.querySelectorAll<HTMLElement>('[data-tl-dot]')).map((dot) => {
+    const dots = Array.from(dotEls).map((dot: HTMLElement) => {
       const r = dot.getBoundingClientRect();
-      return {
-        x: r.left - wrapRect.left + r.width / 2,
-        y: r.top - wrapRect.top + r.height / 2,
-      };
+      return { x: r.left - wrapRect.left + r.width / 2, y: r.top - wrapRect.top + r.height / 2 };
     });
-
-    if (dots.length < 2) {
-      path.setAttribute('d', '');
-      return;
-    }
-
+    if (dots.length < 2) { path.setAttribute('d', ''); return; }
     svg.setAttribute('width', String(wrapRect.width));
     svg.setAttribute('height', String(wrapRect.height));
     svg.setAttribute('viewBox', `0 0 ${wrapRect.width} ${wrapRect.height}`);
-    path.setAttribute('d', buildPath(dots));
+    if (straight) {
+      path.setAttribute('d', dots.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.y}`).join(' '));
+    } else {
+      path.setAttribute('d', buildPath(dots));
+    }
+  }
+
+  function drawTimeline(wrap) {
+    const list = wrap.querySelector('[data-tl-list]');
+    if (!list) return;
+    const svgDesktop = wrap.querySelector('[data-tl-svg-desktop]');
+    if (svgDesktop) drawOne(wrap, svgDesktop, list.querySelectorAll('[data-tl-dot-desktop]'), false);
+    const svgMobile = wrap.querySelector('[data-tl-svg-mobile]');
+    if (svgMobile) drawOne(wrap, svgMobile, list.querySelectorAll('[data-tl-dot-mobile]'), true);
   }
 
   function initTimelines() {
-    const wraps = document.querySelectorAll('.tl-wrap');
-    wraps.forEach((wrap) => {
+    document.querySelectorAll('.tl-wrap').forEach((wrap) => {
       drawTimeline(wrap);
-      // 尺寸变化时重绘（响应式、字体加载、内容高度变化）
-      const ro = new ResizeObserver(() => drawTimeline(wrap));
-      ro.observe(wrap);
+      new ResizeObserver(() => drawTimeline(wrap)).observe(wrap);
     });
   }
 
-  // 初次加载 + 每次视图切换（Astro view transitions）后重绘
   document.addEventListener('astro:page-load', initTimelines);
 </script>

@@ -50,7 +50,7 @@ const metadata = {
     <Fragment slot="title">
       <div class="flex flex-col gap-4">
         <div
-          class="text-primary text-[40px] md:text-[56px] font-semibold leading-[1.07] tracking-[-0.005em] [text-shadow:0_0_1px_var(--color-primary-content)]"
+          class="text-[#6C2AD8] dark:text-primary text-[40px] md:text-[56px] font-semibold leading-[1.07] tracking-[-0.005em] [text-shadow:0_0_1px_var(--color-primary-content)]"
         >
           理科迷！
         </div>
@@ -64,13 +64,13 @@ const metadata = {
     </Fragment>
     <Fragment slot="subtitle">
       <div class="inline-block bg-base-100/30 backdrop-blur-md rounded-lg px-3 py-1 mb-2">
-        <span class="text-[17px] font-normal text-neutral leading-relaxed"> 由普罗大众组成的科技爱好者社区 </span>
+        <span class="text-[17px] font-normal text-neutral leading-relaxed"> 是由广大科技爱好者组成的社区 </span>
       </div>
 
       <div class="hidden sm:inline-block bg-base-100/30 backdrop-blur-md rounded-lg px-3 py-1.5">
         <span class="text-[14px] text-neutral leading-relaxed">
           <strong class="font-semibold text-primary mr-1">Here!</strong>
-          科学脱离了象牙塔的刻板与高冷，变成了每一个普通人对世界发问的好奇心。我们打破专业门槛，让每一位热爱理性、崇尚科学的普通人，都能在这里找到同频的伙伴，共同探索万物运转的奥秘。
+          在这里，科学与技术都脱离了学术象牙塔的刻板与遥远，变成了每一位都能够去迸发，对于世界发问的好奇心。触手可及，摆脱功利视视角，让更多人迸发对于知识的渴望，感受到理工科的美。我们打破专业门槛，让每一位热爱理性，崇尚科技的“爱好者”，也都能在这里找到同频的伙伴，共探万物运转的奥秘。
         </span>
       </div>
     </Fragment>
@@ -80,7 +80,6 @@ const metadata = {
     id="team"
     title="团队成员"
     subtitle="理科迷因为有你，所以更加精彩"
-    tagline="团队成员"
     items={[
       {
         title: '千寻',
@@ -120,7 +119,7 @@ const metadata = {
     </Fragment>
   </Features2>
 
-  <Section title="发展历程" subtitle="物换星移，春秋代序" tagline="发展历程" id="timeline">
+  <Section title="发展历程" subtitle="物换星移，春秋代序" id="timeline">
     <div class="flex justify-center"></div>
     <Timeline
       items={[
@@ -263,8 +262,7 @@ const metadata = {
   <BlogLatestPosts
     id="update"
     title="最近更新"
-    information={`如果不知道看什么，可以阅读这些文档来熟悉我们！
-                `}
+    information={'如果不知道看什么，可以阅读这些文档来熟悉我们！'}
   />
 
   <!-- FAQs Widget ******************* -->
@@ -273,28 +271,27 @@ const metadata = {
     id="faq"
     title="常见问题"
     subtitle="以下整理了用户关于 LKM 官方网站的常见疑问，帮助您快速了解项目特性和使用方式。"
-    tagline="常见问题"
     classes={{ container: 'max-w-4xl mx-auto' }}
     items={[
       {
         title: '理科迷是什么？',
         description:
-          '理科迷是一个由普罗大众组成的科技爱好者社区，创立于 2014 年。我们打破专业门槛，让每一位热爱理性、崇尚科学的人都能在这里找到同频的伙伴，共同探索万物运转的奥秘。',
+          '理科迷是一个由科技爱好者组成的社区，创立于 2014 年。我们打破专业门槛，让每一位热爱理性、崇尚科技的人都能在这里找到同频的伙伴，共同探索万物运转的奥秘。',
       },
       {
         title: '如何加入理科迷？',
         description:
-          '你可以通过理科迷官方 QQ 群组加入我们。目前设有初中群和高中群两个分群，为不同学段的成员提供更精准的交流空间。具体群号请查看联系我们页面。',
+          '你可以通过理科迷官方 QQ 群组加入我们。目前设有初中群和高中群两个分群，还有完整的基础学科和应用学科群，对不同学段、不同专业的成员提供更精准的交流空间。具体群号请查看联系我们页面。',
       },
       {
         title: '理科迷有哪些活动？',
         description:
-          '理科迷定期举办暑假活动、学科研讨会、科普内容创作等。七月团队·活动策划部负责统筹各项活动，欢迎关注官方宣传账号获取最新动态。',
+          '理科迷定期举办假期活动、学科研讨会、科普内容创作等。七月团队·活动策划部负责统筹各项活动，欢迎关注官方宣传账号获取最新动态。',
       },
       {
         title: '如何参与社区建设？',
         description:
-          '理科迷是一个共建共享的社区。你可以加入管理团队（总务部、群务部、新闻办等），也可以投稿科普文章、参与暑假活动策划，或是帮忙宣传推广。',
+          '理科迷是一个共建共享的社区。你可以加入管理团队（总务部、群务部、新闻办等），也可以加入项目团队（教材编写项目组、科普产出项目组等），也可以投稿作品文章、参加活动、帮忙宣传和推广。',
       },
       {
         title: '理科迷有网站或文档库吗？',

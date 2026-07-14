@@ -1,14 +1,11 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useRef } from 'react';
 import { useColorMode } from './useColorMode';
-const QuantumWebBackground = ({ quantumColor: propQuantumColor, normalColor: propNormalColor, backgroundColor: propBackgroundColor, labelColor: propLabelColor, labelBg: propLabelBg, densityDivisor = 5000, velocityMultiplier = 0.5, speedRange = [0.01, 0.05], phaseNoise = 0.01, velocityDamping = 0.98, quantumRadiusRange = [1, 3], normalRadiusRange = [0.5, 2], opacityRange = [0.2, 0.6], trailMaxRange = [5, 15], mouseRadius = 150, attractionForceFactor = 0.01, repulsionForceFactor = 0.05, connectionDistance = 150, connectionBaseOpacity = 0.7, connectionPulseRate = 3, connectionStrengthRange = [0.01, 0.06], connectionLineWidth = 1, glowMultiplier = 3 } = {}) => {
+const QuantumWebBackground = ({ quantumColor: propQuantumColor, normalColor: propNormalColor, densityDivisor = 5000, velocityMultiplier = 0.5, speedRange = [0.01, 0.05], phaseNoise = 0.01, velocityDamping = 0.98, quantumRadiusRange = [1, 3], normalRadiusRange = [0.5, 2], opacityRange = [0.2, 0.6], trailMaxRange = [5, 15], mouseRadius = 150, attractionForceFactor = 0.01, repulsionForceFactor = 0.05, connectionDistance = 150, connectionBaseOpacity = 0.7, connectionPulseRate = 3, connectionStrengthRange = [0.01, 0.06], connectionLineWidth = 1, glowMultiplier = 3 } = {}) => {
     const mode = useColorMode();
     // Theme-aware color defaults
     const quantumColor = propQuantumColor || (mode === 'dark' ? '#7f5af0' : '#3f2d78');
     const normalColor = propNormalColor || (mode === 'dark' ? '#2cb67d' : '#165b3e');
-    const backgroundColor = propBackgroundColor || (mode === 'dark' ? 'rgba(24,24,27,0.7)' : 'rgba(255,255,255,0.7)');
-    const labelColor = propLabelColor || (mode === 'dark' ? '#fff' : '#222');
-    const labelBg = propLabelBg || (mode === 'dark' ? 'bg-gray-900 bg-opacity-50' : 'bg-white bg-opacity-70');
     const canvasRef = useRef(null);
     const animationRef = useRef(null);
     const particlesRef = useRef([]);
@@ -271,6 +268,6 @@ const QuantumWebBackground = ({ quantumColor: propQuantumColor, normalColor: pro
         quantumColor,
         normalColor
     ]);
-    return (_jsxs("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: [_jsx("canvas", { ref: canvasRef, className: "w-full h-full" }), _jsxs("div", { className: `absolute bottom-4 left-4 p-3 rounded-lg text-xs pointer-events-auto ${labelBg}`, style: { color: labelColor, background: backgroundColor }, children: [_jsxs("div", { className: "flex items-center gap-2", children: [_jsx("div", { className: "w-3 h-3 rounded-full", style: { background: normalColor } }), _jsx("span", { children: "Quantum Particles" })] }), _jsxs("div", { className: "flex items-center gap-2 mt-1", children: [_jsx("div", { className: "w-3 h-3 rounded-full", style: { background: quantumColor } }), _jsx("span", { children: "Entangled Particles" })] }), _jsx("div", { className: "mt-2", children: mouseRef.current.attractionMode ? (_jsx("span", { style: { color: normalColor }, children: "Attraction Mode (Shift)" })) : (_jsx("span", { children: "Repulsion Mode (Hold Shift for attraction)" })) })] })] }));
+    return (_jsx("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: _jsx("canvas", { ref: canvasRef, className: "w-full h-full" }) }));
 };
 export default QuantumWebBackground;

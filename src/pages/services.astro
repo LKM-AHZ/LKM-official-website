@@ -12,7 +12,7 @@ const metadata = {
 };
 
 const sidebarLinks = [
-  { text: '科普内容', href: getPermalink('/services#content') },
+  { text: '内容创作', href: getPermalink('/services#content') },
   { text: '社区活动', href: getPermalink('/services#events') },
   { text: '知识平台', href: getPermalink('/services#platform') },
 ];
@@ -22,8 +22,8 @@ const sidebarLinks = [
   <!-- Hero -->
   <Hero
     tagline="服务"
-    title="让科学回归每一个人"
-    subtitle="理科迷提供多种形式的科学传播与社区服务，从科普内容创作到学科交流社群，我们致力于打破知识壁垒，让更多人感受到科学的魅力。"
+    title="让科技回归每一个人"
+    subtitle="理科迷提供多种形式让科学与技术传播，以及社区服务，从学术专业讨论到科普内容，我们致力于打破知识壁垒，打破信息差，让更多人感受到科技的魅力，理性的美。"
     actions={[{ variant: 'primary', target: '_self', text: '加入我们', href: getPermalink('/contact') }]}
     image={{
       src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
@@ -31,11 +31,11 @@ const sidebarLinks = [
     }}
   />
 
-  <!-- 科普内容 -->
+  <!-- 内容创作 -->
   <Features2
     id="content"
-    title="科普内容创作"
-    subtitle="由团队成员和社区成员共创的高质量科普内容，覆盖多个学科领域。"
+    title="内容创作"
+    subtitle="由团队成员和社区成员共创的高质量内容，覆盖多个学科领域。"
     columns={3}
     items={[
       {
@@ -50,9 +50,14 @@ const sidebarLinks = [
         icon: 'tabler:atom',
       },
       {
-        title: '视频科普',
-        description: '通过B站等视频平台发布科普视频，以生动直观的方式呈现科学知识，让抽象的公式和理论变得眼见为实。',
+        title: '视频创作',
+        description: '通过B站等视频平台发布教学、科普视频，以及硬核优质内容，以生动直观的方式展现科学与技术知识点，让抽象的公理和理论变得眼见为实。',
         icon: 'tabler:video',
+      },
+      {
+        title: '相关帮助',
+        description: '我们会提供不限于学习、竞赛、专业、考试、技能和方向等等具有实质性并且最新的建议，打破参考和意见，打破信息差。',
+        icon: 'tabler:help-circle',
       },
       {
         title: '专题深度',
@@ -69,6 +74,16 @@ const sidebarLinks = [
         description: '整理和分享优质学习资料、书籍推荐、在线课程等学习资源，帮助社区成员找到最适合自己的学习路径。',
         icon: 'tabler:books',
       },
+      {
+        title: '科技期刊',
+        description: '在未来我们会组建期刊项目组，给大家呈现一年或半年内，社区共建共享所产出的实质性内容和成果，如优秀的文章、科普、创作作品等等。',
+        icon: 'tabler:book',
+      },
+      {
+        title: '中外交流',
+        description: '在未来我们会组建翻译组，传播和搬运中外优质的科技论文、文章、讲解和讲课视频，做到双向的输入输出。',
+        icon: 'tabler:language',
+      },
     ]}
   />
 
@@ -76,13 +91,13 @@ const sidebarLinks = [
   <Features2
     id="events"
     title="社区活动"
-    subtitle="从线上研讨到暑假活动，理科迷为社区成员提供丰富多彩的互动体验。"
+    subtitle="从线上研讨到假期活动，理科迷为社区成员提供丰富多彩的互动体验。"
     columns={2}
     items={[
       {
-        title: '暑假活动',
+        title: '假期活动',
         description:
-          '一年一度的暑假主题活动，由七月团队·活动策划部统筹组织。汇集线上讲座、学科研讨、趣味竞赛等多种形式，是社区每年最大的盛事。',
+          '一年一度的寒暑假主题活动，由七月团队·活动策划部统筹组织。汇集线上讲座、学科研讨、趣味竞赛等多种形式，是社区每年最大的盛事。',
         icon: 'tabler:sun',
       },
       {
@@ -92,12 +107,12 @@ const sidebarLinks = [
       },
       {
         title: '社群交流',
-        description: '设有初中群和高中群两个官方 QQ 群组，以及各学科分群，为不同学段的成员提供精准、高效的交流空间。',
+        description: '我们设有不同年级阶段、职业相关交流群，以及各学科方向分群，为不同阶段和类型的成员提供精准高效的交流空间。',
         icon: 'tabler:messages',
       },
       {
         title: '宣传推广',
-        description: '通过官方宣传账号在 B 站等平台持续输出，扩大社区影响力，吸引更多热爱科学的伙伴加入我们。',
+        description: '通过官方宣传账号在 B 站等平台持续输出，扩大社区影响力，吸引更多热爱科技的伙伴加入我们。',
         icon: 'tabler:brand-youtube',
       },
     ]}
@@ -138,7 +153,11 @@ const sidebarLinks = [
         href: getPermalink('/contact'),
       },
     ]}
-    title="对理科迷感兴趣？"
-    subtitle="无论你是想加入社区、投稿科普文章，还是提出合作建议，我们都非常欢迎。"
+    title={
+      <Fragment>
+        对<span class="text-[#6C2AD8]">理科迷</span>感兴趣？
+      </Fragment>
+    }
+    subtitle="无论你是想加入社区、投稿创作作品，还是提出合作建议，我们都非常欢迎。"
   />
 </Layout>
