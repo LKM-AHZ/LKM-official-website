@@ -12,14 +12,7 @@ interface Props {
   iconColor?: string;
 }
 
-const {
-  year,
-  title,
-  description,
-  index,
-  iconName = 'tabler:circle-check',
-  iconColor = 'text-primary',
-} = Astro.props;
+const { year, title, description, index, iconName = 'tabler:circle-check', iconColor = 'text-primary' } = Astro.props;
 
 const isEven = index % 2 === 0;
 // isEven: 圆点在 1/3、文字在右宽侧；否则圆点在 2/3、文字在左宽侧

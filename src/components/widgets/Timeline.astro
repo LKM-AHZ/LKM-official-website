@@ -87,7 +87,10 @@ const { items } = Astro.props;
       const r = dot.getBoundingClientRect();
       return { x: r.left - wrapRect.left + r.width / 2, y: r.top - wrapRect.top + r.height / 2 };
     });
-    if (dots.length < 2) { path.setAttribute('d', ''); return; }
+    if (dots.length < 2) {
+      path.setAttribute('d', '');
+      return;
+    }
     svg.setAttribute('width', String(wrapRect.width));
     svg.setAttribute('height', String(wrapRect.height));
     svg.setAttribute('viewBox', `0 0 ${wrapRect.width} ${wrapRect.height}`);
