@@ -1,7 +1,7 @@
 ---
 import CallToAction from '~/components/widgets/CallToAction.astro';
 import Features2 from '~/components/widgets/Features2.astro';
-import Hero from '~/components/widgets/Hero.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
 import Layout from '~/layouts/SidebarLayout.astro';
 
 import { teamTopTabs } from '~/navigation';
@@ -20,15 +20,10 @@ const sidebarLinks = [
 
 <Layout metadata={metadata} topTabs={teamTopTabs} sidebarLinks={sidebarLinks} currentPath={getPermalink('/services')}>
   <!-- Hero -->
-  <Hero
-    tagline="服务"
+  <HeroText
     title="让科技回归每一个人"
     subtitle="理科迷提供多种形式让科学与技术传播，以及社区服务，从学术专业讨论到科普内容，我们致力于打破知识壁垒，打破信息差，让更多人感受到科技的魅力，理性的美。"
-    actions={[{ variant: 'primary', target: '_self', text: '加入我们', href: getPermalink('/contact') }]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-      alt: '理科迷服务',
-    }}
+    callToAction={{ text: '加入我们', href: getPermalink('/contact'), variant: 'primary' }}
   />
 
   <!-- 内容创作 -->
@@ -153,11 +148,10 @@ const sidebarLinks = [
         href: getPermalink('/contact'),
       },
     ]}
-    title={
-      <Fragment>
-        对<span class="text-[#6C2AD8]">理科迷</span>感兴趣？
-      </Fragment>
-    }
     subtitle="无论你是想加入社区、投稿创作作品，还是提出合作建议，我们都非常欢迎。"
-  />
+  >
+    <Fragment slot="title">
+      对<span class="text-[#6C2AD8]">理科迷</span>感兴趣？
+    </Fragment>
+  </CallToAction>
 </Layout>

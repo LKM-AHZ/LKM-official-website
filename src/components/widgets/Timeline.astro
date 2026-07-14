@@ -61,7 +61,7 @@ const { items } = Astro.props;
 <script>
   const CORNER_RADIUS = 20;
 
-  function buildPath(dots) {
+  function buildPath(dots: { x: number; y: number }[]) {
     if (dots.length < 2) return '';
     let d = `M ${dots[0].x},${dots[0].y}`;
     for (let i = 0; i < dots.length - 1; i++) {
@@ -79,11 +79,11 @@ const { items } = Astro.props;
     return d;
   }
 
-  function drawOne(wrap, svg, dotEls, straight) {
+  function drawOne(wrap: Element, svg: SVGSVGElement, dotEls: NodeListOf<HTMLElement>, straight: boolean) {
     const path = svg.querySelector('[data-tl-path]');
     if (!path) return;
     const wrapRect = wrap.getBoundingClientRect();
-    const dots = Array.from(dotEls).map((dot: HTMLElement) => {
+    const dots = Array.from(dotEls).map((dot) => {
       const r = dot.getBoundingClientRect();
       return { x: r.left - wrapRect.left + r.width / 2, y: r.top - wrapRect.top + r.height / 2 };
     });
@@ -98,12 +98,12 @@ const { items } = Astro.props;
     }
   }
 
-  function drawTimeline(wrap) {
+  function drawTimeline(wrap: Element) {
     const list = wrap.querySelector('[data-tl-list]');
     if (!list) return;
-    const svgDesktop = wrap.querySelector('[data-tl-svg-desktop]');
+    const svgDesktop = wrap.querySelector('[data-tl-svg-desktop]') as SVGSVGElement | null;
     if (svgDesktop) drawOne(wrap, svgDesktop, list.querySelectorAll('[data-tl-dot-desktop]'), false);
-    const svgMobile = wrap.querySelector('[data-tl-svg-mobile]');
+    const svgMobile = wrap.querySelector('[data-tl-svg-mobile]') as SVGSVGElement | null;
     if (svgMobile) drawOne(wrap, svgMobile, list.querySelectorAll('[data-tl-dot-mobile]'), true);
   }
 
