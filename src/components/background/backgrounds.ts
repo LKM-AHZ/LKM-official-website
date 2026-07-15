@@ -73,7 +73,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '✨',
     theme: 'both',
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8' },
-    lightProps: { particleColor: '#f59e0b', connectionColor: '#fbbf24' },
+    lightProps: { particleColor: '#0bcaf5ff', connectionColor: '#20cdf4ff' },
   },
   {
     id: 'data-rain',
