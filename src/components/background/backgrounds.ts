@@ -73,7 +73,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '✨',
     theme: 'both',
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8' },
-    lightProps: { particleColor: '#0bcaf5ff', connectionColor: '#20cdf4ff' },
+    lightProps: { particleColor: '#0bcaf5', connectionColor: '#20cdf4' },
   },
   {
     id: 'data-rain',
@@ -131,7 +131,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '⚛',
     theme: 'both',
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8', rippleColor: '#818cf8' },
-    lightProps: { particleColor: '#07c8f9ff', connectionColor: '#52d0efff', rippleColor: '#52d0efff' },
+    lightProps: { particleColor: '#07c8f9', connectionColor: '#52d0ef', rippleColor: '#52d0ef' },
   },
   {
     id: 'quantum-web',
