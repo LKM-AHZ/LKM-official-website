@@ -149,8 +149,14 @@ export const affairsSubGroups: Record<string, SubGroup> = {
   chess: {
     label: '兴趣-棋牌社',
     members: [
-      { name: '七月随便', avatarKey: '七月随便.jpg', desc: '一个想学会所有感兴趣的东西的懒鬼。', dream: '梦想：暂时保密', quote: '—— 前进吧，就算到不了尽头，前进本身就有意义' }, 
-      { name: '七月熠', avatarKey: '七月熠.jpg' }
+      {
+        name: '七月随便',
+        avatarKey: '七月随便.jpg',
+        desc: '一个想学会所有感兴趣的东西的懒鬼。',
+        dream: '梦想：暂时保密',
+        quote: '—— 前进吧，就算到不了尽头，前进本身就有意义',
+      },
+      { name: '七月熠', avatarKey: '七月熠.jpg' },
     ],
   },
   music: {
