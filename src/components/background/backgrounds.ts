@@ -131,7 +131,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '⚛',
     theme: 'both',
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8', rippleColor: '#818cf8' },
-    lightProps: { particleColor: '#f59e0b', connectionColor: '#fbbf24', rippleColor: '#fbbf24' },
+    lightProps: { particleColor: '#07c8f9ff', connectionColor: '#52d0efff', rippleColor: '#52d0efff' },
   },
   {
     id: 'quantum-web',
