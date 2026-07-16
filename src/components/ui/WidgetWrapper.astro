@@ -33,12 +33,7 @@ const WrapperTag = as;
     </slot>
   </div>
   <div
-    class:list={[
-      twMerge(
-        `relative mx-auto ${widthClass} px-4 md:px-6 ${spacingClass} text-default `,
-        containerClass
-      ),
-    ]}
+    class:list={[twMerge(`relative mx-auto ${widthClass} px-4 md:px-6 ${spacingClass} text-default `, containerClass)]}
   >
     <slot />
   </div>

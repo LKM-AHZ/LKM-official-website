@@ -86,10 +86,7 @@ const metadata = {
           { name: '七月郁离', desc: '群务组组长，群务无小事，用心皆风景', avatar: avatar七月郁离 },
           { name: '七月有枝', desc: '前活动策划组组员，且停且忘且随风，且行且看且从容', avatar: avatar七月有枝 },
         ].map((m) => (
-          <a
-            href={getPermalink('/team')}
-            class="profile-card "
-          >
+          <a href={getPermalink('/team')} class="profile-card ">
             <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
               <img
                 src={m.avatar.src}
@@ -104,10 +101,7 @@ const metadata = {
           </a>
         ))
       }
-      <a
-        href={getPermalink('/team')}
-        class="profile-card "
-      >
+      <a href={getPermalink('/team')} class="profile-card">
         <div class="profile-inner p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3 min-h-full">
           <span class="text-lg font-bold text-base-content">更多成员</span>
           <span class="text-xs text-neutral">点击查看完整管理团队</span>

@@ -27,14 +27,7 @@ const {
     <div class="pt-0 md:pt-[76px] pointer-events-none"></div>
     <div class="py-16 md:py-[80px]">
       <div class="text-center max-w-5xl mx-auto">
-        {
-          tagline && (
-            <p
-              class="text-sm text-primary font-semibold tracking-wide uppercase mb-2 "
-              set:html={tagline}
-            />
-          )
-        }
+        {tagline && <p class="text-sm text-primary font-semibold tracking-wide uppercase mb-2 " set:html={tagline} />}
         {
           title && (
             <h1
@@ -44,17 +37,8 @@ const {
           )
         }
         <div class="max-w-3xl mx-auto">
-          {
-            subtitle && (
-              <p
-                class="text-[17px] text-neutral mb-6 leading-relaxed "
-                set:html={subtitle}
-              />
-            )
-          }
-          <div
-            class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4 "
-          >
+          {subtitle && <p class="text-[17px] text-neutral mb-6 leading-relaxed " set:html={subtitle} />}
+          <div class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4">
             {
               callToAction && (
                 <div class="flex w-full sm:w-auto">
