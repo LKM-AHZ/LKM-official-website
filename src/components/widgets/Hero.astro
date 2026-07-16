@@ -29,31 +29,14 @@ const {
   <div class={styles.heroInner + ' relative z-10'}>
     <div class="py-16 md:py-[80px]">
       <div class={styles.heroBody}>
-        {
-          tagline && (
-            <p
-              class="text-base text-secondary font-bold tracking-wide uppercase "
-              set:html={tagline}
-            />
-          )
-        }
+        {tagline && <p class="text-base text-secondary font-bold tracking-wide uppercase " set:html={tagline} />}
         {
           title && (
-            <h1
-              class={`${styles.heroHeading} font-heading leading-tighter tracking-tighter `}
-              set:html={title}
-            />
+            <h1 class={`${styles.heroHeading} font-heading leading-tighter tracking-tighter `} set:html={title} />
           )
         }
         <div class="max-w-3xl mx-auto">
-          {
-            subtitle && (
-              <p
-                class={`${styles.heroSubtitle} text-neutral `}
-                set:html={subtitle}
-              />
-            )
-          }
+          {subtitle && <p class={`${styles.heroSubtitle} text-neutral `} set:html={subtitle} />}
           {
             actions && (
               <div class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4 ">

@@ -9,9 +9,7 @@ export interface Props {
 const { name, qqGroup, desc, isQQChannel = false } = Astro.props;
 ---
 
-<div
-  class="profile-card "
->
+<div class="profile-card">
   <div class="profile-inner p-5 flex flex-col gap-3">
     <div class="flex items-center justify-between gap-2">
       <h4 class="font-bold text-base text-base-content">{name}</h4>
