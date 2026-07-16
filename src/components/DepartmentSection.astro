@@ -15,12 +15,12 @@ const { id, title, borderColor, desc, noGrid = false } = Astro.props;
 
 <Section id={id}>
   <div class="max-w-7xl mx-auto">
-    <h3 class="text-xl font-bold mb-2 text-center">
+    <h3 class="text-xl font-bold mb-5 text-center">
       <span class="border-b-2 pb-1" style={`border-color: ${borderColor}`}>{title}</span>
     </h3>
     {
       desc && (
-        <p class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed card-hover intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+        <p class="max-w-3xl mx-auto mb-9 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed card-hover intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
           {desc}
         </p>
       )
@@ -29,7 +29,7 @@ const { id, title, borderColor, desc, noGrid = false } = Astro.props;
       noGrid ? (
         <slot />
       ) : (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <slot />
         </div>
       )

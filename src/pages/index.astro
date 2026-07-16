@@ -5,7 +5,7 @@ import { getPermalink } from '~/utils/permalinks';
 
 import BackgroundSwitcher from '~/components/background/BackgroundSwitcher.astro';
 import Hero from '~/components/widgets/Hero.astro';
-import Features2 from '~/components/widgets/Features2.astro';
+
 
 import avatar七月花 from '~/assets/images/member/七月花.jpg';
 import avatar七月O from '~/assets/images/member/七月O.png';
@@ -77,48 +77,39 @@ const metadata = {
     </Fragment>
   </Hero>
 
-  <Features2
-    id="team"
-    title="团队成员"
-    subtitle="理科迷因为有你，所以更加精彩"
-    items={[
+  <Section title="团队成员" subtitle="理科迷因为有你，所以更加精彩" id="team">
+    <div class="grid gap-5 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {
-        title: '七月O',
-        description: '中国科学院国家天文台博士，引力波与黑洞物理方向',
-        icon: avatar七月O.src,
-      },
-      {
-        title: '七月花',
-        description: '一个有理想的博士，梦想：每个孩子都能接触科学',
-        icon: avatar七月花.src,
-      },
-      {
-        title: '七月墨染',
-        description: '双非物理，卧薪尝胆三千日，大雪深埋终成金',
-        icon: avatar七月墨染.src,
-      },
-      {
-        title: '七月郁离',
-        description: '群务组组长，群务无小事，用心皆风景',
-        icon: avatar七月郁离.src,
-      },
-      {
-        title: '七月有枝',
-        description: '前活动策划组组员，且停且忘且随风，且行且看且从容',
-        icon: avatar七月有枝.src,
-      },
-      {
-        title: '更多成员',
-        description: '点击查看完整管理团队',
-        icon: '',
-        callToAction: { variant: 'primary', text: '查看全部 →', href: getPermalink('/team') },
-      },
-    ]}
-  >
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-base-200"></div>
-    </Fragment>
-  </Features2>
+        [
+          { name: '七月O', desc: '中国科学院国家天文台博士，引力波与黑洞物理方向', avatar: avatar七月O },
+          { name: '七月花', desc: '一个有理想的博士，梦想：每个孩子都能接触科学', avatar: avatar七月花 },
+          { name: '七月墨染', desc: '双非物理，卧薪尝胆三千日，大雪深埋终成金', avatar: avatar七月墨染 },
+          { name: '七月郁离', desc: '群务组组长，群务无小事，用心皆风景', avatar: avatar七月郁离 },
+          { name: '七月有枝', desc: '前活动策划组组员，且停且忘且随风，且行且看且从容', avatar: avatar七月有枝 },
+        ].map((m) => (
+          <a href={getPermalink('/team')} class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+            <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
+              <img src={m.avatar.src} alt={m.name} class="w-10 h-10 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 sm:mb-3" />
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-lg text-base-content">{m.name}</h4>
+                <p class="text-xs text-neutral mt-1">{m.desc}</p>
+              </div>
+            </div>
+          </a>
+        ))
+      }
+      <a
+        href={getPermalink('/team')}
+        class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+      >
+        <div class="profile-inner h-full p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3">
+          <span class="text-lg font-bold text-base-content">更多成员</span>
+          <span class="text-xs text-neutral">点击查看完整管理团队</span>
+          <span class="not-hover-color inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold leading-6 text-primary-content bg-primary">查看全部 →</span>
+        </div>
+      </a>
+    </div>
+  </Section>
 
   <Section title="发展历程" subtitle="物换星移，春秋代序" id="timeline">
     <div class="flex justify-center"></div>

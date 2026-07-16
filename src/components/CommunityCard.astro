@@ -10,7 +10,9 @@ const { name, qqGroup, desc, isQQChannel = false } = Astro.props;
 ---
 
 <div
-  class="rounded-[12px] bg-base-200 border border-base-300 card-hover intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade p-5 flex flex-col gap-3"
+  class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+>
+  <div class="profile-inner p-5 flex flex-col gap-3"
 >
   <div class="flex items-center justify-between gap-2">
     <h4 class="font-bold text-base text-base-content">{name}</h4>
@@ -42,6 +44,7 @@ const { name, qqGroup, desc, isQQChannel = false } = Astro.props;
     }
   </div>
   {desc && <p class="text-xs text-neutral leading-relaxed">{desc}</p>}
+  </div>
 </div>
 
 <script>

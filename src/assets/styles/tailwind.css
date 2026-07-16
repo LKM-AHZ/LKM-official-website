@@ -338,6 +338,37 @@
 /* ==========================================================================
    卡片 hover 微反馈（全站统一）
    ========================================================================== */
+/* 团队成员/项目团队卡片 */
+@utility profile-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.12),
+    0 0 0 0px rgba(99, 102, 241, 0);
+  overflow: hidden;
+}
+
+.profile-card,
+.profile-card .profile-inner,
+.profile-card img {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-card:hover > .profile-inner {
+  transform: translateY(-5px);
+}
+
+.profile-card:hover {
+  box-shadow:
+    0 16px 48px 0 rgba(31, 38, 135, 0.25),
+    0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.profile-card:hover img {
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+}
+
 @utility card-hover {
   transition:
     transform 200ms ease,
