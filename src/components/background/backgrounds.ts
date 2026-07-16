@@ -56,7 +56,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '🌈',
     theme: 'both',
     darkProps: { rippleColor: '#818cf8' },
-    lightProps: { rippleColor: '#f59e0b' },
+    lightProps: { rippleColor: '#c39ee9' },
   },
   {
     id: 'binary-matrix',
