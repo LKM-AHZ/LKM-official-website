@@ -6,7 +6,6 @@ import { getPermalink } from '~/utils/permalinks';
 import BackgroundSwitcher from '~/components/background/BackgroundSwitcher.astro';
 import Hero from '~/components/widgets/Hero.astro';
 
-
 import avatar七月花 from '~/assets/images/member/七月花.jpg';
 import avatar七月O from '~/assets/images/member/七月O.png';
 import avatar七月郁离 from '~/assets/images/member/七月郁离.png';
@@ -87,9 +86,16 @@ const metadata = {
           { name: '七月郁离', desc: '群务组组长，群务无小事，用心皆风景', avatar: avatar七月郁离 },
           { name: '七月有枝', desc: '前活动策划组组员，且停且忘且随风，且行且看且从容', avatar: avatar七月有枝 },
         ].map((m) => (
-          <a href={getPermalink('/team')} class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+          <a
+            href={getPermalink('/team')}
+            class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+          >
             <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
-              <img src={m.avatar.src} alt={m.name} class="w-10 h-10 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 sm:mb-3" />
+              <img
+                src={m.avatar.src}
+                alt={m.name}
+                class="w-10 h-10 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 sm:mb-3"
+              />
               <div class="flex-1 min-w-0">
                 <h4 class="font-bold text-lg text-base-content">{m.name}</h4>
                 <p class="text-xs text-neutral mt-1">{m.desc}</p>
@@ -105,7 +111,10 @@ const metadata = {
         <div class="profile-inner h-full p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3">
           <span class="text-lg font-bold text-base-content">更多成员</span>
           <span class="text-xs text-neutral">点击查看完整管理团队</span>
-          <span class="not-hover-color inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold leading-6 text-primary-content bg-primary">查看全部 →</span>
+          <span
+            class="not-hover-color inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold leading-6 text-primary-content bg-primary"
+            >查看全部 →</span
+          >
         </div>
       </a>
     </div>

@@ -12,38 +12,37 @@ const { name, qqGroup, desc, isQQChannel = false } = Astro.props;
 <div
   class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
 >
-  <div class="profile-inner p-5 flex flex-col gap-3"
->
-  <div class="flex items-center justify-between gap-2">
-    <h4 class="font-bold text-base text-base-content">{name}</h4>
-    {
-      qqGroup && (
-        <span
-          class="inline-flex items-center gap-1.5 shrink-0 text-xs font-mono bg-base-300 text-neutral rounded-[6px] px-2.5 py-1 cursor-pointer select-none hover:bg-primary hover:text-primary-content transition-colors group/copy"
-          data-copy={qqGroup}
-          title="点击复制"
-        >
-          <span>
-            {isQQChannel ? '频道ID: ' : ''}
-            {qqGroup}
-          </span>
-          <svg
-            class="w-3.5 h-3.5 opacity-50 group-hover/copy:opacity-100"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+  <div class="profile-inner p-5 flex flex-col gap-3">
+    <div class="flex items-center justify-between gap-2">
+      <h4 class="font-bold text-base text-base-content">{name}</h4>
+      {
+        qqGroup && (
+          <span
+            class="inline-flex items-center gap-1.5 shrink-0 text-xs font-mono bg-base-300 text-neutral rounded-[6px] px-2.5 py-1 cursor-pointer select-none hover:bg-primary hover:text-primary-content transition-colors group/copy"
+            data-copy={qqGroup}
+            title="点击复制"
           >
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-        </span>
-      )
-    }
-  </div>
-  {desc && <p class="text-xs text-neutral leading-relaxed">{desc}</p>}
+            <span>
+              {isQQChannel ? '频道ID: ' : ''}
+              {qqGroup}
+            </span>
+            <svg
+              class="w-3.5 h-3.5 opacity-50 group-hover/copy:opacity-100"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </span>
+        )
+      }
+    </div>
+    {desc && <p class="text-xs text-neutral leading-relaxed">{desc}</p>}
   </div>
 </div>
 

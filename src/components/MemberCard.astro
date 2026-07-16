@@ -19,7 +19,9 @@ const isLg = size === 'lg';
   class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
 >
   <!-- 手机端：水平布局 | 桌面端：垂直布局 -->
-  <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
+  <div
+    class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center"
+  >
     <div class="shrink-0 sm:mb-3">
       {
         avatar ? (
@@ -35,7 +37,8 @@ const isLg = size === 'lg';
         ) : (
           <div
             class={
-              'avatar-fallback ' + (isLg
+              'avatar-fallback ' +
+              (isLg
                 ? 'w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-base-300 text-neutral flex items-center justify-center text-lg font-semibold'
                 : 'w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-base-300 text-neutral flex items-center justify-center text-lg font-semibold')
             }
