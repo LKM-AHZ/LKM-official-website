@@ -36,7 +36,7 @@ const columnsClass =
     items.length > 0 && (
       <div class:list={['grid gap-5 md:gap-6 gap-x-8', columnsClass]}>
         {items.map(({ title: itemTitle, description, icon, callToAction }) => (
-          <div class="relative flex flex-col rounded-[12px] bg-base-200 border border-base-300 p-6 intersect-once intersect-quarter intersect-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade card-hover">
+          <div class="relative flex flex-col rounded-[12px] bg-base-200 border border-base-300 p-6  card-hover">
             {(icon || defaultIcon) &&
               (/^tabler:/.test(icon || defaultIcon || '') ? (
                 <Icon name={icon || defaultIcon} class="mb-6 w-12 h-12 text-primary" />

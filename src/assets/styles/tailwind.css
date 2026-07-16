@@ -54,8 +54,6 @@
 
 @custom-variant dark (&:where([data-theme='lkm-dark'], [data-theme='lkm-dark'] *));
 
-@custom-variant intersect (&:not([no-intersect]));
-
 @theme {
   /* ── 字体系统 ──
      Apple 优先 SF Pro → 中文保留 Noto Sans SC */
@@ -75,19 +73,6 @@
   --radius-xl: 16px; /* 大面板/图片 */
   --radius-pill: 9999px;
 
-  /* ── 动画 ── */
-  --animate-fade: fadeInUp 0.8s both;
-
-  @keyframes fadeInUp {
-    0% {
-      opacity: 0;
-      transform: translateY(2rem);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 }
 
 /* ── Header 滚动样式 (实心 base) ── */
@@ -207,62 +192,6 @@
 }
 
 @layer utilities {
-  /* ==========================================================================
-     卡片入场 stagger 动画延迟
-     ========================================================================== */
-
-  .grid > .animate-fade:nth-child(1) {
-    animation-delay: 0ms;
-  }
-  .grid > .animate-fade:nth-child(2) {
-    animation-delay: 80ms;
-  }
-  .grid > .animate-fade:nth-child(3) {
-    animation-delay: 160ms;
-  }
-  .grid > .animate-fade:nth-child(4) {
-    animation-delay: 240ms;
-  }
-  .grid > .animate-fade:nth-child(5) {
-    animation-delay: 320ms;
-  }
-  .grid > .animate-fade:nth-child(6) {
-    animation-delay: 400ms;
-  }
-  .grid > .animate-fade:nth-child(7) {
-    animation-delay: 480ms;
-  }
-  .grid > .animate-fade:nth-child(8) {
-    animation-delay: 560ms;
-  }
-  .grid > .animate-fade:nth-child(9) {
-    animation-delay: 640ms;
-  }
-  .grid > .animate-fade:nth-child(10) {
-    animation-delay: 720ms;
-  }
-  .grid > .animate-fade:nth-child(11) {
-    animation-delay: 800ms;
-  }
-  .grid > .animate-fade:nth-child(12) {
-    animation-delay: 880ms;
-  }
-  .grid > .animate-fade:nth-child(13) {
-    animation-delay: 960ms;
-  }
-  .grid > .animate-fade:nth-child(14) {
-    animation-delay: 1040ms;
-  }
-  .grid > .animate-fade:nth-child(15) {
-    animation-delay: 1120ms;
-  }
-  .grid > .animate-fade:nth-child(16) {
-    animation-delay: 1200ms;
-  }
-
-  /* ==========================================================================
-     .prose 文章内部排版
-     ========================================================================== */
 
   .prose p,
   .prose li,

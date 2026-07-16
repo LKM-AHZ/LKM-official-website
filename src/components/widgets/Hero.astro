@@ -32,7 +32,7 @@ const {
         {
           tagline && (
             <p
-              class="text-base text-secondary font-bold tracking-wide uppercase intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+              class="text-base text-secondary font-bold tracking-wide uppercase "
               set:html={tagline}
             />
           )
@@ -40,7 +40,7 @@ const {
         {
           title && (
             <h1
-              class={`${styles.heroHeading} font-heading leading-tighter tracking-tighter intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade`}
+              class={`${styles.heroHeading} font-heading leading-tighter tracking-tighter `}
               set:html={title}
             />
           )
@@ -49,14 +49,14 @@ const {
           {
             subtitle && (
               <p
-                class={`${styles.heroSubtitle} text-neutral intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade`}
+                class={`${styles.heroSubtitle} text-neutral `}
                 set:html={subtitle}
               />
             )
           }
           {
             actions && (
-              <div class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4 intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+              <div class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4 ">
                 {Array.isArray(actions) ? (
                   actions.map((action) => (
                     <div class="flex w-full sm:w-auto">
@@ -74,7 +74,7 @@ const {
       </div>
       {
         image && (
-          <div class="intersect-once intersect-no-queue intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+          <div class="    ">
             <div class="relative m-auto max-w-5xl">
               {typeof image === 'string' ? (
                 <Fragment set:html={image} />

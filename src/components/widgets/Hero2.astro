@@ -28,7 +28,7 @@ const {
         {
           tagline && (
             <p
-              class="text-sm text-primary font-semibold tracking-wide uppercase mb-2 intersect-once motion-safe:md:intersect:animate-fade motion-safe:md:opacity-0 intersect-quarter"
+              class="text-sm text-primary font-semibold tracking-wide uppercase mb-2 "
               set:html={tagline}
             />
           )
@@ -36,7 +36,7 @@ const {
         {
           title && (
             <h1
-              class="text-[40px] md:text-[56px] font-semibold leading-[1.07] tracking-[-0.005em] mb-4 font-heading text-base-content intersect-once motion-safe:md:intersect:animate-fade motion-safe:md:opacity-0 intersect-quarter"
+              class="text-[40px] md:text-[56px] font-semibold leading-[1.07] tracking-[-0.005em] mb-4 font-heading text-base-content "
               set:html={title}
             />
           )
@@ -45,7 +45,7 @@ const {
           {
             subtitle && (
               <p
-                class="text-[17px] text-neutral mb-6 leading-relaxed intersect-once motion-safe:md:intersect:animate-fade motion-safe:md:opacity-0 intersect-quarter"
+                class="text-[17px] text-neutral mb-6 leading-relaxed "
                 set:html={subtitle}
               />
             )
@@ -53,7 +53,7 @@ const {
 
           {
             actions && (
-              <div class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4 lg:justify-start lg:m-0 lg:max-w-7xl intersect-once motion-safe:md:intersect:animate-fade motion-safe:md:opacity-0 intersect-quarter">
+              <div class="max-w-xs sm:max-w-md m-auto flex flex-nowrap flex-col sm:flex-row sm:justify-center gap-4 lg:justify-start lg:m-0 lg:max-w-7xl ">
                 {Array.isArray(actions) ? (
                   actions.map((action) => (
                     <div class="flex w-full sm:w-auto">
@@ -72,7 +72,7 @@ const {
       <div class="basis-1/2">
         {
           image && (
-            <div class="relative m-auto max-w-5xl intersect-once intersect-no-queue motion-safe:md:intersect:animate-fade motion-safe:md:opacity-0 intersect-quarter">
+            <div class="relative m-auto max-w-5xl    ">
               {typeof image === 'string' ? (
                 <Fragment set:html={image} />
               ) : (

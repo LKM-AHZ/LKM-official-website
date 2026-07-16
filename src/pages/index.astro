@@ -88,7 +88,7 @@ const metadata = {
         ].map((m) => (
           <a
             href={getPermalink('/team')}
-            class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+            class="profile-card "
           >
             <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
               <img
@@ -106,9 +106,9 @@ const metadata = {
       }
       <a
         href={getPermalink('/team')}
-        class="profile-card intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+        class="profile-card "
       >
-        <div class="profile-inner h-full p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3">
+        <div class="profile-inner p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3 min-h-full">
           <span class="text-lg font-bold text-base-content">更多成员</span>
           <span class="text-xs text-neutral">点击查看完整管理团队</span>
           <span
