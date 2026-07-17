@@ -2,50 +2,80 @@
 import { Icon } from 'astro-icon/components';
 import styles from './Sidebar.module.css';
 
-interface SidebarLink {
+interface SidebarGroup {
   text: string;
   href: string;
-  icon?: string;
+  icon: string;
 }
 
-export interface Props {
-  links?: SidebarLink[];
+interface SidebarLogo {
+  src: string;
+  text: string;
+  href: string;
+}
+
+interface Props {
+  logo?: SidebarLogo;
+  groups?: SidebarGroup[];
   currentPath?: string;
 }
 
-const { links = [], currentPath = '' } = Astro.props;
+const { logo, groups = [], currentPath = '' } = Astro.props;
 ---
 
-<nav class={styles.nav} aria-label="Sidebar navigation" data-sidebar>
-  {
-    links.length > 0 && (
-      <ul class={styles.linkList}>
-        {links.map(({ text, href, icon }) => {
-          const isActive = (() => {
-            const linkUrl = new URL(href, 'https://example.com');
-            if (linkUrl.hash) return currentPath === href;
-            return currentPath === href || currentPath.startsWith(href + '#');
-          })();
-          return (
-            <li>
-              <a
-                href={href}
-                class:list={[
-                  styles.link,
-                  isActive
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : [styles.linkInactive, 'text-neutral hover:text-base-content'],
-                ]}
-              >
-                {icon && <Icon name={icon} class={styles.icon} />}
-                <span>{text}</span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    )
-  }
+<nav class={styles.shell} aria-label="Sidebar navigation" data-sidebar>
+  <ul class={styles.nav}>
+    {
+      logo && (
+        <li class:list={[styles.logoItem, { active: currentPath === logo.href }]}>
+          <a href={logo.href}>
+            <div class={styles.icon}>
+              <div class={styles.imageBox}>
+                <img src={logo.src} alt={logo.text} />
+              </div>
+            </div>
+            <div class={styles.text}>{logo.text}</div>
+          </a>
+        </li>
+      )
+    }
+
+    {
+      groups.map(({ text, href, icon }) => {
+        const isActive = (() => {
+          const linkUrl = new URL(href, 'https://example.com');
+          if (linkUrl.hash) return currentPath === href;
+          return currentPath === href || currentPath.startsWith(href + '#');
+        })();
+
+        return (
+          <li class:list={{ active: isActive }}>
+            <a href={href}>
+              <div class={styles.icon}>
+                <Icon name={icon} />
+              </div>
+              <div class={styles.text}>{text}</div>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+
+  <button class={styles.toggle} aria-label="Toggle sidebar" id="sidebar-toggle-btn">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg
+    >
+    <span class={styles.toggleText}>收起</span>
+  </button>
 </nav>
 
 <script>
@@ -55,7 +85,6 @@ const { links = [], currentPath = '' } = Astro.props;
 
     const links = sidebar.querySelectorAll('a[href]');
 
-    // 点击平滑滚动
     const handler = (e: Event) => {
       const link = (e.target as HTMLElement).closest('a[href]');
       if (!link) return;
@@ -78,28 +107,26 @@ const { links = [], currentPath = '' } = Astro.props;
       }
     };
 
-    // 根据当前滚动位置/URL hash 更新高亮
     function updateActive() {
       const currentHash = location.hash;
       links.forEach((a) => {
         const href = a.getAttribute('href');
         if (!href) return;
         const linkUrl = new URL(href, location.origin);
-        // 标准化比较 pathname（去掉末尾 /）
         if (linkUrl.pathname.replace(/\/$/, '') !== location.pathname.replace(/\/$/, '')) return;
+
+        const li = a.closest('li');
+        if (!li) return;
 
         const isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
         if (isActive) {
-          a.classList.add('bg-primary/10', 'text-primary', 'font-semibold');
-          a.classList.remove('text-neutral', 'hover:text-base-content');
+          li.classList.add('active');
         } else {
-          a.classList.remove('bg-primary/10', 'text-primary', 'font-semibold');
-          a.classList.add('text-neutral', 'hover:text-base-content');
+          li.classList.remove('active');
         }
       });
     }
 
-    // 滚动监听
     let scrollTicking = false;
     function onScroll() {
       if (!scrollTicking) {
@@ -116,20 +143,17 @@ const { links = [], currentPath = '' } = Astro.props;
 
           if (sections.length === 0) return;
 
-          // 找到最接近视口顶部且已滚过的 section
           let currentId = '';
           for (const section of sections) {
             const rect = section.getBoundingClientRect();
             if (rect.top <= 120) {
               currentId = '#' + section.id;
-              // 不 break，取最后一个满足条件的（最靠下的可见 section）
             }
           }
           if (currentId && location.hash !== currentId) {
             history.replaceState(null, '', currentId);
             updateActive();
           } else if (!currentId && location.hash) {
-            // 滚动到顶部附近，清除 hash
             history.replaceState(null, '', location.pathname);
             updateActive();
           }
@@ -139,7 +163,6 @@ const { links = [], currentPath = '' } = Astro.props;
       }
     }
 
-    // Remove previous handler before re-attaching (prevents duplicates on astro:after-swap)
     const sidebarWithHandler = sidebar as HTMLElement & {
       _sidebarHandler?: EventListener;
       _scrollHandler?: EventListener;
@@ -156,6 +179,68 @@ const { links = [], currentPath = '' } = Astro.props;
     updateActive();
   }
 
+  function initSidebarToggle() {
+    const btn = document.getElementById('sidebar-toggle-btn');
+    const sidebar = document.querySelector('[data-sidebar]');
+    const main = document.querySelector('[data-main-content]') as HTMLElement | null;
+    if (!btn || !sidebar) return;
+
+    function getSizes() {
+      const mq = window.matchMedia('(max-width: 767px)');
+      return {
+        collapsed: mq.matches ? '50px' : '67px',
+        expanded: mq.matches ? '200px' : '240px',
+      };
+    }
+
+    function syncMainMargin() {
+      if (!main) return;
+      const isExpanded = sidebar!.classList.contains('expanded');
+      const { collapsed, expanded } = getSizes();
+      main.style.paddingLeft = isExpanded ? expanded : collapsed;
+    }
+
+    // 恢复或初始化侧边栏状态（无动画）
+    const STORAGE_KEY = 'sidebar-expanded';
+    const mq = window.matchMedia('(max-width: 767px)');
+    const stored = localStorage.getItem(STORAGE_KEY);
+
+    const sidebarEl = sidebar as HTMLElement;
+    const prevTransition = sidebarEl.style.transition;
+    sidebarEl.style.transition = 'none';
+
+    if (stored !== null) {
+      if (stored === 'true') {
+        sidebar.classList.add('expanded');
+      } else {
+        sidebar.classList.remove('expanded');
+      }
+    } else {
+      if (!mq.matches) {
+        sidebar.classList.add('expanded');
+      }
+    }
+    syncMainMargin();
+
+    // 强制回流后恢复 transition
+    void sidebarEl.offsetWidth;
+    sidebarEl.style.transition = prevTransition;
+    mq.addEventListener('change', syncMainMargin);
+
+    btn.addEventListener('click', (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      sidebar.classList.toggle('expanded');
+      const isExpanded = sidebar!.classList.contains('expanded');
+      localStorage.setItem(STORAGE_KEY, String(isExpanded));
+      syncMainMargin();
+    });
+  }
+
   initSidebarScroll();
-  document.addEventListener('astro:after-swap', initSidebarScroll);
+  initSidebarToggle();
+  document.addEventListener('astro:after-swap', () => {
+    initSidebarScroll();
+    initSidebarToggle();
+  });
 </script>

@@ -1,23 +1,246 @@
-@reference "tailwindcss";
+/* ── 侧边栏容器 ── */
+.shell {
+  position: fixed;
+  top: 130px;
+  left: 0;
+  width: 67px;
+  height: calc(100vh - 130px);
+  background: var(--color-base-100);
+  z-index: 10;
+  transition: width 0.5s;
+  padding-left: 8px;
+  overflow: hidden;
+  border-right: 1px solid var(--color-base-300);
+}
 
+.shell:global(.expanded) {
+  width: 240px;
+}
+
+/* 移动端：侧边栏更窄，顶部位置调整 */
+@media (max-width: 767px) {
+  .shell {
+    width: 50px;
+    padding-left: 4px;
+  }
+
+  .shell:global(.expanded) {
+    width: 200px;
+  }
+
+  .icon {
+    min-width: 36px;
+    height: 30px;
+  }
+
+  .icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .text {
+    height: 30px;
+    font-size: 13px;
+    padding-left: 8px;
+  }
+
+  .nav li:global(.active) .icon::before {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+  }
+
+  .toggle {
+    height: 32px;
+  }
+
+  .toggle svg {
+    min-width: 36px;
+  }
+}
+
+/* ── 头像/图片容器 ── */
+.imageBox {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.imageBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── 导航列表 ── */
 .nav {
-  @apply sticky;
-  top: calc(4rem + 70px);
+  position: relative;
+  height: calc(100vh - 130px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.linkList {
-  @apply space-y-1 pr-4 border-r;
-  border-color: var(--color-base-300);
+.nav li {
+  position: relative;
+  padding: 5px;
 }
 
-.link {
-  @apply flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-sm font-normal transition-colors duration-150;
+.nav li a {
+  position: relative;
+  display: flex;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
-.linkInactive:hover {
-  background-color: var(--color-base-200);
+/* ── Logo 项特殊间距 ── */
+.logoItem {
+  margin: 32px 0 80px 0;
 }
 
+/* ── 图标 ── */
 .icon {
-  @apply w-4 h-4 shrink-0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 48px;
+  height: 35px;
+  color: var(--color-primary);
+  transition: 0.5s;
+}
+
+.icon svg {
+  width: 16px;
+  height: 16px;
+  z-index: 1;
+}
+
+/* ── 文字 ── */
+.text {
+  position: relative;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-base-content);
+  padding-left: 12px;
+  letter-spacing: 0;
+  transition: 0.5s;
+}
+
+/* ── hover 高亮 ── */
+.nav li:hover .icon,
+.nav li:hover .text {
+  color: var(--color-warning);
+}
+
+/* ── Active 状态 — 气泡圆角背景 ── */
+.nav li:global(.active) {
+  background: var(--color-base-200);
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+}
+
+.nav li:global(.active)::before {
+  content: '';
+  position: absolute;
+  top: -19px;
+  right: 0;
+  width: 19px;
+  height: 19px;
+  border-bottom-right-radius: 16px;
+  box-shadow: 3px 3px 0 3px var(--color-base-200);
+  background: transparent;
+}
+
+.nav li:global(.active)::after {
+  content: '';
+  position: absolute;
+  bottom: -19px;
+  right: 0;
+  width: 19px;
+  height: 19px;
+  border-top-right-radius: 16px;
+  box-shadow: 3px -3px 0 3px var(--color-base-200);
+  background: transparent;
+}
+
+/* ── 底部开合按钮 ── */
+.toggle {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  translate: -50% 0;
+  width: calc(100% - 16px);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  border: 1px solid var(--color-base-300);
+  border-radius: 8px;
+  background: var(--color-base-200);
+  color: var(--color-base-content);
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+
+.toggle:hover {
+  background: var(--color-base-300);
+  color: var(--color-primary);
+}
+
+.toggle svg {
+  flex-shrink: 0;
+  width: 16px;
+  transition: transform 0.3s;
+}
+
+.toggleText {
+  white-space: nowrap;
+  font-size: 12px;
+  transition: 0.3s;
+}
+
+/* 展开态：箭头旋转 180° */
+.shell:global(.expanded) .toggle svg {
+  transform: rotate(180deg);
+}
+
+/* 主内容容器默认偏移，匹配侧边栏收起宽度 */
+[data-main-content] {
+  padding-left: 67px;
+}
+
+/* 收起态：居中显示，隐藏文字 */
+.shell:not(:global(.expanded)) .toggle {
+  width: 36px;
+  border-radius: 50%;
+  gap: 0;
+}
+
+.shell:not(:global(.expanded)) .toggleText {
+  display: none;
+}
+
+/* ── Active 图标 — 圆形边框 ── */
+.nav li:global(.active) .icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 29px;
+  height: 29px;
+  background: var(--color-base-100);
+  border-radius: 50%;
+  transition: 0.5s;
+  border: 3px solid var(--color-primary);
+  box-sizing: border-box;
 }
