@@ -14,7 +14,7 @@ import avatar七月有枝 from '~/assets/images/member/七月有枝.jpeg';
 
 import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
-import Timeline from '~/components/widgets/Timeline.astro';
+import ClockTimeline from '~/components/widgets/ClockTimeline.astro';
 import Section from '~/components/widgets/Section.astro';
 const metadata = {
   title: '理科迷 —— 科技爱好者',
@@ -115,8 +115,7 @@ const metadata = {
   </Section>
 
   <Section title="发展历程" subtitle="物换星移，春秋代序" id="timeline">
-    <div class="flex justify-center"></div>
-    <Timeline
+    <ClockTimeline
       items={[
         {
           year: '2014.08.01',
