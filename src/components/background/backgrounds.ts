@@ -1,26 +1,13 @@
 import type { ComponentType } from 'react';
 
-import AuroraBackground from '~/vendor/interactive-backgrounds/AuroraBackground';
-import BinaryMatrixBackground from '~/vendor/interactive-backgrounds/BinaryMatrixBackground';
-import ConstellationFieldBackground from '~/vendor/interactive-backgrounds/ConstellationFieldBackground';
-import DataRainBackground from '~/vendor/interactive-backgrounds/DataRainBackground';
-import DNASparkBackground from '~/vendor/interactive-backgrounds/DNASparkBackground';
-import DNASparkBackground3D from '~/vendor/interactive-backgrounds/DNASparkBackground3D';
-import DreamyHaloBackground from '~/vendor/interactive-backgrounds/DreamyHaloBackground';
-import FluidSmokeFlowBackground from '~/vendor/interactive-backgrounds/FluidSmokeFlowBackground';
-
-import OrbitClusterBackground from '~/vendor/interactive-backgrounds/OrbitClusterBackground';
-import ParticlesBackground from '~/vendor/interactive-backgrounds/ParticlesBackground';
-import QuantumWebBackground from '~/vendor/interactive-backgrounds/QuantumWebBackground';
-import TextParticlesBackground from '~/vendor/interactive-backgrounds/TextParticlesBackground';
-
 export type ThemeMode = 'dark' | 'light' | 'both';
 
 export interface BackgroundMeta {
   id: string;
   name: string;
+  /** 懒加载器 */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  component: ComponentType<any>;
+  load: () => Promise<{ default: ComponentType<any> }>;
   icon: string;
   /** Which theme this background is suitable for. 'dark' hides in light, 'light' hides in dark, 'both' always visible. */
   theme: ThemeMode;
@@ -30,6 +17,8 @@ export interface BackgroundMeta {
   /** Color props for light mode. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lightProps?: Record<string, any>;
+  /** 在切换器首次挂载时立刻 preload chunk（默认背景用） */
+  preload?: boolean;
 }
 
 export type BackgroundId =
@@ -52,101 +41,104 @@ export const BACKGROUNDS: BackgroundMeta[] = [
   {
     id: 'aurora',
     name: '极光',
-    component: AuroraBackground,
     icon: '🌈',
     theme: 'both',
+    preload: true,
+    load: () => import('~/vendor/interactive-backgrounds/AuroraBackground').then((m) => ({ default: m.default })),
     darkProps: { rippleColor: '#818cf8' },
     lightProps: { rippleColor: '#c39ee9' },
   },
   {
     id: 'binary-matrix',
     name: '数字雨',
-    component: BinaryMatrixBackground,
     icon: '🔢',
     theme: 'dark',
+    load: () => import('~/vendor/interactive-backgrounds/BinaryMatrixBackground').then((m) => ({ default: m.default })),
     darkProps: { color: 'rgba(0,255,65,0.8)', rippleColor: 'rgba(0,255,65,0.5)' },
   },
   {
     id: 'constellation-field',
     name: '星座',
-    component: ConstellationFieldBackground,
     icon: '✨',
     theme: 'both',
+    load: () =>
+      import('~/vendor/interactive-backgrounds/ConstellationFieldBackground').then((m) => ({ default: m.default })),
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8' },
     lightProps: { particleColor: '#0bcaf5', connectionColor: '#20cdf4' },
   },
   {
     id: 'data-rain',
     name: '数据雨',
-    component: DataRainBackground,
     icon: '💧',
     theme: 'dark',
+    load: () => import('~/vendor/interactive-backgrounds/DataRainBackground').then((m) => ({ default: m.default })),
     darkProps: { color: 'rgba(0,255,65,0.8)', rippleColor: 'rgba(0,255,65,0.5)' },
   },
   {
     id: 'dna-spark',
     name: 'DNA火花',
-    component: DNASparkBackground,
     icon: '🧬',
     theme: 'dark',
+    load: () => import('~/vendor/interactive-backgrounds/DNASparkBackground').then((m) => ({ default: m.default })),
     darkProps: { sparkColor: '#5e6ad2', strandColor: '#818cf8' },
   },
   {
     id: 'dna-spark-3d',
     name: 'DNA 3D',
-    component: DNASparkBackground3D,
     icon: '🧬',
     theme: 'dark',
+    load: () => import('~/vendor/interactive-backgrounds/DNASparkBackground3D').then((m) => ({ default: m.default })),
     darkProps: { sparkColor: '#5e6ad2', strandColor: '#818cf8' },
   },
   {
     id: 'dreamy-halo',
     name: '梦幻光晕',
-    component: DreamyHaloBackground,
     icon: '💫',
     theme: 'light',
+    load: () => import('~/vendor/interactive-backgrounds/DreamyHaloBackground').then((m) => ({ default: m.default })),
     lightProps: { baseHue: 40, saturation: 80, lightness: 55 },
   },
   {
     id: 'fluid-smoke-flow',
     name: '烟雾流动',
-    component: FluidSmokeFlowBackground,
     icon: '💨',
     theme: 'dark',
+    load: () =>
+      import('~/vendor/interactive-backgrounds/FluidSmokeFlowBackground').then((m) => ({ default: m.default })),
     darkProps: { particleColor: '#5e6ad2' },
   },
-
   {
     id: 'orbit-cluster',
     name: '轨道集群',
-    component: OrbitClusterBackground,
     icon: '🪐',
     theme: 'dark',
+    load: () => import('~/vendor/interactive-backgrounds/OrbitClusterBackground').then((m) => ({ default: m.default })),
     darkProps: { color: '#5e6ad2' },
   },
   {
     id: 'particles',
     name: '粒子',
-    component: ParticlesBackground,
     icon: '⚛',
     theme: 'both',
+    load: () => import('~/vendor/interactive-backgrounds/ParticlesBackground').then((m) => ({ default: m.default })),
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8', rippleColor: '#818cf8' },
     lightProps: { particleColor: '#07c8f9', connectionColor: '#52d0ef', rippleColor: '#52d0ef' },
   },
   {
     id: 'quantum-web',
     name: '量子网',
-    component: QuantumWebBackground,
     icon: '🕸',
     theme: 'dark',
+    load: () => import('~/vendor/interactive-backgrounds/QuantumWebBackground').then((m) => ({ default: m.default })),
     darkProps: { quantumColor: '#5e6ad2', normalColor: '#818cf8' },
   },
   {
     id: 'text-particles',
     name: '文字粒子',
-    component: TextParticlesBackground,
     icon: '🔤',
     theme: 'light',
+    load: () =>
+      import('~/vendor/interactive-backgrounds/TextParticlesBackground').then((m) => ({ default: m.default })),
     lightProps: { color: '#aadcf8', text: '理科迷', fontSize: 300 },
   },
 ];

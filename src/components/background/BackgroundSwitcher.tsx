@@ -1,7 +1,20 @@
-import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { ComponentType } from 'react';
 import type { BackgroundId } from './backgrounds';
 import { BACKGROUNDS, DEFAULT_BACKGROUND } from './backgrounds';
+
+// Cache lazy() per id so we don't recreate the component on every render.
+const lazyCache = new Map<string, ReturnType<typeof lazy>>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getLazyComponent(id: string, load: () => Promise<{ default: ComponentType<any> }>) {
+  let cached = lazyCache.get(id);
+  if (!cached) {
+    cached = lazy(load);
+    lazyCache.set(id, cached);
+  }
+  return cached;
+}
 
 function getIsDark(): boolean {
   if (typeof document === 'undefined') return true;
@@ -108,8 +121,22 @@ export default function BackgroundSwitcher() {
   }, []);
 
   const activeEntry = BACKGROUNDS.find((b) => b.id === currentBg);
-  const ActiveComponent = activeEntry?.component;
+  const ActiveComponent = useMemo(
+    () => (activeEntry ? getLazyComponent(activeEntry.id, activeEntry.load) : null),
+    [activeEntry]
+  );
   const colorProps = isDark ? activeEntry?.darkProps : activeEntry?.lightProps;
+
+  // Preload default background and stored background on mount
+  useEffect(() => {
+    const defaultEntry = BACKGROUNDS.find((b) => b.preload);
+    if (defaultEntry) {
+      void defaultEntry.load();
+    }
+    const storedId = getInitialBackground();
+    const stored = BACKGROUNDS.find((b) => b.id === storedId);
+    if (stored) void stored.load();
+  }, []);
 
   const controls = (
     <>
@@ -193,7 +220,9 @@ export default function BackgroundSwitcher() {
       <div style={{ pointerEvents: 'auto', position: 'absolute', inset: 0, overflow: 'hidden' }}>
         {ActiveComponent && (
           <BackgroundErrorBoundary fallback={<div className="absolute inset-0 bg-base-100" />}>
-            <ActiveComponent key={`${currentBg}-${isDark ? 'dark' : 'light'}`} className="" {...colorProps} />
+            <Suspense fallback={<div className="absolute inset-0 bg-base-100" />}>
+              <ActiveComponent key={`${currentBg}-${isDark ? 'dark' : 'light'}`} className="" {...colorProps} />
+            </Suspense>
           </BackgroundErrorBoundary>
         )}
       </div>
