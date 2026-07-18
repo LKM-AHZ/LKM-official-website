@@ -139,6 +139,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     theme: 'both',
     load: () =>
       import('~/vendor/interactive-backgrounds/TextParticlesBackground').then((m) => ({ default: m.default })),
+    darkProps: { color: 'rgba(255,255,255,0.9)', text: '理科迷', fontSize: 300 },
     lightProps: { color: '#aadcf8', text: '理科迷', fontSize: 300 },
   },
 ];

@@ -36,24 +36,31 @@ export default function TextParticlesBackground({
 
   const createTextParticles = useCallback(
     (width: number, height: number) => {
+      const dpr = window.devicePixelRatio || 1;
+      const pw = Math.round(width * dpr);
+      const ph = Math.round(height * dpr);
       const offscreen = document.createElement('canvas');
-      offscreen.width = width;
-      offscreen.height = height;
+      offscreen.width = pw;
+      offscreen.height = ph;
       const offCtx = offscreen.getContext('2d');
       if (!offCtx) return [];
 
+      offCtx.scale(dpr, dpr);
       offCtx.font = `bold ${fontSize}px "Noto Sans SC", sans-serif`;
       offCtx.textAlign = 'center';
       offCtx.textBaseline = 'middle';
       offCtx.fillStyle = '#ffffff';
       offCtx.fillText(text, width / 2, height / 2);
-      const imageData = offCtx.getImageData(0, 0, width, height);
+      const imageData = offCtx.getImageData(0, 0, pw, ph);
       const data = imageData.data;
 
       const particles: Particle[] = [];
+      // 在 CSS 像素空间遍历，但 index 用物理像素计算
       for (let y = 0; y < height; y += density) {
         for (let x = 0; x < width; x += density) {
-          const index = (y * width + x) * 4;
+          const px = Math.round(x * dpr);
+          const py = Math.round(y * dpr);
+          const index = (py * pw + px) * 4;
           const alpha = data[index + 3];
           if (alpha > 128) {
             particles.push({
