@@ -1,7 +1,20 @@
-import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { ComponentType } from 'react';
 import type { BackgroundId } from './backgrounds';
 import { BACKGROUNDS, DEFAULT_BACKGROUND } from './backgrounds';
+
+// Cache lazy() per id so we don't recreate the component on every render.
+const lazyCache = new Map<string, ReturnType<typeof lazy>>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getLazyComponent(id: string, load: () => Promise<{ default: ComponentType<any> }>) {
+  let cached = lazyCache.get(id);
+  if (!cached) {
+    cached = lazy(load);
+    lazyCache.set(id, cached);
+  }
+  return cached;
+}
 
 function getIsDark(): boolean {
   if (typeof document === 'undefined') return true;
@@ -41,6 +54,7 @@ export default function BackgroundSwitcher() {
   const [currentBg, setCurrentBg] = useState<BackgroundId>(getInitialBackground);
   const [isDark, setIsDark] = useState(getIsDark);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -108,8 +122,31 @@ export default function BackgroundSwitcher() {
   }, []);
 
   const activeEntry = BACKGROUNDS.find((b) => b.id === currentBg);
-  const ActiveComponent = activeEntry?.component;
+  const ActiveComponent = useMemo(
+    () => (activeEntry ? getLazyComponent(activeEntry.id, activeEntry.load) : null),
+    [activeEntry]
+  );
   const colorProps = isDark ? activeEntry?.darkProps : activeEntry?.lightProps;
+
+  // 监听 Hero section 是否在视口内，滚出后卸载背景
+  useEffect(() => {
+    const hero = document.querySelector('[data-hero-section]');
+    if (!hero) return;
+    const io = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), { threshold: 0 });
+    io.observe(hero);
+    return () => io.disconnect();
+  }, []);
+
+  // Preload default background and stored background on mount
+  useEffect(() => {
+    const defaultEntry = BACKGROUNDS.find((b) => b.preload);
+    if (defaultEntry) {
+      void defaultEntry.load();
+    }
+    const storedId = getInitialBackground();
+    const stored = BACKGROUNDS.find((b) => b.id === storedId);
+    if (stored) void stored.load();
+  }, []);
 
   const controls = (
     <>
@@ -191,9 +228,11 @@ export default function BackgroundSwitcher() {
     <div className="absolute inset-0 z-0" style={{ pointerEvents: 'none' }}>
       {/* Background canvas layer */}
       <div style={{ pointerEvents: 'auto', position: 'absolute', inset: 0, overflow: 'hidden' }}>
-        {ActiveComponent && (
+        {heroVisible && ActiveComponent && (
           <BackgroundErrorBoundary fallback={<div className="absolute inset-0 bg-base-100" />}>
-            <ActiveComponent key={`${currentBg}-${isDark ? 'dark' : 'light'}`} className="" {...colorProps} />
+            <Suspense fallback={<div className="absolute inset-0 bg-base-100" />}>
+              <ActiveComponent key={`${currentBg}-${isDark ? 'dark' : 'light'}`} className="" {...colorProps} />
+            </Suspense>
           </BackgroundErrorBoundary>
         )}
       </div>

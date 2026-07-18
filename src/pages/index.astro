@@ -76,7 +76,7 @@ const metadata = {
     </Fragment>
   </Hero>
 
-  <Section title="团队成员" subtitle="理科迷因为有你，所以更加精彩" id="team">
+  <Section title="团队成员" subtitle="理科迷因为有你，所以更加精彩" id="team" classes={{ container: 'bg-base-100' }}>
     <div class="grid gap-5 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {
         [
@@ -87,7 +87,7 @@ const metadata = {
           { name: '七月有枝', desc: '前活动策划组组员，且停且忘且随风，且行且看且从容', avatar: avatar七月有枝 },
         ].map((m) => (
           <a href={getPermalink('/team')} class="profile-card ">
-            <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
+            <div class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center rounded-lg">
               <img
                 src={m.avatar.src}
                 alt={m.name}
@@ -102,7 +102,9 @@ const metadata = {
         ))
       }
       <a href={getPermalink('/team')} class="profile-card">
-        <div class="profile-inner p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3 min-h-full">
+        <div
+          class="profile-inner p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-3 min-h-full rounded-lg"
+        >
           <span class="text-lg font-bold text-base-content">更多成员</span>
           <span class="text-xs text-neutral">点击查看完整管理团队</span>
           <span

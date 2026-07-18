@@ -23,10 +23,10 @@ const {
   {...id ? { id } : {}}
   data-hero-section
 >
-  <div class="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+  <div class="absolute inset-0 z-0" aria-hidden="true">
     <slot name="bg" />
   </div>
-  <div class={styles.heroInner + ' relative z-10'}>
+  <div class={styles.heroInner + ' relative z-10 pointer-events-none'}>
     <div class="py-16 md:py-[80px]">
       <div class={styles.heroBody}>
         {tagline && <p class="text-base text-secondary font-bold tracking-wide uppercase " set:html={tagline} />}

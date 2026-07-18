@@ -268,7 +268,7 @@
 /* 团队成员/项目团队卡片 */
 @utility profile-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.95);
+  background: light-dark(rgba(255, 255, 255, 0.95), rgba(10, 10, 12, 0.92));
   border-radius: 16px;
   box-shadow:
     0 8px 32px 0 rgba(31, 38, 135, 0.12),
