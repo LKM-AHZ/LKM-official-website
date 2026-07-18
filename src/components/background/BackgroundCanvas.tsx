@@ -22,6 +22,5 @@ export function BackgroundCanvas({ draw, init, interactions, className = '', chi
       />
       {children}
     </>
-
   );
 }

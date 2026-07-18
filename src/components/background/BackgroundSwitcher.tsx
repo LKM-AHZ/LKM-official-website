@@ -132,10 +132,7 @@ export default function BackgroundSwitcher() {
   useEffect(() => {
     const hero = document.querySelector('[data-hero-section]');
     if (!hero) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setHeroVisible(entry.isIntersecting),
-      { threshold: 0 }
-    );
+    const io = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), { threshold: 0 });
     io.observe(hero);
     return () => io.disconnect();
   }, []);
