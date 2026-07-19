@@ -16,7 +16,6 @@ import {
   advisorMembers,
   techMembers,
   professionalSubGroups,
-  projectSubGroups,
   alumniMembers,
 } from '~/data/members';
 
@@ -61,15 +60,15 @@ const metadata = {
 };
 
 const sidebarLinks = [
-  { text: '创始人', href: getPermalink('/team#founder') },
-  { text: '总务部', href: getPermalink('/team#general') },
-  { text: '群务部', href: getPermalink('/team#affairs') },
-  { text: '活动策划部', href: getPermalink('/team#events') },
-  { text: '新闻办', href: getPermalink('/team#news') },
-  { text: '顾问团', href: getPermalink('/team#advisors') },
-  { text: '专业委员会', href: getPermalink('/team#professional') },
-  { text: '技术委员会', href: getPermalink('/team#tech') },
-  { text: '已离开成员', href: getPermalink('/team#alumni') },
+  { text: '创始人', href: getPermalink('/team#founder'), icon: 'tabler:star' },
+  { text: '总务部', href: getPermalink('/team#general'), icon: 'tabler:building-skyscraper' },
+  { text: '群务部', href: getPermalink('/team#affairs'), icon: 'tabler:users-group' },
+  { text: '活动策划部', href: getPermalink('/team#events'), icon: 'tabler:calendar-event' },
+  { text: '新闻办', href: getPermalink('/team#news'), icon: 'tabler:news' },
+  { text: '顾问团', href: getPermalink('/team#advisors'), icon: 'tabler:user-check' },
+  { text: '专业委员会', href: getPermalink('/team#professional'), icon: 'tabler:certificate' },
+  { text: '技术委员会', href: getPermalink('/team#tech'), icon: 'tabler:code' },
+  { text: '已离开成员', href: getPermalink('/team#alumni'), icon: 'tabler:user-x' },
 ];
 ---
 
@@ -123,9 +122,9 @@ const sidebarLinks = [
   >
     {
       Object.entries(affairsSubGroups).map(([, group]) => (
-        <div class="mb-8">
-          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="mb-12">
+          <h4 class="text-md font-bold mb-3 text-center text-neutral">{group.label}</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {group.members.map((m) => (
               <MemberCard
                 name={m.name ?? '匿名成员'}
@@ -170,7 +169,7 @@ const sidebarLinks = [
     desc="该团队部门职责是负责各平台宣传账号的持续运营，以及外交事宜，持续宣传输出并扩大影响能力，并为此向大众输出科普内容，促进传播知识。新闻办会下属一个科普项目组，以及翻译项目组，为科普事业繁荣昌盛，以及中外科技爱好者能有所知识共享，破除信息差和壁垒。"
     noGrid
   >
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {
         newsMembers.map((m) => (
           <MemberCard
@@ -186,11 +185,11 @@ const sidebarLinks = [
     {
       Object.entries(newsSubGroups).map(([, group]) => (
         <div class="mt-8">
-          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
-          <p class="max-w-3xl mx-auto mb-4 px-6 py-3 bg-base-200 border border-base-300 rounded-[8px] text-center text-[13px] text-neutral leading-relaxed">
+          <h4 class="text-md font-bold mb-3 text-center text-neutral">{group.label}</h4>
+          <p class="max-w-3xl mx-auto mb-6 px-6 py-3 bg-base-200 border border-base-300 rounded-[8px] text-center text-[13px] text-neutral leading-relaxed">
             {group.desc}
           </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {group.members.map((m) => (
               <MemberCard
                 name={m.name ?? '匿名成员'}
@@ -237,9 +236,9 @@ const sidebarLinks = [
   >
     {
       Object.entries(professionalSubGroups).map(([, group]) => (
-        <div class="mb-8">
-          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="mb-12">
+          <h4 class="text-md font-bold mb-3 text-center text-neutral">{group.label}</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {group.members.map((m) => (
               <MemberCard
                 name={m.name ?? '匿名成员'}
@@ -276,50 +275,18 @@ const sidebarLinks = [
     }
   </DepartmentSection>
 
-  <!-- 项目团队 -->
-  <DepartmentSection
-    id="project"
-    title="项目团队"
-    borderColor="#14b8a6"
-    desc="项目团队负责理科迷的各项实际项目推进，从教材编写到科普传播，将想法落地为成果。"
-    noGrid
-  >
-    {
-      Object.entries(projectSubGroups).map(([, group]) => (
-        <div class="mb-8">
-          <h4 class="text-md font-bold mb-2 text-center text-neutral">{group.label}</h4>
-          {group.members.length > 0 ? (
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {group.members.map((m) => (
-                <MemberCard
-                  name={m.name ?? '匿名成员'}
-                  avatar={getAvatar(m.avatarKey)}
-                  desc={m.desc}
-                  dream={m.dream}
-                  quote={m.quote}
-                />
-              ))}
-            </div>
-          ) : (
-            <p class="text-center text-sm text-neutral/50 py-6">暂无成员，期待你的加入</p>
-          )}
-        </div>
-      ))
-    }
-  </DepartmentSection>
-
   <!-- 已离开成员 -->
   <Section id="alumni">
     <div class="max-w-7xl mx-auto">
-      <h3 class="text-xl font-bold mb-6 text-center">
+      <h3 class="text-xl font-bold mb-9 text-center">
         <span class="border-b-2 border-base-300 pb-1">已离开或失联成员</span>
       </h3>
       <p
-        class="max-w-3xl mx-auto mb-6 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed"
+        class="max-w-3xl mx-auto mb-9 px-6 py-4 bg-base-200 border border-base-300 rounded-[8px] text-center text-[14px] text-neutral leading-relaxed"
       >
         以下成员曾为理科迷作出贡献，因各种原因现无法联系，不管如何理科迷的大门永远向你们打开。
       </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {
           alumniMembers.map((m) => (
             <MemberCard

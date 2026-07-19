@@ -21,6 +21,7 @@ export const founderMembers: Member[] = [
   {
     name: '可琪（若有千寻）',
     role: '创始人',
+    avatarKey: '若有千寻.jpg',
     desc: '2014年8月1日，可琪创立了最初群聊——〔理科迷宅基地〕。他是理科迷最初的创始者，群里现有很多现有事物和框架，都是在他所做的事情之上建立起来的。可琪创立了腾讯「物理部落」和微信公众号，吸引了大量科技爱好者；组建了最初的理科迷分群体系和七月团队管理架构。2018年因学业原因逐渐淡出，但理科迷的一切，都源于他的开创。',
     quote: '「可琪现在不在，但他确确实实是理科迷最初的创始者。」',
     dream: '梦想：让知识流入千家万户',
@@ -29,9 +30,9 @@ export const founderMembers: Member[] = [
 
 /** 总务部 */
 export const generalMembers: Member[] = [
-  { name: '七月花', avatarKey: '七月花.jpeg', desc: '一个有理想的PHD', dream: '梦想：每个孩子都能接触科学' },
+  { name: '七月花', avatarKey: '七月花.jpg', desc: '一个有理想的PHD', dream: '梦想：每个孩子都能接触科学' },
   { name: '七月知更鸟', avatarKey: '七月知更鸟.jpeg', desc: '待填写，这位还是学生在沉淀当中（让我们期待他的成长吧～' },
-  { name: '七月阿鸿', avatarKey: '七月阿鸿.jpeg' },
+  { name: '七月阿鸿', avatarKey: '七月阿鸿.jpeg', desc: '待填写，这位还是学生在沉淀当中（让我们期待他的成长吧～' },
   {
     name: '七月墨染',
     avatarKey: '七月墨染.png',
@@ -55,7 +56,7 @@ export const generalMembers: Member[] = [
   },
   {
     name: '七月千寻',
-    avatarKey: undefined,
+    avatarKey: '七月千寻.jpg',
     desc: '19年初二时加入理科迷，现在我是一个待打工人，虽然在过去也是很饱含着梦想，但不是每个人都能当科学家的啦～˶>ᗜ<˶无论是过去的哥哥姐姐们，还是现在比我小的弟弟妹妹们，我都不希望我的遗憾能够出现在他们身上，也希望在未来更多的人能够喜欢理工科，不会像我一样轻易的放弃他们。',
     dream:
       '梦想：未来的理想是让理科迷能够做大做强，能够实现它的最终目标，践行宗旨。但最眼前的还是要实行短期目标，建设一个成熟完整的线上管理团队。',
@@ -102,8 +103,9 @@ export const affairsSubGroups: Record<string, SubGroup> = {
     label: '高中三群',
     members: [
       {
-        avatarKey: '匿名成员.jpeg',
-        desc: '5岁，中考已过，衔接完毕。文理均衡，韧性较强，求友共进。',
+        name: '七月流年',
+        avatarKey: '七月流年.jpeg',
+        desc: '15岁。中考已过，衔接完毕。文理均衡，韧性较强。求友共进。',
         dream: '梦想：目标国防科大，以己力助理科迷做大做强√',
         quote: '—— 且行且忘且随风，且行且看且从容',
       },
@@ -113,7 +115,7 @@ export const affairsSubGroups: Record<string, SubGroup> = {
     label: '初中',
     members: [
       { name: '七月badragon', avatarKey: '七月badragon.jpeg', desc: '关注理科迷谢谢喵' },
-      { name: '七月三七', avatarKey: '七月三七.jpeg' },
+      { name: '七月三七', avatarKey: '七月三七.jpeg', desc: '妄立誓则祸近', dream: '梦想：养一只小猫' },
       { name: '七月焱 Echo', avatarKey: '七月焱 Echo.jpeg', desc: '解析数论爱好者' },
     ],
   },
@@ -130,14 +132,14 @@ export const affairsSubGroups: Record<string, SubGroup> = {
   },
   social: {
     label: '社会科学',
-    members: [{ name: '七月十一', avatarKey: '七月十一.jpeg', desc: '经济类相关本科毕业，兴趣爱好涉猎广泛。' }],
+    members: [{ name: '七月十一', avatarKey: '七月十一.jpg', desc: '经济类相关本科毕业，兴趣爱好涉猎广泛。' }],
   },
   language: {
     label: '国际科技交流语言学习社',
     members: [
       {
         name: '七月颜子墨',
-        avatarKey: '七月颜子墨.jpeg',
+        avatarKey: '七月颜子墨.jpg',
         desc: '汉语言文学专业出身',
         dream: '梦想：当哲学家和数学家',
         quote: '—— 随风漂泊到远方。',
@@ -146,11 +148,20 @@ export const affairsSubGroups: Record<string, SubGroup> = {
   },
   chess: {
     label: '兴趣-棋牌社',
-    members: [{ name: '七月随便', avatarKey: '七月随便.jpeg' }, { name: '七月熠', avatarKey: '七月熠.jpeg' }],
+    members: [
+      {
+        name: '七月随便',
+        avatarKey: '七月随便.jpg',
+        desc: '一个想学会所有感兴趣的东西的懒鬼。',
+        dream: '梦想：暂时保密',
+        quote: '—— 前进吧，就算到不了尽头，前进本身就有意义',
+      },
+      { name: '七月熠', avatarKey: '七月熠.jpg' },
+    ],
   },
   music: {
     label: '兴趣-土鳖音乐社',
-    members: [{ name: '七月慕楸', avatarKey: '七月慕楸.jpeg' }],
+    members: [{ name: '七月慕楸', avatarKey: '七月慕楸.jpg' }],
   },
 };
 
@@ -167,23 +178,30 @@ export const eventsMembers: Member[] = [
 ];
 
 /** 新闻办 */
-export const newsMembers: Member[] = [
-  {
-    name: '七月草薙铃',
-    avatarKey: '七月草薙铃.png',
-    desc: '一个不存在,但是希望祝福大家的人.',
-    dream: '梦想：让大家开心,到达知识的Sekai边缘.',
-    quote: '—— We must know,we will know.',
-  },
-  { name: '七月一前', avatarKey: '七月一前.png', desc: '我是新闻办的一前' },
-];
+export const newsMembers: Member[] = [];
 
 /** 新闻办下属小组 */
 export const newsSubGroups: Record<string, SubGroup> = {
   production: {
     label: '制作组',
     desc: '负责各平台、各活动关于宣传相关的制作，如有UI设计，海报制作，可视化等等，对于美工会有一定的要求，适合有相应能力的人加入。',
-    members: [] as Member[],
+    members: [
+      {
+        name: '七月草薙铃',
+        avatarKey: '七月草薙铃.png',
+        desc: '一个不存在,但是希望祝福大家的人.',
+        dream: '梦想：让大家开心,到达知识的Sekai边缘.',
+        quote: '—— We must know,we will know.',
+      },
+      { name: '七月一前', avatarKey: '七月一前.png', desc: '我是新闻办的一前' },
+      {
+        name: '七月孙',
+        avatarKey: '七月孙.jpg',
+        desc: '用好手中的技术，服务更多有需要的人。制作组小朋友一枚。',
+        dream: '梦想：多提升学历，多认识点人。',
+        quote: '—— 无人扶我青云志，我自踏雪至山巅。',
+      },
+    ],
   },
   promotion: {
     label: '宣传组',
@@ -201,27 +219,20 @@ export const newsSubGroups: Record<string, SubGroup> = {
         dream: '梦想：传播科学文化',
         quote: '—— 马克思说过，科学技术是生产力。',
       },
-      {
-        name: '七月吴理',
-        avatarKey: '七月吴理.png',
-        desc: '计算机广告制作专业中技',
-        dream: '梦想：活着，同时干点事吧',
-        quote: '—— 逆天不一定能改命，但是你所做的一切选择将会影响你的命，请慎重自己的选择',
-      },
     ],
   },
 };
 
 /** 顾问团 */
 export const advisorMembers: Member[] = [
-  { name: '七月upogg', avatarKey: '七月upogg.jpeg', role: '团长', desc: '学生', quote: '—— 我以全部知识作为我的领域' },
+  { name: '七月upogg', avatarKey: '七月upogg.jpg', role: '团长', desc: '学生', quote: '—— 我以全部知识作为我的领域' },
 ];
 
 /** 技术委员会 */
 export const techMembers: Member[] = [
-  { name: '七月可分数列', avatarKey: '七月可分数列.jpeg', role: '会长', desc: '平凡的ICPCer' },
-  { name: '七月A', desc: '网站开发的主要牛马', dream: '以后不要当牛马' },
-  { name: '七月合成魔法', avatarKey: '七月合成魔法.jpeg' },
+  { name: '七月可分数列', avatarKey: '七月可分数列.jpg', role: '会长', desc: '平凡的ICPCer' },
+  { name: '七月A', avatarKey: '七月A.jpg', desc: '网站开发的主要牛马', dream: '以后不要当牛马' },
+  { name: '七月合成魔法', avatarKey: '七月合成魔法.jpg' },
 ];
 
 /** 专业委员会下属各学科组 */
@@ -291,7 +302,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
         quote: '—— 真正的大师，永远都怀着一颗学徒的心',
       },
       { name: '七月文', avatarKey: '七月文.jpeg', desc: '打摆子的好选手', dream: '梦想：想不干嘛就不干嘛' },
-      { name: '七月三尺水', desc: '化学，爱爱爱它！（化学的狂热热爱者）' },
+      { name: '七月三尺水', avatarKey: '七月三尺水.jpg', desc: '化学，爱爱爱它！（化学的狂热热爱者）' },
     ],
   },
   biology: {
@@ -308,7 +319,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
   },
   general: {
     label: '综合',
-    members: [{ name: '七月卅律', avatarKey: '七月卅律.jpeg' }],
+    members: [{ name: '七月卅律', avatarKey: '七月卅律.jpg' }],
   },
   medicine: {
     label: '医学组-中医',
@@ -328,6 +339,7 @@ export const professionalSubGroups: Record<string, SubGroup> = {
 export const projectSubGroups: Record<string, SubGroup> = {
   textbooks: {
     label: '教材项目组',
+    desc: '致力于编写高质量的理科教材，整合知识体系，为学习者提供系统化的学习资源。',
     members: [
       { name: '七月大雄', avatarKey: '七月大雄.jpeg', desc: '什么都好奇一点', dream: '梦想：理想很多' },
       { name: '七月Joshua Xue', avatarKey: '七月Joshua Xue.png', desc: '一位数学爱好者，想让所有人都能轻松学上数学' },
@@ -336,38 +348,38 @@ export const projectSubGroups: Record<string, SubGroup> = {
   },
   science: {
     label: '科普项目组',
+    desc: '负责各平台的科普征集与传播，将专业知识转化为通俗易懂的科普内容，促进科学知识普及。',
     members: [],
   },
 };
 
-/** 已离开或失联成员（无 avatarKey） */
+/** 已离开或失联成员 */
 export const alumniMembers: Member[] = [
-  { name: '七月逗', role: '组长' },
-  { name: '七月喵', role: '组长' },
-  { name: '七月丫', role: '组长' },
-  { name: 'Spica', role: '总务组成员' },
-  { name: '七月烧', role: '群务组监督' },
-  { name: '七月凡', role: '总务组成员' },
-  { name: '七月Toy', role: '专务' },
-  { name: '七月希', role: '总务组成员' },
-  { name: '七月钗', role: '总务组成员' },
-  { name: '七月铝', role: '专务 / 顾问组成员' },
-  { name: '七月焱', role: '总务组成员' },
-  { name: '七月雨', role: '总务组成员' },
-  { name: '七月九', role: '群务组组长' },
-  { name: '本群最弱玩家', role: '18级管理' },
-  { name: '道德同志', role: '18级管理' },
-  { name: 'L.I', role: '18级管理' },
-  { name: '面条', role: '18级管理' },
-  { name: '源泉', role: '18级管理' },
-  { name: '无逸', role: '18级管理' },
-  { name: '七月湦', role: '18级管理' },
-  { name: '观澜千代', role: '信息群管理' },
-  { name: '七月上', role: '群务组成员' },
-  { name: '海豹', role: '群务组成员' },
-  { name: '七月悠', role: '组长' },
-  { name: '七月糊-又', role: '总务组专务' },
-  { name: '七月哔', role: '顾问组成员' },
-  { name: '乾坤胤', role: '顾问组成员' },
-  { name: 'Ryan', role: '顾问组成员' },
+  { name: '七月逗', avatarKey: '七月逗.png', role: '组长' },
+  { name: '七月喵', avatarKey: '七月喵.jpg', role: '组长' },
+  { name: '七月丫', avatarKey: '七月丫.jpeg', role: '组长' },
+  { name: 'Spica', avatarKey: 'Spica.jpeg', role: '总务组成员' },
+  { name: '七月烧', avatarKey: '七月烧.jpg', role: '群务组监督' },
+  { name: '七月凡', avatarKey: '七月凡.png', role: '总务组成员' },
+  { name: '七月Toy', avatarKey: '七月Toy.png', role: '专务' },
+  { name: '七月希', avatarKey: '七月希.jpg', role: '总务组成员' },
+  { name: '七月钗', avatarKey: '七月钗.jpg', role: '总务组成员' },
+  { name: '七月铝', avatarKey: '七月铝.jpg', role: '专务 / 顾问组成员' },
+  { name: '七月雨', avatarKey: '七月雨.jpeg', role: '总务组成员' },
+  { name: '七月九', avatarKey: '七月九.jpg', role: '群务组组长' },
+  { name: '本群最弱玩家', avatarKey: '本群最弱玩家.jpg', role: '18级管理' },
+  { name: '道德同志', avatarKey: '道德同志.jpg', role: '18级管理' },
+  { name: 'L.I', avatarKey: 'L.I.jpg', role: '18级管理' },
+  { name: '面条', avatarKey: '面条.jpg', role: '18级管理' },
+  { name: '源泉', avatarKey: '源泉.jpg', role: '18级管理' },
+  { name: '无逸', avatarKey: '无逸.png', role: '18级管理' },
+  { name: '七月湦', avatarKey: '七月湦.jpg', role: '18级管理' },
+  { name: '观澜千代', avatarKey: '观澜千代.jpg', role: '信息群管理' },
+  { name: '七月上', avatarKey: '七月上.jpg', role: '群务组成员' },
+  { name: '海豹', avatarKey: '海豹.jpg', role: '群务组成员' },
+  { name: '七月悠', avatarKey: '七月悠.jpg', role: '组长' },
+  { name: '七月糊-又', avatarKey: '七月糊-又.jpg', role: '总务组专务' },
+  { name: '七月哔', avatarKey: '七月哔.jpg', role: '顾问组成员' },
+  { name: '乾坤胤', avatarKey: '乾坤胤.jpg', role: '顾问组成员' },
+  { name: 'Ryan', avatarKey: 'Ryan.jpeg', role: '顾问组成员' },
 ];

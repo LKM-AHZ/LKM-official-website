@@ -22,7 +22,7 @@ const variantClass =
   }[variant] || 'btn-neutral';
 
 const isSubmit = type === 'button' || type === 'submit' || type === 'reset';
-const classes = ['btn', variantClass, className].filter(Boolean).join(' ');
+const classes = ['btn', variantClass, 'pointer-events-auto', className].filter(Boolean).join(' ');
 ---
 
 {

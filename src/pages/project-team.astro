@@ -1,0 +1,83 @@
+---
+import Layout from '~/layouts/SidebarLayout.astro';
+import MemberCard from '~/components/MemberCard.astro';
+import DepartmentSection from '~/components/DepartmentSection.astro';
+
+import type { ImageMetadata } from 'astro';
+
+import { projectSubGroups } from '~/data/members';
+
+import { teamTopTabs } from '~/navigation';
+import { getPermalink } from '~/utils/permalinks';
+
+// 自动导入所有成员头像
+const avatarModules = import.meta.glob('~/assets/images/member/*.{jpg,jpeg,png}', {
+  eager: true,
+});
+
+// 缓存映射表，避免重复查找
+const avatarCache = new Map<string, ImageMetadata>();
+
+function getAvatar(filename?: string): ImageMetadata | undefined {
+  if (!filename) return undefined;
+
+  if (avatarCache.has(filename)) {
+    return avatarCache.get(filename);
+  }
+
+  const fullPath = `/src/assets/images/member/${filename}`;
+  const module = avatarModules[fullPath];
+
+  if (module && typeof module === 'object' && 'default' in module) {
+    const image = module.default as ImageMetadata;
+    avatarCache.set(filename, image);
+    return image;
+  }
+
+  return undefined;
+}
+
+const metadata = {
+  title: '项目团队 —— 理科迷',
+};
+
+const sidebarLinks = [
+  { text: '教材项目组', href: getPermalink('/project-team#textbooks'), icon: 'tabler:books' },
+  { text: '科普项目组', href: getPermalink('/project-team#science'), icon: 'tabler:flask' },
+];
+---
+
+<Layout
+  metadata={metadata}
+  topTabs={teamTopTabs}
+  sidebarLinks={sidebarLinks}
+  currentPath={getPermalink('/project-team')}
+>
+  <!-- 教材项目组 -->
+  {
+    Object.entries(projectSubGroups).map(([, group]) => (
+      <DepartmentSection
+        id={group.label === '教材项目组' ? 'textbooks' : 'science'}
+        title={group.label}
+        borderColor={group.label === '教材项目组' ? '#14b8a6' : '#a855f7'}
+        desc={group.desc ?? ''}
+      >
+        {group.members.length > 0 ? (
+          <>
+            {group.members.map((m) => (
+              <MemberCard
+                name={m.name ?? '匿名成员'}
+                avatar={getAvatar(m.avatarKey)}
+                desc={m.desc}
+                dream={m.dream}
+                quote={m.quote}
+              />
+            ))}
+          </>
+        ) : (
+          <p class="col-span-full text-center text-sm text-neutral/50 py-6">暂无成员，期待你的加入</p>
+        )}
+      </DepartmentSection>
+    ))
+  }
+</Layout>

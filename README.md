@@ -1,20 +1,20 @@
 # LKM Official Website · 理科迷官方网站
 
-[![Astro](https://img.shields.io/badge/Astro-v6-FF5D01?logo=astro)](https://astro.build)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
+[![Astro v6](https://img.shields.io/badge/Astro-v6-FF5D01?logo=astro)](https://astro.build)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?logo=vuedotjs)](https://vuejs.org)
 [![Three.js](https://img.shields.io/badge/Three.js-0.178-000000?logo=threedotjs)](https://threejs.org)
+[![daisyUI](https://img.shields.io/badge/daisyUI-v5-5A0EF8?logo=daisyui)](https://daisyui.com)
 
-理科迷 (LKM) 组织的官方网站，基于 [AstroWind](https://github.com/arthelokyo/astrowind) 模板构建，采用 **Astro v6 + Tailwind CSS v4** 的纯静态站点。
+**理科迷 (LKM)** 的官方网站 — 基于 [AstroWind](https://github.com/arthelokyo/astrowind) 模板，采用 Astro v6 + Tailwind CSS v4 构建的纯静态站点。LKM 是创立于 2014 年的科技爱好者社区，覆盖数学、物理、化学、生物、信息技术等多个学科。
 
-The official website of the LKM (LiKeMi) open-source organization — a static site built with **Astro v6 + Tailwind CSS v4**, based on the [AstroWind](https://github.com/arthelokyo/astrowind) template.
-
-> 📖 For AI agent instructions, see [AGENTS.md](./AGENTS.md).
+> 查看 [AGENTS.md](./AGENTS.md) 了解 AI Agent 工作指令。
 
 ---
 
-## 快速开始 · Quick Start
+## 快速开始
 
 > **Node.js >= 24.0.0** | **pnpm >= 11.0.0**
 
@@ -29,136 +29,93 @@ pnpm run dev
 
 ---
 
-## 命令 · Commands
+## 常用命令
 
-| 命令               | 说明                                                                       |
-| :----------------- | :------------------------------------------------------------------------- |
-| `pnpm run dev`     | 启动开发服务器 / Start dev server at `localhost:4321/LKM-official-website` |
-| `pnpm run build`   | 生产构建到 `./dist/` / Production build to `./dist/`                       |
-| `pnpm run preview` | 本地预览生产构建 / Preview production build locally                        |
-| `pnpm run check`   | 类型检查 + ESLint + Prettier / Type check + Lint                           |
-| `pnpm run fix`     | 自动修复 ESLint + Prettier / Auto-fix lint issues                          |
+| 命令               | 说明                         |
+| :----------------- | :--------------------------- |
+| `pnpm run dev`     | 启动开发服务器               |
+| `pnpm run build`   | 生产构建到 `./dist/`         |
+| `pnpm run preview` | 本地预览生产构建             |
+| `pnpm run check`   | 类型检查 + ESLint + Prettier |
+| `pnpm run fix`     | 自动修复 ESLint + Prettier   |
 
 ---
 
-## 项目结构 · Project Structure
+## 项目结构
 
 ```
 /
-├── .github/workflows/             # CI / CD (GitHub Actions)
-├── public/                        # 静态资源 / Static assets (robots.txt, _headers, images/)
+├── .github/workflows/          # CI/CD (GitHub Actions)
+├── public/                     # 静态资源
 ├── src/
 │   ├── assets/
-│   │   ├── favicons/              # 网站图标
-│   │   ├── images/                # 本地图片 / Local images
-│   │   └── styles/tailwind.css    # Tailwind v4 入口：主题、工具类、插件
+│   │   ├── images/             # 本地图片、头像
+│   │   └── styles/tailwind.css # Tailwind v4 配置入口
 │   ├── components/
-│   │   ├── background/       # 动态背景 / Dynamic background (interactive-backgrounds, 13 种可切换效果)
-│   │   ├── blog/             # 博客组件 / Blog components
-│   │   ├── common/           # 通用组件 / Shared (Image, Metadata, Analytics 等)
-│   │   ├── ui/               # 基础 UI 组件 / Primitives (Button, Form, Headline 等)
-│   │   └── widgets/          # 页面部件 / Page sections (Hero, Header, Footer 等)
+│   │   ├── background/         # 可切换动态背景（13 种效果）
+│   │   ├── blog/               # 博客组件
+│   │   ├── common/             # 通用组件（Image, Metadata, Analytics 等）
+│   │   ├── ui/                 # 基础 UI 组件
+│   │   └── widgets/            # 页面部件（Hero, Header, Footer 等）
 │   ├── data/
-│   │   ├── members.ts        # 团队成员数据 / Team member data
-│   │   └── post/             # 博客文章 / Blog posts (.md / .mdx)
-│   ├── layouts/              # 页面布局 / Layouts
-│   ├── pages/                # 文件路由 / File-based routing
-│   ├── utils/                # 工具函数 / Utilities (blog, images, permalinks)
-│   ├── config.yaml           # 站点主配置 / Site configuration
-│   ├── content.config.ts     # 内容集合 Schema
-│   ├── navigation.ts         # 导航结构
-│   └── types.d.ts            # TypeScript 类型定义
-├── src/vendor/interactive-backgrounds/  # Vendored 背景组件源码
-├── vendor/integration/       # 自定义 Astro 集成 / Config loader
-├── AGENTS.md                 # AI Agent 指令 / AI agent instructions
-├── astro.config.ts           # Astro 配置
-└── tsconfig.json             # TypeScript 配置
+│   │   ├── members.ts          # 团队成员数据
+│   │   └── post/               # 博客文章 (.md / .mdx)
+│   ├── layouts/                # 页面布局
+│   ├── pages/                  # 文件路由
+│   ├── utils/                  # 工具函数
+│   ├── config.yaml             # 站点主配置
+│   ├── content.config.ts       # 内容集合 Schema
+│   └── navigation.ts           # 导航结构
+├── src/vendor/interactive-backgrounds/  # 背景组件源码
+├── vendor/integration/         # 自定义 Astro 集成
+├── AGENTS.md                   # AI Agent 指令
+├── astro.config.ts             # Astro 配置
+└── tsconfig.json               # TypeScript 配置
 ```
 
 ---
 
-## 页面路由 · Routes
+## 页面路由
 
-| Route           | Path           | Source                 | Layout         |
-| :-------------- | :------------- | :--------------------- | :------------- |
-| 首页 / Home     | `/`            | `pages/index.astro`    | PageLayout     |
-| 关于 / About    | `/about`       | `pages/about.astro`    | SidebarLayout  |
-| 团队 / Team     | `/team`        | `pages/team.astro`     | SidebarLayout  |
-| 服务 / Services | `/services`    | `pages/services.astro` | SidebarLayout  |
-| 定价 / Pricing  | `/pricing`     | `pages/pricing.astro`  | SidebarLayout  |
-| 联系 / Contact  | `/contact`     | `pages/contact.astro`  | SidebarLayout  |
-| 隐私 / Privacy  | `/privacy`     | `pages/privacy.md`     | MarkdownLayout |
-| 条款 / Terms    | `/terms`       | `pages/terms.md`       | MarkdownLayout |
-| 404             | `/404`         | `pages/404.astro`      | PageLayout     |
-| RSS             | `/rss.xml`     | `pages/rss.xml.ts`     | —              |
-| 博客 / Blog     | `/blog`        | `pages/[...blog]/`     | PageLayout     |
-| 文章 / Post     | `/blog/<slug>` | `pages/[...blog]/`     | PageLayout     |
+| 路由       | 路径            | 源文件                     | 布局           |
+| :--------- | :-------------- | :------------------------- | :------------- |
+| 首页       | `/`             | `pages/index.astro`        | PageLayout     |
+| 管理团队   | `/team`         | `pages/team.astro`         | SidebarLayout  |
+| 项目团队   | `/project-team` | `pages/project-team.astro` | SidebarLayout  |
+| 关于       | `/about`        | `pages/about.astro`        | SidebarLayout  |
+| 服务       | `/services`     | `pages/services.astro`     | SidebarLayout  |
+| 赞助与支持 | `/pricing`      | `pages/pricing.astro`      | SidebarLayout  |
+| 联系我们   | `/contact`      | `pages/contact.astro`      | SidebarLayout  |
+| QQ 社群    | `/communities`  | `pages/communities.astro`  | SidebarLayout  |
+| 文档库     | `/docs`         | `pages/docs/`              | DocsLayout     |
+| 隐私政策   | `/privacy`      | `pages/privacy.md`         | MarkdownLayout |
+| 使用条款   | `/terms`        | `pages/terms.md`           | MarkdownLayout |
+| 博客       | `/blog`         | `pages/[...blog]/`         | PageLayout     |
+| 文章详情   | `/blog/<slug>`  | `pages/[...blog]/`         | PageLayout     |
+| 404        | `/404`          | `pages/404.astro`          | PageLayout     |
+| RSS        | `/rss.xml`      | `pages/rss.xml.ts`         | —              |
 
 ---
 
-## 配置系统 · Configuration
+## 配置系统
 
-配置文件 `src/config.yaml` 通过 `vendor/integration/` 注入为 Vite 虚拟模块：
-
-The site config is loaded as a Vite virtual module `astrowind:config`:
+`src/config.yaml` 通过 `vendor/integration/` 注入为 Vite 虚拟模块 `astrowind:config`：
 
 ```ts
 import { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } from 'astrowind:config';
 ```
 
-### 关键配置
-
-```yaml
-site:
-  name: 'LKM'
-  site: 'https://LKM-AHZ.github.io'
-  base: '/LKM-official-website'
-metadata:
-  title:
-    default: 'LKM'
-    template: '%s — LKM'
-i18n:
-  language: zh-cn
-  textDirection: ltr
-apps:
-  blog:
-    isEnabled: true
-    postsPerPage: 6
-ui:
-  theme: 'system'
-analytics:
-  vendors:
-    googleAnalytics:
-      id: null # 填入 "G-XXXXXXXXXX" 启用
-```
-
-导航结构定义在 `src/navigation.ts`，使用 `getPermalink()` 和 `getAsset()` 生成 URL。 / Navigation is in `src/navigation.ts`.
+常用配置项：站点名称/URL、SEO 元数据、博客开关与分页、Google Analytics ID、主题模式等。导航结构在 `src/navigation.ts` 中定义。
 
 ---
 
-## 样式系统 · Styling
+## 样式系统
 
-**Tailwind CSS v4** — CSS-first 配置，入口文件 `src/assets/styles/tailwind.css`：
-
-```css
-@import 'tailwindcss';
-@plugin '@tailwindcss/typography';
-
-@custom-variant dark (&:where(.dark, .dark *));
-
-@theme {
-  --color-primary: ...;
-  --font-heading: ...;
-}
-```
-
-**CSS Modules** — `.module.css` 文件自动局部作用域化，需在顶部加 `@reference "tailwindcss"` 以使用 `@apply`。
-
-**Shoelace + KaTeX** — 组件库与数学公式渲染支持。
+**Tailwind CSS v4** — CSS-first 配置，入口 `src/assets/styles/tailwind.css`，支持暗色模式、自定义主题变量、Typography 插件。组件使用 **CSS Modules** 实现局部作用域样式。UI 层面使用 **daisyUI v5** 组件库，结合 **KaTeX** 渲染数学公式。
 
 ---
 
-## 内容管理 · Content
+## 内容管理
 
 在 `src/data/post/` 下创建 `.md` 或 `.mdx` 文件：
 
@@ -173,69 +130,65 @@ author: 作者名
 image: ~/assets/images/cover.jpg
 ---
 
-Your content here...
+文章正文...
 ```
 
 Schema 由 `src/content.config.ts` (Zod) 验证，`src/utils/blog.ts` 负责加载、排序和关联。
 
 ---
 
-## 构建部署 · Deployment
+## 构建部署
 
 ```bash
-pnpm run build   # 构建到 ./dist/
+pnpm run build   # 输出到 ./dist/
 ```
 
-| 平台             | 说明                                        |
-| :--------------- | :------------------------------------------ |
-| **GitHub Pages** | 推送 main 分支自动部署，GitHub Actions 驱动 |
-| **Vercel**       | 直接导入 Git 仓库即可部署                   |
-| **Netlify**      | 使用 `netlify.toml`                         |
-| **任意托管**     | 上传 `dist/` 目录                           |
+| 平台             | 说明                   |
+| :--------------- | :--------------------- |
+| GitHub Pages     | 推送 main 分支自动部署 |
+| Vercel / Netlify | 导入 Git 仓库即可      |
+| 任意静态托管     | 上传 `dist/` 目录      |
 
 ---
 
-## 团队成员数据 · Team Data
+## 团队成员
 
-团队成员数据集中维护在 `src/data/members.ts`，按部门/小组分组导出（创始人、总务部、群务部、活动策划部、新闻办、顾问团、技术委员会、专业委员会等）。`src/pages/team.astro` 通过 `avatarMap` 将 `avatarKey` 映射到 `src/assets/images/member/` 下的头像图片，配合 `MemberCard` / `DepartmentSection` 组件渲染。
-
----
-
-## 架构概览 · Architecture
-
-```
-配置层        config.yaml → vendor/integration → astrowind:config
-  ↓
-布局层        Layout → PageLayout / MarkdownLayout / SidebarLayout
-  ↓
-页面层        src/pages/ (文件路由)
-  ↓
-Widget 层     src/components/widgets/ (Hero, Features, Header, Footer...)
-  ↓
-UI 层         src/components/ui/ (Button, Form, Headline, Timeline...)
-  ↓
-Common 层     src/components/common/ (Image, Metadata, Analytics...)
-  ↓
-Background 层  src/components/background/ (13 种可切换动态背景：极光/数字雨/星座/DNA/星云等，3D 核苷酸模型可拖拽旋转)
-  ↓
-数据层        src/data/post/ + src/utils/
-```
+团队数据维护在 `src/data/members.ts`，按部门分组导出（创始人、总务部、群务部、活动策划部、新闻办等）。`src/pages/team.astro` 通过 `MemberCard` / `DepartmentSection` 组件渲染，头像存放于 `src/assets/images/member/`。
 
 ---
 
-## 特性 · Features
+## 架构概览
 
-- **Astro v6** 静态站点生成 / Static site generation，PageSpeed Insights 评分优秀
-- **Tailwind CSS v4** CSS-first 配置 / CSS-first config，暗色模式 / Dark mode
-- **13 种可切换动态背景** / 13 switchable interactive backgrounds（极光、数字雨、星座、DNA 2D/3D、星云等，自适应深浅主题）
-- **3D 核苷酸模型** / 3D nucleotide ball-and-stick models（腺嘌呤/胸腺嘧啶/鸟嘌呤/胞嘧啶完整结构，可拖拽旋转）
-- **CSS Modules** 局部作用域样式 / Locally scoped styles
-- **Vue 3 + React 19** 双 UI 框架支持 / Dual UI framework support
-- **SEO 友好** / SEO: Sitemap, RSS, Open Graph, Twitter Card
-- **图片优化** / Image optimization: Sharp + Unpic CDN
-- **博客系统** / Blog: MD/MDX, 分类/标签, 分页, KaTeX 公式
-- **View Transitions** SPA 风格页面切换 / SPA-style page transitions
-- **daisyUI v5 + KaTeX** 组件库 + 数学公式 / Component library + math rendering
-- **团队成员数据驱动** / Data-driven team page
-- **多平台部署** / Multi-platform deploy: Vercel, Netlify, any static host
-- **AI Agent 指令** / AI agent instructions in [AGENTS.md](./AGENTS.md)
+```
+配置层     config.yaml → vendor/integration → astrowind:config (虚拟模块)
+  ↓
+布局层     SidebarLayout / PageLayout / MarkdownLayout / DocsLayout
+  ↓
+页面层     src/pages/ (文件路由)
+  ↓
+Widget 层  src/components/widgets/ (Hero, Features, Header, Footer…)
+  ↓
+UI 层      src/components/ui/ (Button, Form, Headline, Timeline…)
+  ↓
+Common 层  src/components/common/ (Image, Metadata, Analytics…)
+  ↓
+背景层     src/components/background/ (13 种可切换动态背景，3D 核苷酸模型可拖拽)
+  ↓
+数据层     src/data/post/ + src/utils/
+```
+
+---
+
+## 特性
+
+- **Astro v6** 静态站点生成，PageSpeed Insights 评分优秀
+- **Tailwind CSS v4** 暗色模式 + 自定义主题
+- **13 种可切换动态背景** — 极光、数字雨、星座、DNA（2D/3D）、星云等，自适应深浅主题
+- **双 UI 框架** — Vue 3 + React 19
+- **View Transitions** SPA 风格页面切换
+- **博客系统** — MD/MDX、分类/标签、分页、KaTeX 公式
+- **SEO 完整** — Sitemap、RSS、Open Graph、Twitter Card
+- **图片优化** — Sharp + Unpic CDN
+- **daisyUI v5 + KaTeX** — 组件库 + 数学公式渲染
+- **响应式适配** — 移动端至桌面端
+- **多平台部署** — GitHub Pages / Vercel / Netlify / 任意静态托管

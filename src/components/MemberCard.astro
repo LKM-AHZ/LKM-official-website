@@ -15,11 +15,11 @@ const { name, avatar, role, desc, dream, quote, size = 'sm' } = Astro.props;
 const isLg = size === 'lg';
 ---
 
-<div
-  class="rounded-[12px] bg-base-200 border border-base-300 card-hover intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
->
+<div class="profile-card">
   <!-- 手机端：水平布局 | 桌面端：垂直布局 -->
-  <div class="p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center">
+  <div
+    class="profile-inner p-4 sm:p-5 flex flex-row items-center gap-3 sm:flex-col sm:items-center text-left sm:text-center"
+  >
     <div class="shrink-0 sm:mb-3">
       {
         avatar ? (
@@ -35,9 +35,10 @@ const isLg = size === 'lg';
         ) : (
           <div
             class={
-              isLg
+              'avatar-fallback ' +
+              (isLg
                 ? 'w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-base-300 text-neutral flex items-center justify-center text-lg font-semibold'
-                : 'w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-base-300 text-neutral flex items-center justify-center text-lg font-semibold'
+                : 'w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-base-300 text-neutral flex items-center justify-center text-lg font-semibold')
             }
           >
             {name.replace('七月', '').charAt(0) || name.charAt(0)}
@@ -56,7 +57,7 @@ const isLg = size === 'lg';
       {role && <span class={isLg ? 'text-primary font-semibold' : 'text-xs text-neutral'}>{role}</span>}
       {desc && <p class="text-xs text-neutral mt-1">{desc}</p>}
       {dream && <p class="text-xs text-[#6C2AD8]/80 mt-1 italic">{dream}</p>}
-      {quote && <p class="text-xs text-primary/70 mt-1">{quote}</p>}
+      {quote && <p class="profile-quote text-xs text-primary/70 mt-1">{quote}</p>}
     </div>
   </div>
 </div>
