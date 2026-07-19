@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            height: 100vh;
+        }
+        .window {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position:fixed;
+            z-index: 9999;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        input {
+            justify-content: center;
+            display: block;
+            width: 300px;
+            padding: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button.top {
+            float: left;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="top">
+        <button class="top" type="submit">切换日夜风格</button>
+    </div>
+    <div class="window">
+        <h2>登录</h2>
+        <form>
+            <input type="text" placeholder="用户名" id="username" required>
+            <input type="password" placeholder="密码" id="password" required>
+            <input type="email" placeholder="邮箱（非必填）" id="email">
+            <button type="submit">登录</button>
+        </form>
+    </div>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            //在此输入用户名、密码和邮箱的处理逻辑，例如发送到服务器进行验证
+            console.log('Username:', username);
+            console.log('Password:', password);
+            console.log('Email:', email);
+        });
+        document.querySelector('.top button').addEventListener('click', function() {
+            document.body.classList.toggle('lkm-light');
+        });
+    </script>
+</body>
+</html>
