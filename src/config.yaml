@@ -1,15 +1,14 @@
 site:
-  name: 理科迷
+  name: 理科迷LKM
   site: 'https://LKM-AHZ.github.io'
   base: '/LKM-official-website'
   trailingSlash: false
-
   googleSiteVerificationId: null
 
 # Default SEO metadata
 metadata:
   title:
-    default: 理科迷
+    default: 理科迷LKM
     template: '%s — LKM'
   description: '理科迷 (LKM) — 创立于 2014 年的科技爱好者社区。覆盖数学、物理、化学、生物、信息技术等多个学科，由普罗大众组成，让科学回归每一个人。'
   robots:

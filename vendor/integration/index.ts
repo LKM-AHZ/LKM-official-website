@@ -1,31 +1,23 @@
+import { EOL } from 'node:os';
 import fs from 'node:fs';
-import os from 'node:os';
 import type { AstroConfig, AstroIntegration } from 'astro';
 
 import configBuilder, { type Config } from './utils/configBuilder';
 import loadConfig from './utils/loadConfig';
 
-export default ({ config: _themeConfig = 'src/config.yaml' } = {}): AstroIntegration => {
+export default ({ config: configPath = 'src/config.yaml' } = {}): AstroIntegration => {
   let cfg: AstroConfig;
   return {
     name: 'astrowind-integration',
 
     hooks: {
-      'astro:config:setup': async ({
-        // command,
-        config,
-        // injectRoute,
-        // isRestart,
-        logger,
-        updateConfig,
-        addWatchFile,
-      }) => {
+      'astro:config:setup': async ({ config, logger, updateConfig, addWatchFile }) => {
         const buildLogger = logger.fork('astrowind');
 
         const virtualModuleId = 'astrowind:config';
         const resolvedVirtualModuleId = '\0' + virtualModuleId;
 
-        const rawJsonConfig = (await loadConfig(_themeConfig)) as Config;
+        const rawJsonConfig = (await loadConfig(configPath)) as Config;
         const { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } = configBuilder(rawJsonConfig);
 
         updateConfig({
@@ -60,10 +52,10 @@ export default ({ config: _themeConfig = 'src/config.yaml' } = {}): AstroIntegra
           },
         });
 
-        if (typeof _themeConfig === 'string') {
-          addWatchFile(new URL(_themeConfig, config.root));
+        if (typeof configPath === 'string') {
+          addWatchFile(new URL(configPath, config.root));
 
-          buildLogger.info(`Astrowind \`${_themeConfig}\` has been loaded.`);
+          buildLogger.info(`Astrowind \`${configPath}\` has been loaded.`);
         } else {
           buildLogger.info(`Astrowind config has been loaded.`);
         }
@@ -85,8 +77,7 @@ export default ({ config: _themeConfig = 'src/config.yaml' } = {}): AstroIntegra
           const robotsTxtFileInOut = new URL('robots.txt', outDir);
 
           const hasIntegration =
-            Array.isArray(cfg?.integrations) &&
-            cfg.integrations?.find((e) => e?.name === '@astrojs/sitemap') !== undefined;
+            Array.isArray(cfg?.integrations) && cfg.integrations.some((e) => e?.name === '@astrojs/sitemap');
           const sitemapExists = fs.existsSync(sitemapFile);
 
           if (hasIntegration && sitemapExists) {
@@ -95,7 +86,7 @@ export default ({ config: _themeConfig = 'src/config.yaml' } = {}): AstroIntegra
             const pattern = /^Sitemap:(.*)$/m;
 
             if (!pattern.test(robotsTxt)) {
-              fs.writeFileSync(robotsTxtFileInOut, `${robotsTxt}${os.EOL}${os.EOL}Sitemap: ${sitemapUrl}`, {
+              fs.writeFileSync(robotsTxtFileInOut, `${robotsTxt}${EOL}${EOL}Sitemap: ${sitemapUrl}`, {
                 encoding: 'utf8',
                 flag: 'w',
               });
