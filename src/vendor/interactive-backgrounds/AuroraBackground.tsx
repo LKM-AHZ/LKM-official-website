@@ -25,79 +25,45 @@ interface LocalRipple {
   growing: boolean;
 }
 
-<<<<<<< HEAD
-=======
 const AURORA_THEME = {
   dark: {
-    layers: 3,
+    layers: 5,
     colors: ['#6366f1', '#818cf8', '#22d3ee'],
-    alpha: [0.16, 0.11, 0.07],
-    waveSpeed: 0.12,
-    mouseStrength: 14,
+    alpha: [0.28, 0.2, 0.13],
+    waveSpeed: 0.16,
+    mouseStrength: 20,
   },
   light: {
-    layers: 2,
-    colors: ['#818cf8', '#67e8f9'],
-    alpha: [0.09, 0.055],
-    waveSpeed: 0.08,
-    mouseStrength: 7,
+    layers: 3,
+    colors: ['#6366f1', '#06b6d4', '#67e8f9'],
+    alpha: [0.16, 0.11, 0.07],
+    waveSpeed: 0.11,
+    mouseStrength: 10,
   },
 } as const;
 
 const MAX_RIPPLES = 12;
 
->>>>>>> 2764c34 (333)
 export default function AuroraBackground({
   mouseRadius = 150,
   rippleColor: propRippleColor,
   className = '',
-<<<<<<< HEAD
-  layers = 5,
-  baseWaveHeight = 30,
-  waveSpacing = 10,
-  waveSpeed = 0.5,
-=======
   layers: propLayers,
   baseWaveHeight = 30,
   waveSpacing = 10,
   waveSpeed: propWaveSpeed,
->>>>>>> 2764c34 (333)
   lineWidthBase = 2,
   rippleMaxRadius = 120,
   rippleGrowthRate = 3,
   rippleLineWidth = 2,
 }: AuroraBackgroundProps) {
   const mode = useColorMode();
-<<<<<<< HEAD
-  const rippleColor = propRippleColor ?? (mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.08)');
-=======
   const theme = AURORA_THEME[mode];
   const rippleColor = propRippleColor ?? (mode === 'dark' ? '#818cf8' : '#a5f3fc');
->>>>>>> 2764c34 (333)
   const ripplesRef = useRef<LocalRipple[]>([]);
 
   const draw = useCallback(
     (frame: BackgroundFrame) => {
-<<<<<<< HEAD
-      const { ctx, width, height, mouse, time } = frame;
-
-      // Consume per-frame ripples batch
-      for (const r of frame.ripples) {
-        ripplesRef.current.push({ x: r.x, y: r.y, radius: 0, opacity: 1, growing: true });
-      }
-
-      // drawAuroraWave
-      ctx.clearRect(0, 0, width, height);
-      for (let layer = 0; layer < layers; layer++) {
-        ctx.beginPath();
-        const waveHeight = baseWaveHeight + layer * waveSpacing;
-        const waveOffset = time * waveSpeed + layer * 50;
-        const alpha = 0.05 + layer * 0.05;
-        const hue = (time * 10 + layer * 50) % 360;
-        ctx.strokeStyle = `hsla(${hue}, 100%, 70%, ${alpha})`;
-        ctx.lineWidth = lineWidthBase + layer * 1.5;
-        for (let x = 0; x <= width; x += 10) {
-=======
       const { ctx, width, height, mouse, time, delta, performance } = frame;
       const { quality, reducedMotion } = performance;
       const qualityScale = quality === 'high' ? 1 : quality === 'medium' ? 0.75 : 0.5;
@@ -125,7 +91,6 @@ export default function AuroraBackground({
         ctx.globalAlpha = theme.alpha[layer % theme.alpha.length];
         ctx.lineWidth = lineWidthBase + layer * 1.5;
         for (let x = 0; x <= width; x += sampleStep) {
->>>>>>> 2764c34 (333)
           const y =
             height / 2 +
             Math.sin(x * 0.01 + waveOffset) * waveHeight +
@@ -135,11 +100,7 @@ export default function AuroraBackground({
             const dx = mouse.x - x;
             const dy = mouse.y - y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-<<<<<<< HEAD
-            const distort = dist < mouseRadius ? ((mouseRadius - dist) / mouseRadius) * 20 : 0;
-=======
             const distort = dist < mouseRadius ? ((mouseRadius - dist) / mouseRadius) * mouseStrength : 0;
->>>>>>> 2764c34 (333)
             finalY = y - distort;
           }
           ctx.lineTo(x, finalY);
@@ -147,39 +108,15 @@ export default function AuroraBackground({
         ctx.stroke();
       }
 
-<<<<<<< HEAD
-      // drawRipples
-      ripplesRef.current = ripplesRef.current.filter((ripple) => {
-        if (ripple.growing) {
-          ripple.radius += rippleGrowthRate;
-=======
       ripplesRef.current = ripplesRef.current.filter((ripple) => {
         if (ripple.growing) {
           ripple.radius += rippleGrowthRate * delta * 60 * qualityScale;
->>>>>>> 2764c34 (333)
           ripple.opacity = 1 - ripple.radius / rippleMaxRadius;
           if (ripple.radius >= rippleMaxRadius) ripple.growing = false;
           return true;
         }
         return false;
       });
-<<<<<<< HEAD
-      ripplesRef.current.forEach((ripple) => {
-        ctx.beginPath();
-        ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = rippleColor.replace(/[\d.]+(?=\))/, (ripple.opacity * 0.8).toString());
-        ctx.lineWidth = rippleLineWidth;
-        ctx.stroke();
-      });
-    },
-    [
-      mouseRadius,
-      rippleColor,
-      layers,
-      baseWaveHeight,
-      waveSpacing,
-      waveSpeed,
-=======
       for (const ripple of ripplesRef.current) {
         ctx.beginPath();
         ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
@@ -199,7 +136,6 @@ export default function AuroraBackground({
       baseWaveHeight,
       waveSpacing,
       propWaveSpeed,
->>>>>>> 2764c34 (333)
       lineWidthBase,
       rippleMaxRadius,
       rippleGrowthRate,

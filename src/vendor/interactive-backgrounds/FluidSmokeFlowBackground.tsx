@@ -20,12 +20,9 @@ interface Particle {
   vy: number;
 }
 
-<<<<<<< HEAD
-=======
 const QUALITY_MULTIPLIER = { high: 1, medium: 0.68, low: 0.4 } as const;
 const BASE_FRAME_RATE = 60;
 
->>>>>>> 2764c34 (333)
 export default function FluidSmokeFlowBackground({
   particleColor: propParticleColor,
   lineWidth = 1,
@@ -40,39 +37,39 @@ export default function FluidSmokeFlowBackground({
     propParticleColor || (mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)');
 
   const particlesRef = useRef<Particle[]>([]);
+  const lastQualityRef = useRef<BackgroundFrame['performance']['quality'] | null>(null);
 
-  const init = useCallback(
-    (_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
-      const particles: Particle[] = [];
-<<<<<<< HEAD
-      for (let i = 0; i < particleCount; i++) {
-=======
-      const count = Math.floor(particleCount * QUALITY_MULTIPLIER[frame.performance.quality]);
-      for (let i = 0; i < count; i++) {
->>>>>>> 2764c34 (333)
-        particles.push({
-          x: Math.random() * frame.width,
-          y: Math.random() * frame.height,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5,
-        });
-      }
-      particlesRef.current = particles;
-      return () => {
-        particlesRef.current = [];
-      };
+  const createParticles = useCallback(
+    (width: number, height: number, quality: BackgroundFrame['performance']['quality']) => {
+      const count = Math.floor(particleCount * QUALITY_MULTIPLIER[quality]);
+      particlesRef.current = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+      }));
+      lastQualityRef.current = quality;
     },
     [particleCount]
   );
 
+  const init = useCallback(
+    (_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
+      createParticles(frame.width, frame.height, frame.performance.quality);
+      return () => {
+        particlesRef.current = [];
+      };
+    },
+    [createParticles]
+  );
+
   const draw = useCallback(
     (frame: BackgroundFrame) => {
-<<<<<<< HEAD
-      const { ctx, width, height, mouse } = frame;
-      ctx.fillStyle = `rgba(0, 0, 0, ${backgroundFadeAlpha})`;
-=======
       const { ctx, width, height, mouse, delta, performance } = frame;
       const multiplier = QUALITY_MULTIPLIER[performance.quality];
+      if (performance.quality !== lastQualityRef.current) {
+        createParticles(width, height, performance.quality);
+      }
       const motionStep = delta * BASE_FRAME_RATE;
       const motionScale = performance.reducedMotion ? 0.05 : motionStep;
       const scaledInteractionRadius = interactionRadius * multiplier;
@@ -80,33 +77,11 @@ export default function FluidSmokeFlowBackground({
       // Fewer low-quality particles need their old trails removed more aggressively.
       const cleanupAlpha = Math.min(1, backgroundFadeAlpha / multiplier);
       ctx.fillStyle = `rgba(0, 0, 0, ${cleanupAlpha})`;
->>>>>>> 2764c34 (333)
       ctx.fillRect(0, 0, width, height);
       ctx.lineWidth = lineWidth;
       ctx.strokeStyle = particleColor;
 
       particlesRef.current.forEach((p) => {
-<<<<<<< HEAD
-        if (mouse.x !== null && mouse.y !== null) {
-          const dx = mouse.x - p.x;
-          const dy = mouse.y - p.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < interactionRadius) {
-            const force = (interactionRadius - dist) / interactionRadius;
-            const angle = Math.atan2(dy, dx);
-            p.vx -= Math.cos(angle) * force * interactionStrength;
-            p.vy -= Math.sin(angle) * force * interactionStrength;
-          }
-        }
-
-        p.vx *= 0.96;
-        p.vy *= 0.96;
-
-        const prevX = p.x;
-        const prevY = p.y;
-        p.x += p.vx;
-        p.y += p.vy;
-=======
         if (!performance.reducedMotion && mouse.x !== null && mouse.y !== null) {
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
@@ -126,7 +101,6 @@ export default function FluidSmokeFlowBackground({
         const prevY = p.y;
         p.x += p.vx * motionScale;
         p.y += p.vy * motionScale;
->>>>>>> 2764c34 (333)
 
         if (p.x < 0) p.x = width;
         if (p.y < 0) p.y = height;
@@ -139,7 +113,7 @@ export default function FluidSmokeFlowBackground({
         ctx.stroke();
       });
     },
-    [particleColor, lineWidth, interactionRadius, interactionStrength, backgroundFadeAlpha]
+    [createParticles, particleColor, lineWidth, interactionRadius, interactionStrength, backgroundFadeAlpha]
   );
 
   return (

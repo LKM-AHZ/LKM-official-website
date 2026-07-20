@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-<<<<<<< HEAD
-=======
 import {
   getBackgroundPerformance,
   type BackgroundPerformance,
   type BackgroundQuality,
 } from './useBackgroundCanvas';
->>>>>>> 2764c34 (333)
 
 export interface CanvasViewportMouse {
   x: number | null;
@@ -27,24 +24,17 @@ export interface CanvasViewport {
   ripples: ViewportRipple[];
   isVisible: boolean;
   reducedMotion: boolean;
-<<<<<<< HEAD
-=======
   quality: BackgroundQuality;
   performance: BackgroundPerformance;
->>>>>>> 2764c34 (333)
 }
 
 export function useCanvasViewport(interactions: { mouse?: boolean; click?: boolean } = {}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [isVisible, setIsVisible] = useState(true);
-<<<<<<< HEAD
-  const [reducedMotion, setReducedMotion] = useState(false);
-=======
   const [backgroundPerformance, setBackgroundPerformance] = useState<BackgroundPerformance>(() =>
     getBackgroundPerformance()
   );
->>>>>>> 2764c34 (333)
   const mouseRef = useRef<CanvasViewportMouse>({ x: null, y: null });
   const ripplesRef = useRef<ViewportRipple[]>([]);
 
@@ -53,27 +43,19 @@ export function useCanvasViewport(interactions: { mouse?: boolean; click?: boole
     if (!el) return;
 
     const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-<<<<<<< HEAD
-    setReducedMotion(reducedQuery.matches);
-    const onReduced = () => setReducedMotion(reducedQuery.matches);
-=======
     setBackgroundPerformance(getBackgroundPerformance());
     const onReduced = () => {
       const nextPerformance = getBackgroundPerformance();
       setBackgroundPerformance(nextPerformance);
       if (nextPerformance.reducedMotion) ripplesRef.current.length = 0;
     };
->>>>>>> 2764c34 (333)
     reducedQuery.addEventListener('change', onReduced);
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const measure = () => {
       const rect = el.getBoundingClientRect();
       setSize({ width: rect.width, height: rect.height });
-<<<<<<< HEAD
-=======
       setBackgroundPerformance(getBackgroundPerformance());
->>>>>>> 2764c34 (333)
     };
     measure();
     const ro = new ResizeObserver(() => {
@@ -90,11 +72,6 @@ export function useCanvasViewport(interactions: { mouse?: boolean; click?: boole
     updateVis();
     const onVis = () => updateVis();
     const onScroll = () => updateVis();
-<<<<<<< HEAD
-    document.addEventListener('visibilitychange', onVis);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onVis);
-=======
     const onWindowResize = () => {
       measure();
       updateVis();
@@ -102,7 +79,6 @@ export function useCanvasViewport(interactions: { mouse?: boolean; click?: boole
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onWindowResize);
->>>>>>> 2764c34 (333)
 
     const onPointerMove = (e: PointerEvent) => {
       const rect = el.getBoundingClientRect();
@@ -114,20 +90,14 @@ export function useCanvasViewport(interactions: { mouse?: boolean; click?: boole
       mouseRef.current.y = null;
     };
     const onPointerDown = (e: PointerEvent) => {
-<<<<<<< HEAD
-=======
       if (reducedQuery.matches) return;
->>>>>>> 2764c34 (333)
       const rect = el.getBoundingClientRect();
       ripplesRef.current.push({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
         startTime: performance.now() / 1000,
       });
-<<<<<<< HEAD
-=======
       if (ripplesRef.current.length > 12) ripplesRef.current.splice(0, ripplesRef.current.length - 12);
->>>>>>> 2764c34 (333)
     };
 
     if (interactions.mouse) {
@@ -144,11 +114,7 @@ export function useCanvasViewport(interactions: { mouse?: boolean; click?: boole
       reducedQuery.removeEventListener('change', onReduced);
       document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('scroll', onScroll);
-<<<<<<< HEAD
-      window.removeEventListener('resize', onVis);
-=======
       window.removeEventListener('resize', onWindowResize);
->>>>>>> 2764c34 (333)
       if (interactions.mouse) {
         el.removeEventListener('pointermove', onPointerMove);
         el.removeEventListener('pointerleave', onPointerLeave);
@@ -166,12 +132,8 @@ export function useCanvasViewport(interactions: { mouse?: boolean; click?: boole
     mouse: mouseRef.current,
     ripples: ripplesRef.current,
     isVisible,
-<<<<<<< HEAD
-    reducedMotion,
-=======
     reducedMotion: backgroundPerformance.reducedMotion,
     quality: backgroundPerformance.quality,
     performance: backgroundPerformance,
->>>>>>> 2764c34 (333)
   };
 }
