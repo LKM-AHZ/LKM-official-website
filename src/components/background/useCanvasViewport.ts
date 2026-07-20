@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  getBackgroundPerformance,
-  type BackgroundPerformance,
-  type BackgroundQuality,
-} from './useBackgroundCanvas';
+import { getBackgroundPerformance, type BackgroundPerformance, type BackgroundQuality } from './useBackgroundCanvas';
 
 export interface CanvasViewportMouse {
   x: number | null;

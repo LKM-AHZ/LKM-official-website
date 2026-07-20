@@ -252,8 +252,7 @@ export default function QuantumWebBackground({
       particles.forEach((particle) => {
         if (particle.trail.length > 1) {
           const velocity = Math.sqrt(
-            Math.pow(particle.x - particle.lastX, 2) +
-              Math.pow(particle.y - particle.lastY, 2)
+            Math.pow(particle.x - particle.lastX, 2) + Math.pow(particle.y - particle.lastY, 2)
           );
           const trailIntensity = Math.min(velocity * 20, 1);
           if (trailIntensity > 0.05) {
@@ -262,12 +261,7 @@ export default function QuantumWebBackground({
             for (let i = 1; i < particle.trail.length; i++) {
               ctx.lineTo(particle.trail[i].x, particle.trail[i].y);
             }
-            const gradient = ctx.createLinearGradient(
-              particle.trail[0].x,
-              particle.trail[0].y,
-              particle.x,
-              particle.y
-            );
+            const gradient = ctx.createLinearGradient(particle.trail[0].x, particle.trail[0].y, particle.x, particle.y);
             gradient.addColorStop(0, `${particle.baseColor}00`);
             gradient.addColorStop(
               1,
@@ -345,22 +339,12 @@ export default function QuantumWebBackground({
   const init = useCallback(
     (_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
       lastSizeRef.current = { width: frame.width, height: frame.height };
-      particlesRef.current = createParticles(
-        frame.width,
-        frame.height,
-        QUALITY_MULTIPLIER[frame.performance.quality]
-      );
+      particlesRef.current = createParticles(frame.width, frame.height, QUALITY_MULTIPLIER[frame.performance.quality]);
       connectionsRef.current = [];
       connectionFrameRef.current = 0;
     },
     [createParticles]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true, keys: true }}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true, keys: true }} />;
 }

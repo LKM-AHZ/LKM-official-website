@@ -168,8 +168,7 @@ export default function BinaryMatrixBackground({
         let columnChanged = false;
 
         const distToMouse = Math.sqrt(
-          Math.pow(x - (mouse.x ?? -9999), 2) +
-            Math.pow((yPositions[0] || 0) - (mouse.y ?? -9999), 2)
+          Math.pow(x - (mouse.x ?? -9999), 2) + Math.pow((yPositions[0] || 0) - (mouse.y ?? -9999), 2)
         );
         const isAffected = distToMouse < mouseAffectRadius && mouseIntensityRef.current > 0.1;
 
@@ -191,9 +190,7 @@ export default function BinaryMatrixBackground({
           const opacity = 1 - trailIndex / trailLength;
           const brightness = i === 0 ? 1 : 0.3 + 0.7 * opacity;
           const currentFlicker = i === 0 ? flickerIntensity : 1;
-          const mouseEffect = isAffected
-            ? (1 - Math.min(distToMouse / 200, 1)) * mouseIntensityRef.current
-            : 0;
+          const mouseEffect = isAffected ? (1 - Math.min(distToMouse / 200, 1)) * mouseIntensityRef.current : 0;
 
           const match = color.match(/\d+/g);
           const [r, g, b] = match ? match.map(Number) : [0, 255, 0];
@@ -239,12 +236,5 @@ export default function BinaryMatrixBackground({
     ]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true, click: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true, click: true }} className={className} />;
 }

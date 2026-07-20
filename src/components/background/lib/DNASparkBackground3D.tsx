@@ -116,9 +116,17 @@ export default function DNASparkBackground3D({
   const actualBasePairCount = Math.min(basePairCount, qualityConfig.basePairs);
   const actualParticleCount = Math.min(particleCount, qualityConfig.particleCount);
   const actualBackboneSegments =
-    quality === 'low' ? Math.min(backboneSegments, 40) : quality === 'medium' ? Math.min(backboneSegments, 64) : backboneSegments;
+    quality === 'low'
+      ? Math.min(backboneSegments, 40)
+      : quality === 'medium'
+        ? Math.min(backboneSegments, 64)
+        : backboneSegments;
   const actualBaseSphereSegments =
-    quality === 'low' ? Math.min(baseSphereSegments, 8) : quality === 'medium' ? Math.min(baseSphereSegments, 12) : baseSphereSegments;
+    quality === 'low'
+      ? Math.min(baseSphereSegments, 8)
+      : quality === 'medium'
+        ? Math.min(baseSphereSegments, 12)
+        : baseSphereSegments;
   const reducedMotion = performance.reducedMotion;
 
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -137,10 +145,10 @@ export default function DNASparkBackground3D({
 
   // Base color mapping
   const baseColors: Record<string, number> = {
-    A: 0x4169E1, // Royal Blue
-    T: 0xFFD700, // Gold
-    G: 0x1E90FF, // Dodger Blue
-    C: 0xFFA500, // Orange
+    A: 0x4169e1, // Royal Blue
+    T: 0xffd700, // Gold
+    G: 0x1e90ff, // Dodger Blue
+    C: 0xffa500, // Orange
   };
 
   // Complementary base pairs
@@ -167,14 +175,26 @@ export default function DNASparkBackground3D({
 
   const createAtom = (parent: THREE.Group, x: number, y: number, z: number, color: number, radius = 0.65) => {
     const geo = new THREE.SphereGeometry(radius, 16, 16);
-    const mat = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 0.25, specular: 0x222222, shininess: 30 });
+    const mat = new THREE.MeshPhongMaterial({
+      color,
+      emissive: color,
+      emissiveIntensity: 0.25,
+      specular: 0x222222,
+      shininess: 30,
+    });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(x, y, z);
     parent.add(mesh);
     return mesh;
   };
 
-  const createBond = (parent: THREE.Group, a: { x: number; y: number; z: number }, b: { x: number; y: number; z: number }, color = 0xcccccc, radius = 0.16) => {
+  const createBond = (
+    parent: THREE.Group,
+    a: { x: number; y: number; z: number },
+    b: { x: number; y: number; z: number },
+    color = 0xcccccc,
+    radius = 0.16
+  ) => {
     const mid = new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
     const dir = new THREE.Vector3(b.x - a.x, b.y - a.y, b.z - a.z);
     const len = dir.length();
@@ -189,7 +209,13 @@ export default function DNASparkBackground3D({
 
   const v = (a: { x: number; y: number; z?: number }) => ({ x: a.x * 0.55, y: a.y * 0.55, z: a.z || 0 });
 
-  const addDoubleBond = (g: THREE.Group, a: { x: number; y: number; z: number }, b: { x: number; y: number; z: number }, offset: number, radius: number) => {
+  const addDoubleBond = (
+    g: THREE.Group,
+    a: { x: number; y: number; z: number },
+    b: { x: number; y: number; z: number },
+    offset: number,
+    radius: number
+  ) => {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -242,7 +268,9 @@ export default function DNASparkBackground3D({
       z: u1.z - dNorm.z * (dNorm.x * u1.x + dNorm.y * u1.y + dNorm.z * u1.z),
     };
     const p1Len = Math.sqrt(p1.x * p1.x + p1.y * p1.y + p1.z * p1.z);
-    p1.x /= p1Len; p1.y /= p1Len; p1.z /= p1Len;
+    p1.x /= p1Len;
+    p1.y /= p1Len;
+    p1.z /= p1Len;
     const p2 = {
       x: dNorm.y * p1.z - dNorm.z * p1.y,
       y: dNorm.z * p1.x - dNorm.x * p1.z,
@@ -257,9 +285,18 @@ export default function DNASparkBackground3D({
     ];
     const bondLen = 1.2;
     angles.forEach(({ theta, phi }) => {
-      const ox = p.x + bondLen * (Math.sin(theta) * Math.cos(phi) * p1.x + Math.sin(theta) * Math.sin(phi) * p2.x + Math.cos(theta) * dNorm.x);
-      const oy = p.y + bondLen * (Math.sin(theta) * Math.cos(phi) * p1.y + Math.sin(theta) * Math.sin(phi) * p2.y + Math.cos(theta) * dNorm.y);
-      const oz = p.z + bondLen * (Math.sin(theta) * Math.cos(phi) * p1.z + Math.sin(theta) * Math.sin(phi) * p2.z + Math.cos(theta) * dNorm.z);
+      const ox =
+        p.x +
+        bondLen *
+          (Math.sin(theta) * Math.cos(phi) * p1.x + Math.sin(theta) * Math.sin(phi) * p2.x + Math.cos(theta) * dNorm.x);
+      const oy =
+        p.y +
+        bondLen *
+          (Math.sin(theta) * Math.cos(phi) * p1.y + Math.sin(theta) * Math.sin(phi) * p2.y + Math.cos(theta) * dNorm.y);
+      const oz =
+        p.z +
+        bondLen *
+          (Math.sin(theta) * Math.cos(phi) * p1.z + Math.sin(theta) * Math.sin(phi) * p2.z + Math.cos(theta) * dNorm.z);
       createAtom(g, ox, oy, oz, 0xff4040, 0.43);
       createBond(g, p, { x: ox, y: oy, z: oz }, 0xf8a030, 0.12);
     });
@@ -271,14 +308,14 @@ export default function DNASparkBackground3D({
 
     const purineAtoms = (g: THREE.Group, isG: boolean) => {
       const atoms = [
-        { x: -1.46, y: 2.80, z: 0, c: 0x3055ff, r: 0.65 },
-        { x: 0.00, y: 3.40, z: 0, c: 0x666666, r: 0.5 },
-        { x: 1.46, y: 2.80, z: 0, c: 0x3055ff, r: 0.65 },
-        { x: 1.15, y: 1.40, z: 0, c: 0x666666, r: 0.5 },
+        { x: -1.46, y: 2.8, z: 0, c: 0x3055ff, r: 0.65 },
+        { x: 0.0, y: 3.4, z: 0, c: 0x666666, r: 0.5 },
+        { x: 1.46, y: 2.8, z: 0, c: 0x3055ff, r: 0.65 },
+        { x: 1.15, y: 1.4, z: 0, c: 0x666666, r: 0.5 },
         { x: -0.42, y: 0.85, z: 0, c: 0x666666, r: 0.5 },
-        { x: -1.70, y: 1.50, z: 0, c: 0x666666, r: 0.5 },
-        { x: -0.30, y: -0.55, z: 0, c: 0x3055ff, r: 0.65 },
-        { x: -1.60, y: 0.20, z: 0, c: 0x666666, r: 0.5 },
+        { x: -1.7, y: 1.5, z: 0, c: 0x666666, r: 0.5 },
+        { x: -0.3, y: -0.55, z: 0, c: 0x3055ff, r: 0.65 },
+        { x: -1.6, y: 0.2, z: 0, c: 0x666666, r: 0.5 },
         { x: -2.15, y: 1.55, z: 0, c: 0x3055ff, r: 0.65 },
       ];
       atoms.forEach((a) => createAtom(g, a.x * 0.55, a.y * 0.55, a.z, a.c, a.r));
@@ -307,12 +344,12 @@ export default function DNASparkBackground3D({
 
     const pyrimidineAtoms = (g: THREE.Group, isT: boolean) => {
       const atoms = [
-        { x: -1.50, y: 2.30, z: 0, c: 0x3055ff, r: 0.65 },
-        { x: 0.00, y: 3.00, z: 0, c: 0x666666, r: 0.5 },
-        { x: 1.50, y: 2.30, z: 0, c: 0x3055ff, r: 0.65 },
-        { x: 1.10, y: 1.00, z: 0, c: 0x666666, r: 0.5 },
-        { x: -0.40, y: 0.40, z: 0, c: 0x666666, r: 0.5 },
-        { x: -1.70, y: 1.00, z: 0, c: 0x666666, r: 0.5 },
+        { x: -1.5, y: 2.3, z: 0, c: 0x3055ff, r: 0.65 },
+        { x: 0.0, y: 3.0, z: 0, c: 0x666666, r: 0.5 },
+        { x: 1.5, y: 2.3, z: 0, c: 0x3055ff, r: 0.65 },
+        { x: 1.1, y: 1.0, z: 0, c: 0x666666, r: 0.5 },
+        { x: -0.4, y: 0.4, z: 0, c: 0x666666, r: 0.5 },
+        { x: -1.7, y: 1.0, z: 0, c: 0x666666, r: 0.5 },
       ];
       atoms.forEach((a) => createAtom(g, a.x * 0.55, a.y * 0.55, a.z, a.c, a.r));
       for (let i = 0; i < 5; i++) createBond(g, v(atoms[i]), v(atoms[i + 1]));
@@ -352,14 +389,14 @@ export default function DNASparkBackground3D({
 
   const initMolecularStructures3D = (scene: THREE.Scene) => {
     const structs = [
-      { base: 'A', side: 'left', color: 0x4169E1 },
+      { base: 'A', side: 'left', color: 0x4169e1 },
       { base: 'T', side: 'right', color: 0xffd700 },
       { base: 'G', side: 'left', color: 0x1e90ff },
       { base: 'C', side: 'right', color: 0xffa500 },
     ];
 
     const aspect = width > 0 && height > 0 ? width / height : 1;
-    const fovRad = 75 * Math.PI / 180;
+    const fovRad = (75 * Math.PI) / 180;
     const halfH = Math.tan(fovRad / 2) * cameraOrbitRadius * 0.7;
     const halfW = halfH * aspect;
 
@@ -414,9 +451,17 @@ export default function DNASparkBackground3D({
       const y = (i / (seqLen - 1)) * h - h / 2;
       const angle = (i / seqLen) * Math.PI * 2 * turns;
       const pos1 = new THREE.Vector3(Math.cos(angle) * helixRadius, y, Math.sin(angle) * helixRadius);
-      const pos2 = new THREE.Vector3(Math.cos(angle + Math.PI) * helixRadius, y, Math.sin(angle + Math.PI) * helixRadius);
+      const pos2 = new THREE.Vector3(
+        Math.cos(angle + Math.PI) * helixRadius,
+        y,
+        Math.sin(angle + Math.PI) * helixRadius
+      );
 
-      const baseGeometry = new THREE.SphereGeometry(baseSphereRadius, actualBaseSphereSegments, actualBaseSphereSegments);
+      const baseGeometry = new THREE.SphereGeometry(
+        baseSphereRadius,
+        actualBaseSphereSegments,
+        actualBaseSphereSegments
+      );
       const baseMaterial1 = new THREE.MeshPhongMaterial({
         color: baseColors[base1],
         transparent: true,
@@ -473,13 +518,21 @@ export default function DNASparkBackground3D({
     particlesRef.current = [];
     for (let i = 0; i < actualParticleCount; i++) {
       const particle = new THREE.Mesh(particleGeometry, particleMaterial.clone());
-      const position = new THREE.Vector3((Math.random() - 0.5) * 400, (Math.random() - 0.5) * 400, (Math.random() - 0.5) * 400);
+      const position = new THREE.Vector3(
+        (Math.random() - 0.5) * 400,
+        (Math.random() - 0.5) * 400,
+        (Math.random() - 0.5) * 400
+      );
       particle.position.copy(position);
       scene.add(particle);
       const speed = Math.random() * (particleSpeedMax - particleSpeedMin) + particleSpeedMin;
       particlesRef.current.push({
         mesh: particle,
-        velocity: new THREE.Vector3((Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5),
+        velocity: new THREE.Vector3(
+          (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 0.5
+        ),
         originalPosition: position.clone(),
         angle: Math.random() * Math.PI * 2,
         speed,

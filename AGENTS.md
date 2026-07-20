@@ -24,22 +24,23 @@ AstroWind is a free, open-source website template built with **Astro v6** and **
 
 ```
 src/
-  assets/styles/tailwind.css   # Tailwind v4 config (themes, utilities, plugins)
+  styles/tailwind.css        # Tailwind v4 config (themes, utilities, plugins)
   components/
     common/        # Shared: Image, Metadata, Analytics, ToggleTheme
     ui/            # Primitives: Button, Headline, WidgetWrapper, ItemGrid
     widgets/       # Page sections: Hero, Features, Pricing, Header, Footer
     blog/          # Blog: SinglePost, List, Pagination, Tags
+    background/    # Background switcher, canvas & interactive background components
     CustomStyles.astro  # CSS variables for colors and fonts
   content.config.ts    # Content Collections schema (Astro v6 location)
-  data/post/           # Blog posts (.md, .mdx)
+  content/             # Content files: post/, docs/ (.md, .mdx)
+  integrations/        # Custom Astro integration for config loading
   layouts/             # Layout.astro, PageLayout.astro, MarkdownLayout.astro
   pages/               # File-based routing
   utils/               # blog.ts, images.ts, permalinks.ts, frontmatter.ts
   config.yaml          # Site configuration (loaded as virtual module)
   navigation.ts        # Navigation structure
   types.d.ts           # TypeScript type definitions
-vendor/integration/    # Custom Astro integration for config loading
 ```
 
 ### Path Aliases
@@ -53,11 +54,11 @@ import { SITE } from 'astrowind:config';
 
 ### Configuration System
 
-Site config lives in `src/config.yaml` and is loaded as a Vite virtual module `astrowind:config` by the custom integration in `vendor/integration/`. Exports: `SITE`, `I18N`, `METADATA`, `APP_BLOG`, `UI`, `ANALYTICS`.
+Site config lives in `src/config.yaml` and is loaded as a Vite virtual module `astrowind:config` by the custom integration in `src/integrations/`. Exports: `SITE`, `I18N`, `METADATA`, `APP_BLOG`, `UI`, `ANALYTICS`.
 
 ## Tailwind CSS v4
 
-Configuration is CSS-first in `src/assets/styles/tailwind.css`:
+Configuration is CSS-first in `src/styles/tailwind.css`:
 
 - **Theme tokens:** `@theme { --color-primary: var(--aw-color-primary); ... }`
 - **Custom utilities:** `@utility bg-page { ... }`
@@ -75,7 +76,7 @@ Components use `twMerge` from `tailwind-merge` v3 for conditional class composit
 
 ## Content Collections
 
-Defined in `src/content.config.ts` using the Astro v6 Content Layer API with `glob()` loader. Posts are in `src/data/post/` as `.md` or `.mdx` files.
+Defined in `src/content.config.ts` using the Astro v6 Content Layer API with `glob()` loader. Posts are in `src/content/post/` as `.md` or `.mdx` files.
 
 Post frontmatter: `title` (required), `publishDate`, `updateDate`, `draft`, `excerpt`, `image`, `category`, `tags`, `author`, `metadata`.
 

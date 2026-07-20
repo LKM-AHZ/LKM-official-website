@@ -33,8 +33,7 @@ export default function FluidSmokeFlowBackground({
   backgroundFadeAlpha = 0.08,
 }: FluidSmokeFlowBackgroundProps) {
   const mode = useColorMode();
-  const particleColor =
-    propParticleColor || (mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)');
+  const particleColor = propParticleColor || (mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)');
 
   const particlesRef = useRef<Particle[]>([]);
   const lastQualityRef = useRef<BackgroundFrame['performance']['quality'] | null>(null);
@@ -116,12 +115,5 @@ export default function FluidSmokeFlowBackground({
     [createParticles, particleColor, lineWidth, interactionRadius, interactionStrength, backgroundFadeAlpha]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true }} className={className} />;
 }

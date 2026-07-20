@@ -44,7 +44,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '🌈',
     theme: 'both',
     preload: true,
-    load: () => import('~/vendor/interactive-backgrounds/AuroraBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/AuroraBackground').then((m) => ({ default: m.default })),
     darkProps: { rippleColor: '#818cf8' },
     lightProps: { rippleColor: '#a5f3fc' },
   },
@@ -53,7 +53,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '数字雨',
     icon: '🔢',
     theme: 'dark',
-    load: () => import('~/vendor/interactive-backgrounds/BinaryMatrixBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/BinaryMatrixBackground').then((m) => ({ default: m.default })),
     darkProps: { color: 'rgba(0,255,65,0.8)', rippleColor: 'rgba(0,255,65,0.5)' },
   },
   {
@@ -62,7 +62,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     icon: '✨',
     theme: 'both',
     load: () =>
-      import('~/vendor/interactive-backgrounds/ConstellationFieldBackground').then((m) => ({ default: m.default })),
+      import('~/components/background/lib/ConstellationFieldBackground').then((m) => ({ default: m.default })),
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8' },
     lightProps: { particleColor: '#0bcaf5', connectionColor: '#20cdf4' },
   },
@@ -71,7 +71,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '数据雨',
     icon: '💧',
     theme: 'dark',
-    load: () => import('~/vendor/interactive-backgrounds/DataRainBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/DataRainBackground').then((m) => ({ default: m.default })),
     darkProps: { color: 'rgba(0,255,65,0.8)', rippleColor: 'rgba(0,255,65,0.5)' },
   },
   {
@@ -79,7 +79,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: 'DNA火花',
     icon: '🧬',
     theme: 'dark',
-    load: () => import('~/vendor/interactive-backgrounds/DNASparkBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/DNASparkBackground').then((m) => ({ default: m.default })),
     darkProps: { sparkColor: '#5e6ad2', strandColor: '#818cf8' },
   },
   {
@@ -87,7 +87,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: 'DNA 3D',
     icon: '🧬',
     theme: 'dark',
-    load: () => import('~/vendor/interactive-backgrounds/DNASparkBackground3D').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/DNASparkBackground3D').then((m) => ({ default: m.default })),
     darkProps: { sparkColor: '#5e6ad2', strandColor: '#818cf8' },
   },
   {
@@ -95,7 +95,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '梦幻光晕',
     icon: '💫',
     theme: 'light',
-    load: () => import('~/vendor/interactive-backgrounds/DreamyHaloBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/DreamyHaloBackground').then((m) => ({ default: m.default })),
     lightProps: { baseHue: 40, saturation: 80, lightness: 55 },
   },
   {
@@ -103,8 +103,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '烟雾流动',
     icon: '💨',
     theme: 'dark',
-    load: () =>
-      import('~/vendor/interactive-backgrounds/FluidSmokeFlowBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/FluidSmokeFlowBackground').then((m) => ({ default: m.default })),
     darkProps: { particleColor: '#5e6ad2' },
   },
   {
@@ -112,7 +111,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '轨道集群',
     icon: '🪐',
     theme: 'dark',
-    load: () => import('~/vendor/interactive-backgrounds/OrbitClusterBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/OrbitClusterBackground').then((m) => ({ default: m.default })),
     darkProps: { color: '#5e6ad2' },
   },
   {
@@ -120,7 +119,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '粒子',
     icon: '⚛',
     theme: 'both',
-    load: () => import('~/vendor/interactive-backgrounds/ParticlesBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/ParticlesBackground').then((m) => ({ default: m.default })),
     darkProps: { particleColor: '#5e6ad2', connectionColor: '#818cf8', rippleColor: '#818cf8' },
     lightProps: { particleColor: '#07c8f9', connectionColor: '#52d0ef', rippleColor: '#52d0ef' },
   },
@@ -129,7 +128,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '量子网',
     icon: '🕸',
     theme: 'dark',
-    load: () => import('~/vendor/interactive-backgrounds/QuantumWebBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/QuantumWebBackground').then((m) => ({ default: m.default })),
     darkProps: { quantumColor: '#5e6ad2', normalColor: '#818cf8' },
   },
   {
@@ -137,8 +136,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     name: '文字粒子',
     icon: '🔤',
     theme: 'both',
-    load: () =>
-      import('~/vendor/interactive-backgrounds/TextParticlesBackground').then((m) => ({ default: m.default })),
+    load: () => import('~/components/background/lib/TextParticlesBackground').then((m) => ({ default: m.default })),
     darkProps: { color: 'rgba(255,255,255,0.9)', text: '理科迷', fontSize: 300 },
     lightProps: { color: '#aadcf8', text: '理科迷', fontSize: 300 },
   },

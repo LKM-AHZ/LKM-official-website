@@ -143,11 +143,5 @@ export default function AuroraBackground({
     ]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      interactions={{ mouse: true, click: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} interactions={{ mouse: true, click: true }} className={className} />;
 }

@@ -82,9 +82,7 @@ export default function TextParticlesBackground({
       for (let i = 0; i < bgParticleCount; i++) {
         const px = Math.random() * width;
         const py = Math.random() * height;
-        const tooClose = particles.some(
-          (p) => Math.hypot(p.baseX - px, p.baseY - py) < 15
-        );
+        const tooClose = particles.some((p) => Math.hypot(p.baseX - px, p.baseY - py) < 15);
         if (!tooClose) {
           particles.push({
             x: px,
@@ -155,12 +153,5 @@ export default function TextParticlesBackground({
     [createTextParticles]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true }} className={className} />;
 }

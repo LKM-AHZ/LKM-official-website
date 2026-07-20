@@ -60,7 +60,10 @@ function withAlpha(color: string, alpha: number) {
     return `rgba(${red}, ${green}, ${blue}, ${clampedAlpha * sourceAlpha})`;
   }
 
-  const functional = color.match(/^rgba?\(([^)]+)\)$/i)?.[1]?.split(',').map((value) => value.trim());
+  const functional = color
+    .match(/^rgba?\(([^)]+)\)$/i)?.[1]
+    ?.split(',')
+    .map((value) => value.trim());
   if (functional && functional.length >= 3) {
     const sourceAlpha = functional.length === 4 ? Number(functional[3]) : 1;
     return `rgba(${functional[0]}, ${functional[1]}, ${functional[2]}, ${clampedAlpha * sourceAlpha})`;
@@ -105,7 +108,9 @@ export default function ParticlesBackground({
 
       for (let i = 0; i < count; i++) {
         const isShooter = Math.random() < 0.05;
-        const radius = isShooter ? particleSizeMin : particleSizeMin + Math.random() * (particleSizeMax - particleSizeMin);
+        const radius = isShooter
+          ? particleSizeMin
+          : particleSizeMin + Math.random() * (particleSizeMax - particleSizeMin);
         const vx = (Math.random() - 0.5) * (isShooter ? 2 * particleSpeedMultiplier : 0.5 * particleSpeedMultiplier);
         const vy = (Math.random() - 0.5) * (isShooter ? 2 * particleSpeedMultiplier : 0.5 * particleSpeedMultiplier);
         particles.push({
@@ -215,11 +220,7 @@ export default function ParticlesBackground({
             const rippleDx = particle.x - ripple.x;
             const rippleDy = particle.y - ripple.y;
             const rippleDistance = Math.sqrt(rippleDx * rippleDx + rippleDy * rippleDy);
-            if (
-              rippleDistance > 0 &&
-              rippleDistance < ripple.radius + 20 &&
-              rippleDistance > ripple.radius - 20
-            ) {
+            if (rippleDistance > 0 && rippleDistance < ripple.radius + 20 && rippleDistance > ripple.radius - 20) {
               const rippleForce = ripple.opacity * 0.8 * multiplier;
               particle.vx += (rippleDx / rippleDistance) * rippleForce * motionStep;
               particle.vy += (rippleDy / rippleDistance) * rippleForce * motionStep;
@@ -352,12 +353,5 @@ export default function ParticlesBackground({
     [createParticles]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true, click: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true, click: true }} className={className} />;
 }

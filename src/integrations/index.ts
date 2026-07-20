@@ -2,8 +2,8 @@ import { EOL } from 'node:os';
 import fs from 'node:fs';
 import type { AstroConfig, AstroIntegration } from 'astro';
 
-import configBuilder, { type Config } from './utils/configBuilder';
-import loadConfig from './utils/loadConfig';
+import configBuilder, { type Config } from './configBuilder';
+import loadConfig from './loadConfig';
 
 export default ({ config: configPath = 'src/config.yaml' } = {}): AstroIntegration => {
   let cfg: AstroConfig;
