@@ -104,10 +104,29 @@ export default function DNASparkBackground3D({
   const connectionColor = propConnectionColor || (mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)');
   const rippleColor = propRippleColor || (mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.08)');
 
+<<<<<<< HEAD
   const { containerRef, width, height, mouse, ripples, isVisible, reducedMotion } = useCanvasViewport({
     mouse: true,
     click: true,
   });
+=======
+  const { containerRef, width, height, mouse, ripples, isVisible, quality, performance } = useCanvasViewport({
+    mouse: true,
+    click: true,
+  });
+  const qualityConfig = {
+    high: { pixelRatio: 1.5, basePairs: 40, particleCount: 100, shadow: true, glow: 1, motion: 1 },
+    medium: { pixelRatio: 1.25, basePairs: 28, particleCount: 60, shadow: false, glow: 0.7, motion: 0.7 },
+    low: { pixelRatio: 1, basePairs: 16, particleCount: 20, shadow: false, glow: 0.45, motion: 0.45 },
+  }[quality];
+  const actualBasePairCount = Math.min(basePairCount, qualityConfig.basePairs);
+  const actualParticleCount = Math.min(particleCount, qualityConfig.particleCount);
+  const actualBackboneSegments =
+    quality === 'low' ? Math.min(backboneSegments, 40) : quality === 'medium' ? Math.min(backboneSegments, 64) : backboneSegments;
+  const actualBaseSphereSegments =
+    quality === 'low' ? Math.min(baseSphereSegments, 8) : quality === 'medium' ? Math.min(baseSphereSegments, 12) : baseSphereSegments;
+  const reducedMotion = performance.reducedMotion;
+>>>>>>> 2764c34 (333)
 
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -365,6 +384,7 @@ export default function DNASparkBackground3D({
   };
 
   const initDNA3D = (scene: THREE.Scene) => {
+<<<<<<< HEAD
     const sequence = generateDNASequence(basePairCount);
     const h = helixHeight * 2;
     const turns = 8;
@@ -372,10 +392,20 @@ export default function DNASparkBackground3D({
       Array.from({ length: backboneSegments }, (_, i) => {
         const t = (i / (backboneSegments - 1)) * Math.PI * 2 * turns;
         const y = (i / (backboneSegments - 1)) * h - h / 2;
+=======
+    const sequence = generateDNASequence(actualBasePairCount);
+    const h = helixHeight * 2;
+    const turns = 8;
+    const curve1 = new THREE.CatmullRomCurve3(
+      Array.from({ length: actualBackboneSegments }, (_, i) => {
+        const t = (i / (actualBackboneSegments - 1)) * Math.PI * 2 * turns;
+        const y = (i / (actualBackboneSegments - 1)) * h - h / 2;
+>>>>>>> 2764c34 (333)
         return new THREE.Vector3(Math.cos(t) * helixRadius, y, Math.sin(t) * helixRadius);
       })
     );
     const curve2 = new THREE.CatmullRomCurve3(
+<<<<<<< HEAD
       Array.from({ length: backboneSegments }, (_, i) => {
         const t = (i / (backboneSegments - 1)) * Math.PI * 2 * turns + Math.PI;
         const y = (i / (backboneSegments - 1)) * h - h / 2;
@@ -384,6 +414,16 @@ export default function DNASparkBackground3D({
     );
     const backboneGeo1 = new THREE.TubeGeometry(curve1, backboneSegments, backboneRadius, 8, false);
     const backboneGeo2 = new THREE.TubeGeometry(curve2, backboneSegments, backboneRadius, 8, false);
+=======
+      Array.from({ length: actualBackboneSegments }, (_, i) => {
+        const t = (i / (actualBackboneSegments - 1)) * Math.PI * 2 * turns + Math.PI;
+        const y = (i / (actualBackboneSegments - 1)) * h - h / 2;
+        return new THREE.Vector3(Math.cos(t) * helixRadius, y, Math.sin(t) * helixRadius);
+      })
+    );
+    const backboneGeo1 = new THREE.TubeGeometry(curve1, actualBackboneSegments, backboneRadius, 8, false);
+    const backboneGeo2 = new THREE.TubeGeometry(curve2, actualBackboneSegments, backboneRadius, 8, false);
+>>>>>>> 2764c34 (333)
     const mat1 = new THREE.MeshPhongMaterial({ color: 0x808080, transparent: true, opacity: 0.7, shininess: 100 });
     const mat2 = new THREE.MeshPhongMaterial({ color: 0xa9a9a9, transparent: true, opacity: 0.7, shininess: 100 });
     const backboneMesh1 = new THREE.Mesh(backboneGeo1, mat1);
@@ -392,7 +432,11 @@ export default function DNASparkBackground3D({
     scene.add(backboneMesh2);
     backboneRef.current = { mesh1: backboneMesh1, mesh2: backboneMesh2 };
 
+<<<<<<< HEAD
     initMolecularStructures3D(scene);
+=======
+    if (quality !== 'low') initMolecularStructures3D(scene);
+>>>>>>> 2764c34 (333)
 
     basePairsRef.current = [];
     const seqLen = sequence.length * 2;
@@ -404,7 +448,11 @@ export default function DNASparkBackground3D({
       const pos1 = new THREE.Vector3(Math.cos(angle) * helixRadius, y, Math.sin(angle) * helixRadius);
       const pos2 = new THREE.Vector3(Math.cos(angle + Math.PI) * helixRadius, y, Math.sin(angle + Math.PI) * helixRadius);
 
+<<<<<<< HEAD
       const baseGeometry = new THREE.SphereGeometry(baseSphereRadius, baseSphereSegments, baseSphereSegments);
+=======
+      const baseGeometry = new THREE.SphereGeometry(baseSphereRadius, actualBaseSphereSegments, actualBaseSphereSegments);
+>>>>>>> 2764c34 (333)
       const baseMaterial1 = new THREE.MeshPhongMaterial({
         color: baseColors[base1],
         transparent: true,
@@ -459,7 +507,11 @@ export default function DNASparkBackground3D({
       opacity: 0.6,
     });
     particlesRef.current = [];
+<<<<<<< HEAD
     for (let i = 0; i < particleCount; i++) {
+=======
+    for (let i = 0; i < actualParticleCount; i++) {
+>>>>>>> 2764c34 (333)
       const particle = new THREE.Mesh(particleGeometry, particleMaterial.clone());
       const position = new THREE.Vector3((Math.random() - 0.5) * 400, (Math.random() - 0.5) * 400, (Math.random() - 0.5) * 400);
       particle.position.copy(position);
@@ -492,8 +544,13 @@ export default function DNASparkBackground3D({
     });
   };
 
+<<<<<<< HEAD
   const updateParticles3D = () => {
     if (!cameraRef.current) return;
+=======
+  const updateParticles3D = (frameScale: number) => {
+    if (!cameraRef.current || width <= 0 || height <= 0) return;
+>>>>>>> 2764c34 (333)
     const mouse3D = new THREE.Vector3();
     const mx = mouse.x !== null ? (mouse.x / width) * 2 - 1 : 0;
     const my = mouse.y !== null ? -(mouse.y / height) * 2 + 1 : 0;
@@ -504,18 +561,35 @@ export default function DNASparkBackground3D({
     particlesRef.current.forEach((particle) => {
       const distance = particle.mesh.position.distanceTo(mouse3D);
       if (distance < 50) {
+<<<<<<< HEAD
         const repulsion = particle.mesh.position.clone().sub(mouse3D).normalize().multiplyScalar(0.5);
         particle.velocity.add(repulsion);
       }
       particle.mesh.position.add(particle.velocity);
       particle.angle += particle.speed;
+=======
+        const repulsion = particle.mesh.position
+          .clone()
+          .sub(mouse3D)
+          .normalize()
+          .multiplyScalar(0.5 * qualityConfig.motion * frameScale);
+        particle.velocity.add(repulsion);
+      }
+      particle.mesh.position.addScaledVector(particle.velocity, qualityConfig.motion * frameScale);
+      particle.angle += particle.speed * qualityConfig.motion * frameScale;
+>>>>>>> 2764c34 (333)
       const orbital = new THREE.Vector3(
         Math.cos(particle.angle) * particleOrbitalAmplitude,
         Math.sin(particle.angle * 0.7) * particleOrbitalAmplitude,
         Math.sin(particle.angle) * particleOrbitalAmplitude
       );
+<<<<<<< HEAD
       particle.mesh.position.add(orbital);
       particle.velocity.multiplyScalar(0.98);
+=======
+      particle.mesh.position.addScaledVector(orbital, qualityConfig.motion * frameScale);
+      particle.velocity.multiplyScalar(Math.pow(0.98, qualityConfig.motion * frameScale));
+>>>>>>> 2764c34 (333)
       if (particle.mesh.position.x < -200) particle.mesh.position.x = 200;
       if (particle.mesh.position.x > 200) particle.mesh.position.x = -200;
       if (particle.mesh.position.y < -200) particle.mesh.position.y = 200;
@@ -525,15 +599,28 @@ export default function DNASparkBackground3D({
     });
   };
 
+<<<<<<< HEAD
   const updateClickRipples3D = () => {
     if (!sceneRef.current) return;
     clickRipplesRef.current = clickRipplesRef.current.filter((ripple) => {
       ripple.scale += rippleGrowthRate;
       ripple.opacity -= rippleFadeRate;
+=======
+  const updateClickRipples3D = (frameScale: number) => {
+    if (!sceneRef.current) return;
+    clickRipplesRef.current = clickRipplesRef.current.filter((ripple) => {
+      ripple.scale += rippleGrowthRate * frameScale;
+      ripple.opacity -= rippleFadeRate * frameScale;
+>>>>>>> 2764c34 (333)
       ripple.mesh.scale.set(ripple.scale, ripple.scale, ripple.scale);
       (ripple.mesh.material as THREE.MeshBasicMaterial).opacity = ripple.opacity;
       if (ripple.opacity <= 0) {
         sceneRef.current!.remove(ripple.mesh);
+<<<<<<< HEAD
+=======
+        ripple.mesh.geometry.dispose();
+        (ripple.mesh.material as THREE.MeshBasicMaterial).dispose();
+>>>>>>> 2764c34 (333)
         return false;
       }
       return true;
@@ -554,7 +641,11 @@ export default function DNASparkBackground3D({
       } else {
         basePair.glowIntensity *= 0.95;
       }
+<<<<<<< HEAD
       const emissiveIntensity = basePair.glowIntensity * glowIntensityMultiplier;
+=======
+      const emissiveIntensity = basePair.glowIntensity * glowIntensityMultiplier * qualityConfig.glow;
+>>>>>>> 2764c34 (333)
       (basePair.mesh1.material as THREE.MeshPhongMaterial).emissive.setScalar(emissiveIntensity);
       (basePair.mesh2.material as THREE.MeshPhongMaterial).emissive.setScalar(emissiveIntensity);
       basePair.connections.forEach((connection) => {
@@ -583,9 +674,17 @@ export default function DNASparkBackground3D({
       premultipliedAlpha: false,
     });
     renderer.setSize(width || 1, height || 1);
+<<<<<<< HEAD
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+=======
+    renderer.setPixelRatio(performance.dpr);
+    renderer.shadowMap.enabled = qualityConfig.shadow;
+    if (qualityConfig.shadow) {
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
+>>>>>>> 2764c34 (333)
     rendererRef.current = renderer;
     el.appendChild(renderer.domElement);
 
@@ -595,7 +694,11 @@ export default function DNASparkBackground3D({
     scene.add(hemiLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
     directionalLight.position.set(100, 100, 50);
+<<<<<<< HEAD
     directionalLight.castShadow = true;
+=======
+    directionalLight.castShadow = qualityConfig.shadow;
+>>>>>>> 2764c34 (333)
     scene.add(directionalLight);
     const pointLight = new THREE.PointLight(0x00ffff, 0.5, 300);
     pointLight.position.set(0, 0, 100);
@@ -631,6 +734,7 @@ export default function DNASparkBackground3D({
       waveOffsetRef.current = 0;
     };
   }, [
+<<<<<<< HEAD
     basePairCount,
     helixRadius,
     helixHeight,
@@ -639,6 +743,19 @@ export default function DNASparkBackground3D({
     baseSphereRadius,
     baseSphereSegments,
     particleCount,
+=======
+    actualBasePairCount,
+    helixRadius,
+    helixHeight,
+    actualBackboneSegments,
+    backboneRadius,
+    baseSphereRadius,
+    actualBaseSphereSegments,
+    actualParticleCount,
+    quality,
+    performance.dpr,
+    qualityConfig.shadow,
+>>>>>>> 2764c34 (333)
     particleSize,
     particleSpeedMin,
     particleSpeedMax,
@@ -661,7 +778,22 @@ export default function DNASparkBackground3D({
 
   // rAF loop + pause
   useEffect(() => {
+<<<<<<< HEAD
     if (reducedMotion) {
+=======
+    const disposeRipples = () => {
+      for (const ripple of clickRipplesRef.current) {
+        sceneRef.current?.remove(ripple.mesh);
+        ripple.mesh.geometry.dispose();
+        (ripple.mesh.material as THREE.Material).dispose();
+      }
+      clickRipplesRef.current = [];
+      ripples.length = 0;
+    };
+
+    if (reducedMotion) {
+      disposeRipples();
+>>>>>>> 2764c34 (333)
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
         rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
@@ -669,11 +801,31 @@ export default function DNASparkBackground3D({
     }
     if (!isVisible) return;
 
+<<<<<<< HEAD
     const loop = (_now: number) => {
       rafIdRef.current = requestAnimationFrame(loop);
 
       timeRef.current += 0.02;
       waveOffsetRef.current += 0.05;
+=======
+    let lastRenderTime: number | null = null;
+    let nextRenderTime: number | null = null;
+    const loop = (now: number) => {
+      rafIdRef.current = requestAnimationFrame(loop);
+      const interval = performance.frameInterval;
+      if (nextRenderTime === null) nextRenderTime = now;
+      if (now + 0.1 < nextRenderTime) return;
+
+      const deltaSeconds = lastRenderTime === null ? interval / 1000 : Math.min((now - lastRenderTime) / 1000, 0.1);
+      const frameScale = deltaSeconds * 60;
+      lastRenderTime = now;
+      nextRenderTime += interval;
+      if (now - nextRenderTime > interval) nextRenderTime = now + interval;
+
+      // Scale accumulated simulation time once; consumers must not apply motion a second time.
+      timeRef.current += deltaSeconds * qualityConfig.motion;
+      waveOffsetRef.current += deltaSeconds * 2.5 * qualityConfig.motion;
+>>>>>>> 2764c34 (333)
       const time = timeRef.current;
       const waveOffset = waveOffsetRef.current;
 
@@ -684,7 +836,11 @@ export default function DNASparkBackground3D({
       }
 
       updateDNA3D(time, waveOffset);
+<<<<<<< HEAD
       updateParticles3D();
+=======
+      updateParticles3D(frameScale);
+>>>>>>> 2764c34 (333)
 
       if (cameraRef.current) {
         const cam = cameraRef.current;
@@ -695,7 +851,11 @@ export default function DNASparkBackground3D({
         const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
 
         const aspect = width > 0 && height > 0 ? width / height : 1;
+<<<<<<< HEAD
         const fovRad = 75 * Math.PI / 180;
+=======
+        const fovRad = (75 * Math.PI) / 180;
+>>>>>>> 2764c34 (333)
         const dist = 120;
         const halfH = Math.tan(fovRad / 2) * dist;
         const halfW = halfH * aspect;
@@ -712,6 +872,7 @@ export default function DNASparkBackground3D({
             g.group.lookAt(cam.position);
             g.group.userData.initialized = true;
           }
+<<<<<<< HEAD
           g.group.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), 0.005);
         });
       }
@@ -726,6 +887,19 @@ export default function DNASparkBackground3D({
           const mouseVec = new THREE.Vector2(rmx, rmy);
           raycasterRef.current.setFromCamera(mouseVec, cameraRef.current);
           const rippleGeometry = new THREE.RingGeometry(0.5, 1, 32);
+=======
+          g.group.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), 0.005 * qualityConfig.motion * frameScale);
+        });
+      }
+
+      const batch = ripples.splice(0);
+      if (batch.length > 0 && sceneRef.current && cameraRef.current && width > 0 && height > 0) {
+        for (const ripple of batch) {
+          const rmx = (ripple.x / width) * 2 - 1;
+          const rmy = -(ripple.y / height) * 2 + 1;
+          raycasterRef.current.setFromCamera(new THREE.Vector2(rmx, rmy), cameraRef.current);
+          const rippleGeometry = new THREE.RingGeometry(0.5, 1, quality === 'high' ? 32 : 16);
+>>>>>>> 2764c34 (333)
           const rippleMaterial = new THREE.MeshBasicMaterial({
             color: rgbaToThreeColor(rippleColor),
             transparent: true,
@@ -737,17 +911,25 @@ export default function DNASparkBackground3D({
           if (intersects.length > 0) {
             rippleMesh.position.copy(intersects[0].point);
             rippleMesh.lookAt(cameraRef.current.position);
+<<<<<<< HEAD
           } else {
             rippleMesh.position.set(0, 0, 0);
+=======
+>>>>>>> 2764c34 (333)
           }
           sceneRef.current.add(rippleMesh);
           clickRipplesRef.current.push({ mesh: rippleMesh, scale: 1, opacity: 0.8 });
         }
       }
 
+<<<<<<< HEAD
       updateClickRipples3D();
       updateGlowEffects();
 
+=======
+      updateClickRipples3D(frameScale);
+      updateGlowEffects();
+>>>>>>> 2764c34 (333)
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
         rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
@@ -763,6 +945,13 @@ export default function DNASparkBackground3D({
   }, [
     isVisible,
     reducedMotion,
+<<<<<<< HEAD
+=======
+    performance.frameInterval,
+    quality,
+    qualityConfig.motion,
+    qualityConfig.glow,
+>>>>>>> 2764c34 (333)
     width,
     height,
     cameraOrbitSpeed,

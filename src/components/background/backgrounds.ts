@@ -46,7 +46,7 @@ export const BACKGROUNDS: BackgroundMeta[] = [
     preload: true,
     load: () => import('~/vendor/interactive-backgrounds/AuroraBackground').then((m) => ({ default: m.default })),
     darkProps: { rippleColor: '#818cf8' },
-    lightProps: { rippleColor: '#c39ee9' },
+    lightProps: { rippleColor: '#a5f3fc' },
   },
   {
     id: 'binary-matrix',
