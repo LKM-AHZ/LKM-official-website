@@ -56,6 +56,9 @@ interface Connection {
   strength: number;
 }
 
+const QUALITY_MULTIPLIER = { high: 1, medium: 0.68, low: 0.4 } as const;
+const BASE_FRAME_RATE = 60;
+
 const randRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
 export default function QuantumWebBackground({
@@ -89,12 +92,15 @@ export default function QuantumWebBackground({
 
   const particlesRef = useRef<Particle[]>([]);
   const connectionsRef = useRef<Connection[]>([]);
+  const connectionFrameRef = useRef(0);
   const lastSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const lastQualityRef = useRef<BackgroundFrame['performance']['quality'] | null>(null);
 
   const createParticles = useCallback(
-    (width: number, height: number) => {
+    (width: number, height: number, multiplier: number) => {
       const particles: Particle[] = [];
-      const particleCount = Math.max(10, Math.floor((width * height) / densityDivisor));
+      const particleCount = Math.max(10, Math.floor(((width * height) / densityDivisor) * multiplier));
+      const maxTrailMultiplier = Math.max(multiplier, 0.2);
       for (let i = 0; i < particleCount; i++) {
         const isQuantum = Math.random() > 0.85;
         const radius = isQuantum
@@ -110,7 +116,7 @@ export default function QuantumWebBackground({
           opacity,
           baseColor: isQuantum ? quantumColor : normalColor,
           trail: [],
-          maxTrail: Math.floor(randRange(trailMaxRange[0], trailMaxRange[1])),
+          maxTrail: Math.max(1, Math.floor(randRange(trailMaxRange[0], trailMaxRange[1]) * maxTrailMultiplier)),
           isQuantum,
           phase: Math.random() * Math.PI * 2,
           speed: randRange(speedRange[0], speedRange[1]),
@@ -135,19 +141,39 @@ export default function QuantumWebBackground({
 
   const draw = useCallback(
     (frame: BackgroundFrame) => {
-      const { ctx, width, height, mouse, time, keys } = frame;
+      const { ctx, width, height, mouse, time, keys, delta, performance } = frame;
+      const { quality, reducedMotion } = performance;
+      const multiplier = QUALITY_MULTIPLIER[quality];
+      const motionStep = delta * BASE_FRAME_RATE;
+      const motionScale = reducedMotion ? 0.05 : motionStep;
+      const scaledMouseRadius = mouseRadius * multiplier;
+      const scaledAttractionForce = attractionForceFactor * multiplier;
+      const scaledRepulsionForce = repulsionForceFactor * multiplier;
+      const scaledConnectionDistance = connectionDistance * multiplier;
+      const scaledGlowMultiplier = glowMultiplier * multiplier;
 
-      // Ensure pattern: rebuild particles on resize
-      if (width !== lastSizeRef.current.width || height !== lastSizeRef.current.height) {
+      // Rebuild quality-dependent resources on resize or quality changes.
+      if (
+        width !== lastSizeRef.current.width ||
+        height !== lastSizeRef.current.height ||
+        quality !== lastQualityRef.current
+      ) {
         lastSizeRef.current = { width, height };
-        particlesRef.current = createParticles(width, height);
+        lastQualityRef.current = quality;
+        particlesRef.current = createParticles(width, height, multiplier);
         connectionsRef.current = [];
+        connectionFrameRef.current = 0;
       }
 
       const particles = particlesRef.current;
 
       // Update particles
       particles.forEach((particle) => {
+        if (reducedMotion) {
+          particle.phase += particle.speed * motionScale;
+          return;
+        }
+
         particle.lastX = particle.x;
         particle.lastY = particle.y;
 
@@ -156,28 +182,27 @@ export default function QuantumWebBackground({
           particle.trail.shift();
         }
 
-        particle.phase += particle.speed;
-        particle.vx += Math.sin(particle.phase) * phaseNoise;
-        particle.vy += Math.cos(particle.phase) * phaseNoise;
-
-        particle.vx *= velocityDamping;
-        particle.vy *= velocityDamping;
+        particle.phase += particle.speed * motionStep;
+        particle.vx += Math.sin(particle.phase) * phaseNoise * motionStep;
+        particle.vy += Math.cos(particle.phase) * phaseNoise * motionStep;
+        particle.vx *= Math.pow(velocityDamping, motionStep);
+        particle.vy *= Math.pow(velocityDamping, motionStep);
 
         if (mouse.x !== null && mouse.y !== null) {
           const dx = particle.x - mouse.x;
           const dy = particle.y - mouse.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < mouseRadius) {
-            const force = (mouseRadius - distance) / mouseRadius;
+          if (distance < scaledMouseRadius) {
+            const force = (scaledMouseRadius - distance) / scaledMouseRadius;
             const angle = Math.atan2(dy, dx);
-            const tx = mouse.x + Math.cos(angle) * mouseRadius;
-            const ty = mouse.y + Math.sin(angle) * mouseRadius;
+            const tx = mouse.x + Math.cos(angle) * scaledMouseRadius;
+            const ty = mouse.y + Math.sin(angle) * scaledMouseRadius;
             if (keys.shift) {
-              particle.vx += (mouse.x - particle.x) * force * attractionForceFactor;
-              particle.vy += (mouse.y - particle.y) * force * attractionForceFactor;
+              particle.vx += (mouse.x - particle.x) * force * scaledAttractionForce * motionStep;
+              particle.vy += (mouse.y - particle.y) * force * scaledAttractionForce * motionStep;
             } else {
-              particle.vx += (particle.x - tx) * force * repulsionForceFactor;
-              particle.vy += (particle.y - ty) * force * repulsionForceFactor;
+              particle.vx += (particle.x - tx) * force * scaledRepulsionForce * motionStep;
+              particle.vy += (particle.y - ty) * force * scaledRepulsionForce * motionStep;
             }
           }
         }
@@ -187,33 +212,38 @@ export default function QuantumWebBackground({
         if (particle.y < -particle.radius) particle.y = height + particle.radius;
         if (particle.y > height + particle.radius) particle.y = -particle.radius;
 
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+        particle.x += particle.vx * motionScale;
+        particle.y += particle.vy * motionScale;
       });
 
-      // Update connections
-      const newConnections: Connection[] = [];
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const p1 = particles[i];
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < connectionDistance) {
-            const opacity = connectionBaseOpacity * (1 - distance / connectionDistance);
-            const pulse = Math.sin(time * connectionPulseRate) * 0.3 + 0.7;
-            newConnections.push({
-              p1,
-              p2,
-              distance,
-              opacity: opacity * pulse,
-              strength: randRange(connectionStrengthRange[0], connectionStrengthRange[1]),
-            });
+      // Low quality reuses the previous connection set between updates.
+      connectionFrameRef.current += 1;
+      const shouldUpdateConnections =
+        connectionFrameRef.current === 1 || quality !== 'low' || connectionFrameRef.current % 3 === 0;
+      if (shouldUpdateConnections) {
+        const newConnections: Connection[] = [];
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p1 = particles[i];
+            const p2 = particles[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < scaledConnectionDistance) {
+              const opacity = connectionBaseOpacity * multiplier * (1 - distance / scaledConnectionDistance);
+              const pulse = reducedMotion ? 1 : Math.sin(time * connectionPulseRate) * 0.3 + 0.7;
+              newConnections.push({
+                p1,
+                p2,
+                distance,
+                opacity: opacity * pulse,
+                strength: randRange(connectionStrengthRange[0], connectionStrengthRange[1]),
+              });
+            }
           }
         }
+        connectionsRef.current = newConnections;
       }
-      connectionsRef.current = newConnections;
 
       // Render
       ctx.clearRect(0, 0, width, height);
@@ -222,8 +252,7 @@ export default function QuantumWebBackground({
       particles.forEach((particle) => {
         if (particle.trail.length > 1) {
           const velocity = Math.sqrt(
-            Math.pow(particle.x - particle.lastX, 2) +
-              Math.pow(particle.y - particle.lastY, 2)
+            Math.pow(particle.x - particle.lastX, 2) + Math.pow(particle.y - particle.lastY, 2)
           );
           const trailIntensity = Math.min(velocity * 20, 1);
           if (trailIntensity > 0.05) {
@@ -232,12 +261,7 @@ export default function QuantumWebBackground({
             for (let i = 1; i < particle.trail.length; i++) {
               ctx.lineTo(particle.trail[i].x, particle.trail[i].y);
             }
-            const gradient = ctx.createLinearGradient(
-              particle.trail[0].x,
-              particle.trail[0].y,
-              particle.x,
-              particle.y
-            );
+            const gradient = ctx.createLinearGradient(particle.trail[0].x, particle.trail[0].y, particle.x, particle.y);
             gradient.addColorStop(0, `${particle.baseColor}00`);
             gradient.addColorStop(
               1,
@@ -278,14 +302,14 @@ export default function QuantumWebBackground({
         // Glow effect for quantum particles
         if (particle.isQuantum) {
           ctx.beginPath();
-          ctx.arc(particle.x, particle.y, particle.radius * glowMultiplier, 0, Math.PI * 2);
+          ctx.arc(particle.x, particle.y, particle.radius * scaledGlowMultiplier, 0, Math.PI * 2);
           const gradient = ctx.createRadialGradient(
             particle.x,
             particle.y,
             0,
             particle.x,
             particle.y,
-            particle.radius * glowMultiplier
+            particle.radius * scaledGlowMultiplier
           );
           gradient.addColorStop(0, `${particle.baseColor}80`);
           gradient.addColorStop(1, `${particle.baseColor}00`);
@@ -315,17 +339,12 @@ export default function QuantumWebBackground({
   const init = useCallback(
     (_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
       lastSizeRef.current = { width: frame.width, height: frame.height };
-      particlesRef.current = createParticles(frame.width, frame.height);
+      particlesRef.current = createParticles(frame.width, frame.height, QUALITY_MULTIPLIER[frame.performance.quality]);
       connectionsRef.current = [];
+      connectionFrameRef.current = 0;
     },
     [createParticles]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true, keys: true }}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true, keys: true }} />;
 }

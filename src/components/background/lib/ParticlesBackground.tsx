@@ -44,6 +44,34 @@ interface Ripple {
   growing: boolean;
 }
 
+const QUALITY_MULTIPLIER = { high: 1, medium: 0.68, low: 0.4 } as const;
+const BASE_FRAME_RATE = 60;
+
+function withAlpha(color: string, alpha: number) {
+  const clampedAlpha = Math.max(0, Math.min(1, alpha));
+  const hex = color.match(/^#([\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i)?.[1];
+  if (hex) {
+    const expanded = hex.length <= 4 ? [...hex].map((value) => value + value).join('') : hex;
+    const rgb = expanded.slice(0, 6);
+    const sourceAlpha = expanded.length === 8 ? parseInt(expanded.slice(6, 8), 16) / 255 : 1;
+    const red = parseInt(rgb.slice(0, 2), 16);
+    const green = parseInt(rgb.slice(2, 4), 16);
+    const blue = parseInt(rgb.slice(4, 6), 16);
+    return `rgba(${red}, ${green}, ${blue}, ${clampedAlpha * sourceAlpha})`;
+  }
+
+  const functional = color
+    .match(/^rgba?\(([^)]+)\)$/i)?.[1]
+    ?.split(',')
+    .map((value) => value.trim());
+  if (functional && functional.length >= 3) {
+    const sourceAlpha = functional.length === 4 ? Number(functional[3]) : 1;
+    return `rgba(${functional[0]}, ${functional[1]}, ${functional[2]}, ${clampedAlpha * sourceAlpha})`;
+  }
+
+  return color;
+}
+
 export default function ParticlesBackground({
   particleCount = null,
   mouseRadius = 150,
@@ -69,16 +97,20 @@ export default function ParticlesBackground({
   const backgroundRef = useRef<Particle[]>([]);
   const ripplesRef = useRef<Ripple[]>([]);
   const lastSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const lastQualityRef = useRef<BackgroundFrame['performance']['quality'] | null>(null);
 
   const createParticles = useCallback(
-    (width: number, height: number) => {
-      const count = particleCount || Math.floor((width * height) / 8000);
+    (width: number, height: number, multiplier: number) => {
+      const baseCount = particleCount || Math.floor((width * height) / 8000);
+      const count = Math.max(1, Math.floor(baseCount * multiplier));
       const particles: Particle[] = [];
       const background: Particle[] = [];
 
       for (let i = 0; i < count; i++) {
         const isShooter = Math.random() < 0.05;
-        const radius = isShooter ? particleSizeMin : particleSizeMin + Math.random() * (particleSizeMax - particleSizeMin);
+        const radius = isShooter
+          ? particleSizeMin
+          : particleSizeMin + Math.random() * (particleSizeMax - particleSizeMin);
         const vx = (Math.random() - 0.5) * (isShooter ? 2 * particleSpeedMultiplier : 0.5 * particleSpeedMultiplier);
         const vy = (Math.random() - 0.5) * (isShooter ? 2 * particleSpeedMultiplier : 0.5 * particleSpeedMultiplier);
         particles.push({
@@ -97,8 +129,9 @@ export default function ParticlesBackground({
         });
       }
 
-      // Parallax background layer
-      for (let i = 0; i < count * 0.3; i++) {
+      // Parallax background layer scales down again from the quality-adjusted primary count.
+      const backgroundCount = Math.floor(count * 0.3 * multiplier);
+      for (let i = 0; i < backgroundCount; i++) {
         background.push({
           x: Math.random() * width,
           y: Math.random() * height,
@@ -122,12 +155,24 @@ export default function ParticlesBackground({
 
   const draw = useCallback(
     (frame: BackgroundFrame) => {
-      const { ctx, width, height, mouse, time } = frame;
+      const { ctx, width, height, mouse, time, delta, performance } = frame;
+      const multiplier = QUALITY_MULTIPLIER[performance.quality];
+      const motionStep = delta * BASE_FRAME_RATE;
+      const motionScale = performance.reducedMotion ? 0.05 : motionStep;
+      const scaledMouseRadius = mouseRadius * multiplier;
+      const scaledConnectionDistance = connectionDistance * multiplier;
+      const scaledConnectionOpacity = connectionOpacityMultiplier * multiplier;
+      const scaledRippleLineWidth = rippleLineWidth * multiplier;
 
-      // Ensure pattern: rebuild particles on resize
-      if (width !== lastSizeRef.current.width || height !== lastSizeRef.current.height) {
+      // Rebuild quality-dependent resources on resize or quality changes.
+      if (
+        width !== lastSizeRef.current.width ||
+        height !== lastSizeRef.current.height ||
+        performance.quality !== lastQualityRef.current
+      ) {
         lastSizeRef.current = { width, height };
-        const { particles, background } = createParticles(width, height);
+        lastQualityRef.current = performance.quality;
+        const { particles, background } = createParticles(width, height, multiplier);
         particlesRef.current = particles;
         backgroundRef.current = background;
       }
@@ -156,35 +201,37 @@ export default function ParticlesBackground({
         const driftX = Math.cos(particle.randomDirection + time * 0.1) * 0.3;
         const driftY = Math.sin(particle.randomDirection + time * 0.1) * 0.3;
 
-        particle.vx += driftX * 0.01 + randomX * 0.001;
-        particle.vy += driftY * 0.01 + randomY * 0.001;
+        if (!performance.reducedMotion) {
+          particle.vx += (driftX * 0.01 + randomX * 0.001) * motionStep;
+          particle.vy += (driftY * 0.01 + randomY * 0.001) * motionStep;
 
-        if (mouse.x !== null && mouse.y !== null) {
-          const dx = mouse.x - particle.x;
-          const dy = mouse.y - particle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < mouseRadius) {
-            const force = (mouseRadius - distance) / mouseRadius;
-            particle.vx += dx * force * 0.008 * particleSpeedMultiplier;
-            particle.vy += dy * force * 0.008 * particleSpeedMultiplier;
+          if (mouse.x !== null && mouse.y !== null) {
+            const dx = mouse.x - particle.x;
+            const dy = mouse.y - particle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < scaledMouseRadius) {
+              const force = (scaledMouseRadius - distance) / scaledMouseRadius;
+              particle.vx += dx * force * 0.008 * particleSpeedMultiplier * multiplier * motionStep;
+              particle.vy += dy * force * 0.008 * particleSpeedMultiplier * multiplier * motionStep;
+            }
           }
+
+          ripplesRef.current.forEach((ripple) => {
+            const rippleDx = particle.x - ripple.x;
+            const rippleDy = particle.y - ripple.y;
+            const rippleDistance = Math.sqrt(rippleDx * rippleDx + rippleDy * rippleDy);
+            if (rippleDistance > 0 && rippleDistance < ripple.radius + 20 && rippleDistance > ripple.radius - 20) {
+              const rippleForce = ripple.opacity * 0.8 * multiplier;
+              particle.vx += (rippleDx / rippleDistance) * rippleForce * motionStep;
+              particle.vy += (rippleDy / rippleDistance) * rippleForce * motionStep;
+            }
+          });
         }
 
-        ripplesRef.current.forEach((ripple) => {
-          const rippleDx = particle.x - ripple.x;
-          const rippleDy = particle.y - ripple.y;
-          const rippleDistance = Math.sqrt(rippleDx * rippleDx + rippleDy * rippleDy);
-          if (rippleDistance < ripple.radius + 20 && rippleDistance > ripple.radius - 20) {
-            const rippleForce = ripple.opacity * 0.8;
-            particle.vx += (rippleDx / rippleDistance) * rippleForce;
-            particle.vy += (rippleDy / rippleDistance) * rippleForce;
-          }
-        });
-
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        particle.vx *= 0.985;
-        particle.vy *= 0.985;
+        particle.x += particle.vx * motionScale;
+        particle.y += particle.vy * motionScale;
+        particle.vx *= Math.pow(0.985, motionStep);
+        particle.vy *= Math.pow(0.985, motionStep);
 
         if (particle.x < 0 || particle.x > width) {
           particle.vx *= -0.3;
@@ -200,19 +247,20 @@ export default function ParticlesBackground({
         const centerDistance = Math.sqrt(Math.pow(particle.x - centerX, 2) + Math.pow(particle.y - centerY, 2));
         const maxDistance = Math.min(width, height) * 0.4;
         if (centerDistance > maxDistance) {
-          const returnForce = ((centerDistance - maxDistance) / centerDistance) * 0.001 * particleSpeedMultiplier;
+          const returnForce =
+            ((centerDistance - maxDistance) / centerDistance) * 0.001 * particleSpeedMultiplier * motionStep;
           particle.vx += (centerX - particle.x) * returnForce;
           particle.vy += (centerY - particle.y) * returnForce;
         }
 
-        particle.opacity += Math.sin(time * 2 + particle.randomOffset) * 0.002;
+        particle.opacity += Math.sin(time * 2 + particle.randomOffset) * 0.002 * motionScale;
         particle.opacity = Math.max(0.1, Math.min(0.8, particle.opacity));
       });
 
       // Update ripples
       ripplesRef.current = ripplesRef.current.filter((ripple) => {
         if (ripple.growing) {
-          ripple.radius += rippleGrowthRate;
+          ripple.radius += rippleGrowthRate * motionScale;
           ripple.opacity = 1 - ripple.radius / ripple.maxRadius;
           if (ripple.radius >= ripple.maxRadius) ripple.growing = false;
           return true;
@@ -227,7 +275,7 @@ export default function ParticlesBackground({
       backgroundRef.current.forEach((particle) => {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-        ctx.fillStyle = particleColor.replace(/([\d.]+)(?=\))/, (particle.opacity * 0.5).toString());
+        ctx.fillStyle = withAlpha(particleColor, particle.opacity * 0.5 * multiplier);
         ctx.fill();
       });
 
@@ -238,9 +286,10 @@ export default function ParticlesBackground({
           const dx = particlesRef.current[i].x - particlesRef.current[j].x;
           const dy = particlesRef.current[i].y - particlesRef.current[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < connectionDistance) {
-            const opacity = ((connectionDistance - distance) / connectionDistance) * connectionOpacityMultiplier;
-            ctx.strokeStyle = connectionColor.replace(/([\d.]+)(?=\))/, opacity.toString());
+          if (distance < scaledConnectionDistance) {
+            const opacity =
+              ((scaledConnectionDistance - distance) / scaledConnectionDistance) * scaledConnectionOpacity;
+            ctx.strokeStyle = withAlpha(connectionColor, opacity);
             ctx.beginPath();
             ctx.moveTo(particlesRef.current[i].x, particlesRef.current[i].y);
             ctx.lineTo(particlesRef.current[j].x, particlesRef.current[j].y);
@@ -253,7 +302,7 @@ export default function ParticlesBackground({
       particlesRef.current.forEach((particle) => {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-        ctx.fillStyle = particleColor.replace(/([\d.]+)(?=\))/, particle.opacity.toString());
+        ctx.fillStyle = withAlpha(particleColor, particle.opacity * multiplier);
         ctx.fill();
 
         if (particle.shooting) {
@@ -270,8 +319,8 @@ export default function ParticlesBackground({
       ripplesRef.current.forEach((ripple) => {
         ctx.beginPath();
         ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = rippleColor.replace(/([\d.]+)(?=\))/, (ripple.opacity * 0.8).toString());
-        ctx.lineWidth = rippleLineWidth;
+        ctx.strokeStyle = withAlpha(rippleColor, ripple.opacity * 0.8 * multiplier);
+        ctx.lineWidth = scaledRippleLineWidth;
         ctx.stroke();
       });
     },
@@ -293,19 +342,16 @@ export default function ParticlesBackground({
   const init = useCallback(
     (_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
       lastSizeRef.current = { width: frame.width, height: frame.height };
-      const { particles, background } = createParticles(frame.width, frame.height);
+      const { particles, background } = createParticles(
+        frame.width,
+        frame.height,
+        QUALITY_MULTIPLIER[frame.performance.quality]
+      );
       particlesRef.current = particles;
       backgroundRef.current = background;
     },
     [createParticles]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true, click: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true, click: true }} className={className} />;
 }

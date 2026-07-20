@@ -155,18 +155,15 @@ export default function DNASparkBackground({
     return basePairs;
   };
 
-  const init = useCallback(
-    (_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
-      lastSizeRef.current = { width: frame.width, height: frame.height };
-      particlesRef.current = initParticles(frame.width, frame.height);
-      basePairsRef.current = initBasePairs(frame.width, frame.height);
-      initialAnimationCompleteRef.current = false;
-      isShatteringRef.current = false;
-      shatterProgressRef.current = 0;
-      ripplesRef.current = [];
-    },
-    []
-  );
+  const init = useCallback((_canvas: HTMLCanvasElement, frame: BackgroundFrame) => {
+    lastSizeRef.current = { width: frame.width, height: frame.height };
+    particlesRef.current = initParticles(frame.width, frame.height);
+    basePairsRef.current = initBasePairs(frame.width, frame.height);
+    initialAnimationCompleteRef.current = false;
+    isShatteringRef.current = false;
+    shatterProgressRef.current = 0;
+    ripplesRef.current = [];
+  }, []);
 
   const draw = useCallback(
     (frame: BackgroundFrame) => {
@@ -734,12 +731,5 @@ export default function DNASparkBackground({
     [sparkColor, strandColor, particleColor, connectionColor, rippleColor]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true, click: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true, click: true }} className={className} />;
 }

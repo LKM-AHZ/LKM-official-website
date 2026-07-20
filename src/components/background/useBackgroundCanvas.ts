@@ -12,11 +12,45 @@ export interface BackgroundMouse {
   isDown: boolean;
 }
 
+export type BackgroundQuality = 'high' | 'medium' | 'low';
+
+export interface BackgroundPerformance {
+  quality: BackgroundQuality;
+  dpr: number;
+  frameInterval: number;
+  reducedMotion: boolean;
+}
+
+export function getBackgroundPerformance(maxDpr = Number.POSITIVE_INFINITY): BackgroundPerformance {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return { quality: 'medium', dpr: Math.min(1.25, maxDpr), frameInterval: 1000 / 45, reducedMotion: false };
+  }
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobile = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+  const cores = navigator.hardwareConcurrency;
+  const quality: BackgroundQuality =
+    reducedMotion || isMobile ? 'low' : !Number.isFinite(cores) || cores <= 0 || cores <= 4 ? 'medium' : 'high';
+  const settings = {
+    high: { dpr: 1.5, frameInterval: 1000 / 60 },
+    medium: { dpr: 1.25, frameInterval: 1000 / 45 },
+    low: { dpr: 1, frameInterval: 1000 / 30 },
+  }[quality];
+
+  return {
+    quality,
+    dpr: Math.min(window.devicePixelRatio || 1, settings.dpr, maxDpr),
+    frameInterval: settings.frameInterval,
+    reducedMotion,
+  };
+}
+
 export interface BackgroundFrame {
   ctx: CanvasRenderingContext2D;
   width: number; // CSS 像素
   height: number;
   dpr: number;
+  performance: BackgroundPerformance;
   mouse: BackgroundMouse;
   ripples: Ripple[];
   keys: { shift: boolean };
@@ -50,7 +84,8 @@ export function useBackgroundCanvas({
   const rafIdRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedElapsedRef = useRef<number>(0);
-  const lastFrameRef = useRef<number>(0);
+  const lastActualDrawRef = useRef<number>(0);
+  const lastDrawRef = useRef<number>(0);
   const pausedRef = useRef<boolean>(false);
   const initCleanupRef = useRef<(() => void) | void>(undefined);
   const didMountRef = useRef(false);
@@ -88,12 +123,13 @@ export function useBackgroundCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+    const backgroundPerformance = getBackgroundPerformance(maxDpr);
     const frame: BackgroundFrame = {
       ctx,
       width: 0,
       height: 0,
-      dpr,
+      dpr: backgroundPerformance.dpr,
+      performance: backgroundPerformance,
       mouse: { x: null, y: null, isDown: false },
       ripples: [],
       keys: { shift: false },
@@ -104,11 +140,20 @@ export function useBackgroundCanvas({
 
     let isVisible = !document.hidden;
     let isInViewport = true;
+    let pausedStart: number | null = null;
+
+    // Initialize timing before observers can synchronously pause the canvas.
+    startTimeRef.current = performance.now();
+    lastActualDrawRef.current = startTimeRef.current;
+    pausedElapsedRef.current = 0;
+    pausedRef.current = false;
 
     const resize = () => {
       // fixed 定位 + 100vw/100vh，直接取 window 尺寸
       const w = window.innerWidth;
       const h = window.innerHeight;
+      frame.performance = getBackgroundPerformance(maxDpr);
+      frame.dpr = frame.performance.dpr;
       canvas.width = Math.max(1, Math.round(w * frame.dpr));
       canvas.height = Math.max(1, Math.round(h * frame.dpr));
       frame.width = w;
@@ -120,13 +165,36 @@ export function useBackgroundCanvas({
     // Run init after resize so frame.width/height and canvas dimensions are correct.
     initCleanupRef.current = initRef.current?.(canvas, frame);
 
-    // window resize 监听
+    // window resize 监听；同时覆盖设备缩放和跨显示器后的 DPR 变化。
     const onResize = () => resize();
     window.addEventListener('resize', onResize);
+    const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onReducedMotionChange = () => {
+      const wasReduced = frame.performance.reducedMotion;
+      resize();
+      const now = performance.now();
+      lastActualDrawRef.current = now;
+      lastDrawRef.current = now - frame.performance.frameInterval;
+      if (!wasReduced && frame.performance.reducedMotion) frame.ripples = [];
+    };
+    reducedQuery.addEventListener('change', onReducedMotionChange);
 
     const updatePause = () => {
-      pausedRef.current = !(isVisible && isInViewport);
+      const shouldPause = !(isVisible && isInViewport);
+      if (shouldPause === pausedRef.current) return;
+
+      const now = performance.now();
+      pausedRef.current = shouldPause;
+      if (shouldPause) {
+        pausedStart = now;
+      } else if (pausedStart !== null) {
+        pausedElapsedRef.current += now - pausedStart;
+        pausedStart = null;
+      }
+      // Keep the first resumed frame's delta independent of paused duration.
+      lastActualDrawRef.current = now;
     };
+    updatePause();
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -165,7 +233,7 @@ export function useBackgroundCanvas({
       frame.mouse.x = pos.x;
       frame.mouse.y = pos.y;
       frame.mouse.isDown = true;
-      if (useClick) {
+      if (useClick && !frame.performance.reducedMotion) {
         frame.ripples.push({ x: pos.x, y: pos.y, startTime: frame.time });
       }
     };
@@ -197,37 +265,39 @@ export function useBackgroundCanvas({
       window.addEventListener('keyup', onKeyUp);
     }
 
-    // rAF 循环
-    startTimeRef.current = performance.now();
-    lastFrameRef.current = startTimeRef.current;
-    pausedElapsedRef.current = 0;
-    let pausedStart: number | null = null;
-
+    // rAF 循环。累计目标时间避免 60/45/30fps 阈值被显示器刷新间隔持续向后取整。
+    lastDrawRef.current = performance.now() - frame.performance.frameInterval;
     const loop = (now: number) => {
       rafIdRef.current = requestAnimationFrame(loop);
       if (pausedRef.current) {
-        if (pausedStart === null) pausedStart = now;
-        lastFrameRef.current = now;
+        lastActualDrawRef.current = now;
+        lastDrawRef.current = now - frame.performance.frameInterval;
         return;
       }
-      if (pausedStart !== null) {
-        pausedElapsedRef.current += now - pausedStart;
-        pausedStart = null;
-      }
+      const interval = frame.performance.reducedMotion
+        ? Math.max(frame.performance.frameInterval, 1000)
+        : frame.performance.frameInterval;
+      const elapsedSinceDraw = now - lastDrawRef.current;
+      if (elapsedSinceDraw + 0.1 < interval) return;
+
+      const intervalsElapsed = Math.max(1, Math.floor(elapsedSinceDraw / interval));
+      lastDrawRef.current += intervalsElapsed * interval;
+      if (now - lastDrawRef.current > interval) lastDrawRef.current = now;
       frame.time = (now - startTimeRef.current - pausedElapsedRef.current) / 1000;
-      frame.delta = Math.min((now - lastFrameRef.current) / 1000, 0.1);
-      lastFrameRef.current = now;
+      frame.delta = Math.min((now - lastActualDrawRef.current) / 1000, 0.1);
 
       // Consume ripples produced since last frame; each frame's component sees one batch.
       const ripplesBatch = frame.ripples;
       frame.ripples = [];
       drawRef.current({ ...frame, ripples: ripplesBatch });
+      lastActualDrawRef.current = now;
     };
     rafIdRef.current = requestAnimationFrame(loop);
 
     return () => {
       if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
       window.removeEventListener('resize', onResize);
+      reducedQuery.removeEventListener('change', onReducedMotionChange);
       io.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       if (useMouse) {

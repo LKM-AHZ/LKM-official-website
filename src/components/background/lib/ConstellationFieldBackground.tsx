@@ -269,12 +269,5 @@ export default function ConstellationFieldBackground({
     [createParticles]
   );
 
-  return (
-    <BackgroundCanvas
-      draw={draw}
-      init={init}
-      interactions={{ mouse: true }}
-      className={className}
-    />
-  );
+  return <BackgroundCanvas draw={draw} init={init} interactions={{ mouse: true }} className={className} />;
 }
