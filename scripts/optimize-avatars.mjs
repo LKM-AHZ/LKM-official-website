@@ -42,8 +42,12 @@ async function main() {
         .webp({ quality: QUALITY })
         .toFile(outputPath);
 
-      const { size: inSize } = await sharp(inputPath).metadata().then((m) => ({ size: m.size ?? 0 }));
-      const { size: outSize } = await sharp(outputPath).metadata().then((m) => ({ size: m.size ?? 0 }));
+      const { size: inSize } = await sharp(inputPath)
+        .metadata()
+        .then((m) => ({ size: m.size ?? 0 }));
+      const { size: outSize } = await sharp(outputPath)
+        .metadata()
+        .then((m) => ({ size: m.size ?? 0 }));
 
       totalInput += inSize;
       totalOutput += outSize;
@@ -55,7 +59,9 @@ async function main() {
     }
   }
 
-  console.log(`\nTotal: ${(totalInput / 1024 / 1024).toFixed(1)}MB → ${(totalOutput / 1024 / 1024).toFixed(1)}MB (${((1 - totalOutput / totalInput) * 100).toFixed(1)}% reduction)`);
+  console.log(
+    `\nTotal: ${(totalInput / 1024 / 1024).toFixed(1)}MB → ${(totalOutput / 1024 / 1024).toFixed(1)}MB (${((1 - totalOutput / totalInput) * 100).toFixed(1)}% reduction)`
+  );
 }
 
 main().catch((err) => {

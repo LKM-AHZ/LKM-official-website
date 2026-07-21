@@ -181,14 +181,14 @@ node scripts/optimize-avatars.mjs
 
 字段说明：
 
-| 字段 | 必填 | 说明 |
-| :--- | :--- | :--- |
-| `name` | 是 | 显示名称 |
-| `avatarKey` | 否 | `member-optimized/` 下的文件名（写原始扩展名，运行时自动映射 `.webp`） |
-| `role` | 否 | 职务标签（卡片上显示为彩色小字） |
-| `desc` | 否 | 简短描述 |
-| `dream` | 否 | 梦想/目标（紫色斜体） |
-| `quote` | 否 | 一句话格言 |
+| 字段        | 必填 | 说明                                                                   |
+| :---------- | :--- | :--------------------------------------------------------------------- |
+| `name`      | 是   | 显示名称                                                               |
+| `avatarKey` | 否   | `member-optimized/` 下的文件名（写原始扩展名，运行时自动映射 `.webp`） |
+| `role`      | 否   | 职务标签（卡片上显示为彩色小字）                                       |
+| `desc`      | 否   | 简短描述                                                               |
+| `dream`     | 否   | 梦想/目标（紫色斜体）                                                  |
+| `quote`     | 否   | 一句话格言                                                             |
 
 **示例**：在总务部添加"七月小明"，头像为 `xiaoming.png`：
 
@@ -201,18 +201,18 @@ node scripts/optimize-avatars.mjs
 
 **部门对应关系**（`src/data/members.ts`）：
 
-| 页面 | 部门 | 导出数组 |
-| :--- | :--- | :--- |
-| 管理团队 | 创始人 | `founderMembers` |
-| | 总务部 | `generalMembers` |
-| | 群务部 | `affairsSubGroups`（按子群组分组） |
-| | 活动策划部 | `eventsMembers` |
-| | 新闻办 | `newsMembers` + `newsSubGroups` |
-| | 顾问团 | `advisorMembers` |
-| | 专业委员会 | `professionalSubGroups`（按学科分组） |
-| | 技术委员会 | `techMembers` |
-| | 已离开成员 | `alumniMembers` |
-| 项目团队 | 教材/科普项目组 | `projectSubGroups` |
+| 页面     | 部门            | 导出数组                              |
+| :------- | :-------------- | :------------------------------------ |
+| 管理团队 | 创始人          | `founderMembers`                      |
+|          | 总务部          | `generalMembers`                      |
+|          | 群务部          | `affairsSubGroups`（按子群组分组）    |
+|          | 活动策划部      | `eventsMembers`                       |
+|          | 新闻办          | `newsMembers` + `newsSubGroups`       |
+|          | 顾问团          | `advisorMembers`                      |
+|          | 专业委员会      | `professionalSubGroups`（按学科分组） |
+|          | 技术委员会      | `techMembers`                         |
+|          | 已离开成员      | `alumniMembers`                       |
+| 项目团队 | 教材/科普项目组 | `projectSubGroups`                    |
 
 ---
 

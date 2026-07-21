@@ -8,14 +8,12 @@ let _localImages: Record<string, () => Promise<unknown>> | undefined;
 const loadLocalImages = () => {
   if (_localImages) return _localImages;
   try {
-    _localImages = import.meta.glob(
-      [
-        '~/assets/images/**/*.{jpeg,jpg,png,tiff,webp,gif,svg,JPEG,JPG,PNG,TIFF,WEBP,GIF,SVG}',
-        // member-optimized 目录的头像由页面自行 glob，不在此全局范围
-        '!~/assets/images/member/**',
-        '!~/assets/images/member-optimized/**',
-      ]
-    );
+    _localImages = import.meta.glob([
+      '~/assets/images/**/*.{jpeg,jpg,png,tiff,webp,gif,svg,JPEG,JPG,PNG,TIFF,WEBP,GIF,SVG}',
+      // member-optimized 目录的头像由页面自行 glob，不在此全局范围
+      '!~/assets/images/member/**',
+      '!~/assets/images/member-optimized/**',
+    ]);
   } catch {
     _localImages = {};
   }
