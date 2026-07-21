@@ -1,0 +1,10 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import SettingsPageEntry from '~/components/auth/settings/SettingsPageEntry';
+
+const metadata = { title: '账户设置' };
+---
+
+<PageLayout metadata={metadata}>
+  <SettingsPageEntry client:only="react" />
+</PageLayout>

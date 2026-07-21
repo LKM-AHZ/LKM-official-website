@@ -95,7 +95,10 @@ export const headerData = {
       ],
     },
   ],
-  actions: [{ text: '联系我们', href: getPermalink('/contact') }],
+  actions: [
+    { text: '登录', href: getPermalink('/login') },
+    { text: '联系我们', href: getPermalink('/contact') },
+  ],
 };
 
 export const footerData = {

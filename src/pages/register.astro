@@ -1,0 +1,10 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import RegisterPageEntry from '~/components/auth/register/RegisterPageEntry';
+
+const metadata = { title: '注册' };
+---
+
+<PageLayout metadata={metadata}>
+  <RegisterPageEntry client:only="react" />
+</PageLayout>

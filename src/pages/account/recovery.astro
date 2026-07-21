@@ -1,0 +1,10 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import RecoveryPageEntry from '~/components/auth/recovery/RecoveryPageEntry';
+
+const metadata = { title: '密码找回' };
+---
+
+<PageLayout metadata={metadata}>
+  <RecoveryPageEntry client:only="react" />
+</PageLayout>
