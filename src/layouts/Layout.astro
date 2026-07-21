@@ -47,7 +47,9 @@ const baseUrl = import.meta.env.BASE_URL;
 
     <!-- 注释下面这行以禁用 View Transitions -->
     <ClientRouter fallback="swap" />
-    <script define:vars={{ baseUrl }}>window.__BASE_URL__ = baseUrl;</script>
+    <script is:inline define:vars={{ baseUrl }}>
+      window.__BASE_URL__ = baseUrl;
+    </script>
   </head>
 
   <body class="antialiased text-default tracking-tight">
