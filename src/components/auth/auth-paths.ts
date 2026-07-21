@@ -12,5 +12,6 @@ export function getBaseUrl(): string {
 }
 
 export function getAuthPath(path: string): string {
-  return getBaseUrl() + path;
+  const base = getBaseUrl();
+  return base.endsWith('/') ? base + path : base + '/' + path;
 }
