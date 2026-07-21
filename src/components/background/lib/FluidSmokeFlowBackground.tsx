@@ -73,7 +73,7 @@ export default function FluidSmokeFlowBackground({
       const motionScale = performance.reducedMotion ? 0.05 : motionStep;
       const scaledInteractionRadius = interactionRadius * multiplier;
       const scaledInteractionStrength = interactionStrength * multiplier;
-      // Fewer low-quality particles need their old trails removed more aggressively.
+      // 低画质粒子更少，需要更积极地清理旧轨迹。
       const cleanupAlpha = Math.min(1, backgroundFadeAlpha / multiplier);
       ctx.fillStyle = `rgba(0, 0, 0, ${cleanupAlpha})`;
       ctx.fillRect(0, 0, width, height);

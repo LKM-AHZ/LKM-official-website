@@ -68,8 +68,8 @@ const isCdnUrl =
   (resolved.startsWith('http://') || resolved.startsWith('https://')) &&
   parseUrl(resolved) !== undefined;
 
-// Infer missing dimension(s) from ESM-imported ImageMetadata. If only one of
-// width/height is provided, derive the other from the source aspect ratio.
+// 从 ESM 导入的 ImageMetadata 推断缺失的尺寸。如果只提供了
+// width/height 中的一个，则根据源宽高比推导另一个。
 if (resolved && typeof resolved === 'object' && 'width' in resolved && 'height' in resolved) {
   const { width: srcW, height: srcH } = resolved;
   if (!w && !h) {
@@ -172,8 +172,8 @@ const cdnSrcSet =
       style={finalStyle}
     />
   ) : (
-    /* The native <Image /> typing is overly strict for our forwarding wrapper;
-       we spread through unknown once so each call site keeps clean types. */
+    /* 原生 <Image /> 的类型对我们转发包装器来说过于严格；
+       通过 unknown 展开一次，使每个调用位置保持干净的类型。 */
     /* eslint-disable @typescript-eslint/no-explicit-any */
     resolved && (
       <AstroImage

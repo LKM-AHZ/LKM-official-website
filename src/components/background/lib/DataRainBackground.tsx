@@ -110,7 +110,7 @@ export default function DataRainBackground({
       const { ctx, width, height, mouse } = frame;
       const last = lastSizeRef.current;
 
-      // Ensure pattern: rebuild columns if size changed
+      // 确保模式：尺寸变化时重建列
       if (width !== last.width || height !== last.height) {
         lastSizeRef.current = { width, height };
         const columnCount = Math.floor(width * density);
@@ -136,18 +136,18 @@ export default function DataRainBackground({
         columnsRef.current = columns;
       }
 
-      // Consume per-frame ripples
+      // 消耗每帧产生的涟漪
       for (const r of frame.ripples) {
         ripplesRef.current.push({ x: r.x, y: r.y, radius: 0, opacity: 0.8 });
       }
 
       ctx.clearRect(0, 0, width, height);
 
-      // Update flicker
+      // 更新闪烁
       flickerRef.current = (flickerRef.current + flickerSpeed) % (Math.PI * 2);
       const flickerIntensity = 0.7 + Math.sin(flickerRef.current) * 0.3;
 
-      // Update mouse intensity
+      // 更新鼠标强度
       if (mouse.x !== null && mouse.y !== null) {
         const lastX = lastMouseRef.current.x;
         const lastY = lastMouseRef.current.y;
@@ -163,14 +163,14 @@ export default function DataRainBackground({
       }
       mouseIntensityRef.current *= 0.92;
 
-      // Update ripples
+      // 更新涟漪
       ripplesRef.current = ripplesRef.current.filter((ripple) => {
         ripple.radius += rippleGrowthRate;
         ripple.opacity -= rippleFadeRate;
         return ripple.opacity > 0;
       });
 
-      // Draw ripples
+      // 绘制涟漪
       ctx.lineWidth = rippleLineWidth;
       ripplesRef.current.forEach((ripple) => {
         ctx.globalAlpha = ripple.opacity;
@@ -185,7 +185,7 @@ export default function DataRainBackground({
       });
       ctx.globalAlpha = 1;
 
-      // Draw data rain characters
+      // 绘制数据雨字符
       ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.textAlign = 'center';
 

@@ -129,7 +129,7 @@ export default function ParticlesBackground({
         });
       }
 
-      // Parallax background layer scales down again from the quality-adjusted primary count.
+      // 视差背景层基于画质调整后的主计数进行缩放。
       const backgroundCount = Math.floor(count * 0.3 * multiplier);
       for (let i = 0; i < backgroundCount; i++) {
         background.push({
@@ -164,7 +164,7 @@ export default function ParticlesBackground({
       const scaledConnectionOpacity = connectionOpacityMultiplier * multiplier;
       const scaledRippleLineWidth = rippleLineWidth * multiplier;
 
-      // Rebuild quality-dependent resources on resize or quality changes.
+      // 在 resize 或画质变化时重建画质相关资源。
       if (
         width !== lastSizeRef.current.width ||
         height !== lastSizeRef.current.height ||
@@ -177,7 +177,7 @@ export default function ParticlesBackground({
         backgroundRef.current = background;
       }
 
-      // Consume per-frame ripples
+      // 消耗每帧产生的涟漪
       for (const r of frame.ripples) {
         ripplesRef.current.push({
           x: r.x,
@@ -189,7 +189,7 @@ export default function ParticlesBackground({
         });
       }
 
-      // Update particles
+      // 更新粒子
       particlesRef.current.forEach((particle) => {
         if (particle.baseX === 0 && particle.baseY === 0) {
           particle.baseX = particle.x;
@@ -257,7 +257,7 @@ export default function ParticlesBackground({
         particle.opacity = Math.max(0.1, Math.min(0.8, particle.opacity));
       });
 
-      // Update ripples
+      // 更新涟漪
       ripplesRef.current = ripplesRef.current.filter((ripple) => {
         if (ripple.growing) {
           ripple.radius += rippleGrowthRate * motionScale;
@@ -268,10 +268,10 @@ export default function ParticlesBackground({
         return false;
       });
 
-      // Draw
+      // 绘制
       ctx.clearRect(0, 0, width, height);
 
-      // Background particles
+      // 背景粒子
       backgroundRef.current.forEach((particle) => {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
@@ -279,7 +279,7 @@ export default function ParticlesBackground({
         ctx.fill();
       });
 
-      // Connections
+      // 连接线
       ctx.lineWidth = 1;
       for (let i = 0; i < particlesRef.current.length; i++) {
         for (let j = i + 1; j < particlesRef.current.length; j++) {
@@ -298,7 +298,7 @@ export default function ParticlesBackground({
         }
       }
 
-      // Particles
+      // 粒子
       particlesRef.current.forEach((particle) => {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
@@ -315,7 +315,7 @@ export default function ParticlesBackground({
         }
       });
 
-      // Ripples
+      // 涟漪
       ripplesRef.current.forEach((ripple) => {
         ctx.beginPath();
         ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);

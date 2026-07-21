@@ -1,12 +1,12 @@
-# Add a Page
+# 添加页面
 
-## Steps
+## 步骤
 
-1. Create a new `.astro` file in `src/pages/`
-2. Use `PageLayout` for standard pages or `Layout` for custom layouts
-3. Compose the page using widget components from `src/components/widgets/`
+1. 在 `src/pages/` 下创建新的 `.astro` 文件
+2. 标准页面使用 `PageLayout`，自定义布局使用 `Layout`
+3. 使用 `src/components/widgets/` 中的 Widget 组件组合页面
 
-## Template
+## 模板
 
 ```astro
 ---
@@ -15,39 +15,39 @@ import Hero from '~/components/widgets/Hero.astro';
 import Features from '~/components/widgets/Features.astro';
 
 const metadata = {
-  title: 'Page Title',
-  description: 'Page description for SEO',
+  title: '页面标题',
+  description: 'SEO 页面描述',
 };
 ---
 
 <Layout metadata={metadata}>
   <Hero
-    tagline="Optional tagline"
-    title="Page Heading"
-    subtitle="Supporting text"
+    tagline="可选标签"
+    title="页面主标题"
+    subtitle="辅助文本"
     image={{
       src: '~/assets/images/hero.png',
-      alt: 'Hero image description',
+      alt: 'Hero 图片描述',
     }}
   />
 
   <Features
-    title="Section Title"
+    title="区块标题"
     items={[
-      { title: 'Feature 1', description: 'Description', icon: 'tabler:star' },
-      { title: 'Feature 2', description: 'Description', icon: 'tabler:rocket' },
+      { title: '功能 1', description: '描述', icon: 'tabler:star' },
+      { title: '功能 2', description: '描述', icon: 'tabler:rocket' },
     ]}
   />
 </Layout>
 ```
 
-## Available Widget Components
+## 可用 Widget 组件
 
 Hero, Features, Content, Steps, Testimonials, FAQs, Stats, Pricing, Brands, CallToAction, Contact, Team
 
-## Notes
+## 注意事项
 
-- Pages in `src/pages/` are automatically routed by filename
-- Use `PageLayout` (includes Header + Footer) or `Layout` (bare)
-- All widgets accept an `id` prop for anchor links
-- Icons use the `tabler:icon-name` format from `@iconify-json/tabler`
+- `src/pages/` 下的页面按文件名自动路由
+- 使用 `PageLayout`（含 Header + Footer）或 `Layout`（最简布局）
+- 所有 Widget 接受 `id` prop 用于锚点链接
+- 图标使用 `tabler:icon-name` 格式，来自 `@iconify-json/tabler`

@@ -1,21 +1,25 @@
-MIT License
+MIT 许可证
 
-Copyright (c) 2023 onWidget
+版权所有 (c) 2023 onWidget
+版权所有 (c) 2024-2026 理科迷 (LKM)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+特此免费授予任何获得本软件及相关文档文件（以下简称"本软件"）副本的人不受限制地处理本软件的权利，包括但不限于使用、复制、修改、合并、发布、分发、再许可和/或销售本软件副本的权利，以及允许获得本软件的人这样做，但须符合以下条件：
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+上述版权声明和本许可声明应包含在本软件的所有副本或实质性部分中。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+本软件按"原样"提供，不提供任何形式的明示或暗示保证，包括但不限于对适销性、特定用途适用性和非侵权的保证。在任何情况下，作者或版权持有人均不对因本软件或本软件的使用或其他交易而产生、引起或与之相关的任何索赔、损害或其他责任承担责任，无论是合同行为、侵权行为还是其他行为。
+
+---
+
+## 中国法律适用声明
+
+本许可证的解释、效力及争议解决均适用中华人民共和国法律。
+
+本许可证不限制或排除中国《著作权法》及其他相关法律法规授予您的法定权利。本软件在中国境内的使用应遵守中华人民共和国的相关法律法规。
+
+如果本许可证的任何条款被中国法律认定为不可执行或无效，该条款应在法律允许的最大范围内进行修改和解释以实现其目的，其余条款应继续完全有效。
+
+## 联系信息
+
+项目维护者：理科迷 (LKM)
+邮箱：almafox123@outlook.com

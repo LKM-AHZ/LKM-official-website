@@ -21,6 +21,10 @@ export interface BackgroundPerformance {
   reducedMotion: boolean;
 }
 
+/**
+ * 检测设备性能并返回对应的画质等级、DPR 上限和帧间隔。
+ * 分级策略：移动端/减少动画 → low(30fps/DPR1)，低核数/未知 → medium(45fps/DPR1.25)，其余 → high(60fps/DPR1.5)。
+ */
 export function getBackgroundPerformance(maxDpr = Number.POSITIVE_INFINITY): BackgroundPerformance {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') {
     return { quality: 'medium', dpr: Math.min(1.25, maxDpr), frameInterval: 1000 / 45, reducedMotion: false };
@@ -47,7 +51,7 @@ export function getBackgroundPerformance(maxDpr = Number.POSITIVE_INFINITY): Bac
 
 export interface BackgroundFrame {
   ctx: CanvasRenderingContext2D;
-  width: number; // CSS 像素
+  width: number; // CSS 像素宽度
   height: number;
   dpr: number;
   performance: BackgroundPerformance;
@@ -142,7 +146,7 @@ export function useBackgroundCanvas({
     let isInViewport = true;
     let pausedStart: number | null = null;
 
-    // Initialize timing before observers can synchronously pause the canvas.
+    // 在观察者同步暂停画布之前初始化计时。
     startTimeRef.current = performance.now();
     lastActualDrawRef.current = startTimeRef.current;
     pausedElapsedRef.current = 0;
@@ -162,7 +166,7 @@ export function useBackgroundCanvas({
     };
     resize();
 
-    // Run init after resize so frame.width/height and canvas dimensions are correct.
+    // 在 resize 之后运行 init，确保 frame.width/height 和 canvas 尺寸正确。
     initCleanupRef.current = initRef.current?.(canvas, frame);
 
     // window resize 监听；同时覆盖设备缩放和跨显示器后的 DPR 变化。
@@ -191,7 +195,7 @@ export function useBackgroundCanvas({
         pausedElapsedRef.current += now - pausedStart;
         pausedStart = null;
       }
-      // Keep the first resumed frame's delta independent of paused duration.
+      // 保持恢复后第一帧的 delta 不受暂停时长影响。
       lastActualDrawRef.current = now;
     };
     updatePause();
@@ -286,7 +290,7 @@ export function useBackgroundCanvas({
       frame.time = (now - startTimeRef.current - pausedElapsedRef.current) / 1000;
       frame.delta = Math.min((now - lastActualDrawRef.current) / 1000, 0.1);
 
-      // Consume ripples produced since last frame; each frame's component sees one batch.
+      // 消费自上一帧以来产生的涟漪；每帧的组件只看到一批。
       const ripplesBatch = frame.ripples;
       frame.ripples = [];
       drawRef.current({ ...frame, ripples: ripplesBatch });

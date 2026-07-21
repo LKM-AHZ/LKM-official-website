@@ -29,9 +29,9 @@ import { UI } from 'astrowind:config';
     }
   }
 
-  // ApplyColorMode.astro already sets the initial theme before paint.
-  // Here we re-apply from localStorage to keep theme toggle state consistent
-  // after View Transitions (astro:after-swap).
+  // ApplyColorMode.astro 已在绘制前设置了初始主题。
+  // 此处从 localStorage 重新应用以在 View Transitions
+  // (astro:after-swap) 之后保持主题切换状态一致。
   const initTheme = function () {
     const theme = localStorage.theme;
     if (theme === 'dark') {
@@ -64,8 +64,8 @@ import { UI } from 'astrowind:config';
     document.querySelector('#header > div > div:last-child')?.classList.add('hidden');
   }
 
-  // Scroll state shared between the one-time scroll listener and the
-  // per-navigation initial call to applyHeaderStylesOnScroll().
+  // 滚动状态在一次性滚动监听器和每次导航时
+  // 的 applyHeaderStylesOnScroll() 初始调用之间共享。
   let lastKnownScrollPosition = window.scrollY;
   let ticking = true;
 
@@ -80,9 +80,8 @@ import { UI } from 'astrowind:config';
     ticking = false;
   }
 
-  // Guard so that event subscriptions bound to persistent elements
-  // (persist header, document, matchMedia) are only attached once and do
-  // not stack up on every astro:after-swap navigation.
+  // 防重复守卫：绑定到持久元素（header、document、matchMedia）的事件
+  // 只附加一次，不会在每次 astro:after-swap 导航时堆叠。
   let eventsBound = false;
 
   const onLoad = function () {
@@ -111,9 +110,9 @@ import { UI } from 'astrowind:config';
         updateToggleThemeIcon();
       });
 
-      // Delegated on document so it survives View Transitions and still
-      // works for share buttons created fresh on each article page,
-      // without rebinding (and thus stacking) on every navigation.
+      // 委托在 document 上以在 View Transitions 中保持存活，
+      // 且无需在每次导航时重新绑定（避免堆叠），
+      // 同时仍适用于每篇文章页面上新创建的分享按钮。
       document.addEventListener('click', function (e) {
         const elem = e.target.closest?.('[data-aw-social-share]');
         if (!elem) return;
@@ -167,14 +166,14 @@ import { UI } from 'astrowind:config';
       eventsBound = true;
     }
 
-    // Runs on every navigation: reflect current page scroll state and
-    // handle the URL hash anchor for View Transitions SPA nav.
+    // 每次导航时运行：反映当前页面滚动状态并
+    // 处理 View Transitions SPA 导航的 URL hash 锚点。
     lastKnownScrollPosition = window.scrollY;
     applyHeaderStylesOnScroll();
     handleAnchorScroll();
   };
 
-  // Scroll to element matching the URL hash (for View Transitions SPA nav)
+  // 滚动到匹配 URL hash 的元素（用于 View Transitions SPA 导航）
   function handleAnchorScroll() {
     const hash = location.hash;
     if (hash) {
@@ -189,7 +188,7 @@ import { UI } from 'astrowind:config';
           requestAnimationFrame(tryScroll);
         }
       };
-      // Defer to ensure DOM is fully painted after View Transition
+      // 延迟确保 View Transition 后 DOM 完全绘制
       requestAnimationFrame(() => {
         requestAnimationFrame(tryScroll);
       });

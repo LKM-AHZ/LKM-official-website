@@ -71,9 +71,9 @@ export default defineConfig({
           removeAttributeQuotes: false,
         },
       },
-      Image: false,
+      Image: true,
       JavaScript: true,
-      SVG: false,
+      SVG: true,
       Logger: 1,
     }),
 
@@ -83,16 +83,15 @@ export default defineConfig({
   ],
 
   image: {
-    // Astro's default Sharp service handles local images.
+    // Astro 默认的 Sharp 服务处理本地图片。
     //
-    // Most remote CDN images (Unsplash, Cloudinary, Imgix…) are routed by
-    // src/components/common/Image.astro through `unpic`, which rewrites the
-    // URL with CDN-side query parameters and serves it straight from the
-    // provider — Astro never downloads it, so they don't need to be listed.
+    // 大多数远程 CDN 图片（Unsplash、Cloudinary、Imgix 等）由
+    // src/components/common/Image.astro 通过 `unpic` 路由，它会用 CDN 端
+    // 的查询参数重写 URL 并直接从提供商提供 — Astro 从不下载它们，因此无需列出。
     //
-    // `domains` only matters for remote URLs that fall through to Astro's
-    // native <Image /> (i.e. providers Unpic can't detect, like Pixabay).
-    // Listed entries are authorized to be processed by Sharp.
+    // `domains` 只对落入 Astro 原生 <Image /> 的远程 URL 有效
+    // （即 Unpic 无法检测的提供商，如 Pixabay）。
+    // 列出的条目被授权由 Sharp 处理。
     domains: ['cdn.pixabay.com'],
   },
 

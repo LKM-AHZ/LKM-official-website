@@ -112,7 +112,7 @@ export default function ConstellationFieldBackground({
     (frame: BackgroundFrame) => {
       const { ctx, width, height, mouse, time } = frame;
 
-      // Ensure pattern: rebuild particles on resize
+      // 确保模式：resize 时重建粒子
       if (width !== lastSizeRef.current.width || height !== lastSizeRef.current.height) {
         lastSizeRef.current = { width, height };
         particlesRef.current = createParticles(width, height);
@@ -120,7 +120,7 @@ export default function ConstellationFieldBackground({
         constellationNamesRef.current = [];
       }
 
-      // Update particles
+      // 更新粒子
       particlesRef.current.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -146,7 +146,7 @@ export default function ConstellationFieldBackground({
         }
       });
 
-      // Update shooting stars
+      // 更新流星
       if (Math.random() < shootingStarChance) {
         shootingStarsRef.current.push({
           x: Math.random() * width,
@@ -164,7 +164,7 @@ export default function ConstellationFieldBackground({
         s.life -= shootingStarLifeDecay;
       });
 
-      // Update constellation names
+      // 更新星座名称
       if (Math.random() < nameSpawnRate) {
         constellationNamesRef.current.push({
           x: Math.random() * width,
@@ -178,10 +178,10 @@ export default function ConstellationFieldBackground({
         n.opacity -= nameFadeRate;
       });
 
-      // Draw
+      // 绘制
       ctx.clearRect(0, 0, width, height);
 
-      // Particles
+      // 粒子
       particlesRef.current.forEach((p) => {
         const pulseRadius = p.radius + Math.sin(time * 2 + p.pulse) * 0.5;
         ctx.beginPath();
@@ -201,7 +201,7 @@ export default function ConstellationFieldBackground({
         }
       });
 
-      // Connections
+      // 连接线
       for (let i = 0; i < particlesRef.current.length; i++) {
         for (let j = i + 1; j < particlesRef.current.length; j++) {
           const p1 = particlesRef.current[i];
@@ -221,7 +221,7 @@ export default function ConstellationFieldBackground({
         }
       }
 
-      // Shooting stars
+      // 流星
       shootingStarsRef.current.forEach((s) => {
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
@@ -231,7 +231,7 @@ export default function ConstellationFieldBackground({
         ctx.stroke();
       });
 
-      // Constellation names
+      // 星座名称
       ctx.font = '19px Space Grotesk';
       ctx.textAlign = 'center';
       ctx.fillStyle = constfill;

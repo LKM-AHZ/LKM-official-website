@@ -1,107 +1,107 @@
-# AstroWind Agent Instructions
+# AstroWind Agent 指令
 
-## Project Overview
+## 项目概述
 
-AstroWind is a free, open-source website template built with **Astro v6** and **Tailwind CSS v4**. It generates a fully static site optimized for performance, SEO, and accessibility.
+AstroWind 是一个免费、开源的网站模板，基于 **Astro v6** 和 **Tailwind CSS v4** 构建。它生成完全静态的站点，针对性能、SEO 和无障碍访问进行了优化。
 
-**Stack:** Astro v6 | Tailwind CSS v4 | TypeScript 5.9 | MDX | Sharp
+**技术栈：** Astro v6 | Tailwind CSS v4 | TypeScript 5.9 | MDX | Sharp
 
-## Quick Reference
+## 快速参考
 
-| Command           | Purpose                             |
-| ----------------- | ----------------------------------- |
-| `npm run dev`     | Start dev server at localhost:4321  |
-| `npm run build`   | Production build to `./dist/`       |
-| `npm run preview` | Preview production build locally    |
-| `npm run check`   | Run astro check + ESLint + Prettier |
-| `npm run fix`     | Auto-fix ESLint + Prettier issues   |
+| 命令               | 用途                                 |
+| ------------------ | ------------------------------------ |
+| `pnpm run dev`     | 启动开发服务器（localhost:4321）     |
+| `pnpm run build`   | 生产构建到 `./dist/`                 |
+| `pnpm run preview` | 本地预览生产构建                     |
+| `pnpm run check`   | 运行 astro check + ESLint + Prettier |
+| `pnpm run fix`     | 自动修复 ESLint + Prettier 问题      |
 
-**Node.js requirement:** >= 24.0.0
+**Node.js 要求：** >= 24.0.0
 
-## Architecture
+## 架构
 
-### Directory Structure
+### 目录结构
 
 ```
 src/
-  styles/tailwind.css        # Tailwind v4 config (themes, utilities, plugins)
+  styles/tailwind.css        # Tailwind v4 配置（主题、自定义工具类、插件）
   components/
-    common/        # Shared: Image, Metadata, Analytics, ToggleTheme
-    ui/            # Primitives: Button, Headline, WidgetWrapper, ItemGrid
-    widgets/       # Page sections: Hero, Features, Pricing, Header, Footer
-    blog/          # Blog: SinglePost, List, Pagination, Tags
-    background/    # Background switcher, canvas & interactive background components
-    CustomStyles.astro  # CSS variables for colors and fonts
-  content.config.ts    # Content Collections schema (Astro v6 location)
-  content/             # Content files: post/, docs/ (.md, .mdx)
-  integrations/        # Custom Astro integration for config loading
+    common/        # 共享组件：Image, Metadata, Analytics, ToggleTheme
+    ui/            # 基础组件：Button, Headline, WidgetWrapper, ItemGrid
+    widgets/       # 页面部件：Hero, Features, Pricing, Header, Footer
+    blog/          # 博客组件：SinglePost, List, Pagination, Tags
+    background/    # 背景切换器、Canvas 和交互式背景组件
+    CustomStyles.astro  # 颜色和字体的 CSS 变量
+  content.config.ts    # 内容集合 Schema（Astro v6 位置）
+  content/             # 内容文件：post/、docs/（.md、.mdx）
+  integrations/        # 自定义 Astro 集成（配置加载）
   layouts/             # Layout.astro, PageLayout.astro, MarkdownLayout.astro
-  pages/               # File-based routing
+  pages/               # 文件路由
   utils/               # blog.ts, images.ts, permalinks.ts, frontmatter.ts
-  config.yaml          # Site configuration (loaded as virtual module)
-  navigation.ts        # Navigation structure
-  types.d.ts           # TypeScript type definitions
+  config.yaml          # 站点配置（作为虚拟模块加载）
+  navigation.ts        # 导航结构
+  types.d.ts           # TypeScript 类型定义
 ```
 
-### Path Aliases
+### 路径别名
 
-Use `~/` to import from `src/`:
+使用 `~/` 从 `src/` 导入：
 
 ```typescript
 import Image from '~/components/common/Image.astro';
 import { SITE } from 'astrowind:config';
 ```
 
-### Configuration System
+### 配置系统
 
-Site config lives in `src/config.yaml` and is loaded as a Vite virtual module `astrowind:config` by the custom integration in `src/integrations/`. Exports: `SITE`, `I18N`, `METADATA`, `APP_BLOG`, `UI`, `ANALYTICS`.
+站点配置在 `src/config.yaml` 中，由 `src/integrations/` 中的自定义集成作为 Vite 虚拟模块 `astrowind:config` 加载。导出项：`SITE`、`I18N`、`METADATA`、`APP_BLOG`、`UI`、`ANALYTICS`。
 
 ## Tailwind CSS v4
 
-Configuration is CSS-first in `src/styles/tailwind.css`:
+配置以 CSS 优先，入口文件 `src/styles/tailwind.css`：
 
-- **Theme tokens:** `@theme { --color-primary: var(--aw-color-primary); ... }`
-- **Custom utilities:** `@utility bg-page { ... }`
-- **Dark mode:** Class-based via `@variant dark (&:where(.dark, .dark *))`
-- **Plugins:** `@plugin "@tailwindcss/typography"`
-- **Custom variant:** `@custom-variant intersect (&:not([no-intersect]))`
+- **主题令牌：** `@theme { --color-primary: var(--aw-color-primary); ... }`
+- **自定义工具类：** `@utility bg-page { ... }`
+- **暗色模式：** 通过 `@variant dark (&:where(.dark, .dark *))` 实现基于类的暗色模式
+- **插件：** `@plugin "@tailwindcss/typography"`
+- **自定义变体：** `@custom-variant intersect (&:not([no-intersect]))`
 
-CSS variables for colors/fonts are defined in `src/components/CustomStyles.astro` with light/dark theme variants.
+颜色和字体的 CSS 变量在 `src/components/CustomStyles.astro` 中定义，带明暗主题变体。
 
-The Vite plugin `@tailwindcss/vite` is configured in `astro.config.ts` (not as an Astro integration).
+Vite 插件 `@tailwindcss/vite` 在 `astro.config.ts` 中配置（而非作为 Astro 集成）。
 
-### Class Merging
+### 类合并
 
-Components use `twMerge` from `tailwind-merge` v3 for conditional class composition.
+组件使用 `tailwind-merge` v3 的 `twMerge` 进行条件类组合。
 
-## Content Collections
+## 内容集合
 
-Defined in `src/content.config.ts` using the Astro v6 Content Layer API with `glob()` loader. Posts are in `src/content/post/` as `.md` or `.mdx` files.
+在 `src/content.config.ts` 中通过 Astro v6 Content Layer API 的 `glob()` 加载器定义。文章位于 `src/content/post/`，使用 `.md` 或 `.mdx` 格式。
 
-Post frontmatter: `title` (required), `publishDate`, `updateDate`, `draft`, `excerpt`, `image`, `category`, `tags`, `author`, `metadata`.
+文章 frontmatter 字段：`title`（必填）、`publishDate`、`updateDate`、`draft`、`excerpt`、`image`、`category`、`tags`、`author`、`metadata`。
 
-## Component Patterns
+## 组件模式
 
-- Props extend interfaces from `~/types`
-- Use `class:list` for conditional classes
-- Use `twMerge()` when accepting className overrides
-- Use named slots for layout composition
-- Widget components accept standardized props (see `~/types`)
+- Props 继承自 `~/types` 中的接口
+- 使用 `class:list` 进行条件样式绑定
+- 接收 `className` 覆写时使用 `twMerge()` 合并
+- 布局组合使用具名插槽（named slots）
+- Widget 组件接受标准化 props（参见 `~/types`）
 
-## Image Handling
+## 图片处理
 
-`src/components/common/Image.astro` supports:
+`src/components/common/Image.astro` 支持：
 
-- Local images via `astro:assets` (optimized by Sharp)
-- Remote images via Unpic CDN
-- Allowed domains (for providers Unpic can't detect, processed by Sharp): `cdn.pixabay.com`
+- 本地图片通过 `astro:assets`（由 Sharp 优化）
+- 远程图片通过 Unpic CDN
+- 允许的域名（用于 Unpic 无法检测的提供商，由 Sharp 处理）：`cdn.pixabay.com`
 
-Hero images use `loading="eager"` and `fetchpriority="high"`.
+Hero 图片使用 `loading="eager"` 和 `fetchpriority="high"`。
 
-## Verification Checklist
+## 验证检查清单
 
-After changes, always verify:
+修改代码后，务必验证：
 
-1. `npm run build` succeeds
-2. `npm run check` passes (astro check + ESLint + Prettier)
-3. Visual check in browser: homepage, blog, dark mode, mobile menu
+1. `pnpm run build` 构建成功
+2. `pnpm run check` 通过（astro check + ESLint + Prettier）
+3. 浏览器视觉检查：首页、博客、暗色模式、移动端菜单

@@ -2,15 +2,18 @@ import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import type { MetaDataOpenGraph } from '~/types';
 
-// Lazy-loaded glob of local images. The glob runs once and is cached.
+// 本地图片的延迟加载 glob。glob 只执行一次并缓存。
 let _localImages: Record<string, () => Promise<unknown>> | undefined;
 
 const loadLocalImages = () => {
   if (_localImages) return _localImages;
   try {
-    _localImages = import.meta.glob(
-      '~/assets/images/**/*.{jpeg,jpg,png,tiff,webp,gif,svg,JPEG,JPG,PNG,TIFF,WEBP,GIF,SVG}'
-    );
+    _localImages = import.meta.glob([
+      '~/assets/images/**/*.{jpeg,jpg,png,tiff,webp,gif,svg,JPEG,JPG,PNG,TIFF,WEBP,GIF,SVG}',
+      // member-optimized 目录的头像由页面自行 glob，不在此全局范围
+      '!~/assets/images/member/**',
+      '!~/assets/images/member-optimized/**',
+    ]);
   } catch {
     _localImages = {};
   }
@@ -18,12 +21,12 @@ const loadLocalImages = () => {
 };
 
 /**
- * Resolve an image reference to either ImageMetadata (local) or a string URL (remote/public).
- * Accepts:
- *   - `null` / `undefined`         → returned as-is
- *   - `ImageMetadata`              → returned as-is (already imported)
- *   - `"http(s)://…"` or `"/path"` → returned as-is (external or public/)
- *   - `"~/assets/images/…"`        → resolved to its ImageMetadata via the glob
+ * 将图片引用解析为 ImageMetadata（本地）或字符串 URL（远程/public）。
+ * 接受的输入：
+ *   - `null` / `undefined`         → 原样返回
+ *   - `ImageMetadata`              → 原样返回（已导入）
+ *   - `"http(s)://…"` 或 `"/path"` → 原样返回（外部或 public/）
+ *   - `"~/assets/images/…"`        → 通过 glob 解析为 ImageMetadata
  */
 export const findImage = async (
   imagePath?: string | ImageMetadata | null
@@ -45,8 +48,8 @@ const OG_WIDTH = 1200;
 const OG_HEIGHT = 626;
 
 /**
- * Adapt OpenGraph images to absolute, optimized URLs.
- * Used by Metadata.astro to produce social-card-ready URLs.
+ * 将 OpenGraph 图片转换为绝对、优化后的 URL。
+ * 由 Metadata.astro 使用，用于生成社交分享卡片就绪的 URL。
  */
 export const adaptOpenGraphImages = async (
   openGraph: MetaDataOpenGraph = {},
@@ -61,7 +64,7 @@ export const adaptOpenGraphImages = async (
       const resolved = await findImage(image.url);
       if (!resolved) return { url: '' };
 
-      // Generate an optimized JPG via Astro's image service (Sharp by default).
+      // 通过 Astro 的图片服务（默认 Sharp）生成优化后的 JPG。
       const optimized = await getImage({
         src: resolved,
         width: OG_WIDTH,

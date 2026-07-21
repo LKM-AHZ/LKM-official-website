@@ -60,7 +60,7 @@ npm run build    # 生产构建（CI 会同时运行 check）
 
 ## CI 流程
 
-GitHub Actions 配置了两个工作流：
+GitHub Actions 配置了一个工作流文件：
 
 ### actions.yaml — PR 与 Push 检查 + 部署
 
@@ -70,9 +70,9 @@ GitHub Actions 配置了两个工作流：
 | `check`  | PR 到 main / Push 到 main              | `pnpm run check`（astro check + ESLint + Prettier） |
 | `deploy` | Push 到 main（build + check 都通过后） | 部署到 GitHub Pages                                 |
 
-### static.yml — 静态页面部署
+### 部署
 
-Push 到 main 分支时构建并部署到 GitHub Pages。
+部署通过 `actions.yaml` 中的 `deploy` job 完成：Push 到 main 分支时（build + check 通过后）部署到 GitHub Pages。
 
 ### 通过 CI 的门槛
 
@@ -189,7 +189,7 @@ import { SITE, METADATA, I18N, APP_BLOG, UI, ANALYTICS } from 'astrowind:config'
 
 ### 文件位置
 
-博客文章放在 `src/data/post/`，支持 `.md` 和 `.mdx` 格式。
+博客文章放在 `src/content/post/`，支持 `.md` 和 `.mdx` 格式。
 
 ### 必需字段
 
