@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/** */
+
 export const getProjectRootDir = (): string => {
   const mode = import.meta.env.MODE;
 
@@ -12,7 +12,7 @@ export const getProjectRootDir = (): string => {
 
 const __srcFolder = path.join(getProjectRootDir(), '/src');
 
-/** */
+
 export const getRelativeUrlByFilePath = (filepath: string): string => {
   return filepath.replace(__srcFolder, '');
 };

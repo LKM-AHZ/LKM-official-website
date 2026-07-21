@@ -49,25 +49,27 @@ pnpm run dev
 ├── public/                     # 静态资源
 ├── src/
 │   ├── assets/
-│   │   ├── images/             # 本地图片、头像
-│   │   └── styles/tailwind.css # Tailwind v4 配置入口
+│   │   └── images/             # 本地图片、头像
+│   ├── styles/tailwind.css     # Tailwind v4 配置入口
 │   ├── components/
 │   │   ├── background/         # 可切换动态背景（13 种效果）
 │   │   ├── blog/               # 博客组件
 │   │   ├── common/             # 通用组件（Image, Metadata, Analytics 等）
 │   │   ├── ui/                 # 基础 UI 组件
 │   │   └── widgets/            # 页面部件（Hero, Header, Footer 等）
+│   ├── content/
+│   │   ├── docs/               # 文档内容 (.md / .mdx)
+│   │   └── post/               # 博客文章 (.md / .mdx)
 │   ├── data/
 │   │   ├── members.ts          # 团队成员数据
-│   │   └── post/               # 博客文章 (.md / .mdx)
+│   │   └── communities.ts      # 社群数据
 │   ├── layouts/                # 页面布局
 │   ├── pages/                  # 文件路由
 │   ├── utils/                  # 工具函数
 │   ├── config.yaml             # 站点主配置
 │   ├── content.config.ts       # 内容集合 Schema
 │   └── navigation.ts           # 导航结构
-├── src/vendor/interactive-backgrounds/  # 背景组件源码
-├── vendor/integration/         # 自定义 Astro 集成
+├── src/integrations/           # 自定义 Astro 集成
 ├── AGENTS.md                   # AI Agent 指令
 ├── astro.config.ts             # Astro 配置
 └── tsconfig.json               # TypeScript 配置
@@ -87,7 +89,9 @@ pnpm run dev
 | 赞助与支持 | `/pricing`      | `pages/pricing.astro`      | SidebarLayout  |
 | 联系我们   | `/contact`      | `pages/contact.astro`      | SidebarLayout  |
 | QQ 社群    | `/communities`  | `pages/communities.astro`  | SidebarLayout  |
+| 登录       | `/login`        | `pages/login.astro`        | PageLayout     |
 | 文档库     | `/docs`         | `pages/docs/`              | DocsLayout     |
+| 文档详情   | `/docs/<slug>`  | `pages/docs/[...slug].astro` | DocsLayout   |
 | 隐私政策   | `/privacy`      | `pages/privacy.md`         | MarkdownLayout |
 | 使用条款   | `/terms`        | `pages/terms.md`           | MarkdownLayout |
 | 博客       | `/blog`         | `pages/[...blog]/`         | PageLayout     |
@@ -99,7 +103,7 @@ pnpm run dev
 
 ## 配置系统
 
-`src/config.yaml` 通过 `vendor/integration/` 注入为 Vite 虚拟模块 `astrowind:config`：
+`src/config.yaml` 通过 `src/integrations/` 注入为 Vite 虚拟模块 `astrowind:config`：
 
 ```ts
 import { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } from 'astrowind:config';
@@ -111,13 +115,13 @@ import { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } from 'astrowind:config'
 
 ## 样式系统
 
-**Tailwind CSS v4** — CSS-first 配置，入口 `src/assets/styles/tailwind.css`，支持暗色模式、自定义主题变量、Typography 插件。组件使用 **CSS Modules** 实现局部作用域样式。UI 层面使用 **daisyUI v5** 组件库，结合 **KaTeX** 渲染数学公式。
+**Tailwind CSS v4** — CSS-first 配置，入口 `src/styles/tailwind.css`，支持暗色模式、自定义主题变量、Typography 插件。组件使用 **CSS Modules** 实现局部作用域样式。UI 层面使用 **daisyUI v5** 组件库，结合 **KaTeX** 渲染数学公式。
 
 ---
 
 ## 内容管理
 
-在 `src/data/post/` 下创建 `.md` 或 `.mdx` 文件：
+在 `src/content/post/` 下创建 `.md` 或 `.mdx` 文件：
 
 ```md
 ---
@@ -160,7 +164,7 @@ pnpm run build   # 输出到 ./dist/
 ## 架构概览
 
 ```
-配置层     config.yaml → vendor/integration → astrowind:config (虚拟模块)
+配置层     config.yaml → src/integrations/ → astrowind:config (虚拟模块)
   ↓
 布局层     SidebarLayout / PageLayout / MarkdownLayout / DocsLayout
   ↓
@@ -174,7 +178,7 @@ Common 层  src/components/common/ (Image, Metadata, Analytics…)
   ↓
 背景层     src/components/background/ (13 种可切换动态背景，3D 核苷酸模型可拖拽)
   ↓
-数据层     src/data/post/ + src/utils/
+数据层     src/data/ + src/utils/
 ```
 
 ---

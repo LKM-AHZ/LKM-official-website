@@ -101,13 +101,13 @@ export default function OrbitClusterBackground({
     (frame: BackgroundFrame) => {
       const { ctx, width, height, mouse } = frame;
 
-      // Ensure pattern: rebuild clusters on resize
+      // 确保模式：resize 时重建集群
       if (width !== lastSizeRef.current.width || height !== lastSizeRef.current.height) {
         lastSizeRef.current = { width, height };
         clustersRef.current = generateClusters(width, height);
       }
 
-      // Consume click ripples as gravity warps
+      // 消费点击涟漪作为重力扭曲
       for (const r of frame.ripples) {
         gravityWarpRef.current = {
           x: r.x,

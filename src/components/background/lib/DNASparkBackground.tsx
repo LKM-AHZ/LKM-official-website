@@ -171,7 +171,7 @@ export default function DNASparkBackground({
       const mouseX = mouse.x ?? 0;
       const mouseY = mouse.y ?? 0;
 
-      // Ensure pattern: rebuild on resize
+      // 确保模式：resize 时重建
       if (width !== lastSizeRef.current.width || height !== lastSizeRef.current.height) {
         lastSizeRef.current = { width, height };
         particlesRef.current = initParticles(width, height);
@@ -182,10 +182,10 @@ export default function DNASparkBackground({
         ripplesRef.current = [];
       }
 
-      // Consume per-frame ripples batch
+      // 消耗每帧涟漪批次
       for (const r of frame.ripples) {
         ripplesRef.current.push({ x: r.x, y: r.y, radius: 0, opacity: 0.8 });
-        // Trigger shatter animation on click
+        // 点击时触发破碎动画
         if (!isShatteringRef.current && initialAnimationCompleteRef.current) {
           isShatteringRef.current = true;
           shatterProgressRef.current = 0;
@@ -207,13 +207,13 @@ export default function DNASparkBackground({
 
       ctx.clearRect(0, 0, width, height);
 
-      // Map old per-frame counters to frame.time (old ran at ~60fps)
+      // 将旧的每帧计数器映射到 frame.time（旧代码以约 60fps 运行）
       const t = time * 1.2;
       const waveOffset = time * 3;
 
-      // Handle initial animation
+      // 处理初始动画
       if (!initialAnimationCompleteRef.current) {
-        const progress = Math.min(1, time / 2); // old duration 2000ms
+        const progress = Math.min(1, time / 2); // 原持续时间 2000ms
         basePairsRef.current.forEach((basePair) => {
           basePair.animationProgress = progress;
           basePair.trail.push({ x: basePair.x1, y: basePair.y1, opacity: 1 });
@@ -229,23 +229,24 @@ export default function DNASparkBackground({
         }
       }
 
-      // Handle shatter animation
+      // 处理破碎动画
       if (isShatteringRef.current) {
         shatterProgressRef.current += delta;
-        const shatterProgress = Math.min(1, shatterProgressRef.current / 1); // old duration 1000ms
+        const shatterProgress = Math.min(1, shatterProgressRef.current / 1); // 原持续时间 1000ms
         if (shatterProgress >= 1) {
           isShatteringRef.current = false;
         }
       }
 
-      // --- DNA helix drawing (inlined drawEnhancedDNAHelix) ---
+      // DNA 双螺旋核心参数：
+      // amplitude=100 螺旋半径，frequency=0.015 旋转频率，verticalSpacing=25 碱基对垂直间距
       const centerX = width / 2;
       const amplitude = 100;
       const frequency = 0.015;
       const verticalSpacing = 25;
       const helixHeight = height + 200;
 
-      // Update base pair positions and glow
+      // 更新碱基对位置和发光
       basePairsRef.current.forEach((basePair, index) => {
         const targetY = index * verticalSpacing;
         const waveAmplitude = Math.sin(waveOffset + targetY * 0.01) * 10;
@@ -316,7 +317,7 @@ export default function DNASparkBackground({
         basePair.isVisible = z1 > -50 || z2 > -50;
       });
 
-      // drawBackbone
+      // 绘制骨架
       const backboneVerticalSpacing = 8;
       const gradient1 = ctx.createLinearGradient(0, 0, 0, helixHeight);
       gradient1.addColorStop(0, 'rgba(128, 128, 128, 0.1)');
@@ -363,7 +364,7 @@ export default function DNASparkBackground({
       ctx.stroke();
       ctx.globalAlpha = 1;
 
-      // drawBasePairs
+      // 绘制碱基对
       basePairsRef.current.forEach((basePair) => {
         if (!basePair.isVisible) return;
         const scale1 = (basePair.z1 + 100) / 200;
@@ -408,7 +409,7 @@ export default function DNASparkBackground({
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
 
-      // drawBasePairConnections
+      // 绘制碱基对连接线
       basePairsRef.current.forEach((basePair) => {
         if (!basePair.isVisible || basePair.z1 < -50 || basePair.z2 < -50) return;
         const avgZ = (basePair.z1 + basePair.z2) / 2;
@@ -435,7 +436,7 @@ export default function DNASparkBackground({
       });
       ctx.globalAlpha = 1;
 
-      // drawMolecularStructures
+      // 绘制分子结构
       const rng = (c: CanvasRenderingContext2D, v: { x: number; y: number }[]) => {
         c.beginPath();
         c.moveTo(v[0].x, v[0].y);
@@ -478,7 +479,7 @@ export default function DNASparkBackground({
       const sp = totalH / 5;
       const R = 50;
       const sr = 26;
-      const mt = time; // replaces Date.now() * 0.001
+      const mt = time; // 替代 Date.now() * 0.001
 
       const structs = [
         { base: 'A', side: 'left' },
@@ -643,7 +644,7 @@ export default function DNASparkBackground({
         ctx.restore();
       });
 
-      // drawAnimationTrails
+      // 绘制动画轨迹
       basePairsRef.current.forEach((basePair) => {
         if (basePair.trail.length < 2) return;
         ctx.lineWidth = 2;
@@ -663,7 +664,7 @@ export default function DNASparkBackground({
         }
       });
 
-      // updateParticles
+      // 更新粒子
       particlesRef.current.forEach((particle) => {
         const dx = particle.x - mouseX;
         const dy = particle.y - mouseY;
@@ -690,7 +691,7 @@ export default function DNASparkBackground({
         particle.opacity = Math.max(0.1, Math.min(0.8, particle.opacity));
       });
 
-      // drawParticles
+      // 绘制粒子
       particlesRef.current.forEach((particle) => {
         ctx.globalAlpha = particle.opacity;
         ctx.fillStyle = sparkColor;
@@ -706,14 +707,14 @@ export default function DNASparkBackground({
       });
       ctx.globalAlpha = 1;
 
-      // updateClickRipples
+      // 更新点击涟漪
       ripplesRef.current = ripplesRef.current.filter((ripple) => {
         ripple.radius += 5;
         ripple.opacity -= 0.02;
         return ripple.opacity > 0;
       });
 
-      // drawClickRipples
+      // 绘制点击涟漪
       ripplesRef.current.forEach((ripple) => {
         ctx.globalAlpha = ripple.opacity;
         ctx.strokeStyle = rippleColor;

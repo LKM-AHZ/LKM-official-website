@@ -77,7 +77,7 @@ export default function TextParticlesBackground({
         }
       }
 
-      // Scatter background particles in empty space
+      // 在空白区域散布背景粒子
       const bgParticleCount = 200;
       for (let i = 0; i < bgParticleCount; i++) {
         const px = Math.random() * width;
@@ -106,7 +106,7 @@ export default function TextParticlesBackground({
     (frame: BackgroundFrame) => {
       const { ctx, width, height, mouse } = frame;
 
-      // Ensure pattern: rebuild particles on resize
+      // 确保模式：resize 时重建粒子
       if (width !== lastSizeRef.current.width || height !== lastSizeRef.current.height) {
         lastSizeRef.current = { width, height };
         particlesRef.current = createTextParticles(width, height);

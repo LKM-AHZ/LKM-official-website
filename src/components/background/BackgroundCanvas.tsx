@@ -10,6 +10,10 @@ export interface BackgroundCanvasProps {
   children?: ReactNode;
 }
 
+/**
+ * Canvas 背景包装组件。封装 useBackgroundCanvas hook，提供固定全屏 <canvas>
+ * 以及可选的 children 覆盖层（如模糊叠加层）。
+ */
 export function BackgroundCanvas({ draw, init, interactions, className = '', children }: BackgroundCanvasProps) {
   const { canvasRef } = useBackgroundCanvas({ draw, init, interactions });
   return (

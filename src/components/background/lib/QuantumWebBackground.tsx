@@ -152,7 +152,7 @@ export default function QuantumWebBackground({
       const scaledConnectionDistance = connectionDistance * multiplier;
       const scaledGlowMultiplier = glowMultiplier * multiplier;
 
-      // Rebuild quality-dependent resources on resize or quality changes.
+      // 在 resize 或画质变化时重建画质相关资源。
       if (
         width !== lastSizeRef.current.width ||
         height !== lastSizeRef.current.height ||
@@ -167,7 +167,7 @@ export default function QuantumWebBackground({
 
       const particles = particlesRef.current;
 
-      // Update particles
+      // 更新粒子
       particles.forEach((particle) => {
         if (reducedMotion) {
           particle.phase += particle.speed * motionScale;
@@ -216,7 +216,7 @@ export default function QuantumWebBackground({
         particle.y += particle.vy * motionScale;
       });
 
-      // Low quality reuses the previous connection set between updates.
+      // 低画质模式在更新之间复用之前的连接集。
       connectionFrameRef.current += 1;
       const shouldUpdateConnections =
         connectionFrameRef.current === 1 || quality !== 'low' || connectionFrameRef.current % 3 === 0;
@@ -245,10 +245,10 @@ export default function QuantumWebBackground({
         connectionsRef.current = newConnections;
       }
 
-      // Render
+      // 渲染
       ctx.clearRect(0, 0, width, height);
 
-      // Draw particle trails
+      // 绘制粒子轨迹
       particles.forEach((particle) => {
         if (particle.trail.length > 1) {
           const velocity = Math.sqrt(
@@ -276,7 +276,7 @@ export default function QuantumWebBackground({
         }
       });
 
-      // Draw connections with entanglement effect
+      // 绘制量子纠缠效果的连接线
       connectionsRef.current.forEach((connection) => {
         const { p1, p2 } = connection;
         const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
@@ -292,14 +292,14 @@ export default function QuantumWebBackground({
         ctx.globalAlpha = 1;
       });
 
-      // Draw particles
+      // 绘制粒子
       particles.forEach((particle) => {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
         ctx.fillStyle = particle.baseColor;
         ctx.fill();
 
-        // Glow effect for quantum particles
+        // 量子粒子的辉光效果
         if (particle.isQuantum) {
           ctx.beginPath();
           ctx.arc(particle.x, particle.y, particle.radius * scaledGlowMultiplier, 0, Math.PI * 2);

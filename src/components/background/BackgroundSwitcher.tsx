@@ -4,7 +4,7 @@ import type { ComponentType } from 'react';
 import type { BackgroundId } from './backgrounds';
 import { BACKGROUNDS, DEFAULT_BACKGROUND } from './backgrounds';
 
-// Cache lazy() per id so we don't recreate the component on every render.
+// 按 id 缓存 lazy() 以避免每次渲染都重新创建组件。
 const lazyCache = new Map<string, ReturnType<typeof lazy>>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getLazyComponent(id: string, load: () => Promise<{ default: ComponentType<any> }>) {
@@ -30,7 +30,7 @@ function getInitialBackground(): BackgroundId {
   return DEFAULT_BACKGROUND;
 }
 
-/** Error boundary for canvas background components */
+/** Canvas 背景组件的错误边界 */
 class BackgroundErrorBoundary extends Component<
   { children: React.ReactNode; fallback: React.ReactNode },
   { hasError: boolean }
@@ -58,7 +58,7 @@ export default function BackgroundSwitcher() {
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  // Theme detection via data-theme attribute
+  // 通过 data-theme 属性检测主题
   useEffect(() => {
     setIsDark(getIsDark());
     const observer = new MutationObserver(() => {
@@ -71,7 +71,7 @@ export default function BackgroundSwitcher() {
     return () => observer.disconnect();
   }, []);
 
-  // Auto-switch if current background isn't suitable for this theme
+  // 如果当前背景不适合当前主题则自动切换
   useEffect(() => {
     const entry = BACKGROUNDS.find((b) => b.id === currentBg);
     if (entry && entry.theme !== 'both' && entry.theme !== (isDark ? 'dark' : 'light')) {
@@ -79,13 +79,13 @@ export default function BackgroundSwitcher() {
     }
   }, [isDark, currentBg]);
 
-  // Filter backgrounds for current theme
+  // 按当前主题过滤背景
   const visibleBackgrounds = useMemo(
     () => BACKGROUNDS.filter((b) => b.theme === 'both' || b.theme === (isDark ? 'dark' : 'light')),
     [isDark]
   );
 
-  // Close panel on outside click and Escape key
+  // 点击外部或按 Escape 键关闭面板
   useEffect(() => {
     if (!panelOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -137,7 +137,7 @@ export default function BackgroundSwitcher() {
     return () => io.disconnect();
   }, []);
 
-  // Preload default background and stored background on mount
+  // 挂载时预加载默认背景和存储的背景
   useEffect(() => {
     const defaultEntry = BACKGROUNDS.find((b) => b.preload);
     if (defaultEntry) {
@@ -150,7 +150,7 @@ export default function BackgroundSwitcher() {
 
   const controls = (
     <>
-      {/* Floating toggle button */}
+      {/* 浮动切换按钮 */}
       <button
         ref={btnRef}
         type="button"
@@ -183,7 +183,7 @@ export default function BackgroundSwitcher() {
         </svg>
       </button>
 
-      {/* Selection panel */}
+      {/* 选择面板 */}
       {panelOpen && (
         <div
           ref={panelRef}
@@ -226,7 +226,7 @@ export default function BackgroundSwitcher() {
 
   return (
     <div className="absolute inset-0 z-0" style={{ pointerEvents: 'none' }}>
-      {/* Background canvas layer */}
+      {/* 背景 Canvas 层 */}
       <div style={{ pointerEvents: 'auto', position: 'absolute', inset: 0, overflow: 'hidden' }}>
         {heroVisible && ActiveComponent && (
           <BackgroundErrorBoundary fallback={<div className="absolute inset-0 bg-base-100" />}>

@@ -74,7 +74,7 @@ export default function AuroraBackground({
       const rippleOpacity = (mode === 'light' ? 0.45 : 0.8) * (quality === 'low' ? 0.5 : 1);
       const waveSpeed = (propWaveSpeed ?? theme.waveSpeed) * motionScale;
 
-      // Consume per-frame ripples batch, keeping the local queue bounded.
+      // 消费每帧涟漪批次，保持本地队列有界。
       for (const ripple of frame.ripples) {
         ripplesRef.current.push({ x: ripple.x, y: ripple.y, radius: 0, opacity: 1, growing: true });
       }

@@ -3,18 +3,18 @@ import type { HTMLAttributes, ImageMetadata } from 'astro/types';
 import type { MarkdownHeading } from 'astro';
 
 export interface Post {
-  /** Unique ID identifying the post. */
+  /** 文章唯一标识 ID。 */
   id: string;
-  /** URL-friendly slug derived from the post name. */
+  /** 从文章名称派生的 URL 友好 slug。 */
   slug: string;
-  /** Fully resolved permalink, computed from the configured pattern. */
+  /** 根据配置模式计算的完整 permalink。 */
   permalink: string;
 
   publishDate: Date;
   updateDate?: Date;
 
   title: string;
-  /** Optional summary of post content. */
+  /** 文章内容摘要（可选）。 */
   excerpt?: string;
   image?: ImageMetadata | string;
 
@@ -26,13 +26,13 @@ export interface Post {
 
   draft?: boolean;
 
-  /** Rendered Astro component factory for the post body. */
+  /** 文章正文的已渲染 Astro 组件工厂。 */
   Content?: AstroComponentFactory;
 
-  /** Table of contents headings extracted from the markdown. */
+  /** 从 markdown 中提取的目录标题。 */
   headings?: MarkdownHeading[];
 
-  /** Estimated reading time in minutes. */
+  /** 预计阅读时间（分钟）。 */
   readingTime?: number;
 }
 
@@ -167,7 +167,7 @@ export interface Disclaimer {
   label?: string;
 }
 
-// COMPONENTS
+// 组件
 export interface CallToAction extends Omit<HTMLAttributes<'a'>, 'slot'> {
   variant?: 'primary' | 'secondary' | 'tertiary' | 'link';
   text?: string;
@@ -192,7 +192,7 @@ export interface Form {
   description?: string;
 }
 
-// WIDGETS
+// 页面部件
 export interface Hero extends Omit<Headline, 'classes'>, Omit<Widget, 'isDark' | 'classes'> {
   content?: string;
   actions?: string | CallToAction[];

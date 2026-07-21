@@ -143,27 +143,27 @@ export default function DNASparkBackground3D({
   const clickRipplesRef = useRef<ClickRippleData[]>([]);
   const nucleotideGroupsRef = useRef<NucleotideGroupData[]>([]);
 
-  // Base color mapping
+  // 基础颜色映射
   const baseColors: Record<string, number> = {
-    A: 0x4169e1, // Royal Blue
-    T: 0xffd700, // Gold
-    G: 0x1e90ff, // Dodger Blue
-    C: 0xffa500, // Orange
+    A: 0x4169e1, // 皇家蓝
+    T: 0xffd700, // 金色
+    G: 0x1e90ff, // 道奇蓝
+    C: 0xffa500, // 橙色
   };
 
-  // Complementary base pairs
+  // 互补碱基对
   const getComplementaryBase = (base: string) => {
     const pairs: Record<string, string> = { A: 'T', T: 'A', G: 'C', C: 'G' };
     return pairs[base] || 'A';
   };
 
-  // Generate random DNA sequence
+  // 生成随机 DNA 序列
   const generateDNASequence = (length: number) => {
     const bases = ['A', 'T', 'G', 'C'];
     return Array.from({ length }, () => bases[Math.floor(Math.random() * bases.length)]).join('');
   };
 
-  // Convert rgba string to THREE.Color
+  // 将 rgba 字符串转换为 THREE.Color
   const rgbaToThreeColor = (rgba: string) => {
     const match = rgba.match(/rgba?\(([^)]+)\)/);
     if (match) {
@@ -635,7 +635,7 @@ export default function DNASparkBackground3D({
     });
   };
 
-  // Scene initialization
+  // 场景初始化
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -727,7 +727,7 @@ export default function DNASparkBackground3D({
     cameraOrbitSpeed,
   ]);
 
-  // Size synchronization
+  // 尺寸同步
   useEffect(() => {
     if (!rendererRef.current || !cameraRef.current || width === 0 || height === 0) return;
     rendererRef.current.setSize(width, height);
@@ -735,7 +735,7 @@ export default function DNASparkBackground3D({
     cameraRef.current.updateProjectionMatrix();
   }, [width, height]);
 
-  // rAF loop + pause
+  // rAF 循环 + 暂停
   useEffect(() => {
     const disposeRipples = () => {
       for (const ripple of clickRipplesRef.current) {
@@ -770,7 +770,7 @@ export default function DNASparkBackground3D({
       nextRenderTime += interval;
       if (now - nextRenderTime > interval) nextRenderTime = now + interval;
 
-      // Scale accumulated simulation time once; consumers must not apply motion a second time.
+      // 一次性缩放累积的模拟时间；消费者不得再次应用运动。
       timeRef.current += deltaSeconds * qualityConfig.motion;
       waveOffsetRef.current += deltaSeconds * 2.5 * qualityConfig.motion;
       const time = timeRef.current;

@@ -9,12 +9,12 @@ export interface BackgroundMeta {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   load: () => Promise<{ default: ComponentType<any> }>;
   icon: string;
-  /** Which theme this background is suitable for. 'dark' hides in light, 'light' hides in dark, 'both' always visible. */
+  /** 该背景适用于哪个主题模式。'dark' 在浅色模式隐藏，'light' 在深色模式隐藏，'both' 始终可见。 */
   theme: ThemeMode;
-  /** Color props for dark mode. Passed directly to the component as spread props. */
+  /** 深色模式的颜色参数，直接作为展开 props 传递给组件。 */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   darkProps?: Record<string, any>;
-  /** Color props for light mode. */
+  /** 浅色模式的颜色参数。 */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lightProps?: Record<string, any>;
   /** 在切换器首次挂载时立刻 preload chunk（默认背景用） */

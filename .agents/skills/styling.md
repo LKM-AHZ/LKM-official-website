@@ -2,7 +2,7 @@
 
 ## Tailwind CSS v4 配置
 
-所有 Tailwind 配置都在 `src/assets/styles/tailwind.css`：
+所有 Tailwind 配置都在 `src/styles/tailwind.css`：
 
 ### daisyUI 主题
 
@@ -76,7 +76,7 @@ header 背景、`WidgetWrapper.astro` 的 `isDark` 区块背景）。
 
 ## 修改配色
 
-编辑 `src/assets/styles/tailwind.css` 中对应主题（`lkm-light` / `lkm-dark`）块里
+编辑 `src/styles/tailwind.css` 中对应主题（`lkm-light` / `lkm-dark`）块里
 的 CSS 变量：
 
 ```css

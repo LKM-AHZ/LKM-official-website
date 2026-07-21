@@ -27,7 +27,7 @@ export const TAG_BASE = cleanSlug(APP_BLOG?.tag?.pathname) || 'tag';
 
 export const POST_PERMALINK_PATTERN = trimSlash(APP_BLOG?.post?.permalink || `${BLOG_BASE}/%slug%`);
 
-/** */
+
 export const getCanonical = (path = ''): string | URL => {
   const url = String(new URL(path, SITE.site));
   if (SITE.trailingSlash == false && path && url.endsWith('/')) {
@@ -38,16 +38,16 @@ export const getCanonical = (path = ''): string | URL => {
   return url;
 };
 
-/** */
+
 export const getPermalink = (slug = '', type = 'page'): string => {
   let permalink: string;
 
-  // Detect hash-only links (e.g. '#team') — prepend base path
+  // 检测纯 hash 链接（如 '#team'）— 前置基础路径
   if (slug.startsWith('#') || slug.startsWith('javascript:')) {
     return slug;
   }
 
-  // Detect URL with hash (e.g. '/#team') — handle base + hash correctly
+  // 检测带 hash 的 URL（如 '/#team'）— 正确处理 base + hash
   const hashIndex = slug.indexOf('#');
   if (hashIndex > 0) {
     const pathPart = slug.substring(0, hashIndex);
@@ -93,13 +93,13 @@ export const getPermalink = (slug = '', type = 'page'): string => {
   return definitivePermalink(permalink);
 };
 
-/** */
+
 export const getHomePermalink = (): string => getPermalink('/');
 
-/** */
+
 export const getBlogPermalink = (): string => getPermalink(BLOG_BASE);
 
-/** */
+
 export const getAsset = (path: string): string =>
   '/' +
   [BASE_PATHNAME, path]
@@ -107,13 +107,13 @@ export const getAsset = (path: string): string =>
     .filter((el) => !!el)
     .join('/');
 
-/** */
+
 const definitivePermalink = (permalink: string): string => createPath(BASE_PATHNAME, permalink);
 
-/** */
+
 type MenuHref = { type?: string; url?: string };
 
-/** */
+
 export const applyGetPermalinks = (menu: unknown = {}): unknown => {
   if (Array.isArray(menu)) {
     return menu.map((item) => applyGetPermalinks(item));
