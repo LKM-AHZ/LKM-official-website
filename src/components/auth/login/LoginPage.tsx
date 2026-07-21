@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../AuthProvider';
+import { getAuthPath } from '../auth-paths';
 import { findAccount } from '~/data/demo-accounts';
 import { PasswordLogin } from './PasswordLogin';
 import { SmsLogin } from './SmsLogin';
@@ -50,7 +51,7 @@ function getAvailableTabs(account: DemoUser): Tab[] {
 }
 
 export function LoginPage() {
-  const { state, login, baseUrl } = useAuth();
+  const { state, login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -170,17 +171,17 @@ export function LoginPage() {
                 </svg>
                 <span>
                   绑定邮箱或手机号即可解锁全部功能，
-                  <a href={baseUrl + 'account'} className="font-semibold underline">
+                  <a href={getAuthPath('account')} className="font-semibold underline">
                     前往设置 →
                   </a>
                 </span>
               </div>
             )}
             <div className="flex gap-3 justify-center">
-              <a href={baseUrl + 'account'} className="btn btn-ghost btn-sm">
+              <a href={getAuthPath('account')} className="btn btn-ghost btn-sm">
                 账户设置
               </a>
-              <a href={baseUrl} className="btn btn-primary btn-sm">
+              <a href={getAuthPath('')} className="btn btn-primary btn-sm">
                 返回首页
               </a>
             </div>
@@ -236,7 +237,7 @@ export function LoginPage() {
               </button>
               <p className="text-center text-[13px] text-neutral">
                 没有账号？
-                <a href={baseUrl + 'register'} className="text-primary font-semibold hover:underline">
+                <a href={getAuthPath('register')} className="text-primary font-semibold hover:underline">
                   立即注册
                 </a>
               </p>

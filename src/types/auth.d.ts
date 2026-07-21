@@ -60,7 +60,6 @@ export interface AuthContextType {
   register: (type: 'local' | 'normal', data: RegisterData) => RegisterResult;
   logout: () => void;
   updateUser: (user: DemoUser) => void;
-  baseUrl: string;
 }
 
 export interface LoginResult {

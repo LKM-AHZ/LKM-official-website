@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../AuthProvider';
+import { getAuthPath } from '../auth-paths';
 import { ProtectedRoute } from '../ProtectedRoute';
 import { BindMethods } from './BindMethods';
 import { TwoFactorSetup } from './TwoFactorSetup';
@@ -7,7 +8,7 @@ import { PasskeySetup } from './PasskeySetup';
 import type { DemoUser } from '~/types/auth';
 
 export function SettingsPage() {
-  const { state, updateUser, logout, baseUrl } = useAuth();
+  const { state, updateUser, logout } = useAuth();
   const [message, setMessage] = useState('');
 
   function handleUpdate(user: DemoUser) {
@@ -99,7 +100,7 @@ export function SettingsPage() {
           )}
 
           <div className="flex gap-3 justify-between">
-            <a href={baseUrl + 'account/recovery'} className="btn btn-ghost btn-sm">
+            <a href={getAuthPath('account/recovery')} className="btn btn-ghost btn-sm">
               密码找回
             </a>
             <button type="button" className="btn btn-outline btn-sm text-error" onClick={logout}>

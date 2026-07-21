@@ -114,7 +114,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children, baseUrl }: { children: ReactNode; baseUrl: string }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   const login = useCallback(
@@ -252,7 +252,7 @@ export function AuthProvider({ children, baseUrl }: { children: ReactNode; baseU
     dispatch({ type: 'UPDATE_USER', user });
   }, []);
 
-  const value: AuthContextType = { state, dispatch, login, register, logout, updateUser, baseUrl };
+  const value: AuthContextType = { state, dispatch, login, register, logout, updateUser };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

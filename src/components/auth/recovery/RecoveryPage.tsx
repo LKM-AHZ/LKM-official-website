@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../AuthProvider';
+import { getAuthPath } from '../auth-paths';
 import { findAccount, VALIDATE_CODE } from '~/data/demo-accounts';
 import { TwoFactorRecovery } from './TwoFactorRecovery';
 import type { DemoUser } from '~/types/auth';
@@ -8,7 +8,6 @@ type Method = 'sms' | 'email-code' | 'magic-link';
 type Step = 'input' | 'verify' | 'reset' | '2fa' | 'done';
 
 export function RecoveryPage() {
-  const { baseUrl } = useAuth();
   const [input, setInput] = useState('');
   const [method, setMethod] = useState<Method>('email-code');
   const [step, setStep] = useState<Step>('input');
@@ -83,7 +82,7 @@ export function RecoveryPage() {
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-xl font-semibold mb-2">密码重置成功</h2>
             <p className="text-sm text-neutral">所有设备已强制下线，请使用新密码重新登录</p>
-            <a href={baseUrl + 'login'} className="btn btn-primary btn-sm mt-4">
+            <a href={getAuthPath('login')} className="btn btn-primary btn-sm mt-4">
               去登录
             </a>
           </div>

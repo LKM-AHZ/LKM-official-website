@@ -1,13 +1,16 @@
-let _base = '';
-
-export function setBaseUrl(base: string) {
-  _base = base;
+declare global {
+  interface Window {
+    __BASE_URL__: string;
+  }
 }
 
-export function baseUrl(): string {
-  return _base;
+export function getBaseUrl(): string {
+  if (typeof window !== 'undefined' && window.__BASE_URL__) {
+    return window.__BASE_URL__;
+  }
+  return '/';
 }
 
 export function getAuthPath(path: string): string {
-  return _base + path;
+  return getBaseUrl() + path;
 }

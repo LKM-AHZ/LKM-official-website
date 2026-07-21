@@ -3,9 +3,8 @@ import PageLayout from '~/layouts/PageLayout.astro';
 import RegisterPageEntry from '~/components/auth/register/RegisterPageEntry';
 
 const metadata = { title: '注册' };
-const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <PageLayout metadata={metadata}>
-  <RegisterPageEntry baseUrl={baseUrl} client:only="react" />
+  <RegisterPageEntry client:only="react" />
 </PageLayout>

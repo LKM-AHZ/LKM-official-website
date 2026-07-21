@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../AuthProvider';
+import { getAuthPath } from '../auth-paths';
 import type { LoginMethod, DemoUser } from '~/types/auth';
 
 interface Props {
@@ -8,7 +8,6 @@ interface Props {
 }
 
 export function PasswordLogin({ onLogin, identifiedAccount }: Props) {
-  const { baseUrl } = useAuth();
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,7 +50,7 @@ export function PasswordLogin({ onLogin, identifiedAccount }: Props) {
       </div>
       {identifiedAccount.level !== 'local' && (
         <div className="text-right">
-          <a href={baseUrl + 'account/recovery'} className="text-xs text-primary hover:underline">
+          <a href={getAuthPath('account/recovery')} className="text-xs text-primary hover:underline">
             忘记密码？
           </a>
         </div>
