@@ -1,9 +1,13 @@
 import { AuthProvider } from '../AuthProvider';
 import { SettingsPage } from './SettingsPage';
 
-export default function SettingsPageEntry() {
+interface Props {
+  baseUrl: string;
+}
+
+export default function SettingsPageEntry({ baseUrl }: Props) {
   return (
-    <AuthProvider>
+    <AuthProvider baseUrl={baseUrl}>
       <SettingsPage />
     </AuthProvider>
   );

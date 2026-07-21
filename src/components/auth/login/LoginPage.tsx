@@ -50,7 +50,7 @@ function getAvailableTabs(account: DemoUser): Tab[] {
 }
 
 export function LoginPage() {
-  const { state, login } = useAuth();
+  const { state, login, baseUrl } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -170,17 +170,17 @@ export function LoginPage() {
                 </svg>
                 <span>
                   绑定邮箱或手机号即可解锁全部功能，
-                  <a href={import.meta.env.BASE_URL + 'account'} className="font-semibold underline">
+                  <a href={baseUrl + 'account'} className="font-semibold underline">
                     前往设置 →
                   </a>
                 </span>
               </div>
             )}
             <div className="flex gap-3 justify-center">
-              <a href={import.meta.env.BASE_URL + 'account'} className="btn btn-ghost btn-sm">
+              <a href={baseUrl + 'account'} className="btn btn-ghost btn-sm">
                 账户设置
               </a>
-              <a href={import.meta.env.BASE_URL} className="btn btn-primary btn-sm">
+              <a href={baseUrl} className="btn btn-primary btn-sm">
                 返回首页
               </a>
             </div>
@@ -236,7 +236,7 @@ export function LoginPage() {
               </button>
               <p className="text-center text-[13px] text-neutral">
                 没有账号？
-                <a href={import.meta.env.BASE_URL + 'register'} className="text-primary font-semibold hover:underline">
+                <a href={baseUrl + 'register'} className="text-primary font-semibold hover:underline">
                   立即注册
                 </a>
               </p>

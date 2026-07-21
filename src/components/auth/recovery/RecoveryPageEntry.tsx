@@ -1,9 +1,13 @@
 import { AuthProvider } from '../AuthProvider';
 import { RecoveryPage } from './RecoveryPage';
 
-export default function RecoveryPageEntry() {
+interface Props {
+  baseUrl: string;
+}
+
+export default function RecoveryPageEntry({ baseUrl }: Props) {
   return (
-    <AuthProvider>
+    <AuthProvider baseUrl={baseUrl}>
       <RecoveryPage />
     </AuthProvider>
   );

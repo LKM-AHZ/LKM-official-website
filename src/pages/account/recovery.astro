@@ -3,8 +3,9 @@ import PageLayout from '~/layouts/PageLayout.astro';
 import RecoveryPageEntry from '~/components/auth/recovery/RecoveryPageEntry';
 
 const metadata = { title: '密码找回' };
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <PageLayout metadata={metadata}>
-  <RecoveryPageEntry client:only="react" />
+  <RecoveryPageEntry baseUrl={baseUrl} client:only="react" />
 </PageLayout>

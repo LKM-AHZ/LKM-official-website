@@ -11,8 +11,6 @@ export function NormalRegister({ onRegister, onComplete }: Props) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [useEmail, setUseEmail] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
@@ -25,9 +23,6 @@ export function NormalRegister({ onRegister, onComplete }: Props) {
     if (useEmail && !email.trim()) errs.email = '请输入邮箱';
     else if (useEmail && !email.includes('@')) errs.email = '请输入有效的邮箱地址';
     if (!useEmail && !phone.trim()) errs.phone = '请输入手机号';
-    if (!password) errs.password = '请输入密码';
-    else if (password.length < 6) errs.password = '密码长度不能少于 6 位';
-    if (password !== confirmPassword) errs.confirmPassword = '两次输入的密码不一致';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -47,7 +42,6 @@ export function NormalRegister({ onRegister, onComplete }: Props) {
     }
     const result = onRegister('normal', {
       username: username.trim(),
-      password,
       email: useEmail ? email.trim() : undefined,
       phone: !useEmail ? phone.trim() : undefined,
     });
@@ -102,6 +96,7 @@ export function NormalRegister({ onRegister, onComplete }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <p className="text-sm text-neutral text-center">仅需用户名 + {useEmail ? '邮箱' : '手机号'}，验证后即可注册</p>
       <div>
         <label className="label pb-1" htmlFor="reg-normal-user">
           <span className="label-text font-medium">用户名</span>
@@ -172,43 +167,9 @@ export function NormalRegister({ onRegister, onComplete }: Props) {
           {errors.phone && <span className="label-text-alt text-error">{errors.phone}</span>}
         </div>
       )}
-      <div>
-        <label className="label pb-1" htmlFor="reg-normal-pass">
-          <span className="label-text font-medium">密码</span>
-        </label>
-        <input
-          id="reg-normal-pass"
-          type="password"
-          className={`input input-bordered w-full ${errors.password ? 'input-error' : ''}`}
-          value={password}
-          onInput={(e) => {
-            setPassword(e.currentTarget.value);
-            setErrors((p) => ({ ...p, password: '' }));
-          }}
-          placeholder="请输入密码（至少6位）"
-        />
-        {errors.password && <span className="label-text-alt text-error">{errors.password}</span>}
-      </div>
-      <div>
-        <label className="label pb-1" htmlFor="reg-normal-cpass">
-          <span className="label-text font-medium">确认密码</span>
-        </label>
-        <input
-          id="reg-normal-cpass"
-          type="password"
-          className={`input input-bordered w-full ${errors.confirmPassword ? 'input-error' : ''}`}
-          value={confirmPassword}
-          onInput={(e) => {
-            setConfirmPassword(e.currentTarget.value);
-            setErrors((p) => ({ ...p, confirmPassword: '' }));
-          }}
-          placeholder="请再次输入密码"
-        />
-        {errors.confirmPassword && <span className="label-text-alt text-error">{errors.confirmPassword}</span>}
-      </div>
       {submitError && <div className="alert alert-error text-sm">{submitError}</div>}
       <button type="submit" className="btn btn-primary w-full">
-        下一步
+        发送验证码
       </button>
     </form>
   );

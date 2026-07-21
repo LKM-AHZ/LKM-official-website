@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../AuthProvider';
 import type { RegisterData } from '~/types/auth';
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export function LocalRegister({ onRegister }: Props) {
+  const { baseUrl } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,7 +49,7 @@ export function LocalRegister({ onRegister }: Props) {
         <div className="alert alert-info text-sm text-left">
           <span>本地账户功能受限：不可找回密码、不支持 2FA。绑定邮箱或手机号可自动升级为普通账户。</span>
         </div>
-        <a href={import.meta.env.BASE_URL + 'login'} className="btn btn-primary btn-sm">
+        <a href={baseUrl + 'login'} className="btn btn-primary btn-sm">
           去登录
         </a>
       </div>

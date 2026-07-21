@@ -7,7 +7,7 @@ import { PasskeySetup } from './PasskeySetup';
 import type { DemoUser } from '~/types/auth';
 
 export function SettingsPage() {
-  const { state, updateUser, logout } = useAuth();
+  const { state, updateUser, logout, baseUrl } = useAuth();
   const [message, setMessage] = useState('');
 
   function handleUpdate(user: DemoUser) {
@@ -99,7 +99,7 @@ export function SettingsPage() {
           )}
 
           <div className="flex gap-3 justify-between">
-            <a href={import.meta.env.BASE_URL + 'account/recovery'} className="btn btn-ghost btn-sm">
+            <a href={baseUrl + 'account/recovery'} className="btn btn-ghost btn-sm">
               密码找回
             </a>
             <button type="button" className="btn btn-outline btn-sm text-error" onClick={logout}>

@@ -3,8 +3,9 @@ import PageLayout from '~/layouts/PageLayout.astro';
 import SettingsPageEntry from '~/components/auth/settings/SettingsPageEntry';
 
 const metadata = { title: '账户设置' };
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <PageLayout metadata={metadata}>
-  <SettingsPageEntry client:only="react" />
+  <SettingsPageEntry baseUrl={baseUrl} client:only="react" />
 </PageLayout>

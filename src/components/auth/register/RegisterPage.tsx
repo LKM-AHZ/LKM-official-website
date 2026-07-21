@@ -8,7 +8,7 @@ import type { RegisterData, LoginResult } from '~/types/auth';
 type RegType = 'local' | 'normal' | 'github';
 
 export function RegisterPage() {
-  const { state, register } = useAuth();
+  const { state, register, baseUrl } = useAuth();
   const [regType, setRegType] = useState<RegType>('normal');
   const [showGuide, setShowGuide] = useState(false);
 
@@ -29,10 +29,10 @@ export function RegisterPage() {
               欢迎加入理科迷，<span className="font-semibold">{state.user?.username}</span>
             </p>
             <div className="flex gap-3 justify-center mt-6">
-              <a href={import.meta.env.BASE_URL + 'account'} className="btn btn-ghost btn-sm">
+              <a href={baseUrl + 'account'} className="btn btn-ghost btn-sm">
                 账户设置
               </a>
-              <a href={import.meta.env.BASE_URL} className="btn btn-primary btn-sm">
+              <a href={baseUrl} className="btn btn-primary btn-sm">
                 返回首页
               </a>
             </div>
@@ -112,7 +112,7 @@ export function RegisterPage() {
 
           <p className="text-center text-[13px] text-neutral mt-5">
             已有账号？
-            <a href={import.meta.env.BASE_URL + 'login'} className="text-primary font-semibold hover:underline">
+            <a href={baseUrl + 'login'} className="text-primary font-semibold hover:underline">
               立即登录
             </a>
           </p>

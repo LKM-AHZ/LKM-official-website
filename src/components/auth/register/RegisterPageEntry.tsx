@@ -1,9 +1,13 @@
 import { AuthProvider } from '../AuthProvider';
 import { RegisterPage } from './RegisterPage';
 
-export default function RegisterPageEntry() {
+interface Props {
+  baseUrl: string;
+}
+
+export default function RegisterPageEntry({ baseUrl }: Props) {
   return (
-    <AuthProvider>
+    <AuthProvider baseUrl={baseUrl}>
       <RegisterPage />
     </AuthProvider>
   );
