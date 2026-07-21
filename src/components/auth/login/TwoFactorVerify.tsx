@@ -1,4 +1,4 @@
-import { useState, useCallback, type FormEvent } from 'react';
+import { useState, useCallback } from 'react';
 import { DEMO_ACCOUNTS } from '~/data/demo-accounts';
 import { useAuth } from '../AuthProvider';
 
@@ -34,7 +34,7 @@ export function TwoFactorVerify({ onSuccess, onError: _onError }: Props) {
   const isSetupFlow = state.flow === '2fa_setup_required';
 
   const handleTOTPSubmit = useCallback(
-    (e: FormEvent) => {
+    (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       setTotpError('');
       if (!/^\d{6}$/.test(totpCode)) {
@@ -60,7 +60,7 @@ export function TwoFactorVerify({ onSuccess, onError: _onError }: Props) {
   );
 
   const handleRecoverySubmit = useCallback(
-    (e: FormEvent) => {
+    (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       setRecoveryError('');
       if (DUMMY_RECOVERY_CODES.some((c) => c === recoveryCode.toUpperCase().trim())) {
@@ -75,9 +75,12 @@ export function TwoFactorVerify({ onSuccess, onError: _onError }: Props) {
   );
 
   const handleSetupVerify = useCallback(
-    (e: FormEvent) => {
+    (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!/^\d{6}$/.test(setupCode)) { setSetupError('请输入 6 位数字验证码'); return; }
+      if (!/^\d{6}$/.test(setupCode)) {
+        setSetupError('请输入 6 位数字验证码');
+        return;
+      }
       if (setupCode === '000000' || setupCode === '123456') {
         setSetupStep('recovery');
       } else {
@@ -129,29 +132,53 @@ export function TwoFactorVerify({ onSuccess, onError: _onError }: Props) {
                   <span className="label-text font-medium">输入验证码确认</span>
                 </label>
                 <input
-                  id="setup-totp" type="text"
+                  id="setup-totp"
+                  type="text"
                   className={`input input-bordered w-full ${setupError ? 'input-error' : ''}`}
-                  value={setupCode} onInput={(e) => { setSetupCode(e.currentTarget.value); setSetupError(''); }}
-                  placeholder="输入 6 位验证码（模拟：000000）" maxLength={6}
+                  value={setupCode}
+                  onInput={(e) => {
+                    setSetupCode(e.currentTarget.value);
+                    setSetupError('');
+                  }}
+                  placeholder="输入 6 位验证码（模拟：000000）"
+                  maxLength={6}
                 />
                 {setupError && <span className="label-text-alt text-error">{setupError}</span>}
               </div>
-              <button type="submit" className="btn btn-primary w-full">验证并继续</button>
+              <button type="submit" className="btn btn-primary w-full">
+                验证并继续
+              </button>
             </form>
           </div>
         )}
 
         {setupStep === 'recovery' && (
           <div className="space-y-4">
-            <div className="alert alert-warning text-sm">请安全保存以下备用恢复码，用于在丢失 2FA 设备时恢复账户访问</div>
+            <div className="alert alert-warning text-sm">
+              请安全保存以下备用恢复码，用于在丢失 2FA 设备时恢复账户访问
+            </div>
             <div className="bg-base-200 rounded-xl p-4 space-y-1 font-mono text-sm">
-              {DUMMY_RECOVERY_CODES.map((code) => <div className="select-all" key={code}>{code}</div>)}
+              {DUMMY_RECOVERY_CODES.map((code) => (
+                <div className="select-all" key={code}>
+                  {code}
+                </div>
+              ))}
             </div>
             <label className="label cursor-pointer justify-start gap-2">
-              <input type="checkbox" className="checkbox checkbox-sm" checked={savedCodes} onChange={(e) => setSavedCodes(e.currentTarget.checked)} />
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm"
+                checked={savedCodes}
+                onChange={(e) => setSavedCodes(e.currentTarget.checked)}
+              />
               <span className="label-text">我已安全保存备用恢复码</span>
             </label>
-            <button type="button" className="btn btn-primary w-full" disabled={!savedCodes} onClick={handleRecoveryConfirm}>
+            <button
+              type="button"
+              className="btn btn-primary w-full"
+              disabled={!savedCodes}
+              onClick={handleRecoveryConfirm}
+            >
               完成绑定
             </button>
           </div>
@@ -171,14 +198,21 @@ export function TwoFactorVerify({ onSuccess, onError: _onError }: Props) {
               <span className="label-text font-medium">输入备用恢复码</span>
             </label>
             <input
-              id="recovery-code" type="text"
+              id="recovery-code"
+              type="text"
               className={`input input-bordered w-full ${recoveryError ? 'input-error' : ''}`}
-              value={recoveryCode} onInput={(e) => { setRecoveryCode(e.currentTarget.value); setRecoveryError(''); }}
+              value={recoveryCode}
+              onInput={(e) => {
+                setRecoveryCode(e.currentTarget.value);
+                setRecoveryError('');
+              }}
               placeholder="格式：AAAA-BBBB-CCCC"
             />
             {recoveryError && <span className="label-text-alt text-error">{recoveryError}</span>}
           </div>
-          <button type="submit" className="btn btn-primary w-full">验证</button>
+          <button type="submit" className="btn btn-primary w-full">
+            验证
+          </button>
           <button type="button" className="btn btn-ghost w-full btn-sm" onClick={() => setShowRecovery(false)}>
             返回 TOTP 验证
           </button>
@@ -195,23 +229,37 @@ export function TwoFactorVerify({ onSuccess, onError: _onError }: Props) {
       <form onSubmit={handleTOTPSubmit} className="space-y-4">
         <div>
           <input
-            id="totp-code" type="text"
+            id="totp-code"
+            type="text"
             className="input input-bordered w-full text-center text-2xl tracking-widest"
-            value={totpCode} onInput={(e) => { setTotpCode(e.currentTarget.value); setTotpError(''); }}
-            placeholder="000000" maxLength={6} autoComplete="one-time-code"
+            value={totpCode}
+            onInput={(e) => {
+              setTotpCode(e.currentTarget.value);
+              setTotpError('');
+            }}
+            placeholder="000000"
+            maxLength={6}
+            autoComplete="one-time-code"
           />
           <p className="text-xs text-neutral text-center mt-1">模拟验证码：000000</p>
         </div>
         {user?.level !== 'admin' && (
           <label className="label cursor-pointer justify-center gap-2">
-            <input type="checkbox" className="checkbox checkbox-sm" checked={trustDevice} onChange={(e) => setTrustDevice(e.currentTarget.checked)} />
+            <input
+              type="checkbox"
+              className="checkbox checkbox-sm"
+              checked={trustDevice}
+              onChange={(e) => setTrustDevice(e.currentTarget.checked)}
+            />
             <span className="label-text text-sm">信任此设备 30 天</span>
           </label>
         )}
         {user?.level === 'admin' && (
           <p className="text-xs text-neutral text-center">管理员账户每次登录必须进行 2FA 验证</p>
         )}
-        <button type="submit" className="btn btn-primary w-full">验证</button>
+        <button type="submit" className="btn btn-primary w-full">
+          验证
+        </button>
       </form>
       <div className="text-center mt-3">
         <button type="button" className="btn btn-ghost btn-sm text-xs" onClick={() => setShowRecovery(true)}>

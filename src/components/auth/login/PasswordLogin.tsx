@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import type { LoginMethod, DemoUser } from '~/types/auth';
 
 interface Props {
@@ -11,7 +11,7 @@ export function PasswordLogin({ onLogin, identifiedAccount }: Props) {
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!password) {
       setPasswordError('请输入密码');
@@ -38,7 +38,10 @@ export function PasswordLogin({ onLogin, identifiedAccount }: Props) {
           type="password"
           className={`input input-bordered w-full ${passwordError ? 'input-error' : ''}`}
           value={password}
-          onInput={(e) => { setPassword(e.currentTarget.value); setPasswordError(''); }}
+          onInput={(e) => {
+            setPassword(e.currentTarget.value);
+            setPasswordError('');
+          }}
           placeholder="请输入密码"
           autoComplete="current-password"
         />
@@ -46,7 +49,9 @@ export function PasswordLogin({ onLogin, identifiedAccount }: Props) {
       </div>
       {identifiedAccount.level !== 'local' && (
         <div className="text-right">
-          <a href="/account/recovery" className="text-xs text-primary hover:underline">忘记密码？</a>
+          <a href={import.meta.env.BASE_URL + 'account/recovery'} className="text-xs text-primary hover:underline">
+            忘记密码？
+          </a>
         </div>
       )}
       <button type="submit" className="btn btn-primary w-full" disabled={loading}>

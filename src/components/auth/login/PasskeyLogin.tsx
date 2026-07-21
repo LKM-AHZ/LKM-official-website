@@ -26,7 +26,13 @@ export function PasskeyLogin({ onLogin }: Props) {
         <p className="text-xs text-neutral">通过设备的指纹、面容或 PIN 码进行认证</p>
         {error && <div className="alert alert-error text-sm">{error}</div>}
         <button type="button" className="btn btn-primary" onClick={handleClick} disabled={loading}>
-          {loading ? <><span className="loading loading-spinner loading-xs"></span> 正在验证...</> : '使用通行密钥'}
+          {loading ? (
+            <>
+              <span className="loading loading-spinner loading-xs"></span> 正在验证...
+            </>
+          ) : (
+            '使用通行密钥'
+          )}
         </button>
       </div>
     </div>

@@ -44,10 +44,7 @@ export const DEMO_ACCOUNTS: DemoUser[] = [
 export function findAccount(usernameOrEmailOrPhone: string): DemoUser | undefined {
   const input = usernameOrEmailOrPhone.trim().toLowerCase();
   return DEMO_ACCOUNTS.find(
-    (u) =>
-      u.username.toLowerCase() === input ||
-      u.email?.toLowerCase() === input ||
-      u.phone === input
+    (u) => u.username.toLowerCase() === input || u.email?.toLowerCase() === input || u.phone === input
   );
 }
 

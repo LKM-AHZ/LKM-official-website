@@ -15,7 +15,9 @@ export function ProtectedRoute({ children, fallback }: Props) {
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
           <div className="text-6xl">🔒</div>
           <p className="text-lg text-base-content">请先登录后再访问此页面</p>
-          <a href="/login" className="btn btn-primary">前往登录</a>
+          <a href={import.meta.env.BASE_URL + 'login'} className="btn btn-primary">
+            前往登录
+          </a>
         </div>
       )
     );

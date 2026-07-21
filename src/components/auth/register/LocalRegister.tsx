@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import type { RegisterData } from '~/types/auth';
 
 interface Props {
@@ -24,12 +24,15 @@ export function LocalRegister({ onRegister }: Props) {
     return Object.keys(errs).length === 0;
   }
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError('');
     if (!validate()) return;
     const result = onRegister('local', { username: username.trim(), password });
-    if (!result.success) { setSubmitError(result.error || '注册失败'); return; }
+    if (!result.success) {
+      setSubmitError(result.error || '注册失败');
+      return;
+    }
     setSubmitted(true);
   }
 
@@ -38,11 +41,15 @@ export function LocalRegister({ onRegister }: Props) {
       <div className="text-center space-y-4">
         <div className="text-5xl">✅</div>
         <p className="font-semibold text-lg">本地账户注册成功</p>
-        <p className="text-sm text-neutral">账户等级：<span className="badge badge-sm">本地账户</span></p>
+        <p className="text-sm text-neutral">
+          账户等级：<span className="badge badge-sm">本地账户</span>
+        </p>
         <div className="alert alert-info text-sm text-left">
           <span>本地账户功能受限：不可找回密码、不支持 2FA。绑定邮箱或手机号可自动升级为普通账户。</span>
         </div>
-        <a href="/login" className="btn btn-primary btn-sm">去登录</a>
+        <a href={import.meta.env.BASE_URL + 'login'} className="btn btn-primary btn-sm">
+          去登录
+        </a>
       </div>
     );
   }
@@ -54,16 +61,25 @@ export function LocalRegister({ onRegister }: Props) {
         const labels: Record<string, string> = { username: '用户名', password: '密码', confirmPassword: '确认密码' };
         const types: Record<string, string> = { username: 'text', password: 'password', confirmPassword: 'password' };
         const vals = { username, password, confirmPassword };
-        const setters: Record<string, (v: string) => void> = { username: setUsername, password: setPassword, confirmPassword: setConfirmPassword };
+        const setters: Record<string, (v: string) => void> = {
+          username: setUsername,
+          password: setPassword,
+          confirmPassword: setConfirmPassword,
+        };
         return (
           <div key={field}>
             <label className="label pb-1" htmlFor={`reg-local-${field}`}>
               <span className="label-text font-medium">{labels[field]}</span>
             </label>
             <input
-              id={`reg-local-${field}`} type={types[field]}
+              id={`reg-local-${field}`}
+              type={types[field]}
               className={`input input-bordered w-full ${errors[field] ? 'input-error' : ''}`}
-              value={vals[field]} onInput={(e) => { setters[field](e.currentTarget.value); setErrors((p) => ({ ...p, [field]: '' })); }}
+              value={vals[field]}
+              onInput={(e) => {
+                setters[field](e.currentTarget.value);
+                setErrors((p) => ({ ...p, [field]: '' }));
+              }}
               placeholder={`请输入${labels[field]}${field === 'password' || field === 'confirmPassword' ? '（至少6位）' : '(至少3位)'}`}
             />
             {errors[field] && <span className="label-text-alt text-error">{errors[field]}</span>}
@@ -71,7 +87,9 @@ export function LocalRegister({ onRegister }: Props) {
         );
       })}
       {submitError && <div className="alert alert-error text-sm">{submitError}</div>}
-      <button type="submit" className="btn btn-primary w-full">注册本地账户</button>
+      <button type="submit" className="btn btn-primary w-full">
+        注册本地账户
+      </button>
     </form>
   );
 }

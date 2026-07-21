@@ -1,5 +1,14 @@
 import { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react';
-import type { AuthState, AuthAction, AuthContextType, LoginResult, LoginMethod, RegisterData, RegisterResult, DemoUser } from '~/types/auth';
+import type {
+  AuthState,
+  AuthAction,
+  AuthContextType,
+  LoginResult,
+  LoginMethod,
+  RegisterData,
+  RegisterResult,
+  DemoUser,
+} from '~/types/auth';
 import { findAccount, checkPassword, VALIDATE_CODE } from '~/data/demo-accounts';
 
 const initialState: AuthState = {
@@ -212,31 +221,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [state.passwordAttempts, state.lockedUntil]
   );
 
-  const register = useCallback(
-    (type: 'local' | 'normal', data: RegisterData): RegisterResult => {
-      const existing = findAccount(data.username);
-      if (existing) {
-        return { success: false, error: '用户名已存在' };
-      }
-      const newUser: DemoUser = {
-        id: `user-${Date.now()}`,
-        username: data.username,
-        password: data.password || '',
-        level: type,
-        email: data.email || null,
-        phone: data.phone || null,
-        has2FA: false,
-        hasPasskey: false,
-        hasGithub: false,
-        bindings: [],
-      };
-      if (data.email) newUser.bindings.push('email');
-      if (data.phone) newUser.bindings.push('phone');
-      dispatch({ type: 'LOGIN_SUCCESS', user: newUser });
-      return { success: true };
-    },
-    []
-  );
+  const register = useCallback((type: 'local' | 'normal', data: RegisterData): RegisterResult => {
+    const existing = findAccount(data.username);
+    if (existing) {
+      return { success: false, error: '用户名已存在' };
+    }
+    const newUser: DemoUser = {
+      id: `user-${Date.now()}`,
+      username: data.username,
+      password: data.password || '',
+      level: type,
+      email: data.email || null,
+      phone: data.phone || null,
+      has2FA: false,
+      hasPasskey: false,
+      hasGithub: false,
+      bindings: [],
+    };
+    if (data.email) newUser.bindings.push('email');
+    if (data.phone) newUser.bindings.push('phone');
+    dispatch({ type: 'LOGIN_SUCCESS', user: newUser });
+    return { success: true };
+  }, []);
 
   const logout = useCallback(() => {
     dispatch({ type: 'LOGOUT' });

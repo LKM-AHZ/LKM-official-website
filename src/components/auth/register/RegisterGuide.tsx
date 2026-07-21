@@ -17,8 +17,12 @@ export function RegisterGuide({ onComplete, onSkip }: Props) {
         </div>
         <p className="text-sm text-neutral">使用 Google Authenticator 扫码绑定 2FA</p>
         <div className="flex gap-3 justify-center">
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStep('passkey')}>跳过</button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setStep('passkey')}>设置 2FA（模拟）</button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStep('passkey')}>
+            跳过
+          </button>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setStep('passkey')}>
+            设置 2FA（模拟）
+          </button>
         </div>
       </div>
     );
@@ -32,8 +36,12 @@ export function RegisterGuide({ onComplete, onSkip }: Props) {
       </div>
       <p className="text-sm text-neutral">通过指纹/面容/设备 PIN 实现免密登录</p>
       <div className="flex gap-3 justify-center">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onSkip}>跳过</button>
-        <button type="button" className="btn btn-primary btn-sm" onClick={onComplete}>创建（模拟）</button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onSkip}>
+          跳过
+        </button>
+        <button type="button" className="btn btn-primary btn-sm" onClick={onComplete}>
+          创建（模拟）
+        </button>
       </div>
     </div>
   );

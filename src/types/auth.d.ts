@@ -2,12 +2,7 @@ export type AccountLevel = 'local' | 'normal' | 'admin';
 
 export type LoginMethod = 'password' | 'sms' | 'github' | 'magic-link' | 'passkey';
 
-export type AuthFlow =
-  | 'idle'
-  | 'logging_in'
-  | '2fa_required'
-  | '2fa_setup_required'
-  | 'logged_in';
+export type AuthFlow = 'idle' | 'logging_in' | '2fa_required' | '2fa_setup_required' | 'logged_in';
 
 export interface DemoUser {
   id: string;

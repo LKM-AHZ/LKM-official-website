@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, type FormEvent } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../AuthProvider';
 import { findAccount } from '~/data/demo-accounts';
 import { PasswordLogin } from './PasswordLogin';
@@ -7,7 +7,7 @@ import { GithubLogin } from './GithubLogin';
 import { MagicLinkLogin } from './MagicLinkLogin';
 import { PasskeyLogin } from './PasskeyLogin';
 import { TwoFactorVerify } from './TwoFactorVerify';
-import type { LoginMethod, LoginResult, DemoUser } from '~/types/auth';
+import type { LoginMethod, DemoUser } from '~/types/auth';
 
 interface Tab {
   key: LoginMethod;
@@ -73,7 +73,7 @@ export function LoginPage() {
   }
 
   // 识别账户
-  function handleIdentify(e: FormEvent) {
+  function handleIdentify(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIdentifierError('');
     setError(null);
@@ -147,19 +147,42 @@ export function LoginPage() {
             </p>
             <p className="text-xs text-neutral mb-4">
               账户等级：
-              <span className={`badge badge-sm ml-1 ${state.user.level === 'admin' ? 'badge-error' : state.user.level === 'normal' ? 'badge-primary' : 'badge-ghost'}`}>
+              <span
+                className={`badge badge-sm ml-1 ${state.user.level === 'admin' ? 'badge-error' : state.user.level === 'normal' ? 'badge-primary' : 'badge-ghost'}`}
+              >
                 {state.user.level === 'admin' ? '管理员' : state.user.level === 'normal' ? '普通账户' : '本地账户'}
               </span>
             </p>
             {state.user.level === 'local' && (
               <div className="alert alert-info mb-4 text-left text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span>绑定邮箱或手机号即可解锁全部功能，<a href="/account" className="font-semibold underline">前往设置 →</a></span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-current shrink-0 h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span>
+                  绑定邮箱或手机号即可解锁全部功能，
+                  <a href={import.meta.env.BASE_URL + 'account'} className="font-semibold underline">
+                    前往设置 →
+                  </a>
+                </span>
               </div>
             )}
             <div className="flex gap-3 justify-center">
-              <a href="/account" className="btn btn-ghost btn-sm">账户设置</a>
-              <a href="/" className="btn btn-primary btn-sm">返回首页</a>
+              <a href={import.meta.env.BASE_URL + 'account'} className="btn btn-ghost btn-sm">
+                账户设置
+              </a>
+              <a href={import.meta.env.BASE_URL} className="btn btn-primary btn-sm">
+                返回首页
+              </a>
             </div>
           </div>
         </div>
@@ -199,15 +222,23 @@ export function LoginPage() {
                   type="text"
                   className={`input input-bordered w-full ${identifierError ? 'input-error' : ''}`}
                   value={identifier}
-                  onInput={(e) => { setIdentifier(e.currentTarget.value); setIdentifierError(''); }}
+                  onInput={(e) => {
+                    setIdentifier(e.currentTarget.value);
+                    setIdentifierError('');
+                  }}
                   placeholder="请先输入您的账号标识"
                   autoComplete="username"
                 />
                 {identifierError && <span className="label-text-alt text-error">{identifierError}</span>}
               </div>
-              <button type="submit" className="btn btn-primary w-full">继续</button>
+              <button type="submit" className="btn btn-primary w-full">
+                继续
+              </button>
               <p className="text-center text-[13px] text-neutral">
-                没有账号？<a href="/register" className="text-primary font-semibold hover:underline">立即注册</a>
+                没有账号？
+                <a href={import.meta.env.BASE_URL + 'register'} className="text-primary font-semibold hover:underline">
+                  立即注册
+                </a>
               </p>
             </form>
           )}
@@ -219,11 +250,19 @@ export function LoginPage() {
                 <div className="text-sm">
                   <span className="text-neutral">登录为 </span>
                   <span className="font-semibold">{identifiedAccount.username}</span>
-                  <span className={`badge badge-xs ml-1.5 ${identifiedAccount.level === 'admin' ? 'badge-error' : identifiedAccount.level === 'normal' ? 'badge-primary' : 'badge-ghost'}`}>
-                    {identifiedAccount.level === 'admin' ? '管理员' : identifiedAccount.level === 'normal' ? '普通' : '本地'}
+                  <span
+                    className={`badge badge-xs ml-1.5 ${identifiedAccount.level === 'admin' ? 'badge-error' : identifiedAccount.level === 'normal' ? 'badge-primary' : 'badge-ghost'}`}
+                  >
+                    {identifiedAccount.level === 'admin'
+                      ? '管理员'
+                      : identifiedAccount.level === 'normal'
+                        ? '普通'
+                        : '本地'}
                   </span>
                 </div>
-                <button type="button" className="btn btn-ghost btn-xs" onClick={handleBack}>切换账号</button>
+                <button type="button" className="btn btn-ghost btn-xs" onClick={handleBack}>
+                  切换账号
+                </button>
               </div>
 
               {/* Tab 切换 */}
@@ -243,10 +282,14 @@ export function LoginPage() {
               </div>
 
               {/* 登录表单 */}
-              {activeTab === 'password' && <PasswordLogin onLogin={handleLogin} identifiedAccount={identifiedAccount} />}
+              {activeTab === 'password' && (
+                <PasswordLogin onLogin={handleLogin} identifiedAccount={identifiedAccount} />
+              )}
               {activeTab === 'sms' && <SmsLogin onLogin={handleLogin} identifiedAccount={identifiedAccount} />}
               {activeTab === 'github' && <GithubLogin onLogin={handleLogin} />}
-              {activeTab === 'magic-link' && <MagicLinkLogin onLogin={handleLogin} identifiedAccount={identifiedAccount} />}
+              {activeTab === 'magic-link' && (
+                <MagicLinkLogin onLogin={handleLogin} identifiedAccount={identifiedAccount} />
+              )}
               {activeTab === 'passkey' && <PasskeyLogin onLogin={handleLogin} />}
             </>
           )}

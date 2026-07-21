@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import type { LoginMethod, DemoUser } from '~/types/auth';
 
 interface Props {
@@ -13,7 +13,7 @@ export function MagicLinkLogin({ onLogin, identifiedAccount }: Props) {
   const [stage, setStage] = useState<Stage>('input');
   const [loading, setLoading] = useState(false);
 
-  function handleSend(e: FormEvent) {
+  function handleSend(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setStage('sent');
   }
@@ -38,8 +38,12 @@ export function MagicLinkLogin({ onLogin, identifiedAccount }: Props) {
               {loading ? <span className="loading loading-spinner loading-xs"></span> : '模拟点击邮件链接'}
             </button>
             <div className="flex gap-2 justify-center">
-              <button type="button" className="btn btn-ghost btn-xs" onClick={() => setStage('expired')}>模拟链接已过期</button>
-              <button type="button" className="btn btn-ghost btn-xs" onClick={() => setStage('used')}>模拟链接已使用</button>
+              <button type="button" className="btn btn-ghost btn-xs" onClick={() => setStage('expired')}>
+                模拟链接已过期
+              </button>
+              <button type="button" className="btn btn-ghost btn-xs" onClick={() => setStage('used')}>
+                模拟链接已使用
+              </button>
             </div>
           </div>
         </div>
@@ -50,8 +54,12 @@ export function MagicLinkLogin({ onLogin, identifiedAccount }: Props) {
   if (stage === 'expired') {
     return (
       <div className="space-y-4 text-center">
-        <div className="alert alert-warning"><span>链接已过期，请重新获取</span></div>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStage('input')}>返回重新发送</button>
+        <div className="alert alert-warning">
+          <span>链接已过期，请重新获取</span>
+        </div>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStage('input')}>
+          返回重新发送
+        </button>
       </div>
     );
   }
@@ -59,8 +67,12 @@ export function MagicLinkLogin({ onLogin, identifiedAccount }: Props) {
   if (stage === 'used') {
     return (
       <div className="space-y-4 text-center">
-        <div className="alert alert-warning"><span>链接已失效（已使用），请重新获取</span></div>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStage('input')}>返回重新发送</button>
+        <div className="alert alert-warning">
+          <span>链接已失效（已使用），请重新获取</span>
+        </div>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStage('input')}>
+          返回重新发送
+        </button>
       </div>
     );
   }
@@ -70,7 +82,9 @@ export function MagicLinkLogin({ onLogin, identifiedAccount }: Props) {
       <p className="text-sm text-neutral text-center">
         我们将向 <span className="font-semibold">{email}</span> 发送包含登录链接的邮件
       </p>
-      <button type="submit" className="btn btn-primary w-full">发送魔法链接</button>
+      <button type="submit" className="btn btn-primary w-full">
+        发送魔法链接
+      </button>
     </form>
   );
 }
