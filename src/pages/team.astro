@@ -22,8 +22,8 @@ import {
 import { teamTopTabs } from '~/navigation';
 import { getPermalink } from '~/utils/permalinks';
 
-// 自动导入所有成员头像
-const avatarModules = import.meta.glob('~/assets/images/member/*.{jpg,jpeg,png}', {
+// 自动导入所有优化后的成员头像（WebP, 192px）
+const avatarModules = import.meta.glob('~/assets/images/member-optimized/*.webp', {
   eager: true,
 });
 
@@ -38,8 +38,9 @@ function getAvatar(filename?: string): ImageMetadata | undefined {
     return avatarCache.get(filename);
   }
 
-  // 构建完整路径（与 glob 中的路径匹配）
-  const fullPath = `/src/assets/images/member/${filename}`;
+  // 将原始文件名（含 jpg/jpeg/png 扩展名）映射到对应的 .webp 文件
+  const webpName = filename.replace(/\.(jpe?g|png)$/i, '.webp');
+  const fullPath = `/src/assets/images/member-optimized/${webpName}`;
   const module = avatarModules[fullPath];
 
   if (module && typeof module === 'object' && 'default' in module) {

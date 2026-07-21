@@ -27,7 +27,6 @@ export const TAG_BASE = cleanSlug(APP_BLOG?.tag?.pathname) || 'tag';
 
 export const POST_PERMALINK_PATTERN = trimSlash(APP_BLOG?.post?.permalink || `${BLOG_BASE}/%slug%`);
 
-
 export const getCanonical = (path = ''): string | URL => {
   const url = String(new URL(path, SITE.site));
   if (SITE.trailingSlash == false && path && url.endsWith('/')) {
@@ -37,7 +36,6 @@ export const getCanonical = (path = ''): string | URL => {
   }
   return url;
 };
-
 
 export const getPermalink = (slug = '', type = 'page'): string => {
   let permalink: string;
@@ -93,12 +91,9 @@ export const getPermalink = (slug = '', type = 'page'): string => {
   return definitivePermalink(permalink);
 };
 
-
 export const getHomePermalink = (): string => getPermalink('/');
 
-
 export const getBlogPermalink = (): string => getPermalink(BLOG_BASE);
-
 
 export const getAsset = (path: string): string =>
   '/' +
@@ -107,12 +102,9 @@ export const getAsset = (path: string): string =>
     .filter((el) => !!el)
     .join('/');
 
-
 const definitivePermalink = (permalink: string): string => createPath(BASE_PATHNAME, permalink);
 
-
 type MenuHref = { type?: string; url?: string };
-
 
 export const applyGetPermalinks = (menu: unknown = {}): unknown => {
   if (Array.isArray(menu)) {

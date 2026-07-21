@@ -1,7 +1,7 @@
 /** 成员数据接口 */
 export interface Member {
   name?: string;
-  /** 对应 src/assets/images/member/ 下的文件名（不含目录前缀） */
+  /** 对应 src/assets/images/member-optimized/ 下的 .webp 文件名（avatarKey 使用原始扩展名，运行时会自动映射） */
   avatarKey?: string;
   role?: string;
   desc?: string;

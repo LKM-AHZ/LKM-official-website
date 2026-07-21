@@ -38,7 +38,7 @@ const metadata = {
       <!-- 登录表单卡片 -->
       <div class="rounded-[12px] bg-base-200 border border-base-300 p-6 sm:p-8 w-full not-prose">
         <form id="login-form" novalidate data-contact-url={getPermalink('/contact')}>
-          <div id="form-message" class="hidden mb-4"></div>
+          <div id="form-message" class="hidden mb-4" role="alert" aria-live="polite"></div>
 
           <!-- 用户名 -->
           <div class="mb-4">
@@ -53,8 +53,9 @@ const metadata = {
               placeholder="请输入用户名"
               class="input input-bordered w-full"
               required
+              aria-describedby="username-error"
             />
-            <span id="username-error" class="label-text-alt text-error hidden mt-1"></span>
+            <span id="username-error" class="label-text-alt text-error hidden mt-1" role="alert" aria-live="polite"></span>
           </div>
 
           <!-- 密码 -->
@@ -71,8 +72,9 @@ const metadata = {
               class="input input-bordered w-full"
               required
               minlength="6"
+              aria-describedby="password-error"
             />
-            <span id="password-error" class="label-text-alt text-error hidden mt-1"></span>
+            <span id="password-error" class="label-text-alt text-error hidden mt-1" role="alert" aria-live="polite"></span>
           </div>
 
           <!-- 提交按钮 -->

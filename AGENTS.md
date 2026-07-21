@@ -8,13 +8,13 @@ AstroWind 是一个免费、开源的网站模板，基于 **Astro v6** 和 **Ta
 
 ## 快速参考
 
-| 命令             | 用途                                 |
-| ---------------- | ------------------------------------ |
-| `pnpm run dev`   | 启动开发服务器（localhost:4321）     |
-| `pnpm run build` | 生产构建到 `./dist/`                 |
-| `pnpm run preview` | 本地预览生产构建                   |
-| `pnpm run check` | 运行 astro check + ESLint + Prettier |
-| `pnpm run fix`   | 自动修复 ESLint + Prettier 问题      |
+| 命令               | 用途                                 |
+| ------------------ | ------------------------------------ |
+| `pnpm run dev`     | 启动开发服务器（localhost:4321）     |
+| `pnpm run build`   | 生产构建到 `./dist/`                 |
+| `pnpm run preview` | 本地预览生产构建                     |
+| `pnpm run check`   | 运行 astro check + ESLint + Prettier |
+| `pnpm run fix`     | 自动修复 ESLint + Prettier 问题      |
 
 **Node.js 要求：** >= 24.0.0
 

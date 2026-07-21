@@ -79,25 +79,25 @@ pnpm run dev
 
 ## 页面路由
 
-| 路由       | 路径            | 源文件                     | 布局           |
-| :--------- | :-------------- | :------------------------- | :------------- |
-| 首页       | `/`             | `pages/index.astro`        | PageLayout     |
-| 管理团队   | `/team`         | `pages/team.astro`         | SidebarLayout  |
-| 项目团队   | `/project-team` | `pages/project-team.astro` | SidebarLayout  |
-| 关于       | `/about`        | `pages/about.astro`        | SidebarLayout  |
-| 服务       | `/services`     | `pages/services.astro`     | SidebarLayout  |
-| 赞助与支持 | `/pricing`      | `pages/pricing.astro`      | SidebarLayout  |
-| 联系我们   | `/contact`      | `pages/contact.astro`      | SidebarLayout  |
-| QQ 社群    | `/communities`  | `pages/communities.astro`  | SidebarLayout  |
-| 登录       | `/login`        | `pages/login.astro`        | PageLayout     |
-| 文档库     | `/docs`         | `pages/docs/`              | DocsLayout     |
-| 文档详情   | `/docs/<slug>`  | `pages/docs/[...slug].astro` | DocsLayout   |
-| 隐私政策   | `/privacy`      | `pages/privacy.md`         | MarkdownLayout |
-| 使用条款   | `/terms`        | `pages/terms.md`           | MarkdownLayout |
-| 博客       | `/blog`         | `pages/[...blog]/`         | PageLayout     |
-| 文章详情   | `/blog/<slug>`  | `pages/[...blog]/`         | PageLayout     |
-| 404        | `/404`          | `pages/404.astro`          | PageLayout     |
-| RSS        | `/rss.xml`      | `pages/rss.xml.ts`         | —              |
+| 路由       | 路径            | 源文件                       | 布局           |
+| :--------- | :-------------- | :--------------------------- | :------------- |
+| 首页       | `/`             | `pages/index.astro`          | PageLayout     |
+| 管理团队   | `/team`         | `pages/team.astro`           | SidebarLayout  |
+| 项目团队   | `/project-team` | `pages/project-team.astro`   | SidebarLayout  |
+| 关于       | `/about`        | `pages/about.astro`          | SidebarLayout  |
+| 服务       | `/services`     | `pages/services.astro`       | SidebarLayout  |
+| 赞助与支持 | `/pricing`      | `pages/pricing.astro`        | SidebarLayout  |
+| 联系我们   | `/contact`      | `pages/contact.astro`        | SidebarLayout  |
+| QQ 社群    | `/communities`  | `pages/communities.astro`    | SidebarLayout  |
+| 登录       | `/login`        | `pages/login.astro`          | PageLayout     |
+| 文档库     | `/docs`         | `pages/docs/`                | DocsLayout     |
+| 文档详情   | `/docs/<slug>`  | `pages/docs/[...slug].astro` | DocsLayout     |
+| 隐私政策   | `/privacy`      | `pages/privacy.md`           | MarkdownLayout |
+| 使用条款   | `/terms`        | `pages/terms.md`             | MarkdownLayout |
+| 博客       | `/blog`         | `pages/[...blog]/`           | PageLayout     |
+| 文章详情   | `/blog/<slug>`  | `pages/[...blog]/`           | PageLayout     |
+| 404        | `/404`          | `pages/404.astro`            | PageLayout     |
+| RSS        | `/rss.xml`      | `pages/rss.xml.ts`           | —              |
 
 ---
 
@@ -157,7 +157,62 @@ pnpm run build   # 输出到 ./dist/
 
 ## 团队成员
 
-团队数据维护在 `src/data/members.ts`，按部门分组导出（创始人、总务部、群务部、活动策划部、新闻办等）。`src/pages/team.astro` 通过 `MemberCard` / `DepartmentSection` 组件渲染，头像存放于 `src/assets/images/member/`。
+团队数据维护在 `src/data/members.ts`，按部门分组导出（创始人、总务部、群务部、活动策划部、新闻办等）。`src/pages/team.astro` 通过 `MemberCard` / `DepartmentSection` 组件渲染，头像存放于 `src/assets/images/member-optimized/`。
+
+### 添加新成员
+
+**第 1 步：准备头像**
+
+将原始头像图片（jpg/png）放入 `src/assets/images/member/` 目录，然后运行优化脚本：
+
+```bash
+node scripts/optimize-avatars.mjs
+```
+
+脚本会将所有原始图片缩放至 192px 并转换为 WebP，输出到 `member-optimized/` 目录。
+
+**第 2 步：编辑数据**
+
+在 `src/data/members.ts` 中找到对应的部门数组，按格式添加：
+
+```ts
+{ name: '七月X', avatarKey: '文件名.jpg', desc: '简短描述', dream: '梦想：xxx', quote: '—— 格言' }
+```
+
+字段说明：
+
+| 字段 | 必填 | 说明 |
+| :--- | :--- | :--- |
+| `name` | 是 | 显示名称 |
+| `avatarKey` | 否 | `member-optimized/` 下的文件名（写原始扩展名，运行时自动映射 `.webp`） |
+| `role` | 否 | 职务标签（卡片上显示为彩色小字） |
+| `desc` | 否 | 简短描述 |
+| `dream` | 否 | 梦想/目标（紫色斜体） |
+| `quote` | 否 | 一句话格言 |
+
+**示例**：在总务部添加"七月小明"，头像为 `xiaoming.png`：
+
+1. 将 `xiaoming.png` 放入 `src/assets/images/member/`，运行 `node scripts/optimize-avatars.mjs`
+2. 在 `generalMembers` 数组末尾添加：
+
+```ts
+{ name: '七月小明', avatarKey: 'xiaoming.png', desc: '热爱物理的大二学生', dream: '梦想：成为理论物理学家', quote: '—— 仰望星空，脚踏实地' },
+```
+
+**部门对应关系**（`src/data/members.ts`）：
+
+| 页面 | 部门 | 导出数组 |
+| :--- | :--- | :--- |
+| 管理团队 | 创始人 | `founderMembers` |
+| | 总务部 | `generalMembers` |
+| | 群务部 | `affairsSubGroups`（按子群组分组） |
+| | 活动策划部 | `eventsMembers` |
+| | 新闻办 | `newsMembers` + `newsSubGroups` |
+| | 顾问团 | `advisorMembers` |
+| | 专业委员会 | `professionalSubGroups`（按学科分组） |
+| | 技术委员会 | `techMembers` |
+| | 已离开成员 | `alumniMembers` |
+| 项目团队 | 教材/科普项目组 | `projectSubGroups` |
 
 ---
 
