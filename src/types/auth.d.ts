@@ -55,7 +55,6 @@ export type AuthAction =
 
 export interface AuthContextType {
   state: AuthState;
-  dispatch: React.Dispatch<AuthAction>;
   login: (method: LoginMethod, credentials: Record<string, string>, account?: DemoUser) => LoginResult;
   register: (type: 'local' | 'normal', data: RegisterData) => RegisterResult;
   logout: () => void;

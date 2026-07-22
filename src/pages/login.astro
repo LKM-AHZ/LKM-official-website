@@ -1,10 +1,10 @@
 ---
 import PageLayout from '~/layouts/PageLayout.astro';
-import LoginPageEntry from '~/components/auth/login/LoginPageEntry';
+import LoginPage from '~/components/auth/login/LoginPage.vue';
 
 const metadata = { title: '登录' };
 ---
 
 <PageLayout metadata={metadata}>
-  <LoginPageEntry client:only="react" />
+  <LoginPage client:only="vue" />
 </PageLayout>
