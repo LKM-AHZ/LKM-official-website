@@ -4,7 +4,20 @@
     <div class="absolute inset-0 bg-base-100/70 backdrop-blur-sm"></div>
     <div class="relative w-full max-w-md text-center">
       <div class="rounded-2xl bg-base-100 shadow-2xl border border-base-300 p-6 sm:p-8">
-        <div class="text-5xl mb-4">✅</div>
+        <div class="mb-4 flex justify-center">
+          <svg
+            class="w-14 h-14 text-success"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+        </div>
         <h2 class="text-xl font-semibold mb-2">密码重置成功</h2>
         <p class="text-sm text-neutral">所有设备已强制下线，请使用新密码重新登录</p>
         <a :href="getAuthPath('login')" class="btn btn-primary btn-sm mt-4">去登录</a>

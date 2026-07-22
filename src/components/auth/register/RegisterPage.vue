@@ -5,7 +5,20 @@
     <!-- Logged in / success -->
     <div v-if="state.flow === 'logged_in'" class="relative w-full max-w-md text-center">
       <div class="rounded-2xl bg-base-100 shadow-2xl border border-base-300 p-6 sm:p-8">
-        <div class="text-5xl mb-4">🎉</div>
+        <div class="mb-4 flex justify-center">
+          <svg
+            class="w-14 h-14 text-success"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+        </div>
         <h2 class="text-2xl font-semibold">注册成功，已自动登录</h2>
         <p class="text-neutral text-sm">
           欢迎加入理科迷，<span class="font-semibold">{{ state.user?.username }}</span>

@@ -35,9 +35,7 @@ export default defineConfig({
   integrations: [
     sitemap(),
     mdx(),
-    vue({
-      include: ['**/*.vue'],
-    }),
+    vue(),
     react({
       include: ['**/*.tsx', '**/*.jsx'],
     }),
