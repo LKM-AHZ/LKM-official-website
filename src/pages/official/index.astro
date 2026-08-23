@@ -16,9 +16,10 @@ import Section from '~/features/homepage/components/Section.astro';
 
 import { ssrFetch } from '~/lib/fetch-ssr';
 
-import type {
-  OfficialArticle,
-  OfficialArticleListData,
+import {
+  NEWS_CATEGORY_SLUGS,
+  type OfficialArticle,
+  type OfficialArticleListData,
 } from '~/lib/api/modules/official-articles';
 
 const metadata = {
@@ -26,9 +27,10 @@ const metadata = {
   ignoreTitleTemplate: true,
 };
 
-// 首页「最新文章」服务端取数（3 秒超时 + 失败降级为空数组，避免后端不可用拖慢/崩首屏）
+// 首页「最新新闻」服务端取数（3 秒超时 + 失败降级为空数组，避免后端不可用拖慢/崩首屏）。
+// 取多页后按三大新闻分类（官方公告/科技新闻/科普相关）过滤，只把新闻类文章上首页。
 const { data: latestData } = await ssrFetch<OfficialArticleListData>(
-  '/api/v1/articles?page=1&page_size=6',
+  '/api/v1/articles?page=1&page_size=30',
   { fallback: { items: [], total: 0 } },
 );
 
@@ -41,13 +43,17 @@ function formatHomeDate(dateStr: string): string {
   });
 }
 
-const latestArticles = (latestData?.items ?? []).map((a: OfficialArticle) => ({
-  slug: a.slug,
-  title: a.title,
-  description: a.description,
-  cover: a.cover,
-  publishedText: formatHomeDate(a.published),
-}));
+const latestArticles = (latestData?.items ?? [])
+  // 仅保留三大新闻分类
+  .filter((a: OfficialArticle) => NEWS_CATEGORY_SLUGS.includes(a.category))
+  .slice(0, 6)
+  .map((a: OfficialArticle) => ({
+    slug: a.slug,
+    title: a.title,
+    description: a.description,
+    cover: a.cover,
+    publishedText: formatHomeDate(a.published),
+  }));
 ---
 
 <Layout metadata={metadata} navItems={['nav.home', 'nav.news', 'nav.team', 'nav.resources']}>

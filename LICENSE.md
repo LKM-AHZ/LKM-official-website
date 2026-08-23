@@ -1,11 +1,3 @@
-理科迷官网 (LKM Official Website)
-Copyright (c) 2024-2026 理科迷 (LKM)
-
-部分代码基于 AstroWind（https://github.com/onwidget/astrowind），
-Copyright (c) 2023 onWidget，原始以 MIT License 发布。
-
-========================================================================
-
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 

@@ -57,6 +57,13 @@ const ARTICLE_CATEGORY_KEYS: Record<string, string> = {
   science: "messages.articles.categories.science",
 };
 
+/** 首页「最新新闻」展示用到的三大新闻分类 slug（与新闻资讯页 NEWS_SECTIONS 对齐） */
+export const NEWS_CATEGORY_SLUGS: readonly string[] = [
+  "announcement",
+  "news",
+  "science",
+];
+
 /** 分类 slug → 显示名 */
 export function categoryLabel(slug: string): string {
   const key = ARTICLE_CATEGORY_KEYS[slug];

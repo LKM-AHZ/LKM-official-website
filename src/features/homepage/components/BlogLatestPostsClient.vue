@@ -2,8 +2,13 @@
 import { ref, computed, onMounted } from "vue";
 import { t } from "~/lib/i18n";
 import { fetchWithCache } from "~/lib/cache-client";
+import { NEWS_CATEGORY_SLUGS } from "~/lib/api/modules/official-articles";
 
-/** 服务端传入的已渲染条目（publishedText 由服务端格式化，避免客户端复算 mismatch） */
+/**
+ * 首页「最新新闻」卡片。
+ * 服务端（official/index.astro）已按三大新闻分类（官方公告/科技新闻/科普相关）过滤，
+ * 客户端兜底 fetch 时也按同一分类过滤，保证行为一致。
+ */
 interface ServerArticle {
   slug: string;
   title: string;
@@ -40,22 +45,25 @@ onMounted(async () => {
     // 响应条目含 published 原始日期字段（与 ServerArticle 渲染形状不同）
     const { data } = await fetchWithCache<{
       items: Array<
-        Omit<ServerArticle, "publishedText"> & { published: string }
+        Omit<ServerArticle, "publishedText"> & { published: string; category: string }
       >;
       total: number;
-    }>("/api/v1/articles?page=1&page_size=6", CACHE_KEY, CACHE_TTL);
+    }>("/api/v1/articles?page=1&page_size=30", CACHE_KEY, CACHE_TTL);
     if (data?.items) {
-      fetchedArticles.value = data.items.map((a) => ({
-        slug: a.slug,
-        title: a.title,
-        description: a.description ?? null,
-        cover: a.cover ?? null,
-        publishedText: new Date(a.published).toLocaleDateString("zh-CN", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-      }));
+      fetchedArticles.value = data.items
+        .filter((a) => NEWS_CATEGORY_SLUGS.includes(a.category))
+        .slice(0, 6)
+        .map((a) => ({
+          slug: a.slug,
+          title: a.title,
+          description: a.description ?? null,
+          cover: a.cover ?? null,
+          publishedText: new Date(a.published).toLocaleDateString("zh-CN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+        }));
     }
   } finally {
     loading.value = false;
