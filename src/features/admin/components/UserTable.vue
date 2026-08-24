@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// 后台用户管理列表 —— 接真实后端 GET /admin/users（adminFetch）
-import { ref, onMounted, computed } from "vue";
-import { adminFetch, readAdminResp } from "~/lib/api/admin";
+// 后台用户管理列表 —— 统一走 useAdminPagination
+import { ref, onMounted } from "vue";
+import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
 
 interface AdminUserRow {
@@ -14,14 +14,8 @@ interface AdminUserRow {
   phone: string | null;
 }
 
-const rows = ref<AdminUserRow[]>([]);
-const total = ref(0);
-const page = ref(1);
-const pageSize = ref(20);
 const keyword = ref("");
 const includePii = ref(false);
-const loading = ref(false);
-const error = ref("");
 
 const levelLabel = (key: string): string =>
   ({
@@ -30,36 +24,19 @@ const levelLabel = (key: string): string =>
     admin: t("admin.userLevel.admin"),
   })[key] ?? key;
 
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(total.value / pageSize.value)),
-);
-
-async function load() {
-  loading.value = true;
-  error.value = "";
-  try {
+const { items, total, page, totalPages, loading, error, refresh, goTo } =
+  useAdminPagination<AdminUserRow>((page, limit) => {
     const params = new URLSearchParams({
-      page: String(page.value),
-      size: String(pageSize.value),
+      page: String(page),
+      limit: String(limit),
       include_pii: String(includePii.value),
     });
     if (keyword.value.trim()) params.set("keyword", keyword.value.trim());
+    return `/api/v1/admin/users?${params.toString()}`;
+  }, 20);
 
-    const res = await adminFetch(`/api/v1/admin/users?${params.toString()}`);
-    const body = await readAdminResp(res);
-    rows.value = (body.data as { items: AdminUserRow[] }).items;
-    total.value = (body.data as { total: number }).total;
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
-  } finally {
-    loading.value = false;
-  }
-}
-
-function goTo(p: number) {
-  page.value = Math.min(Math.max(1, p), totalPages.value);
-  void load();
-}
+const rows = items;
+const load = refresh;
 
 onMounted(() => void load());
 </script>

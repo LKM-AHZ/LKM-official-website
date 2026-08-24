@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// 后台文件审核列表 —— 接真实后端 GET /files（按 status 过滤）
-import { ref, onMounted, computed } from "vue";
-import { adminFetch, readAdminResp } from "~/lib/api/admin";
+// 后台文件审核列表 —— 统一走 useAdminPagination（按 status 过滤）
+import { ref, onMounted } from "vue";
+import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
 
 interface AdminFileRow {
@@ -15,13 +15,7 @@ interface AdminFileRow {
   created_at: string;
 }
 
-const rows = ref<AdminFileRow[]>([]);
-const total = ref(0);
-const page = ref(1);
-const pageSize = ref(20);
 const statusFilter = ref<"all" | "pending" | "approved" | "rejected">("all");
-const loading = ref(false);
-const error = ref("");
 
 const statusLabel = (key: string): string =>
   ({
@@ -29,10 +23,6 @@ const statusLabel = (key: string): string =>
     approved: t("admin.fileStatus.approved"),
     rejected: t("admin.fileStatus.rejected"),
   })[key] ?? key;
-
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(total.value / pageSize.value)),
-);
 
 function fmtSize(bytes: number): string {
   if (!bytes && bytes !== 0) return "—";
@@ -46,39 +36,25 @@ function fmtSize(bytes: number): string {
   return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-async function load() {
-  loading.value = true;
-  error.value = "";
-  try {
+const { items, total, page, totalPages, loading, error, refresh, goTo } =
+  useAdminPagination<AdminFileRow>((page, limit) => {
     const params = new URLSearchParams({
-      page: String(page.value),
-      limit: String(pageSize.value),
+      page: String(page),
+      limit: String(limit),
     });
     if (statusFilter.value !== "all") params.set("status", statusFilter.value);
+    return `/api/v1/files?${params.toString()}`;
+  }, 20);
 
-    const res = await adminFetch(`/api/v1/files?${params.toString()}`);
-    const body = await readAdminResp(res);
-    rows.value = (body.data as { items: AdminFileRow[] }).items;
-    total.value = (body.data as { total: number }).total;
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
-  } finally {
-    loading.value = false;
-  }
-}
+const rows = items;
 
 function setFilter(f: "all" | "pending" | "approved" | "rejected") {
   statusFilter.value = f;
   page.value = 1;
-  void load();
+  void refresh();
 }
 
-function goTo(p: number) {
-  page.value = Math.min(Math.max(1, p), totalPages.value);
-  void load();
-}
-
-onMounted(() => void load());
+onMounted(() => void refresh());
 </script>
 
 <template>

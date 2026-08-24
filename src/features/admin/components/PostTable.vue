@@ -1,8 +1,7 @@
 <script setup lang="ts">
-// 后台帖子管理列表 —— 接真实后端 GET /forum/posts
-import { ref, onMounted, computed } from "vue";
-import { adminFetch, readAdminResp } from "~/lib/api/admin";
-import { t } from "~/lib/i18n";
+// 后台帖子管理列表 —— 统一走 useAdminPagination
+import { onMounted } from "vue";
+import { useAdminPagination } from "~/lib/http/useAdminPagination";
 
 interface AdminPostRow {
   id: number;
@@ -14,42 +13,18 @@ interface AdminPostRow {
   created_at: string;
 }
 
-const rows = ref<AdminPostRow[]>([]);
-const total = ref(0);
-const page = ref(1);
-const pageSize = ref(20);
-const loading = ref(false);
-const error = ref("");
-
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(total.value / pageSize.value)),
-);
-
-async function load() {
-  loading.value = true;
-  error.value = "";
-  try {
+const { items, total, page, totalPages, loading, error, refresh, goTo } =
+  useAdminPagination<AdminPostRow>((page, limit) => {
     const params = new URLSearchParams({
-      page: String(page.value),
-      limit: String(pageSize.value),
+      page: String(page),
+      limit: String(limit),
     });
-    const res = await adminFetch(`/api/v1/forum/posts?${params.toString()}`);
-    const body = await readAdminResp(res);
-    rows.value = (body.data as { items: AdminPostRow[] }).items;
-    total.value = (body.data as { total: number }).total;
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
-  } finally {
-    loading.value = false;
-  }
-}
+    return `/api/v1/forum/posts?${params.toString()}`;
+  }, 20);
 
-function goTo(p: number) {
-  page.value = Math.min(Math.max(1, p), totalPages.value);
-  void load();
-}
+const rows = items;
 
-onMounted(() => void load());
+onMounted(() => void refresh());
 </script>
 
 <template>

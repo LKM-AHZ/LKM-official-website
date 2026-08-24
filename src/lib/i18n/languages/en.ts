@@ -144,6 +144,8 @@ export const en = {
     intro: "Introduction",
     teamMembers: "Team members",
     timeline: "Timeline",
+    feedTimeline: "Activity Timeline",
+    follow: "My Follows",
     recentUpdates: "Recent updates",
     faq: "FAQ",
     officialAnnouncement: "Announcements",
@@ -293,6 +295,39 @@ export const en = {
       files: "File Review",
       categories: "Board Management",
       reports: "Report Management",
+      moderation: "Auto Moderation",
+    },
+    saved: "Saved",
+    deleted: "Deleted",
+    actions: "Actions",
+    edit: "Edit",
+    delete: "Delete",
+    mfaTitle: "Two-Factor Verification Required",
+    mfaHint: "Enter your verification code to confirm this action.",
+    mfaCodePlaceholder: "Verification code",
+    mfaInvalidCode: "Invalid or expired code",
+    moderation: {
+      title: "Auto Moderation Rules",
+      addRule: "Add Rule",
+      noRules: "No rules yet",
+      pattern: "Pattern",
+      action: "Action",
+      weight: "Weight",
+      regex: "Regex",
+      status: "Status",
+      enabled: "On",
+      disabled: "Off",
+      editRule: "Edit Rule",
+      patternPlaceholder: "Keyword / domain / regex",
+      isRegex: "Regular expression",
+      testRules: "Test Rules",
+      testPlaceholder: "Enter text to evaluate",
+      runTest: "Run Test",
+      testMatched: "Matched: would be moderated",
+      testClean: "Clean: no rule matched",
+      penalty: "Penalty {value}",
+      shouldHide: "Should Hide",
+      totalRules: "{count} active rules",
     },
     login: {
       subtitle: "Administrator Login · LKM",
@@ -420,6 +455,32 @@ export const en = {
     pointsSuffix: "{points} pts",
     exchangeSuccess:
       'Exchange successful! You spent {points} points on "{name}"',
+  },
+
+  follow: {
+    follow: "Follow",
+    unfollow: "Unfollow",
+    loginToFollow: "Login to follow",
+    followingUsers: "Following Users ({count})",
+    followingBoards: "Following Boards ({count})",
+    emptyUsers: "You are not following anyone yet.",
+    emptyBoards: "You have not followed any boards yet.",
+  },
+
+  timeline: {
+    title: "Timeline",
+    refresh: "Refresh",
+    follow: "Following",
+    hot: "Popular",
+    empty: "Nothing here yet.",
+    loadMore: "Load more",
+    type: {
+      forum: "Forum",
+      article: "Article",
+      column: "Column",
+      qa: "QA",
+      project: "Project",
+    },
   },
 
   notification: {
@@ -2937,6 +2998,13 @@ export const en = {
       contribution: {
         metaTitle: "Contribution System — LKM",
       },
+
+      follow: {
+        metaTitle: "My Follows — LKM",
+      },
+      timeline: {
+        metaTitle: "Timeline — LKM",
+      },
     },
 
     treehole: {
@@ -3002,6 +3070,9 @@ export const en = {
         handle: "Handle",
         reject: "Reject",
         empty: "No reports",
+      },
+      moderation: {
+        title: "Auto Moderation",
       },
       users: {
         title: "User Management",

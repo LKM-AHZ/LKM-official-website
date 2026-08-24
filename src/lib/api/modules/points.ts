@@ -74,10 +74,13 @@ export const pointsApi = {
     period: "daily" | "weekly" | "total" = "total",
     limit = 50,
   ) =>
-    get<PointsLeaderboardEntry[]>("/api/v1/points/leaderboard", {
-      period,
-      limit,
-    }),
+    get<PaginatedResponse<PointsLeaderboardEntry>>(
+      "/api/v1/points/leaderboard",
+      {
+        period,
+        limit,
+      },
+    ),
   getAchievements: () =>
     get<PointsAchievement[]>("/api/v1/points/achievements"),
   getTasks: () => get<PointsTask[]>("/api/v1/points/tasks"),

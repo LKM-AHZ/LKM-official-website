@@ -31,6 +31,12 @@ export { authApi } from "./modules/auth";
 export { notificationApi } from "./modules/notification";
 export { pointsApi } from "./modules/points";
 export type * from "./modules/points";
+export { followApi } from "./modules/follow";
+export type * from "./modules/follow";
+export { timelineApi } from "./modules/timeline";
+export type * from "./modules/timeline";
+export { moderationApi } from "./modules/moderation";
+export type * from "./modules/moderation";
 
 // GraphQL 客户端
 export { graphqlClient, graphql } from "./graphql";

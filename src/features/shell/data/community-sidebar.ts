@@ -31,6 +31,11 @@ export const communitySidebarLinks: CommunitySidebarLink[] = [
     icon: "material-symbols:home-outline-rounded",
   },
   {
+    text: "nav.feedTimeline",
+    href: getPermalink("/timeline"),
+    icon: "material-symbols:timeline-outline",
+  },
+  {
     text: "nav.forum",
     href: getPermalink("/forum"),
     icon: "material-symbols:forum-outline",
@@ -77,6 +82,11 @@ export const userSidebarLinks: CommunitySidebarLink[] = [
   {
     text: "nav.profile",
     href: getPermalink("/profile"),
+    icon: "material-symbols:person-outline",
+  },
+  {
+    text: "nav.follow",
+    href: getPermalink("/follow"),
     icon: "material-symbols:person-outline",
   },
   {

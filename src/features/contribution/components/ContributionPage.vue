@@ -437,8 +437,8 @@ async function refreshMyTitle() {
   if (USE_MOCK_FALLBACK || myUserId.value === null) return;
   const res = await pointsApi.getLeaderboard(leaderboardPeriod.value, 50);
   if (res.isOk()) {
-    leaderboardMap.value[leaderboardPeriod.value] = res.value;
-    const me = res.value.find((e) => e.user_id === myUserId.value);
+    leaderboardMap.value[leaderboardPeriod.value] = res.value.items;
+    const me = res.value.items.find((e) => e.user_id === myUserId.value);
     // 即便当前周期不在榜（无 title），也标记为已查，避免反复重查
     myTitle.value = me?.title ?? "";
   }
@@ -524,12 +524,12 @@ async function loadPublic() {
   if (USE_MOCK_FALLBACK) return;
   const lbRes = await pointsApi.getLeaderboard(leaderboardPeriod.value, 50);
   if (lbRes.isOk()) {
-    leaderboardMap.value[leaderboardPeriod.value] = lbRes.value;
+    leaderboardMap.value[leaderboardPeriod.value] = lbRes.value.items;
     // 尝试在当前排行榜中定位当前用户以显示其称号
     // （首屏时 myUserId 可能尚未就绪，此处定位只是尽力而为，真正的 title 查找
     //   在 loadPrivate 赋值 myUserId 后经 refreshMyTitle 完成）
     if (myUserId.value !== null && myTitle.value === "") {
-      const me = lbRes.value.find((e) => e.user_id === myUserId.value);
+      const me = lbRes.value.items.find((e) => e.user_id === myUserId.value);
       if (me) myTitle.value = me.title;
     }
   }
@@ -566,10 +566,10 @@ async function switchPeriod(p: "daily" | "weekly" | "total") {
   if (USE_MOCK_FALLBACK) return;
   const res = await pointsApi.getLeaderboard(p, 50);
   if (res.isOk()) {
-    leaderboardMap.value[p] = res.value;
+    leaderboardMap.value[p] = res.value.items;
     // 切换周期时同步刷新当前用户在榜 title（myTitle 依赖 leaderboardPeriod）
     if (myUserId.value !== null) {
-      const me = res.value.find((e) => e.user_id === myUserId.value);
+      const me = res.value.items.find((e) => e.user_id === myUserId.value);
       myTitle.value = me?.title ?? "";
     }
   }

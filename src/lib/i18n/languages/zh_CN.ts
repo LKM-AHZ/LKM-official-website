@@ -141,6 +141,8 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     intro: "简明介绍",
     teamMembers: "团队成员",
     timeline: "发展历程",
+    feedTimeline: "动态时间线",
+    follow: "我的关注",
     recentUpdates: "最近更新",
     faq: "常见问题",
     officialAnnouncement: "官方公告",
@@ -289,6 +291,39 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       files: "文件审核",
       categories: "板块管理",
       reports: "举报管理",
+      moderation: "自动审校",
+    },
+    saved: "已保存",
+    deleted: "已删除",
+    actions: "操作",
+    edit: "编辑",
+    delete: "删除",
+    mfaTitle: "需要二次验证",
+    mfaHint: "请输入验证码以确认此操作。",
+    mfaCodePlaceholder: "验证码",
+    mfaInvalidCode: "验证码无效或已过期",
+    moderation: {
+      title: "自动审校规则",
+      addRule: "新增规则",
+      noRules: "暂无规则",
+      pattern: "匹配内容",
+      action: "动作",
+      weight: "权重",
+      regex: "正则",
+      status: "状态",
+      enabled: "开启",
+      disabled: "关闭",
+      editRule: "编辑规则",
+      patternPlaceholder: "关键词 / 域名 / 正则",
+      isRegex: "使用正则匹配",
+      testRules: "规则测试",
+      testPlaceholder: "输入要试跑的文本",
+      runTest: "运行测试",
+      testMatched: "命中：将被审校",
+      testClean: "干净：无规则命中",
+      penalty: "降权系数 {value}",
+      shouldHide: "应隐藏",
+      totalRules: "{count} 条启用的规则",
     },
     login: {
       subtitle: "管理员登录 · 理科迷",
@@ -415,6 +450,32 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     periodTotal: "总榜",
     pointsSuffix: "{points} 分",
     exchangeSuccess: '兑换成功！您已花费 {points} 积分兑换"{name}"',
+  },
+
+  follow: {
+    follow: "关注",
+    unfollow: "取消关注",
+    loginToFollow: "登录后关注",
+    followingUsers: "关注的用户（{count}）",
+    followingBoards: "关注的板块（{count}）",
+    emptyUsers: "你还没有关注任何人。",
+    emptyBoards: "你还没有关注任何板块。",
+  },
+
+  timeline: {
+    title: "时间线",
+    refresh: "刷新",
+    follow: "关注流",
+    hot: "热门",
+    empty: "这里还没有内容。",
+    loadMore: "加载更多",
+    type: {
+      forum: "论坛",
+      article: "文章",
+      column: "专栏",
+      qa: "问答",
+      project: "项目",
+    },
   },
 
   notification: {
@@ -2810,6 +2871,13 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       contribution: {
         metaTitle: "贡献系统 —— 理科迷",
       },
+
+      follow: {
+        metaTitle: "我的关注 —— 理科迷",
+      },
+      timeline: {
+        metaTitle: "时间线 —— 理科迷",
+      },
     },
 
     treehole: {
@@ -2868,6 +2936,9 @@ export const zh_CN: DeepStringRecord<typeof en> = {
         handle: "处理",
         reject: "驳回",
         empty: "暂无举报",
+      },
+      moderation: {
+        title: "自动审校",
       },
       users: {
         title: "用户管理",

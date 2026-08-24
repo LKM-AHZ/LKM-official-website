@@ -1,42 +1,40 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { computed } from "vue";
 import { blogApi } from "~/lib/api";
 import type { BlogArticleInfo } from "../types/blog";
+import { usePagination } from "~/lib/http/usePagination";
+import type { PaginatedResponse } from "~/lib/api/types";
 import { t } from "~/lib/i18n";
 
-const articles = ref<BlogArticleInfo[]>([]);
-const loading = ref(false);
-const error = ref<string | null>(null);
-const page = ref(1);
-const totalPages = ref(0);
-const total = ref(0);
+// blogApi.listArticles 返回 blog 的 PaginatedData（total_pages），统一重塑为
+// usePagination 期望的 PaginatedResponse（pages）后无感接入。
+const {
+  items: articles,
+  page,
+  totalPages,
+  total,
+  loading,
+  error,
+  goPage,
+} = usePagination<BlogArticleInfo>({
+  loader: async (p) => {
+    const result = await blogApi.listArticles(p);
+    return result.map(
+      (d) =>
+        ({
+          items: d.items,
+          total: d.total,
+          page: d.page,
+          pages: d.total_pages,
+        }) as PaginatedResponse<BlogArticleInfo>,
+    );
+  },
+});
 
 const hasPrev = computed(() => page.value > 1);
-const hasNext = computed(() => page.value < totalPages.value);
-
-async function fetchPage(p: number) {
-  loading.value = true;
-  error.value = null;
-  const result = await blogApi.listArticles(p);
-  if (result.isErr()) {
-    error.value = result.error.message;
-  } else {
-    articles.value = result.value.items;
-    totalPages.value = result.value.total_pages;
-    total.value = result.value.total;
-    page.value = result.value.page;
-  }
-  loading.value = false;
-}
-
-function goPage(p: number) {
-  if (p >= 1 && p <= totalPages.value) {
-    fetchPage(p);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}
-
-onMounted(() => fetchPage(1));
+const hasNext = computed(
+  () => page.value < totalPages.value && totalPages.value > 0,
+);
 </script>
 
 <template>
