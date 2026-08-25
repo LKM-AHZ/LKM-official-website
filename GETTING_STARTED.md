@@ -67,7 +67,7 @@ pnpm install
 pnpm run dev
 ```
 
-此时会输出 `$ astro dev`。随后打开浏览器（默认为 `Edge`）访问 <http://localhost:4321/LKM-official-website> 即可看到目前的官网。
+此时会输出 `$ astro dev`。随后打开浏览器（默认为 `Edge`）访问 <http://localhost:4321/> 即可看到目前的官网。
 
 ## 开发工具部署
 
@@ -161,7 +161,7 @@ cd LKM-official-website
 pnpm dev
 ```
 
-浏览器访问 <http://localhost:4321/LKM-official-website/>。VSCode 进入 `LKM-official-website` 文件夹即可启动开发平台（记得勾选"我完全信任"）。
+浏览器访问 <http://localhost:4321/>。VSCode 进入 `LKM-official-website` 文件夹即可启动开发平台（记得勾选"我完全信任"）。
 
 > `pnpm run dev` 仅启动 **Astro（端口 4321）**。仓库不含后端，后端请求经 `API_URL` 代理到真实后端（见 `.env.example`），未配置则前端仅提供不依赖 API 的页面。
 
@@ -248,7 +248,7 @@ pnpm exec prettier --write .
 
 ## 外置链接
 
-自八月十号起，你可以通过访问 [链接](http://lkm.s12mc.xyz/) 来直接访问 LKM 官网。
+对外测试访问地址为 <http://124.220.55.235/>（当前为测试 IP 直连，HTTP 为主）。
 
 感谢 `Jason·CJ`（QQ `3549287757`）。
 
