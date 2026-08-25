@@ -3,7 +3,7 @@
 import { ref, onMounted } from "vue";
 import { followApi } from "~/lib/api";
 import { t } from "~/lib/i18n";
-import FollowButton from "./FollowButton.vue";
+import FollowButton from "../components/FollowButton.vue";
 
 const users = ref<
   Array<{ user_id: number; display_name: string; avatar: string | null }>
