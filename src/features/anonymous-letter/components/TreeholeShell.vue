@@ -38,7 +38,7 @@
                     </svg>
                   </a>
                   <a
-                    :href="buildUrl('/community/treehole')"
+                    :href="buildUrl('/treehole')"
                     class="nav-brand"
                     :aria-label="t('treehole.homeAriaLabel')"
                   >
@@ -51,31 +51,31 @@
 
                 <nav class="nav-links" :aria-label="t('treehole.nav.aria')">
                   <a
-                    :href="buildUrl('/community/treehole')"
+                    :href="buildUrl('/treehole')"
                     class="nav-link"
                     :class="{ active: activeNav === 'home' }"
                     >{{ t("treehole.nav.square") }}</a
                   >
                   <a
-                    :href="buildUrl('/community/treehole/random')"
+                    :href="buildUrl('/treehole/random')"
                     class="nav-link"
                     :class="{ active: activeNav === 'random' }"
                     >{{ t("treehole.nav.random") }}</a
                   >
                   <a
-                    :href="buildUrl('/community/treehole/bottle')"
+                    :href="buildUrl('/treehole/bottle')"
                     class="nav-link"
                     :class="{ active: activeNav === 'bottle' }"
                     >{{ t("treehole.nav.bottle") }}</a
                   >
                   <a
-                    :href="buildUrl('/community/treehole/wish')"
+                    :href="buildUrl('/treehole/wish')"
                     class="nav-link"
                     :class="{ active: activeNav === 'wish' }"
                     >{{ t("treehole.nav.wish") }}</a
                   >
                   <a
-                    :href="buildUrl('/community/treehole/rank')"
+                    :href="buildUrl('/treehole/rank')"
                     class="nav-link"
                     :class="{ active: activeNav === 'rank' }"
                     >{{ t("treehole.nav.rank") }}</a
@@ -85,7 +85,7 @@
                 <!-- 右侧操作 -->
                 <div class="nav-actions">
                   <a
-                    :href="buildUrl('/community/treehole/write')"
+                    :href="buildUrl('/treehole/write')"
                     class="btn-grad nav-write-btn"
                     >&#x270D;&#xFE0F; {{ t("treehole.nav.write") }}</a
                   >
@@ -120,55 +120,55 @@
                 @click="mobileMenuOpen = false"
               >
                 <a
-                  :href="buildUrl('/community/treehole')"
+                  :href="buildUrl('/treehole')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'home' }"
                   >&#x1F3E0; {{ t("treehole.nav.square") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/write')"
+                  :href="buildUrl('/treehole/write')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'write' }"
                   >&#x270D;&#xFE0F; {{ t("treehole.nav.write") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/random')"
+                  :href="buildUrl('/treehole/random')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'random' }"
                   >&#x1F3B2; {{ t("treehole.nav.randomTreehole") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/bottle')"
+                  :href="buildUrl('/treehole/bottle')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'bottle' }"
                   >&#x1F37E; {{ t("treehole.nav.bottle") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/wish')"
+                  :href="buildUrl('/treehole/wish')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'wish' }"
                   >&#x2B50; {{ t("treehole.nav.wish") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/rank')"
+                  :href="buildUrl('/treehole/rank')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'rank' }"
                   >&#x1F3C6; {{ t("treehole.nav.rank") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/mine')"
+                  :href="buildUrl('/treehole/mine')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'mine' }"
                   >&#x1F4EC; {{ t("treehole.nav.myMailbox") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/messages')"
+                  :href="buildUrl('/treehole/messages')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'messages' }"
                   >&#x1F4AC; {{ t("treehole.nav.messages") }}</a
                 >
                 <a
-                  :href="buildUrl('/community/treehole/settings')"
+                  :href="buildUrl('/treehole/settings')"
                   class="mobile-nav-link"
                   :class="{ active: activeNav === 'settings' }"
                   >&#x2699;&#xFE0F; {{ t("treehole.nav.settings") }}</a
@@ -187,7 +187,7 @@
               :aria-label="t('treehole.nav.bottomAria')"
             >
               <a
-                :href="buildUrl('/community/treehole')"
+                :href="buildUrl('/treehole')"
                 class="bn-item"
                 :class="{ active: activeNav === 'home' }"
               >
@@ -195,7 +195,7 @@
                 <span class="bn-label">{{ t("treehole.nav.square") }}</span>
               </a>
               <a
-                :href="buildUrl('/community/treehole/random')"
+                :href="buildUrl('/treehole/random')"
                 class="bn-item"
                 :class="{ active: activeNav === 'random' }"
               >
@@ -203,14 +203,14 @@
                 <span class="bn-label">{{ t("treehole.nav.random") }}</span>
               </a>
               <a
-                :href="buildUrl('/community/treehole/write')"
+                :href="buildUrl('/treehole/write')"
                 class="bn-item bn-center"
                 :class="{ active: activeNav === 'write' }"
               >
                 <span class="bn-center-circle">&#x270D;&#xFE0F;</span>
               </a>
               <a
-                :href="buildUrl('/community/treehole/bottle')"
+                :href="buildUrl('/treehole/bottle')"
                 class="bn-item"
                 :class="{ active: activeNav === 'bottle' }"
               >
@@ -218,7 +218,7 @@
                 <span class="bn-label">{{ t("treehole.nav.bottle") }}</span>
               </a>
               <a
-                :href="buildUrl('/community/treehole/mine')"
+                :href="buildUrl('/treehole/mine')"
                 class="bn-item"
                 :class="{ active: activeNav === 'mine' }"
               >

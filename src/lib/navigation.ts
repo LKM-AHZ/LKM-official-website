@@ -15,19 +15,19 @@ export const footerData = {
     {
       title: "footer.community",
       links: [
-        { text: "nav.team", href: getPermalink("/blog/about") },
-        { text: "nav.managementTeam", href: getPermalink("/official/team") },
-        { text: "nav.timeline", href: getPermalink("/#timeline") },
-        { text: "nav.help", href: getPermalink("/official/articles") },
+        { text: "nav.forum", href: getPermalink("/forum") },
+        { text: "nav.columns", href: getPermalink("/columns") },
+        { text: "nav.fileLibrary", href: getPermalink("/files") },
+        { text: "nav.competition", href: getPermalink("/competition") },
       ],
     },
     {
       title: "footer.pages",
       links: [
-        { text: "nav.services", href: getPermalink("/official/services") },
-        { text: "footer.supportUs", href: getPermalink("/official/pricing") },
-        { text: "nav.contactUs", href: getPermalink("/official/contact") },
-        { text: "nav.faq", href: getPermalink("/#faq") },
+        { text: "nav.news", href: getPermalink("/news") },
+        { text: "nav.articleList", href: getPermalink("/articles") },
+        { text: "nav.projects", href: getPermalink("/projects") },
+        { text: "nav.qa", href: getPermalink("/qa") },
       ],
     },
     {
@@ -35,15 +35,15 @@ export const footerData = {
       links: [
         {
           text: "footer.privacyPolicy",
-          href: getPermalink("/official/privacy"),
+          href: getPermalink("/privacy"),
         },
-        { text: "footer.terms", href: getPermalink("/official/terms") },
+        { text: "footer.terms", href: getPermalink("/terms") },
       ],
     },
   ],
   secondaryLinks: [
-    { text: "footer.terms", href: getPermalink("/official/terms") },
-    { text: "footer.privacyPolicy", href: getPermalink("/official/privacy") },
+    { text: "footer.terms", href: getPermalink("/terms") },
+    { text: "footer.privacyPolicy", href: getPermalink("/privacy") },
   ],
   socialLinks: [
     {

@@ -66,7 +66,7 @@
                 <a
                   v-if="['pending', 'rejected', 'scheduled'].includes(l.status)"
                   :href="
-                    buildUrl('/community/treehole/write') + '?letterId=' + l.id
+                    buildUrl('/treehole/write') + '?letterId=' + l.id
                   "
                   class="mini"
                   >{{ t("treehole.mine.edit") }}</a
@@ -111,7 +111,7 @@
               <div class="item-acts">
                 <a
                   :href="
-                    buildUrl('/community/treehole/write') + '?draftId=' + d.id
+                    buildUrl('/treehole/write') + '?draftId=' + d.id
                   "
                   class="mini"
                   >{{ t("treehole.mine.continueEdit") }}</a

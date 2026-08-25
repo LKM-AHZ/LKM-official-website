@@ -10,7 +10,7 @@ interface Props {
 
 const { article } = Astro.props;
 const image = await findImage(article.cover);
-const link = getPermalink(`/official/articles/${article.slug}`);
+const link = getPermalink(`/articles/${article.slug}`);
 ---
 
 <article class="mb-6 transition">

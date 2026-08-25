@@ -44,8 +44,8 @@ const projectConfig: Record<string, unknown> = {
         },
         {
           name: "博客",
-          url: "/community/blog",
-          children: [{ name: "博客列表", url: "/community/blog" }],
+          url: "/blog",
+          children: [{ name: "博客列表", url: "/blog" }],
         },
       ],
     },

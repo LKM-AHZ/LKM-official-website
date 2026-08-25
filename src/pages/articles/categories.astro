@@ -15,7 +15,7 @@ const metadata = { title: `${t('page.articles.categoriesTitle')} —— LKM` };
 <Layout
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
-  currentPath={getPermalink('/official/articles')}
+  currentPath={getPermalink('/articles')}
   navItems={['nav.home', 'nav.news', 'nav.team', 'nav.resources']}
 >
   <div class="space-y-6">
@@ -28,7 +28,7 @@ const metadata = { title: `${t('page.articles.categoriesTitle')} —— LKM` };
       {
         categories.map((cat) => (
           <a
-            href={getPermalink(`/official/articles/category/${cat.slug}`)}
+            href={getPermalink(`/articles/category/${cat.slug}`)}
             class="block p-6 bg-card-bg rounded-lg border border-surface-3 hover:border-primary transition-all hover:shadow-lg group"
           >
             <div class="flex flex-col h-full">

@@ -14,7 +14,7 @@ interface Props {
 
 const { article } = Astro.props;
 const image = (await findImage(article.cover)) ?? buildUrl('/images/article-default.png');
-const link = getPermalink(`/official/articles/${article.slug}`);
+const link = getPermalink(`/articles/${article.slug}`);
 ---
 
 <article
@@ -54,7 +54,7 @@ const link = getPermalink(`/official/articles/${article.slug}`);
                   ·{' '}
                   <a
                     class="font-medium hover:text-primary hover:underline transition-colors"
-                    href={getPermalink(`/official/articles/category/${article.category}`)}
+                    href={getPermalink(`/articles/category/${article.category}`)}
                   >
                     {categoryLabel(article.category)}
                   </a>

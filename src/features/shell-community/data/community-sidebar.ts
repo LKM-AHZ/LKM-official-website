@@ -26,49 +26,34 @@ export interface CommunitySidebarLink {
 /** 社区核心功能入口 */
 export const communitySidebarLinks: CommunitySidebarLink[] = [
   {
-    text: "nav.home",
-    href: getPermalink("/community"),
-    icon: "material-symbols:home-outline-rounded",
-  },
-  {
     text: "nav.forum",
-    href: getPermalink("/community/forum"),
+    href: getPermalink("/forum"),
     icon: "material-symbols:forum-outline",
   },
   {
     text: "nav.columns",
-    href: getPermalink("/community/columns"),
+    href: getPermalink("/columns"),
     icon: "material-symbols:article-outline",
   },
   {
     text: "nav.fileLibrary",
-    href: getPermalink("/community/files"),
+    href: getPermalink("/files"),
     icon: "material-symbols:folder-outline",
   },
   {
     text: "nav.qa",
-    href: getPermalink("/official/qa"),
+    href: getPermalink("/qa"),
     icon: "material-symbols:help-outline",
   },
   {
     text: "nav.projects",
-    href: getPermalink("/official/projects"),
+    href: getPermalink("/projects"),
     icon: "material-symbols:rocket-launch-outline",
   },
   {
     text: "nav.competition",
-    href: getPermalink("/community/competition"),
+    href: getPermalink("/competition"),
     icon: "tabler:trophy",
-  },
-  {
-    text: "nav.funding",
-    href: getPermalink("/official/funding"),
-    icon: "material-symbols:volunteer-activism-outline",
-  },
-  {
-    text: "nav.qqCommunity",
-    href: getPermalink("/official/communities"),
-    icon: "tabler:brand-qq",
   },
 ];
 

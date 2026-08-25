@@ -1,6 +1,6 @@
 ---
 title: "服务条款"
-layout: "../../layouts/MarkdownLayout.astro"
+layout: "../layouts/MarkdownLayout.astro"
 ---
 
 _最后更新_：2026年7月28日

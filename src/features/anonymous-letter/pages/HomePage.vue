@@ -13,10 +13,10 @@
           }}<span class="quote-mark">"</span>
         </div>
         <div class="hero-acts">
-          <a :href="buildUrl('/community/treehole/write')" class="btn-grad">{{
+          <a :href="buildUrl('/treehole/write')" class="btn-grad">{{
             t("treehole.writeLetter")
           }}</a>
-          <a :href="buildUrl('/community/treehole/random')" class="chip">{{
+          <a :href="buildUrl('/treehole/random')" class="chip">{{
             t("treehole.randomTreehole")
           }}</a>
         </div>

@@ -6,10 +6,10 @@ const links: NavBarLink[] = [
   { name: "主页", url: "/" },
   {
     name: "七月团队",
-    url: "/official/team",
-    children: [{ name: "管理团队", url: "/official/team" }],
+    url: "/team",
+    children: [{ name: "管理团队", url: "/team" }],
   },
-  { name: "资源", url: "/community/forum" },
+  { name: "资源", url: "/forum" },
 ];
 
 describe("filterNavbarByNames", () => {
@@ -20,7 +20,7 @@ describe("filterNavbarByNames", () => {
   it("按名称白名单过滤并保持顺序", () => {
     expect(filterNavbarByNames(links, ["资源", "主页"])).toEqual([
       { name: "主页", url: "/" },
-      { name: "资源", url: "/community/forum" },
+      { name: "资源", url: "/forum" },
     ]);
   });
 

@@ -8,13 +8,13 @@ export const officialDefaultNavItems: string[] = [
   "nav.home",
   "nav.news",
   "nav.help",
-  "nav.team",
 ];
 
 /**
  * 全站统一导航菜单池（原 config.yaml fuwari.navbar 与 fuwari.navbarCommunity 合并）。
  * 页面用 navItems 白名单（name，即 i18n key）从该池中挑选要显示的一级菜单。
  * 渲染层通过 t(name) 显示本地化文本。
+ * 已扁平化：去掉 /official 与 /community 前缀；移除已迁到静态站的官方页（team/services/contact/pricing/funding/communities/project-team 等）。
  */
 export const allMenuItems: NavBarLink[] = [
   {
@@ -30,45 +30,32 @@ export const allMenuItems: NavBarLink[] = [
   },
   {
     name: "nav.community",
-    url: "/community",
+    url: "/forum",
     children: [
-      { name: "nav.communityHome", url: "/community" },
-      { name: "nav.forum", url: "/community/forum" },
-      { name: "nav.columns", url: "/community/columns" },
-      { name: "nav.qa", url: "/official/qa" },
-      { name: "nav.competition", url: "/community/competition" },
+      { name: "nav.forum", url: "/forum" },
+      { name: "nav.columns", url: "/columns" },
+      { name: "nav.fileLibrary", url: "/files" },
+      { name: "nav.qa", url: "/qa" },
+      { name: "nav.competition", url: "/competition" },
     ],
   },
   {
     name: "nav.news",
-    url: "/official/news",
+    url: "/news",
     children: [
-      { name: "nav.officialAnnouncement", url: "/official/news/announcement" },
-      { name: "nav.techNews", url: "/official/news/news" },
-      { name: "nav.science", url: "/official/news/science" },
+      { name: "nav.officialAnnouncement", url: "/news/announcement" },
+      { name: "nav.techNews", url: "/news/news" },
+      { name: "nav.science", url: "/news/science" },
     ],
   },
   {
     name: "nav.help",
-    url: "/official/articles",
+    url: "/articles",
     children: [
-      { name: "nav.articleList", url: "/official/articles" },
-      { name: "nav.allCategories", url: "/official/articles/categories" },
-      { name: "nav.articleArchive", url: "/official/articles/archive" },
-      { name: "nav.aboutArticles", url: "/official/articles/about" },
-    ],
-  },
-  {
-    name: "nav.team",
-    url: "/official/team",
-    children: [
-      { name: "nav.managementTeam", url: "/official/team" },
-      { name: "nav.projectTeam", url: "/official/project-team" },
-      { name: "nav.aboutUs", url: "/blog/about" },
-      { name: "nav.services", url: "/official/services" },
-      { name: "nav.sponsorship", url: "/official/pricing" },
-      { name: "nav.contactUs", url: "/official/contact" },
-      { name: "nav.qqCommunity", url: "/official/communities" },
+      { name: "nav.articleList", url: "/articles" },
+      { name: "nav.allCategories", url: "/articles/categories" },
+      { name: "nav.articleArchive", url: "/articles/archive" },
+      { name: "nav.aboutArticles", url: "/articles/about" },
     ],
   },
   {
@@ -83,15 +70,14 @@ export const allMenuItems: NavBarLink[] = [
   },
   {
     name: "nav.resources",
-    url: "/community/forum",
+    url: "/forum",
     children: [
-      { name: "nav.forum", url: "/community/forum" },
-      { name: "nav.columns", url: "/community/columns" },
-      { name: "nav.fileLibrary", url: "/community/files" },
-      { name: "nav.qa", url: "/official/qa" },
-      { name: "nav.projects", url: "/official/projects" },
-      { name: "nav.competition", url: "/community/competition" },
-      { name: "nav.funding", url: "/official/funding" },
+      { name: "nav.forum", url: "/forum" },
+      { name: "nav.columns", url: "/columns" },
+      { name: "nav.fileLibrary", url: "/files" },
+      { name: "nav.qa", url: "/qa" },
+      { name: "nav.projects", url: "/projects" },
+      { name: "nav.competition", url: "/competition" },
       { name: "nav.moreApps", url: "/apps" },
     ],
   },

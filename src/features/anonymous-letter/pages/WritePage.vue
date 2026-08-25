@@ -313,10 +313,10 @@
           <h2 class="modal-title">{{ t("treehole.write.successTitle") }}</h2>
           <p class="modal-desc">{{ successMsg }}</p>
           <div class="modal-actions">
-            <a :href="buildUrl('/community/treehole')" class="btn-grad">{{
+            <a :href="buildUrl('/treehole')" class="btn-grad">{{
               t("treehole.write.backToSquare")
             }}</a>
-            <a :href="buildUrl('/community/treehole/mine')" class="chip">{{
+            <a :href="buildUrl('/treehole/mine')" class="chip">{{
               t("treehole.write.myMailbox")
             }}</a>
             <button class="btn-text" @click="writeAnother">

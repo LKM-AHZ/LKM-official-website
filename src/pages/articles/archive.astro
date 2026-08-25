@@ -57,7 +57,7 @@ const metadata = { title: `${t('page.articles.archiveTitle')} —— LKM` };
 <Layout
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
-  currentPath={getPermalink('/official/articles')}
+  currentPath={getPermalink('/articles')}
   navItems={['nav.home', 'nav.news', 'nav.team', 'nav.resources']}
 >
   <div class="space-y-6">
@@ -94,7 +94,7 @@ const metadata = { title: `${t('page.articles.archiveTitle')} —— LKM` };
               <div class="space-y-3">
                 {monthGroup.articles.map((article) => (
                   <a
-                    href={getPermalink(`/official/articles/${article.slug}`)}
+                    href={getPermalink(`/articles/${article.slug}`)}
                     class="flex items-center justify-between gap-4 border-b border-surface-3 pb-3 hover:text-primary transition-colors group"
                   >
                     <span class="text-deep-text group-hover:text-primary transition-colors">{article.title}</span>

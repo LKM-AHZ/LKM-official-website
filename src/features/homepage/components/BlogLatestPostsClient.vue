@@ -6,7 +6,7 @@ import { NEWS_CATEGORY_SLUGS } from "~/lib/api/modules/official-articles";
 
 /**
  * 首页「最新新闻」卡片。
- * 服务端（official/index.astro）已按三大新闻分类（官方公告/科技新闻/科普相关）过滤，
+ * 服务端（index.astro 首页）已按三大新闻分类（官方公告/科技新闻/科普相关）过滤，
  * 客户端兜底 fetch 时也按同一分类过滤，保证行为一致。
  */
 interface ServerArticle {
@@ -79,7 +79,7 @@ onMounted(async () => {
     <a
       v-for="article in articles"
       :key="article.slug"
-      :href="`${baseUrl}official/articles/${article.slug}`"
+      :href="`${baseUrl}articles/${article.slug}`"
       class="profile-card group flex flex-col"
     >
       <div class="profile-inner h-full flex flex-col">
