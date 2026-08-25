@@ -45,7 +45,10 @@ onMounted(async () => {
     // 响应条目含 published 原始日期字段（与 ServerArticle 渲染形状不同）
     const { data } = await fetchWithCache<{
       items: Array<
-        Omit<ServerArticle, "publishedText"> & { published: string; category: string }
+        Omit<ServerArticle, "publishedText"> & {
+          published: string;
+          category: string;
+        }
       >;
       total: number;
     }>("/api/v1/articles?page=1&page_size=30", CACHE_KEY, CACHE_TTL);

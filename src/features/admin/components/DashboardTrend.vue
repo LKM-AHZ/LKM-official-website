@@ -49,7 +49,8 @@ onMounted(async () => {
     const res = await adminFetch("/api/v1/admin/stats/trend?days=14");
     const body = await readAdminResp(res);
     // 无数据时 items 为空仍渲染空折线，不报错
-    const items = ((body.data as { items?: TrendItem[] }).items ?? []) as TrendItem[];
+    const items = ((body.data as { items?: TrendItem[] }).items ??
+      []) as TrendItem[];
     render({
       tooltip: { trigger: "axis" },
       legend: { data: [t("admin.trend.users"), t("admin.trend.posts")] },

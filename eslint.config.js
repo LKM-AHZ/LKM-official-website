@@ -107,6 +107,13 @@ export default [
     },
   },
   {
+    // 测试文件豁免返回类型标注：测试常用简洁箭头函数，结果由断言/泛型承载。
+    files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
+    },
+  },
+  {
     files: [
       "src/features/shell/common/components/Analytics.astro",
       "src/features/shell/common/components/Analytics.astro/**",
@@ -143,15 +150,15 @@ export default [
   },
   {
     ignores: [
-      "dist",
-      "packages/*/dist",
-      "node_modules",
-      ".github",
-      "reference",
-      "types.generated.d.ts",
-      ".astro",
-      ".claude",
-      ".superpowers",
+      "**/dist",
+      "**/node_modules",
+      "**/.astro",
+      "**/.turbo",
+      "**/.github",
+      "**/.claude",
+      "**/.superpowers",
+      "**/reference",
+      "**/types.generated.d.ts",
       "src/layouts/BlogLayout.astro",
       "src/layouts/OfficialBlogLayout.astro",
       "src/layouts/CommunityBlogLayout.astro",

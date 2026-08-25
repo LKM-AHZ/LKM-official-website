@@ -65,9 +65,7 @@
               <div class="item-acts">
                 <a
                   v-if="['pending', 'rejected', 'scheduled'].includes(l.status)"
-                  :href="
-                    buildUrl('/treehole/write') + '?letterId=' + l.id
-                  "
+                  :href="buildUrl('/treehole/write') + '?letterId=' + l.id"
                   class="mini"
                   >{{ t("treehole.mine.edit") }}</a
                 >
@@ -110,9 +108,7 @@
               <span>{{ timeText(d.updatedAt) }}</span>
               <div class="item-acts">
                 <a
-                  :href="
-                    buildUrl('/treehole/write') + '?draftId=' + d.id
-                  "
+                  :href="buildUrl('/treehole/write') + '?draftId=' + d.id"
                   class="mini"
                   >{{ t("treehole.mine.continueEdit") }}</a
                 >

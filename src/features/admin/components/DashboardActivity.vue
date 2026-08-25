@@ -26,37 +26,40 @@ const loading = ref(true);
 async function fetchUsers() {
   const res = await adminFetch("/api/v1/admin/users?size=5");
   const body = await readAdminResp(res);
-  return (body.data as { items: Array<{ username: string; created_at?: string }> }).items
-    .map((u) => ({
-      key: `u${u.username}`,
-      label: u.username,
-      time: u.created_at,
-      to: "/admin/users",
-    }));
+  return (
+    body.data as { items: Array<{ username: string; created_at?: string }> }
+  ).items.map((u) => ({
+    key: `u${u.username}`,
+    label: u.username,
+    time: u.created_at,
+    to: "/admin/users",
+  }));
 }
 
 async function fetchPosts() {
   const res = await adminFetch("/api/v1/forum/posts?page=1&limit=5");
   const body = await readAdminResp(res);
-  return (body.data as { items: Array<{ title: string; created_at?: string }> }).items
-    .map((p) => ({
-      key: `p${p.title}`,
-      label: p.title,
-      time: p.created_at,
-      to: "/admin/posts",
-    }));
+  return (
+    body.data as { items: Array<{ title: string; created_at?: string }> }
+  ).items.map((p) => ({
+    key: `p${p.title}`,
+    label: p.title,
+    time: p.created_at,
+    to: "/admin/posts",
+  }));
 }
 
 async function fetchReports() {
   const res = await adminFetch("/api/v1/admin/reports");
   const body = await readAdminResp(res);
-  return (body.data as { items: Array<{ target_title: string; created_at?: string }> }).items
-    .map((r) => ({
-      key: `r${r.target_title}`,
-      label: r.target_title,
-      time: r.created_at,
-      to: "/admin/reports",
-    }));
+  return (
+    body.data as { items: Array<{ target_title: string; created_at?: string }> }
+  ).items.map((r) => ({
+    key: `r${r.target_title}`,
+    label: r.target_title,
+    time: r.created_at,
+    to: "/admin/reports",
+  }));
 }
 
 /** 把某组请求结果写入对应分组的 rows；失败时仅降级为空数组 + 用 console.error
@@ -94,7 +97,9 @@ onMounted(async () => {
           <n-list-item>
             <div class="flex items-center justify-between gap-2">
               <span class="truncate text-sm">{{ r.label }}</span>
-              <span v-if="r.time" class="text-xs text-text-muted shrink-0">{{ r.time }}</span>
+              <span v-if="r.time" class="text-xs text-text-muted shrink-0">{{
+                r.time
+              }}</span>
             </div>
           </n-list-item>
         </a>

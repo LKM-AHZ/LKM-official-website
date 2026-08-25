@@ -60,7 +60,8 @@ describe("usePagination (cursor)", () => {
     const loader = async (cursor: string | null) => {
       if (cursor === null)
         return ok({ items: [{ id: 1 }], next_cursor: "cur2" });
-      if (cursor === "cur2") return ok({ items: [{ id: 2 }], next_cursor: null });
+      if (cursor === "cur2")
+        return ok({ items: [{ id: 2 }], next_cursor: null });
       return ok({ items: [], next_cursor: null });
     };
     const pag = usePagination<{ id: number }>({ cursorLoader: loader });
@@ -76,8 +77,7 @@ describe("usePagination (cursor)", () => {
 
   it("游标模式失败不丢已加载项", async () => {
     const loader = async (cursor: string | null) => {
-      if (cursor === null)
-        return ok({ items: [{ id: 1 }], next_cursor: "c2" });
+      if (cursor === null) return ok({ items: [{ id: 1 }], next_cursor: "c2" });
       return err(new AppError(ErrorCode.HTTP_TIMEOUT, "超时"));
     };
     const pag = usePagination<{ id: number }>({ cursorLoader: loader });
