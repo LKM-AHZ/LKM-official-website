@@ -8,25 +8,12 @@
 //  - 每个模块的 API 返回 Result<T, AppError>
 
 export { blogApi } from "./modules/blog";
-export {
-  fetchAllArticles,
-  fetchArticleCategories,
-  categoryLabel,
-} from "./modules/official-articles";
 export type {
   OfficialArticle,
-  OfficialArticleListData,
-  OfficialArticleCategory,
   ArticleDetail,
 } from "./modules/official-articles";
-export { competitionApi } from "./modules/competition";
-export { qaApi } from "./modules/qa";
-export { projectApi } from "./modules/project";
 export { fileLibraryApi } from "./modules/file-library";
-export { treeholeApi } from "./modules/treehole";
-export { teamApi } from "./modules/team";
 export { authApi } from "./modules/auth";
-export { notificationApi } from "./modules/notification";
 export { pointsApi } from "./modules/points";
 export type * from "./modules/points";
 export { followApi } from "./modules/follow";

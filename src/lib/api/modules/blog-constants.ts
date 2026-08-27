@@ -29,7 +29,6 @@ export const BLOG_API = {
   articles: {
     list: "/api/v1/articles",
     detail: (slug: string) => `/api/v1/articles/${slug}`,
-    prevNext: (slug: string) => `/api/v1/articles/${slug}/prev-next`,
     like: (slug: string) => `/api/v1/articles/${slug}/like`,
     comments: {
       list: (slug: string) => `/api/v1/articles/${slug}/comments`,

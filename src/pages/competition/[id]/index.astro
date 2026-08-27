@@ -6,7 +6,6 @@ import { getPermalink } from '~/lib/utils/permalinks';
 import { t } from '~/lib/i18n';
 
 // server 模式：params 从 URL 直接解析
-// 后端就绪后切换为：const comp = await competitionApi.getCompetition(id)
 const { id } = Astro.params;
 const comp = mockCompetitions.find((c) => c.id === id);
 
