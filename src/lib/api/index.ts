@@ -20,7 +20,6 @@ export type {
   ArticleDetail,
 } from "./modules/official-articles";
 export { competitionApi } from "./modules/competition";
-export { columnApi } from "./modules/column";
 export { qaApi } from "./modules/qa";
 export { projectApi } from "./modules/project";
 export { fileLibraryApi } from "./modules/file-library";
