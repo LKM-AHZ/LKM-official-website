@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { allMenuItems } from "../menus";
 
 describe("menus", () => {
-  it("统一菜单池含 8 个一级项", () => {
-    expect(allMenuItems.length).toBe(8);
+  it("统一菜单池含 4 个一级项（news/help/blog 已并入论坛入口 nav.community）", () => {
+    expect(allMenuItems.length).toBe(4);
   });
 
   it("一级 name 全部唯一（主页与社区主页已区分）", () => {
@@ -18,11 +18,16 @@ describe("menus", () => {
     });
   });
 
-  it("七月团队子项 7 个且唯一", () => {
-    const team = allMenuItems.find((item) => item.name === "nav.team");
-    expect(team).toBeTruthy();
-    const childNames = team!.children!.map((child) => child.name);
-    expect(childNames).toHaveLength(7);
-    expect(new Set(childNames).size).toBe(childNames.length);
+  it("nav.community 是唯一内容入口（/forum）", () => {
+    const community = allMenuItems.find((item) => item.name === "nav.community");
+    expect(community).toBeTruthy();
+    expect(community!.url).toBe("/forum");
+  });
+
+  it("内容区（news/help/blog）已不在顶级菜单", () => {
+    const names = allMenuItems.map((item) => item.name);
+    expect(names).not.toContain("nav.news");
+    expect(names).not.toContain("nav.help");
+    expect(names).not.toContain("nav.blog");
   });
 });

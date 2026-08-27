@@ -6,8 +6,8 @@ import type { NavBarLink } from "~/types/config";
  */
 export const officialDefaultNavItems: string[] = [
   "nav.home",
-  "nav.news",
-  "nav.help",
+  "nav.community",
+  "nav.resources",
 ];
 
 /**
@@ -37,35 +37,6 @@ export const allMenuItems: NavBarLink[] = [
       { name: "nav.fileLibrary", url: "/files" },
       { name: "nav.qa", url: "/qa" },
       { name: "nav.competition", url: "/competition" },
-    ],
-  },
-  {
-    name: "nav.news",
-    url: "/news",
-    children: [
-      { name: "nav.officialAnnouncement", url: "/news/announcement" },
-      { name: "nav.techNews", url: "/news/news" },
-      { name: "nav.science", url: "/news/science" },
-    ],
-  },
-  {
-    name: "nav.help",
-    url: "/articles",
-    children: [
-      { name: "nav.articleList", url: "/articles" },
-      { name: "nav.allCategories", url: "/articles/categories" },
-      { name: "nav.articleArchive", url: "/articles/archive" },
-      { name: "nav.aboutArticles", url: "/articles/about" },
-    ],
-  },
-  {
-    name: "nav.blog",
-    url: "/blog",
-    children: [
-      { name: "nav.blogList", url: "/blog" },
-      { name: "nav.allCategories", url: "/blog/categories" },
-      { name: "nav.archive", url: "/blog/archive" },
-      { name: "nav.aboutBlog", url: "/blog/about" },
     ],
   },
   {

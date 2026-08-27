@@ -1,32 +1,23 @@
 ---
 import Layout from '~/layouts/CommunitySidebarLayout.astro';
 import { Icon } from 'astro-icon/components';
-import { getCategoryBySlug } from '~/features/forum/data/categories';
 import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
 import PostInteractions from '~/features/forum/components/PostInteractions.vue';
 import CommentSection from '~/features/forum/components/CommentSection.vue';
-import PostCard from '~/features/forum/components/PostCard.astro';
 import { getPermalink } from '~/lib/utils/permalinks';
 import { sanitizeHtmlContent } from '~/lib/utils/html-sanitize';
-import { forumApi } from '~/lib/api';
-import type { GqlPost } from '~/features/forum/graphql';
+import { contentApi, type ContentItem } from '~/lib/api/modules/content';
 import { t } from '~/lib/i18n';
 
 const { postId } = Astro.params;
 
-// 通过 forumApi 获取帖子详情（统一数据访问层）
-const postResult = await forumApi.getPostDetail(Number(postId));
-const post = postResult.data?.post;
+// 统一内容详情：讨论帖 / 官方文章 / 专栏连载 / 博客发布产物统一读取
+const res = await contentApi.getItem(Number(postId));
+const post = res.isOk() ? res.value : null;
 
 if (!post) {
   return Astro.redirect(getPermalink('/forum'));
 }
-
-const category = getCategoryBySlug(post.categoryId);
-
-// 通过 forumApi 获取相关帖子
-const relatedResult = await forumApi.listRelatedPosts(post.categoryId, post.id);
-const relatedPosts = relatedResult.data?.posts?.items ?? [];
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('zh-CN', {
@@ -38,14 +29,23 @@ function formatDate(dateStr: string): string {
   });
 }
 
-const authorName = post.author?.displayName ?? t('page.communityDetail.forum.anonymousUser');
+const authorName = post.author_name || post.publisher || t('page.communityDetail.forum.anonymousUser');
+
+// 内容体裁判别中文标签（讨论/官方/专栏/博客）
+const CONTENT_TYPE_LABEL: Record<string, string> = {
+  discussion: '讨论',
+  article: '官方文章',
+  column_post: '专栏',
+  blog_post: '博客',
+};
+const metadata = { title: `${post.title} —— LKM` };
 ---
 
 <Layout
-  metadata={{ title: `${post.title} —— LKM` }}
+  metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={getPermalink(`/forum/post/${postId}`)}
-  navItems={['社区主页', '博客', '资源', '我的']}
+  navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}
 >
   <div class="space-y-6">
     <!-- 面包屑 -->
@@ -54,35 +54,32 @@ const authorName = post.author?.displayName ?? t('page.communityDetail.forum.ano
         {t('page.communityDetail.forum.forum')}
       </a>
       <Icon name="tabler:chevron-right" class="w-3.5 h-3.5" />
-      {
-        category && (
-          <>
-            <a href={getPermalink(`/forum/${category.slug}`)} class="hover:text-primary transition-colors">
-              {t(category.name)}
-            </a>
-            <Icon name="tabler:chevron-right" class="w-3.5 h-3.5" />
-          </>
-        )
-      }
       <span class="text-text-muted truncate">{post.title}</span>
     </div>
 
-    <!-- 帖子正文 -->
+    <!-- 正文 -->
     <article>
       <!-- 标题区 -->
       <div class="mb-6">
         <div class="flex items-center gap-2 mb-2">
           {
-            post.isPinned && (
+            post.is_pinned && (
               <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400">
                 <Icon name="tabler:pin" class="w-3 h-3" /> {t('page.communityDetail.forum.pinned')}
               </span>
             )
           }
           {
-            post.isFeatured && (
+            post.is_featured && (
               <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400">
                 <Icon name="tabler:star-filled" class="w-3 h-3" /> {t('page.communityDetail.forum.featured')}
+              </span>
+            )
+          }
+          {
+            post.content_type !== 'discussion' && (
+              <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-primary/10 text-primary">
+                {CONTENT_TYPE_LABEL[post.content_type] ?? post.content_type}
               </span>
             )
           }
@@ -90,12 +87,18 @@ const authorName = post.author?.displayName ?? t('page.communityDetail.forum.ano
         <h1 class="text-2xl md:text-3xl font-bold text-deep-text leading-tight">{post.title}</h1>
         <div class="flex flex-wrap items-center gap-3 mt-4 text-sm text-text-muted/60">
           <span>{authorName}</span>
+          {post.department && (
+            <>
+              <span>·</span>
+              <span>{post.department}</span>
+            </>
+          )}
           <span>·</span>
-          <span>{formatDate(post.createdAt)}</span>
+          <span>{formatDate(post.created_at)}</span>
           <span>·</span>
           <span>
             <Icon name="tabler:eye" class="w-4 h-4 inline mr-1" />
-            {t('page.communityDetail.forum.views', { count: post.viewCount })}
+            {t('page.communityDetail.forum.views', { count: post.view_count })}
           </span>
         </div>
         {
@@ -117,9 +120,9 @@ const authorName = post.author?.displayName ?? t('page.communityDetail.forum.ano
       <!-- 交互栏 -->
       <PostInteractions
         client:visible
-        likeCount={post.likeCount}
-        bookmarkCount={post.bookmarkCount}
-        forwardCount={post.forwardCount}
+        likeCount={post.like_count}
+        bookmarkCount={post.bookmark_count}
+        forwardCount={post.forward_count}
       />
 
       <!-- 评论 -->
@@ -127,19 +130,5 @@ const authorName = post.author?.displayName ?? t('page.communityDetail.forum.ano
         <CommentSection client:visible postId={String(post.id)} />
       </div>
     </article>
-
-    <!-- 相关推荐 -->
-    {
-      relatedPosts.length > 0 && (
-        <div class="border-t border-surface-3 pt-6 mt-6">
-          <h3 class="font-semibold text-deep-text mb-4">{t('page.communityDetail.forum.related')}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {relatedPosts.map((rp: GqlPost) => (
-              <PostCard post={rp} />
-            ))}
-          </div>
-        </div>
-      )
-    }
   </div>
 </Layout>

@@ -38,16 +38,16 @@
                 {{ t("community.forum.selectCategory") }}
               </option>
               <optgroup
-                v-for="root in rootCategories"
+                v-for="root in rootBoards"
                 :key="root.id"
-                :label="root.name"
+                :label="root.title"
               >
                 <option
-                  v-for="child in getChildren(root.id)"
+                  v-for="child in childrenOf(root.id)"
                   :key="child.id"
                   :value="child.id"
                 >
-                  {{ child.name }}
+                  {{ child.title }}
                 </option>
               </optgroup>
             </select>
@@ -137,9 +137,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
-import { getRootCategories, getChildCategories } from "../data/categories";
+import { contentApi, type BoardItem } from "~/lib/api/modules/content";
+import { useAuthStore } from "~/stores/auth";
 import { t } from "~/lib/i18n";
 
 const visible = ref(false);
@@ -148,13 +149,19 @@ const title = ref("");
 const content = ref("");
 const tags = ref<string[]>([]);
 const tagInput = ref("");
+const submitting = ref(false);
 
-const rootCategories = getRootCategories();
-const getChildren = getChildCategories;
+const auth = useAuthStore();
+const boards = ref<BoardItem[]>([]);
 
 const canSubmit = computed(
-  () => selectedCategory.value && title.value.trim() && content.value.trim(),
+  () => selectedCategory.value && title.value.trim() && content.value.trim() && !submitting.value,
 );
+
+const rootBoards = computed(() => boards.value.filter((b) => b.parent_id == null));
+function childrenOf(parentId: number): BoardItem[] {
+  return boards.value.filter((b) => b.parent_id === parentId);
+}
 
 function addTag() {
   const tag = tagInput.value.trim();
@@ -164,31 +171,54 @@ function addTag() {
   tagInput.value = "";
 }
 
-function open() {
+async function open() {
+  const res = await contentApi.listBoards();
+  if (res.isOk()) {
+    boards.value = res.value?.items ?? [];
+  }
   visible.value = true;
 }
 
 function close() {
-  visible.value = false;
+  if (!submitting.value) visible.value = false;
 }
 
-function submit() {
+async function submit() {
   if (!canSubmit.value) return;
-  alert(
-    t("community.forum.publishSuccess", {
-      title: title.value,
-      category: selectedCategory.value,
-      tags: tags.value.join(", ") || t("community.forum.none"),
-    }),
-  );
-  // 重置表单
-  selectedCategory.value = "";
-  title.value = "";
-  content.value = "";
-  tags.value = [];
-  tagInput.value = "";
-  visible.value = false;
+  if (!auth.isLoggedIn) {
+    alert("请先登录后再发布");
+    return;
+  }
+  submitting.value = true;
+  const res = await contentApi.createItem({
+    content_type: "discussion",
+    board_id: Number(selectedCategory.value),
+    title: title.value.trim(),
+    content: content.value.trim(),
+    tags: tags.value,
+  });
+  submitting.value = false;
+  if (res.isOk()) {
+    // 重置表单
+    selectedCategory.value = "";
+    title.value = "";
+    content.value = "";
+    tags.value = [];
+    tagInput.value = "";
+    visible.value = false;
+    window.location.href = `/forum/post/${res.value.id}`;
+  } else {
+    alert("发布失败，请重试");
+  }
 }
+
+// 监听全局事件：SSR 页面静态"发帖"按钮 dispatch('lkm:open-create-post') 打开弹窗
+onMounted(() => {
+  window.addEventListener("lkm:open-create-post", open);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("lkm:open-create-post", open);
+});
 
 defineExpose({ open, close });
 </script>

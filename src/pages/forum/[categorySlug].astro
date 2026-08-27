@@ -1,68 +1,63 @@
 ---
 import Layout from '~/layouts/CommunitySidebarLayout.astro';
 import { Icon } from 'astro-icon/components';
-import { getCategoryBySlug, getChildCategories } from '~/features/forum/data/categories';
 import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
-import PostCard from '~/features/forum/components/PostCard.astro';
+import ContentCard from '~/features/content/components/ContentCard.astro';
+import CreatePostDialog from '~/features/forum/components/CreatePostDialog.vue';
+import { contentApi, type BoardItem, type ContentItem } from '~/lib/api/modules/content';
 import { getPermalink } from '~/lib/utils/permalinks';
-import { forumApi } from '~/lib/api';
-import type { GqlPost } from '~/features/forum/graphql';
-import { generateMockPostsForCategory } from '~/features/forum/data/mock-posts';
 import { t } from '~/lib/i18n';
 
 const { categorySlug } = Astro.params;
-const category = getCategoryBySlug(categorySlug || '');
 
-if (!category) {
+// 板块详情：从后端解析真实板块（按 slug），并拉取其统一内容（讨论/官方/专栏/博客）
+const boardsRes = await contentApi.listBoards();
+let boards: BoardItem[] = boardsRes.isOk() ? (boardsRes.value?.items ?? []) : [];
+const board = boards.find((b) => b.slug === categorySlug);
+
+if (!board) {
   return Astro.redirect(getPermalink('/forum'));
 }
 
-const isParent = !category.parentId;
-const children = isParent ? getChildCategories(category.id) : [];
+// 子板块（父板块展示） + 本板块id
+const children = boards.filter((b) => b.parent_id === board.id);
+const boardIds = board.parent_id == null
+  ? [board.id, ...children.map((c) => c.id)]
+  : [board.id];
 
-// 通过 forumApi 获取帖子数据（统一数据访问层）
-const allCategoryIds = isParent ? [category.id, ...children.map((c) => c.id)] : [category.id];
-
-let allPosts: GqlPost[] = [];
-for (const cid of allCategoryIds) {
-  const result = await forumApi.listPostsByCategory(cid);
-  if (result.data?.posts?.items) {
-    allPosts = allPosts.concat(result.data.posts.items);
+// 拉统一内容（这里全量拉第一页，后续可加内容体裁 Tab 分类）
+let allItems: ContentItem[] = [];
+for (const bid of boardIds) {
+  const res = await contentApi.listItems({ board_id: bid, limit: 50 });
+  if (res.isOk()) {
+    allItems = allItems.concat(res.value.items ?? []);
   }
 }
 
-// 本地 mock fallback：真实后端不可用 / 无数据时，为各板块填充示例帖子，保证每个板块都有可展示内容
-// 接入真实数据后可置 false 关闭
-const useMockFallback = import.meta.env.PUBLIC_USE_FORUM_MOCK !== 'false';
-if (useMockFallback && allPosts.length === 0) {
-  allPosts = allCategoryIds.flatMap((cid) => generateMockPostsForCategory(cid, 6));
-}
-
 // 排序：置顶优先，其次按创建时间降序
-allPosts.sort((a, b) => {
-  if (a.isPinned && !b.isPinned) return -1;
-  if (!a.isPinned && b.isPinned) return 1;
-  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+allItems.sort((a, b) => {
+  if (a.is_pinned && !b.is_pinned) return -1;
+  if (!a.is_pinned && b.is_pinned) return 1;
+  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
 });
 
-const childCategories = isParent ? children : [];
-const categoryLabel = t(category.name);
-const metadata = { title: `${categoryLabel} —— LKM` };
+const boardTitle = board.title;
+const boardDesc = board.description || '';
+const boardLabel = boardTitle;
+const metadata = { title: `${boardLabel} —— LKM` };
 
-// 热门讨论：置顶 / 精华优先，其次按浏览数取前若干
-const hotPosts = allPosts
+// 热门：置顶/精华优先，其次浏览数
+const hotItems = allItems
   .slice()
   .sort((a, b) => {
-    if ((a.isPinned || a.isFeatured) !== (b.isPinned || b.isFeatured)) {
-      return a.isPinned || a.isFeatured ? -1 : 1;
+    if ((a.is_pinned || a.is_featured) !== (b.is_pinned || b.is_featured)) {
+      return a.is_pinned || a.is_featured ? -1 : 1;
     }
-    return b.viewCount - a.viewCount;
+    return b.view_count - a.view_count;
   })
   .slice(0, 6);
 
-const recentPosts = allPosts.slice(0, 24);
-// 活跃成员占位头像数量（暂以成员数封顶展示，后续可接真实成员列表接口）
-const memberAvatarCount = Math.min(category.memberCount || 0, 10);
+const recentItems = allItems.slice(0, 48);
 ---
 
 <Layout
@@ -78,7 +73,7 @@ const memberAvatarCount = Math.min(category.memberCount || 0, 10);
         {t('page.communityDetail.forum.backToSquare')}
       </a>
       <span>/</span>
-      <span class="text-deep-text font-medium">{categoryLabel}</span>
+      <span class="text-deep-text font-medium">{boardLabel}</span>
     </div>
 
     <!-- 板块头部 -->
@@ -87,29 +82,13 @@ const memberAvatarCount = Math.min(category.memberCount || 0, 10);
       <div class="relative p-5 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
           <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Icon name={category.icon} class="w-8 h-8 text-primary" />
+            <Icon name="tabler:building-community" class="w-8 h-8 text-primary" />
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <h1 class="text-2xl font-bold text-deep-text">{t(category.name)}</h1>
-              {
-                category.type === 'school_club' && (
-                  <span class="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
-                    {t('community.forum.club')}
-                  </span>
-                )
-              }
+              <h1 class="text-2xl font-bold text-deep-text">{boardLabel}</h1>
             </div>
-            <p class="text-sm text-text-muted mt-1">
-              {
-                t('page.communityDetail.forum.memberStats', {
-                  members: category.memberCount,
-                  posts: category.postCount,
-                  today: category.todayPostCount,
-                })
-              }
-            </p>
-            <p class="text-sm text-text-muted line-clamp-2 mt-2">{t(category.description)}</p>
+            <p class="text-sm text-text-muted line-clamp-2 mt-2">{boardDesc}</p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <button
@@ -121,7 +100,9 @@ const memberAvatarCount = Math.min(category.memberCount || 0, 10);
             </button>
             <button
               type="button"
+              id="create-post-btn"
               class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5"
+              onclick="window.dispatchEvent(new CustomEvent('lkm:open-create-post'))"
             >
               <Icon name="tabler:pencil-plus" class="w-4 h-4" />
               {t('page.communityDetail.forum.createPost')}
@@ -133,23 +114,20 @@ const memberAvatarCount = Math.min(category.memberCount || 0, 10);
 
     <!-- 子板块导航（一级分类时显示） -->
     {
-      childCategories.length > 0 && (
+      children.length > 0 && (
         <section class="bg-card-bg border border-surface-3 rounded-2xl p-5">
           <div class="flex items-center gap-2 mb-3">
             <Icon name="tabler:category-2" class="w-4 h-4 text-primary" />
             <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.subcategoriesTitle')}</h2>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {childCategories.map((child) => (
+            {children.map((child) => (
               <a
                 href={getPermalink(`/forum/${child.slug}`)}
                 class="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-3/50 hover:bg-primary/10 transition-colors text-sm"
               >
-                <Icon name={child.icon} class="w-4 h-4 text-primary shrink-0" />
-                <span class="text-deep-text font-medium truncate flex-1">{t(child.name)}</span>
-                <span class="text-xs text-text-muted/70 shrink-0">
-                  {child.postCount} {t('community.forum.postsShort')}
-                </span>
+                <Icon name="tabler:building-community" class="w-4 h-4 text-primary shrink-0" />
+                <span class="text-deep-text font-medium truncate flex-1">{child.title}</span>
               </a>
             ))}
           </div>
@@ -163,66 +141,37 @@ const memberAvatarCount = Math.min(category.memberCount || 0, 10);
         <Icon name="tabler:info-circle" class="w-4 h-4 text-primary" />
         <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.introTitle')}</h2>
       </div>
-      <p class="text-sm text-text-muted leading-relaxed">{t(category.description)}</p>
-    </section>
-
-    <!-- 活跃成员 -->
-    <section class="bg-card-bg border border-surface-3 rounded-2xl p-5">
-      <div class="flex items-center gap-2 mb-3">
-        <Icon name="tabler:users" class="w-4 h-4 text-primary" />
-        <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.membersTitle')}</h2>
-        <span class="text-xs text-text-muted ml-auto">
-          {t('page.communityDetail.forum.membersShort', { count: category.memberCount })}
-        </span>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        {
-          memberAvatarCount > 0 ? (
-            Array.from({ length: memberAvatarCount }).map(() => (
-              <div
-                class="w-9 h-9 rounded-full bg-primary/10 border border-surface-3 flex items-center justify-center"
-                title={t('community.forum.anonymous')}
-              >
-                <Icon name="tabler:user" class="w-4 h-4 text-text-muted" />
-              </div>
-            ))
-          ) : (
-            <p class="text-sm text-text-muted">{t('page.communityDetail.forum.emptyMembers')}</p>
-          )
-        }
-      </div>
+      <p class="text-sm text-text-muted leading-relaxed">{boardDesc}</p>
     </section>
 
     <!-- 热门讨论 -->
     {
-      hotPosts.length > 0 && (
+      hotItems.length > 0 && (
         <section>
           <div class="flex items-center gap-2 mb-3">
             <Icon name="tabler:flame" class="w-4 h-4 text-orange-500" />
             <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.hotPosts')}</h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {hotPosts.map((post) => (
-              <PostCard post={post} />
-            ))}
+            {hotItems.map((item) => <ContentCard post={item} />)}
           </div>
         </section>
       )
     }
 
-    <!-- 全部帖子 -->
+    <!-- 全部内容 -->
     <section>
       <div class="flex items-center gap-2 mb-3">
         <Icon name="tabler:news" class="w-4 h-4 text-primary" />
         <h2 class="font-semibold text-deep-text">{t('community.forum.latestPosts')}</h2>
         <span class="text-xs text-text-muted ml-auto">
-          {t('page.communityDetail.forum.postsShort', { count: allPosts.length })}
+          {t('page.communityDetail.forum.postsShort', { count: recentItems.length })}
         </span>
       </div>
       <div class="space-y-3">
         {
-          recentPosts.length > 0 ? (
-            recentPosts.map((post) => <PostCard post={post} />)
+          recentItems.length > 0 ? (
+            recentItems.map((item) => <ContentCard post={item} />)
           ) : (
             <div class="bg-card-bg border border-surface-3 rounded-xl p-12 text-center">
               <Icon name="tabler:article-off" class="w-12 h-12 text-text-muted/30 mx-auto mb-3" />
@@ -235,5 +184,7 @@ const memberAvatarCount = Math.min(category.memberCount || 0, 10);
         }
       </div>
     </section>
+
+    <CreatePostDialog client:load />
   </div>
 </Layout>
