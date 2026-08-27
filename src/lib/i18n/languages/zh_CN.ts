@@ -2114,6 +2114,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       typeArticle: "官方文章",
       typeColumnPost: "专栏",
       typeBlogPost: "博客",
+      typeQuestion: "提问",
       today: "今天",
       yesterday: "昨天",
       countTenThousand: "{count}万",

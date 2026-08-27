@@ -1,30 +1,6 @@
 ---
-import Layout from '~/layouts/OfficialSidebarLayout.astro';
-import ArticleList from '~/features/official-articles/components/ArticleList.astro';
-import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
+// 官方文章内容区已并入论坛（统一内容模型，2026-08-27）：/articles 重定向到论坛入口。
 import { getPermalink } from '~/lib/utils/permalinks';
-import { ssrFetch, logSsrError } from '~/lib/fetch-ssr';
-import type { OfficialArticle, OfficialArticleListData } from '~/lib/api/modules/official-articles';
-import { t } from '~/lib/i18n';
 
-const { data: listData, error } = await ssrFetch<OfficialArticleListData>('/api/v1/articles?page=1&page_size=50', {
-  fallback: { items: [], total: 0 },
-});
-logSsrError('文章列表', error);
-const articles = (listData?.items ?? []) as OfficialArticle[];
-
-const metadata = { title: `${t('page.articles.title')} —— LKM` };
+return Astro.redirect(getPermalink('/forum'));
 ---
-
-<Layout
-  metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
-  currentPath={getPermalink('/articles')}
-  navItems={['nav.home', 'nav.news', 'nav.team', 'nav.resources']}
->
-  <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-deep-text">{t('page.articles.title')}</h1>
-
-    <ArticleList articles={articles} error={error} />
-  </div>
-</Layout>

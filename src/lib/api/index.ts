@@ -7,7 +7,6 @@
 //  - CSR 时使用同域 /api（无跨域，由 Astro 中间件代理）
 //  - 每个模块的 API 返回 Result<T, AppError>
 
-export { forumApi } from "./modules/forum";
 export { blogApi } from "./modules/blog";
 export {
   fetchAllArticles,

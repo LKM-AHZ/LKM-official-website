@@ -5,7 +5,8 @@ export type ContentType =
   | "discussion"
   | "article"
   | "column_post"
-  | "blog_post";
+  | "blog_post"
+  | "qa";
 
 /** 板块（boards 是统一分类轴，支持父/子层级嵌套展示） */
 export interface BoardItem {
@@ -32,6 +33,7 @@ export interface ContentItem {
   department: string | null;
   column_id: number | null;
   column_title: string;
+  qa_question_id: number | null;
   slug: string | null;
   title: string;
   excerpt: string;

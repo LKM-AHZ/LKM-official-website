@@ -27,7 +27,8 @@ export type ContentType =
   | "discussion"
   | "article"
   | "column_post"
-  | "blog_post";
+  | "blog_post"
+  | "qa";
 
 export interface ContentItem {
   id: number;
@@ -39,6 +40,7 @@ export interface ContentItem {
   department: string | null;
   column_id: number | null;
   column_title: string;
+  qa_question_id: number | null;
   slug: string | null;
   title: string;
   excerpt: string;

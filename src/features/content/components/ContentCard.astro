@@ -32,14 +32,19 @@ const TYPE_KEY: Record<string, string> = {
   article: 'community.forum.typeArticle',
   column_post: 'community.forum.typeColumnPost',
   blog_post: 'community.forum.typeBlogPost',
+  qa: 'community.forum.typeQuestion',
 };
 
 const timeStr = formatTime(post.created_at);
 const authorName = post.author_name || post.publisher || t('community.forum.anonymous');
 const typeLabel = TYPE_KEY[post.content_type] ? t(TYPE_KEY[post.content_type]) : '';
+// QA 提问链接到提问详情（/qa/[id]），其余统一走论坛详情
+const detailHref = post.content_type === 'qa' && post.qa_question_id
+  ? getPermalink(`/qa/${post.qa_question_id}`)
+  : getPermalink(`/forum/post/${post.id}`);
 ---
 
-<a href={getPermalink(`/forum/post/${post.id}`)} class="profile-card group block">
+<a href={detailHref} class="profile-card group block">
   <div class="profile-inner p-4 flex flex-col gap-2.5">
     <!-- 标记：内容体裁 + 置顶/精华 -->
     <div class="flex items-center gap-2">

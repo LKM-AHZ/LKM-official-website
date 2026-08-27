@@ -583,6 +583,7 @@ export const enFlat = {
   "community.forum.typeBlogPost": "Blog post",
   "community.forum.typeColumnPost": "Column",
   "community.forum.typeDiscussion": "Discussion",
+  "community.forum.typeQuestion": "Question",
   "community.forum.viewAll": "View all",
   "community.forum.yesterday": "Yesterday",
   "community.subtitle":

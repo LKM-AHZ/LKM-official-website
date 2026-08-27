@@ -556,6 +556,7 @@ export const zhFlat = {
   "community.forum.typeBlogPost": "博客",
   "community.forum.typeColumnPost": "专栏",
   "community.forum.typeDiscussion": "讨论",
+  "community.forum.typeQuestion": "提问",
   "community.forum.viewAll": "查看全部",
   "community.forum.yesterday": "昨天",
   "community.subtitle":

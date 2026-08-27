@@ -2217,6 +2217,7 @@ export const en = {
       typeArticle: "Official Article",
       typeColumnPost: "Column",
       typeBlogPost: "Blog post",
+      typeQuestion: "Question",
       today: "Today",
       yesterday: "Yesterday",
       countTenThousand: "{count}w",

@@ -1,14 +1,6 @@
 ---
-// 兜底路由：/blog 列表、/blog/posts/[slug]、/blog/categories、/blog/tags、
-// /blog/search、/blog/about 均已迁 Astro SSR（具体路由优先于此通配），
-// 此处只兜底仍走 BlogApp SPA 的交互孤岛（archive/series）。
-import Layout from '~/layouts/CommunityLayout.astro';
-import BlogApp from '~/features/blog-community/BlogApp.vue';
+// 旧内容区已并入论坛（统一内容模型，2026-08-27）：本路由重定向到论坛入口。
+import { getPermalink } from '~/lib/utils/permalinks';
 
-const basePath = new URL(import.meta.env.BASE_URL, 'http://x').pathname.replace(/\/$/, '');
-const initialPath = (Astro.url.pathname + Astro.url.search).replace(basePath, '') || '/';
+return Astro.redirect(getPermalink('/forum'));
 ---
-
-<Layout navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}>
-  <BlogApp initialPath={initialPath} client:only="vue" />
-</Layout>
