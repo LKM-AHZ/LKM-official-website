@@ -31,12 +31,11 @@ function formatDate(dateStr: string): string {
 
 const authorName = post.author_name || post.publisher || t('page.communityDetail.forum.anonymousUser');
 
-// 内容体裁判别中文标签（讨论/官方/专栏/博客）
-const CONTENT_TYPE_LABEL: Record<string, string> = {
-  discussion: '讨论',
-  article: '官方文章',
-  column_post: '专栏',
-  blog_post: '博客',
+// 内容体裁判别（讨论帖不显示标签）
+const TYPE_KEY: Record<string, string> = {
+  article: 'community.forum.typeArticle',
+  column_post: 'community.forum.typeColumnPost',
+  blog_post: 'community.forum.typeBlogPost',
 };
 const metadata = { title: `${post.title} —— LKM` };
 ---
@@ -79,7 +78,7 @@ const metadata = { title: `${post.title} —— LKM` };
           {
             post.content_type !== 'discussion' && (
               <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-primary/10 text-primary">
-                {CONTENT_TYPE_LABEL[post.content_type] ?? post.content_type}
+                {TYPE_KEY[post.content_type] ? t(TYPE_KEY[post.content_type]) : post.content_type}
               </span>
             )
           }

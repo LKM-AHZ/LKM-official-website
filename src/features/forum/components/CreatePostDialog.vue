@@ -186,7 +186,7 @@ function close() {
 async function submit() {
   if (!canSubmit.value) return;
   if (!auth.isLoggedIn) {
-    alert("请先登录后再发布");
+    alert(t("community.forum.loginRequired"));
     return;
   }
   submitting.value = true;
@@ -208,7 +208,7 @@ async function submit() {
     visible.value = false;
     window.location.href = `/forum/post/${res.value.id}`;
   } else {
-    alert("发布失败，请重试");
+    alert(t("community.forum.publishFailed"));
   }
 }
 

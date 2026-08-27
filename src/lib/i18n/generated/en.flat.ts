@@ -544,6 +544,7 @@ export const enFlat = {
   "community.forum.justNow": "just now",
   "community.forum.latestPosts": "All posts",
   "community.forum.linkCopied": "Link copied to clipboard",
+  "community.forum.loginRequired": "Please sign in before publishing",
   "community.forum.markdownHint": "Markdown syntax supported",
   "community.forum.me": "Me",
   "community.forum.members": "members",
@@ -554,6 +555,7 @@ export const enFlat = {
   "community.forum.posts": "posts",
   "community.forum.postsShort": "posts",
   "community.forum.publish": "Publish",
+  "community.forum.publishFailed": "Publish failed, please try again",
   "community.forum.publishSuccess":
     "Post published!\nTitle: {title}\nCategory: {category}\nTags: {tags}",
   "community.forum.reply": "Reply",
@@ -577,6 +579,10 @@ export const enFlat = {
   "community.forum.titlePlaceholder": "Enter post title",
   "community.forum.today": "Today",
   "community.forum.todayPosts": "Today {count}",
+  "community.forum.typeArticle": "Official Article",
+  "community.forum.typeBlogPost": "Blog post",
+  "community.forum.typeColumnPost": "Column",
+  "community.forum.typeDiscussion": "Discussion",
   "community.forum.viewAll": "View all",
   "community.forum.yesterday": "Yesterday",
   "community.subtitle":

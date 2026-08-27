@@ -2211,6 +2211,12 @@ export const en = {
       publishSuccess:
         "Post published!\nTitle: {title}\nCategory: {category}\nTags: {tags}",
       none: "none",
+      loginRequired: "Please sign in before publishing",
+      publishFailed: "Publish failed, please try again",
+      typeDiscussion: "Discussion",
+      typeArticle: "Official Article",
+      typeColumnPost: "Column",
+      typeBlogPost: "Blog post",
       today: "Today",
       yesterday: "Yesterday",
       countTenThousand: "{count}w",

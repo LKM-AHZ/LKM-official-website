@@ -28,16 +28,15 @@ function formatCount(n: number): string {
 }
 
 // 内容体裁判别
-const TYPE_LABEL: Record<string, string> = {
-  discussion: '',
-  article: '官方',
-  column_post: '专栏',
-  blog_post: '博客',
+const TYPE_KEY: Record<string, string> = {
+  article: 'community.forum.typeArticle',
+  column_post: 'community.forum.typeColumnPost',
+  blog_post: 'community.forum.typeBlogPost',
 };
 
 const timeStr = formatTime(post.created_at);
 const authorName = post.author_name || post.publisher || t('community.forum.anonymous');
-const typeLabel = TYPE_LABEL[post.content_type] ?? '';
+const typeLabel = TYPE_KEY[post.content_type] ? t(TYPE_KEY[post.content_type]) : '';
 ---
 
 <a href={getPermalink(`/forum/post/${post.id}`)} class="profile-card group block">

@@ -518,6 +518,7 @@ export const zhFlat = {
   "community.forum.justNow": "刚刚",
   "community.forum.latestPosts": "全部帖子",
   "community.forum.linkCopied": "链接已复制到剪贴板",
+  "community.forum.loginRequired": "请先登录后再发布",
   "community.forum.markdownHint": "支持 Markdown 语法",
   "community.forum.me": "我",
   "community.forum.members": "成员",
@@ -528,6 +529,7 @@ export const zhFlat = {
   "community.forum.posts": "帖子",
   "community.forum.postsShort": "帖",
   "community.forum.publish": "发布",
+  "community.forum.publishFailed": "发布失败，请重试",
   "community.forum.publishSuccess":
     "帖子已发布！\n标题：{title}\n板块：{category}\n标签：{tags}",
   "community.forum.reply": "回复",
@@ -550,6 +552,10 @@ export const zhFlat = {
   "community.forum.titlePlaceholder": "输入帖子标题",
   "community.forum.today": "今天",
   "community.forum.todayPosts": "今日 {count}",
+  "community.forum.typeArticle": "官方文章",
+  "community.forum.typeBlogPost": "博客",
+  "community.forum.typeColumnPost": "专栏",
+  "community.forum.typeDiscussion": "讨论",
   "community.forum.viewAll": "查看全部",
   "community.forum.yesterday": "昨天",
   "community.subtitle":

@@ -2108,6 +2108,12 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       publishSuccess:
         "帖子已发布！\n标题：{title}\n板块：{category}\n标签：{tags}",
       none: "无",
+      loginRequired: "请先登录后再发布",
+      publishFailed: "发布失败，请重试",
+      typeDiscussion: "讨论",
+      typeArticle: "官方文章",
+      typeColumnPost: "专栏",
+      typeBlogPost: "博客",
       today: "今天",
       yesterday: "昨天",
       countTenThousand: "{count}万",
