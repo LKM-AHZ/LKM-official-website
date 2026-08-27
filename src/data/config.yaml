@@ -1,6 +1,6 @@
 site:
   name: 理科迷
-  site: "http://124.220.55.235"
+  site: "https://lkm-ahz.ltd"
   base: "/"
   trailingSlash: false
   googleSiteVerificationId: null
