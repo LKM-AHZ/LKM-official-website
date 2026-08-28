@@ -92,198 +92,172 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
   </button>
 </nav>
 
-<script>
-  function initSidebarScroll(): void {
-    const sidebar = document.querySelector("[data-sidebar]");
-    if (!sidebar) return;
-
-    const links = sidebar.querySelectorAll("a[href]");
-
-    const handler = (e: Event): void => {
-      const link = (e.target as HTMLElement).closest("a[href]");
-      if (!link) return;
-
-      const href = link.getAttribute("href");
-      if (!href) return;
-
-      const url = new URL(href, location.origin);
-      const isSamePage =
-        url.pathname.replace(/\/$/, "") ===
-        location.pathname.replace(/\/$/, "");
-      const hash = url.hash;
-
-      if (!hash || !isSamePage) return;
-
-      e.preventDefault();
-      const target = document.querySelector(hash);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-        history.replaceState(null, "", hash);
-        updateActive();
-      }
+<!-- 本脚本设为 is:inline：侧边栏容器 #sidebar-wrapper 现已加入 Swup containers，
+     容器内内联脚本会被 reloadScripts 在每次导航过渡时重跑。因此必须：
+     1) 用 IIFE + var 包裹，避免顶层 const/let 重复声明抛 "already declared" 中断脚本；
+     2) 各生命周期监听（document 点击委托 / window scroll / matchMedia）只注册一次（持久化到
+        window 的标记属性，IIFE 重跑不重置），仅节点态初始化每次对新 sidebar 节点重做。
+     事件改用 document 级委托：Swup 切换后旧节点被替换、新节点进入，委托监听天然覆盖新节点，
+     无需逐个节点重绑，杜绝切换多次后监听叠加导致的功能失灵（顶栏 dropdown 曾踩过此坑）。 -->
+<script is:inline>
+  (function () {
+    var currentSidebar = function () {
+      return document.querySelector("[data-sidebar]");
+    };
+    var currentMain = function () {
+      return document.querySelector("[data-main-content]");
     };
 
-    function updateActive(): void {
-      const currentHash = location.hash;
-      links.forEach((a) => {
-        const href = a.getAttribute("href");
+    // 折叠状态恢复/同步：仅在切换后对新节点调用（SSR 首帧已由 BaseLayout 内联脚本设定
+    // html.sidebar-collapsed，此处将 shell 收起态与文档级标记对齐，不触碰 main 内联 padding，
+    // 避免首帧后改布局触发 CLS）。
+    function syncToggleState() {
+      var sidebar = currentSidebar();
+      if (!sidebar) return;
+      var stored = null;
+      try {
+        stored = localStorage.getItem("sidebar-expanded");
+      } catch {
+        /* noop */
+      }
+      var mobile = window.matchMedia("(max-width: 767px)").matches;
+      var collapsed = stored !== null ? stored === "false" : mobile;
+      var prevTransition = sidebar.style.transition;
+      sidebar.style.transition = "none";
+      sidebar.classList.toggle("collapsed", collapsed);
+      document.documentElement.classList.toggle("sidebar-collapsed", collapsed);
+      void sidebar.offsetWidth;
+      sidebar.style.transition = prevTransition;
+    }
+
+    // 用户点击折叠按钮：切换展开态并持久化，同步主内容偏移。
+    function setExpanded(expanded) {
+      var sidebar = currentSidebar();
+      if (!sidebar) return;
+      var mobile = window.matchMedia("(max-width: 767px)").matches;
+      sidebar.classList.toggle("collapsed", !expanded);
+      document.documentElement.classList.toggle("sidebar-collapsed", !expanded);
+      var main = currentMain();
+      if (main) {
+        main.style.paddingLeft = (expanded ? (mobile ? 200 : 240) : (mobile ? 50 : 67)) + "px";
+      }
+      try {
+        localStorage.setItem("sidebar-expanded", String(expanded));
+      } catch {
+        /* noop */
+      }
+    }
+
+    // 依据当前路径+hash 更新 .active。跨页路径高亮由 SSR 渲染，此处仅当存在 hash 锚点
+    // 时按 hash 高亮；无 hash 时保持 SSR 的路径高亮不被误清。
+    function updateActive() {
+      var sidebar = currentSidebar();
+      if (!sidebar) return;
+      var currentHash = location.hash;
+      var currentPath = location.pathname.replace(/\/$/, "");
+      sidebar.querySelectorAll("a[href]").forEach(function (a) {
+        var href = a.getAttribute("href");
         if (!href) return;
-        const linkUrl = new URL(href, location.origin);
-        if (
-          linkUrl.pathname.replace(/\/$/, "") !==
-          location.pathname.replace(/\/$/, "")
-        )
-          return;
-
-        const li = a.closest("li");
+        var linkUrl = new URL(href, location.origin);
+        if (linkUrl.pathname.replace(/\/$/, "") !== currentPath) return;
+        var li = a.closest("li");
         if (!li) return;
-
-        const isActive = linkUrl.hash
-          ? linkUrl.hash === currentHash
-          : !currentHash;
+        var isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
         if (isActive) {
           li.classList.add("active");
-        } else {
+        } else if (!linkUrl.hash) {
           li.classList.remove("active");
         }
       });
     }
 
-    let scrollTicking = false;
-    function onScroll(): void {
-      if (!scrollTicking) {
-        requestAnimationFrame(() => {
-          const sections = [...links]
-            .map((a) => {
-              const href = a.getAttribute("href");
-              if (!href) return null;
-              const url = new URL(href, location.origin);
-              if (
-                url.pathname.replace(/\/$/, "") !==
-                  location.pathname.replace(/\/$/, "") ||
-                !url.hash
-              )
-                return null;
-              return document.querySelector(url.hash);
+    // 文档级点击委托：折叠按钮 + 锚点链接。仅注册一次（无论脚本被 reloadScripts 重跑多少次）。
+    if (!window.__lkmSidebarBound) {
+      window.__lkmSidebarBound = true;
+
+      document.addEventListener("click", function (e) {
+        var target = e.target;
+        if (target.closest && target.closest("#sidebar-toggle-btn")) {
+          var sidebar = currentSidebar();
+          if (!sidebar) return;
+          setExpanded(sidebar.classList.contains("collapsed"));
+          return;
+        }
+        var link = target.closest ? target.closest("[data-sidebar] a[href]") : null;
+        if (!link) return;
+        var href = link.getAttribute("href");
+        if (!href) return;
+        var url = new URL(href, location.origin);
+        var isSamePage =
+          url.pathname.replace(/\/$/, "") === location.pathname.replace(/\/$/, "");
+        var hash = url.hash;
+        if (!hash || !isSamePage) return;
+        e.preventDefault();
+        var anchorTarget = document.querySelector(hash);
+        if (anchorTarget) {
+          anchorTarget.scrollIntoView({ behavior: "smooth" });
+          history.replaceState(null, "", hash);
+          updateActive();
+        }
+      });
+
+      // window scroll：新 sidebar 节点替换后本监听仍生效（内部动态取当前节点）。
+      var scrollTicking = false;
+      window.addEventListener(
+        "scroll",
+        function () {
+          if (scrollTicking) return;
+          scrollTicking = true;
+          requestAnimationFrame(function () {
+            scrollTicking = false;
+            var sidebar = currentSidebar();
+            if (!sidebar) return;
+            var links = sidebar.querySelectorAll("a[href]");
+            var sections = Array.prototype.filter.call(links, function (a) {
+              var href = a.getAttribute("href");
+              if (!href) return false;
+              var url = new URL(href, location.origin);
+              return (
+                url.pathname.replace(/\/$/, "") ===
+                  location.pathname.replace(/\/$/, "") && url.hash
+              );
             })
-            .filter(Boolean) as HTMLElement[];
-
-          if (sections.length === 0) return;
-
-          let currentId = "";
-          for (const section of sections) {
-            const rect = section.getBoundingClientRect();
-            if (rect.top <= 120) {
-              currentId = "#" + section.id;
+              .map(function (a) {
+                var url = new URL(a.getAttribute("href"), location.origin);
+                return document.querySelector(url.hash);
+              })
+              .filter(Boolean);
+            if (sections.length === 0) return;
+            var currentId = "";
+            for (var i = 0; i < sections.length; i++) {
+              if (sections[i].getBoundingClientRect().top <= 120) {
+                currentId = "#" + sections[i].id;
+              }
             }
-          }
-          if (currentId && location.hash !== currentId) {
-            history.replaceState(null, "", currentId);
-            updateActive();
-          } else if (!currentId && location.hash) {
-            history.replaceState(null, "", location.pathname);
-            updateActive();
-          }
-          scrollTicking = false;
-        });
-        scrollTicking = true;
-      }
-    }
-
-    const sidebarWithHandler = sidebar as HTMLElement & {
-      _sidebarHandler?: EventListener;
-      _scrollHandler?: EventListener;
-    };
-    const prevHandler = sidebarWithHandler._sidebarHandler;
-    const prevScroll = sidebarWithHandler._scrollHandler;
-    if (prevHandler) sidebar.removeEventListener("click", prevHandler);
-    if (prevScroll) window.removeEventListener("scroll", prevScroll);
-    sidebar.addEventListener("click", handler);
-    sidebarWithHandler._sidebarHandler = handler as EventListener;
-    window.addEventListener("scroll", onScroll, { passive: true });
-    sidebarWithHandler._scrollHandler = onScroll as EventListener;
-
-    updateActive();
-  }
-
-  function initSidebarToggle(): void {
-    const btn = document.getElementById("sidebar-toggle-btn");
-    const sidebar = document.querySelector("[data-sidebar]");
-    const main = document.querySelector(
-      "[data-main-content]",
-    ) as HTMLElement | null;
-    if (!btn || !sidebar) return;
-
-    function getSizes(): { collapsed: string; expanded: string } {
-      const mq = window.matchMedia("(max-width: 767px)");
-      return {
-        collapsed: mq.matches ? "50px" : "67px",
-        expanded: mq.matches ? "200px" : "240px",
-      };
-    }
-
-    function syncMainMargin(): void {
-      if (!main) return;
-      const isExpanded = !sidebar!.classList.contains("collapsed");
-      const { collapsed, expanded } = getSizes();
-      main.style.paddingLeft = isExpanded ? expanded : collapsed;
-    }
-
-    // 展开/收起统一入口：侧边栏默认展开，收起态用显式 .collapsed。
-    // 同步 .shell 的 .collapsed、<html> 的首帧兜底标记与主内容偏移，
-    // 保证首帧内联脚本设置的 html.sidebar-collapsed 与实际收起态始终一致。
-    function setSidebarExpanded(isExpanded: boolean): void {
-      sidebar!.classList.toggle("collapsed", !isExpanded);
-      document.documentElement.classList.toggle(
-        "sidebar-collapsed",
-        !isExpanded,
+            if (currentId && location.hash !== currentId) {
+              history.replaceState(null, "", currentId);
+              updateActive();
+            } else if (!currentId && location.hash) {
+              history.replaceState(null, "", location.pathname);
+              updateActive();
+            }
+          });
+        },
+        { passive: true }
       );
-      syncMainMargin();
+
+      // 视口断点切换时重新对齐折叠态（读 localStorage 重算）。
+      window
+        .matchMedia("(max-width: 767px)")
+        .addEventListener("change", syncToggleState);
     }
 
-    // 恢复或初始化侧边栏状态（无动画）。
-    // 默认：桌面端展开、移动端收起；用户显式持久化的值优先。
-    const STORAGE_KEY = "sidebar-expanded";
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const mobile = window.matchMedia("(max-width: 767px)").matches;
-
-    const sidebarEl = sidebar as HTMLElement;
-    const prevTransition = sidebarEl.style.transition;
-    sidebarEl.style.transition = "none";
-
-    const defaultExpanded = stored !== null ? stored === "true" : !mobile;
-    // 首帧状态由 BaseLayout 内联脚本以 html.sidebar-collapsed 在 paint 前设定，
-    // CSS 已据此设置 main 偏移（见 Sidebar.module.css），此处仅同步 shell 的实际收起态，
-    // 不再内联改 main 内边距，避免首帧后改布局触发 CLS。
-    sidebar!.classList.toggle("collapsed", !defaultExpanded);
-    document.documentElement.classList.toggle(
-      "sidebar-collapsed",
-      !defaultExpanded,
-    );
-
-    // 强制回流后恢复 transition
-    void sidebarEl.offsetWidth;
-    sidebarEl.style.transition = prevTransition;
-
-    // 视口在移动/桌面间切换时，重算主内容偏移（宽度随断点变化）
-    window
-      .matchMedia("(max-width: 767px)")
-      .addEventListener("change", syncMainMargin);
-
-    btn.addEventListener("click", (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const isExpanded = !sidebar!.classList.contains("collapsed");
-      setSidebarExpanded(!isExpanded);
-      localStorage.setItem(STORAGE_KEY, String(!isExpanded));
-      syncMainMargin();
+    // 首次加载与每次 Swup 导航后：对新 sidebar 节点恢复/同步折叠态，并刷新 hash 高亮。
+    syncToggleState();
+    updateActive();
+    document.addEventListener("astro:after-swap", function () {
+      syncToggleState();
+      updateActive();
     });
-  }
-
-  initSidebarScroll();
-  initSidebarToggle();
-  document.addEventListener("astro:after-swap", () => {
-    initSidebarScroll();
-    initSidebarToggle();
-  });
+  })();
 </script>

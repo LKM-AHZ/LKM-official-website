@@ -124,12 +124,15 @@ export default [
     },
   },
   {
-    // FuwariNavbar 内联脚本在 Swup 容器内会被 reloadScripts 每次过渡重新执行，
-    // 顶层 const 重复声明会抛 "Identifier 'B' has already been declared" 中断脚本；
-    // 故 `var B` 为有意的设计（见组件内注释），豁免 no-var。
+    // FuwariNavbar / Sidebar 内联脚本位于 Swup 容器（#navbar-wrapper / #sidebar-wrapper）
+    // 内，会被 reloadScripts 每次过渡重新执行，顶层 const 重复声明会抛
+    // "Identifier 'B' has already been declared" 中断脚本；故 `var` 为有意的设计
+    // （见组件内注释），豁免 no-var。
     files: [
       "src/features/shell-official/components/FuwariNavbar.astro",
       "src/features/shell-official/components/FuwariNavbar.astro/**",
+      "src/features/homepage/components/Sidebar.astro",
+      "src/features/homepage/components/Sidebar.astro/**",
     ],
     rules: {
       "no-var": "off",

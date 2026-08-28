@@ -22,6 +22,11 @@ const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
 
 <Layout metadata={metadata} navbarLinks={navbarLinks}>
   <SiteNavbar links={navbarLinks} module="official" />
+  <!-- 侧边栏独立 Swup 容器：与 main 同范围覆盖，全站恒在（空则无视觉影响），
+       避免 fixed 侧边栏被 main 的 view-transition 过渡动画捕获而抖动 -->
+  <div id="sidebar-wrapper">
+    <slot name="sidebar" />
+  </div>
   <main>
     <slot />
   </main>
