@@ -3084,6 +3084,7 @@ export const zhFlat = {
   "timeline.refresh": "刷新",
   "timeline.title": "时间线",
   "timeline.type.article": "文章",
+  "timeline.type.blog": "博客",
   "timeline.type.column": "专栏",
   "timeline.type.forum": "论坛",
   "timeline.type.project": "项目",

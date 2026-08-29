@@ -3310,6 +3310,7 @@ export const enFlat = {
   "timeline.refresh": "Refresh",
   "timeline.title": "Timeline",
   "timeline.type.article": "Article",
+  "timeline.type.blog": "Blog",
   "timeline.type.column": "Column",
   "timeline.type.forum": "Forum",
   "timeline.type.project": "Project",

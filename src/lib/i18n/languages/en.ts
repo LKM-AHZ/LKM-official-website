@@ -480,6 +480,7 @@ export const en = {
       column: "Column",
       qa: "QA",
       project: "Project",
+      blog: "Blog",
     },
   },
 

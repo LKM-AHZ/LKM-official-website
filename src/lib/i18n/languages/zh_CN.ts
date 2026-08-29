@@ -475,6 +475,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       column: "专栏",
       qa: "问答",
       project: "项目",
+      blog: "博客",
     },
   },
 
