@@ -3,9 +3,22 @@
 // 收敛五套旧内容模块（forum / articles / columns / blog 阅读 / news）为单一
 // contentApi：讨论帖、官方文章、专栏连载、博客发布产物统一为 ContentItem，
 // 由 content_type 判别，board_id 作统一分类轴。
+//
+// 读方法（listBoards / listItems / getItem / getItemBySlug / listComments）
+// 走 GraphQL 只读查询（urql graphqlClient），将后端 camelCase 字段映射为
+// snake_case 公共类型；写方法（create/delete/like/createComment）保留 REST。
 
-import { get, post, del } from "../../http/client";
-import type { PaginatedResponse } from "../types";
+import { post, del } from "../../http/client";
+import { ok, err } from "../../errors/result";
+import { AppError, ErrorCode } from "../../errors/error-codes";
+import { graphqlClient } from "../graphql";
+import {
+  BOARDS,
+  CONTENT_ITEMS,
+  CONTENT_ITEM,
+  CONTENT_ITEM_BY_SLUG,
+  CONTENT_COMMENTS,
+} from "./content.graphql";
 
 export type { PaginatedResponse } from "../types";
 
@@ -24,11 +37,7 @@ export interface BoardItem {
 }
 
 export type ContentType =
-  | "discussion"
-  | "article"
-  | "column_post"
-  | "blog_post"
-  | "qa";
+  "discussion" | "article" | "column_post" | "blog_post" | "qa";
 
 export interface ContentItem {
   id: number;
@@ -92,27 +101,215 @@ export interface ContentCreateInput {
   is_featured?: boolean;
 }
 
-export const contentApi = {
-  listBoards: () => get<{ items: BoardItem[] }>("/api/v1/boards"),
+/** 统一 GraphQL 错误 → AppError（区分网络层 vs GraphQL 业务错误） */
+function mapErr(
+  error:
+    | { message: string; graphQLErrors?: { message: string }[]; networkError?: Error }
+    | string
+    | null
+    | undefined,
+): AppError {
+  if (error && typeof error === "object") {
+    // graphQLErrors = 业务/校验类错误(如字段校验、实体不存在以错误返回),
+    // networkError = 真实网络/连接失败。二者用不同 ErrorCode 区分。
+    if (error.networkError === undefined && error.graphQLErrors?.length) {
+      return new AppError(
+        ErrorCode.VALIDATION_ERROR,
+        error.graphQLErrors.map((e) => e.message).join("; ") || "graphql error",
+      );
+    }
+    return new AppError(ErrorCode.NETWORK_ERROR, error.message || "graphql error");
+  }
+  return new AppError(ErrorCode.NETWORK_ERROR, String(error || "graphql error"));
+}
 
-  listItems: (args?: {
+/** GraphBoard（camelCase）→ BoardItem（snake_case） */
+function mapBoard(b: {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  parentId: number | null;
+  ownerId: number | null;
+  status: string;
+  requireCertified: boolean;
+  dailyPostLimit: number;
+  isPublic: boolean;
+}): BoardItem {
+  return {
+    id: b.id,
+    slug: b.slug,
+    title: b.title,
+    description: b.description,
+    parent_id: b.parentId,
+    owner_id: b.ownerId,
+    status: b.status,
+    require_certified: b.requireCertified,
+    daily_post_limit: b.dailyPostLimit,
+    is_public: b.isPublic,
+  };
+}
+
+/** GraphContentItem（camelCase）→ ContentItem（snake_case） */
+function mapItem(i: {
+  id: number;
+  contentType: string;
+  boardId: number;
+  authorId: number | null;
+  authorName: string;
+  publisher: string | null;
+  department: string | null;
+  columnId: number | null;
+  columnTitle: string;
+  qaQuestionId: number | null;
+  slug: string | null;
+  title: string;
+  excerpt: string;
+  summary: string | null;
+  cover: string | null;
+  keywords: string[];
+  content: string;
+  tags: string[];
+  status: string;
+  isPinned: boolean;
+  isFeatured: boolean;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  bookmarkCount: number;
+  forwardCount: number;
+  readingTime: number;
+  createdAt: string;
+  publishedAt: string | null;
+}): ContentItem {
+  return {
+    id: i.id,
+    content_type: i.contentType as ContentType,
+    board_id: i.boardId,
+    author_id: i.authorId,
+    author_name: i.authorName,
+    publisher: i.publisher,
+    department: i.department,
+    column_id: i.columnId,
+    column_title: i.columnTitle,
+    qa_question_id: i.qaQuestionId,
+    slug: i.slug,
+    title: i.title,
+    excerpt: i.excerpt,
+    summary: i.summary,
+    cover: i.cover,
+    keywords: i.keywords,
+    content: i.content,
+    tags: i.tags,
+    status: i.status,
+    is_pinned: i.isPinned,
+    is_featured: i.isFeatured,
+    view_count: i.viewCount,
+    like_count: i.likeCount,
+    comment_count: i.commentCount,
+    bookmark_count: i.bookmarkCount,
+    forward_count: i.forwardCount,
+    reading_time: i.readingTime,
+    created_at: i.createdAt,
+    published_at: i.publishedAt,
+  };
+}
+
+/** GraphContentComment（camelCase）→ ContentComment（snake_case） */
+function mapComment(c: {
+  id: number;
+  contentId: number;
+  authorId: number;
+  authorName: string;
+  content: string;
+  floorNumber: number;
+  parentId: number | null;
+  likeCount: number;
+  createdAt: string;
+}): ContentComment {
+  return {
+    id: c.id,
+    content_id: c.contentId,
+    author_id: c.authorId,
+    author_name: c.authorName,
+    content: c.content,
+    floor_number: c.floorNumber,
+    parent_id: c.parentId,
+    like_count: c.likeCount,
+    created_at: c.createdAt,
+  };
+}
+
+export const contentApi = {
+  /** 板块列表（论坛分类轴） */
+  async listBoards() {
+    const r = await graphqlClient.query(BOARDS, {}).toPromise();
+    if (r.error) return err(mapErr(r.error));
+    const boards = (r.data?.boards ?? []).map(mapBoard);
+    return ok({ items: boards });
+  },
+
+  /** 内容列表（统一分页） */
+  async listItems(args?: {
     page?: number;
     limit?: number;
     board_id?: number;
     content_type?: ContentType;
-  }) =>
-    get<PaginatedResponse<ContentItem>>("/api/v1/content/items", {
-      page: args?.page ?? 1,
-      limit: args?.limit ?? 20,
-      ...(args?.board_id ? { board_id: args.board_id } : {}),
-      ...(args?.content_type ? { content_type: args.content_type } : {}),
-    }),
+  }) {
+    const r = await graphqlClient
+      .query(CONTENT_ITEMS, {
+        page: args?.page ?? 1,
+        pageSize: args?.limit ?? 20,
+        boardId: args?.board_id ?? null,
+        contentType: args?.content_type ?? null,
+      })
+      .toPromise();
+    if (r.error) return err(mapErr(r.error));
+    const d = r.data?.contentItems;
+    return ok({
+      items: (d?.items ?? []).map(mapItem),
+      total: d?.total ?? 0,
+      page: d?.page ?? 1,
+      pages: d?.pages ?? 1,
+    });
+  },
 
-  getItem: (id: number) => get<ContentItem>(`/api/v1/content/items/${id}`),
+  /** 按 id 取内容详情 */
+  async getItem(id: number) {
+    const r = await graphqlClient.query(CONTENT_ITEM, { id }).toPromise();
+    if (r.error) return err(mapErr(r.error));
+    if (!r.data?.contentItem)
+      return err(new AppError(ErrorCode.DOCUMENT_NOT_FOUND, "not found"));
+    return ok(mapItem(r.data.contentItem));
+  },
 
-  getItemBySlug: (slug: string) =>
-    get<ContentItem>(`/api/v1/content/by-slug/${slug}`),
+  /** 按 slug 取内容详情 */
+  async getItemBySlug(slug: string) {
+    const r = await graphqlClient
+      .query(CONTENT_ITEM_BY_SLUG, { slug })
+      .toPromise();
+    if (r.error) return err(mapErr(r.error));
+    if (!r.data?.contentItemBySlug)
+      return err(new AppError(ErrorCode.DOCUMENT_NOT_FOUND, "not found"));
+    return ok(mapItem(r.data.contentItemBySlug));
+  },
 
+  /** 评论列表（统一分页） */
+  async listComments(itemId: number, page = 1, limit = 20) {
+    const r = await graphqlClient
+      .query(CONTENT_COMMENTS, { itemId, page, pageSize: limit })
+      .toPromise();
+    if (r.error) return err(mapErr(r.error));
+    const d = r.data?.contentComments;
+    return ok({
+      items: (d?.items ?? []).map(mapComment),
+      total: d?.total ?? 0,
+      page: d?.page ?? 1,
+      pages: d?.pages ?? 1,
+    });
+  },
+
+  // —— 以下写方法保留 REST ——
   createItem: (data: ContentCreateInput) =>
     post<ContentItem>("/api/v1/content/items", data),
 
@@ -121,12 +318,6 @@ export const contentApi = {
   likeItem: (id: number) => post<void>(`/api/v1/content/items/${id}/like`),
 
   unlikeItem: (id: number) => del<void>(`/api/v1/content/items/${id}/like`),
-
-  listComments: (itemId: number, page = 1, limit = 20) =>
-    get<PaginatedResponse<ContentComment>>(
-      `/api/v1/content/items/${itemId}/comments`,
-      { page, limit },
-    ),
 
   createComment: (
     itemId: number,
