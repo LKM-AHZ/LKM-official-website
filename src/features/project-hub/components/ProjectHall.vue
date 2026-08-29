@@ -464,7 +464,6 @@ import { ref, computed, reactive, watch, nextTick, onMounted } from "vue";
 import { t } from "~/lib/i18n";
 import { projectApi, type ProjectItem as Project } from "~/lib/api/modules/projects";
 import { buildUrl } from "~/lib/utils/paths";
-import { apiFetch } from "~/lib/api";
 
 // ==================== 类型 ====================
 interface ApplyForm {
@@ -489,45 +488,6 @@ const isValidEmail = (v: string): boolean =>
 const isValidContact = (v: string): boolean =>
   isValidPhone(v) || isValidEmail(v);
 const sanitizeInput = (v: string): string => v.replace(/<[^>]*>/g, "").trim();
-
-// ==================== HTTP（无 fetch） ====================
-const getErrorMessage = (status: number): string => {
-  switch (status) {
-    case 400:
-      return t("projectHub.err400");
-    case 401:
-      return t("projectHub.err401");
-    case 403:
-      return t("projectHub.err403");
-    case 500:
-      return t("projectHub.err500");
-    default:
-      return t("projectHub.errGeneric");
-  }
-};
-
-const api = {
-  async post<T>(endpoint: string, payload: unknown): Promise<T> {
-    try {
-      const response = await apiFetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(response.status));
-      }
-
-      return response.json() as Promise<T>;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error(t("projectHub.errGeneric"), { cause: error });
-    }
-  },
-};
 
 // ==================== Toast（无 alert / any） ====================
 const toast = {
