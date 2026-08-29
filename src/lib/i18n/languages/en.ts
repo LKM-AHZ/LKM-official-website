@@ -475,7 +475,7 @@ export const en = {
     empty: "Nothing here yet.",
     loadMore: "Load more",
     type: {
-      forum: "Forum",
+      discussion: "Discussion",
       article: "Article",
       column: "Column",
       qa: "QA",

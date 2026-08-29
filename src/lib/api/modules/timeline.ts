@@ -3,7 +3,8 @@
 
 import { get } from "../../http/client";
 
-export type FeedItemType = "forum" | "article" | "column" | "qa" | "project" | "blog";
+export type FeedItemType =
+  "discussion" | "article" | "column" | "qa" | "project" | "blog";
 
 export interface FeedItem {
   item_type: FeedItemType;

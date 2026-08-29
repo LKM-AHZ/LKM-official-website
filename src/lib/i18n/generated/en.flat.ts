@@ -3312,7 +3312,7 @@ export const enFlat = {
   "timeline.type.article": "Article",
   "timeline.type.blog": "Blog",
   "timeline.type.column": "Column",
-  "timeline.type.forum": "Forum",
+  "timeline.type.discussion": "Discussion",
   "timeline.type.project": "Project",
   "timeline.type.qa": "QA",
   "treehole.anonymous": "Anonymous",

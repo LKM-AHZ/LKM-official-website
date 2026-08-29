@@ -3086,7 +3086,7 @@ export const zhFlat = {
   "timeline.type.article": "文章",
   "timeline.type.blog": "博客",
   "timeline.type.column": "专栏",
-  "timeline.type.forum": "论坛",
+  "timeline.type.discussion": "讨论",
   "timeline.type.project": "项目",
   "timeline.type.qa": "问答",
   "treehole.anonymous": "匿名",

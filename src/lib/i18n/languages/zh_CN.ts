@@ -470,7 +470,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     empty: "这里还没有内容。",
     loadMore: "加载更多",
     type: {
-      forum: "论坛",
+      discussion: "讨论",
       article: "文章",
       column: "专栏",
       qa: "问答",
