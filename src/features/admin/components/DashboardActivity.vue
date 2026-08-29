@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 后台控制台最近活动 —— 复用现有只读端点，三组独立容错。
 //
-// 三组数据分别来自 /admin/users、/forum/posts、/admin/reports，均解包 data.items
+// 三组数据分别来自 /admin/users、/admin/content/items、/admin/reports，均解包 data.items
 // 组装为「可点击行」。用 Promise.allSettled 让单组请求失败（rejected → 空数组）
 // 不至于拖垮整页，任一组的失败只影响当期卡片（展示「暂无数据」兜底）。
 import { ref, onMounted } from "vue";
@@ -37,7 +37,7 @@ async function fetchUsers() {
 }
 
 async function fetchPosts() {
-  const res = await adminFetch("/api/v1/forum/posts?page=1&limit=5");
+  const res = await adminFetch("/api/v1/admin/content/items?page=1&limit=5");
   const body = await readAdminResp(res);
   return (
     body.data as { items: Array<{ title: string; created_at?: string }> }

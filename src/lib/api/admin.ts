@@ -9,7 +9,7 @@
 //  - 底层走 src/lib/api/fetch.ts 的 apiFetch（统一 base URL + timeout + Result），
 //    符合仓库"不直接调 fetch"的约束。
 //  - 路径前缀用 /api/v1/admin：src/middleware.ts 只代理 /api/ 开头并**原样转发**路径，
-//    与仓库其余调用一致（如 /api/v1/forum/...），cookie Path=/api/v1/admin 也与之匹配。
+//    与仓库其余调用一致（如 /api/v1/admin/content/items），cookie Path=/api/v1/admin 也与之匹配。
 
 import { apiFetch } from "~/lib/api/fetch";
 import { t } from "~/lib/i18n";

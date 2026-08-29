@@ -7,7 +7,7 @@ interface AdminPostRow {
   id: number;
   title: string;
   author_name: string;
-  category_id: string;
+  board_id: number;
   view_count: number;
   comment_count: number;
   created_at: string;
@@ -19,7 +19,7 @@ const { items, total, page, totalPages, loading, error, refresh, goTo } =
       page: String(page),
       limit: String(limit),
     });
-    return `/api/v1/forum/posts?${params.toString()}`;
+    return `/api/v1/admin/content/items?${params.toString()}`;
   }, 20);
 
 const rows = items;
@@ -76,7 +76,7 @@ onMounted(() => void refresh());
               {{ p.author_name || "—" }}
             </td>
             <td class="px-4 py-3 hidden md:table-cell text-text-muted">
-              {{ p.category_id }}
+              {{ p.board_id }}
             </td>
             <td class="px-4 py-3 text-text-muted">{{ p.view_count }}</td>
             <td class="px-4 py-3 hidden md:table-cell text-text-muted">
