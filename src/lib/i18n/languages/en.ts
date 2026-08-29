@@ -3247,6 +3247,7 @@ export const en = {
       tabVolunteer: "Volunteer / Major recommendations",
       yesterday: "Yesterday",
       daysAgo: "{count} days ago",
+      empty: "No questions yet",
     },
 
     projects: {

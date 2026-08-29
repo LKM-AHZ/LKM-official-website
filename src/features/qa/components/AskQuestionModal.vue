@@ -249,6 +249,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { t } from "~/lib/i18n";
+import { qaApi } from "~/lib/api/modules/qa";
 import {
   QA_DRAFT_STORAGE_KEY,
   computeTotalBounty,
@@ -262,8 +263,14 @@ import {
   saveImageBlob,
 } from "../../editor/persistence/image-store";
 
-const props = defineProps<{ show: boolean }>();
-const emit = defineEmits<{ "update:show": [value: boolean] }>();
+const props = defineProps<{
+  show: boolean;
+  category?: "help" | "volunteer";
+}>();
+const emit = defineEmits<{
+  "update:show": [value: boolean];
+  published: [];
+}>();
 
 type FieldKey = keyof QaDraft;
 
@@ -481,10 +488,24 @@ function handleSaveDraft(): void {
 async function handlePublish(): Promise<void> {
   if (!validate()) return;
   const refs = [...formModel.images];
+  const created = await qaApi.createQuestion({
+    title: formModel.title,
+    situation: formModel.situation,
+    content: formModel.detail,
+    category: props.category ?? "help",
+    bountyPeople: formModel.bountyPeople ?? 1,
+    bountyPerPerson: formModel.bountyPerPerson ?? 0,
+  });
   clearDraft();
   resetForm();
-  showToast(t("page.qa.publishedToast"));
-  emit("update:show", false);
+  if (created) {
+    showToast(t("page.qa.publishedToast"));
+    emit("published");
+    emit("update:show", false);
+  } else {
+    showToast(t("common.loadFailed"));
+    return;
+  }
   await deleteImageBlobs(refs);
 }
 

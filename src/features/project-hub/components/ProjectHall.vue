@@ -51,7 +51,13 @@
     </div>
 
     <!-- 项目卡片列表 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div
+      v-if="loading"
+      class="text-sm text-text-muted py-12 text-center"
+    >
+      {{ t("common.loading") }}
+    </div>
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <a
         v-for="proj in filteredProjects"
         :key="proj.id"
@@ -76,10 +82,10 @@
           <h3
             class="font-bold text-deep-text group-hover:text-primary transition-colors"
           >
-            {{ t(proj.name) }}
+            {{ proj.title }}
           </h3>
           <p class="text-xs text-text-muted">
-            {{ t("projectHub.initiatedBy", { name: t(proj.initiatorName) }) }}
+            {{ t("projectHub.initiatedBy", { name: proj.applicantName }) }}
           </p>
           <div class="mt-1">
             <div class="h-1.5 rounded-full bg-surface-3">
@@ -111,7 +117,7 @@
               :key="r"
               class="text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary"
             >
-              {{ t("projectHub.roleMissing", { role: t(r) }) }}
+              {{ t("projectHub.roleMissing", { role: r }) }}
             </span>
           </div>
         </div>
@@ -454,25 +460,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, nextTick } from "vue";
+import { ref, computed, reactive, watch, nextTick, onMounted } from "vue";
 import { t } from "~/lib/i18n";
-import { mockProjects } from "../data/mock-projects";
+import { projectApi, type ProjectItem as Project } from "~/lib/api/modules/projects";
 import { buildUrl } from "~/lib/utils/paths";
 import { apiFetch } from "~/lib/api";
 
 // ==================== 类型 ====================
-interface Project {
-  id: string | number;
-  name: string;
-  type: "recruiting" | "showcase";
-  isPinned: boolean;
-  isIncubated: boolean;
-  initiatorName: string;
-  progress: number;
-  isRecruiting: boolean;
-  recruitingRoles: string[];
-}
-
 interface ApplyForm {
   nickname: string;
   progress: string;
@@ -578,9 +572,16 @@ const tabs = [
 ];
 
 const activeTab = ref<"recruiting" | "showcase">("recruiting");
+const allProjects = ref<Project[]>([]);
+const loading = ref(true);
+
+onMounted(async () => {
+  allProjects.value = await projectApi.listProjects();
+  loading.value = false;
+});
 
 const filteredProjects = computed<Project[]>(() =>
-  mockProjects
+  allProjects.value
     .filter((p) => p.type === activeTab.value)
     .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0)),
 );
@@ -663,14 +664,18 @@ const handleApplySubmit = async (): Promise<void> => {
   if (Object.values(applyErrors).some(Boolean)) return;
   isSubmittingApply.value = true;
   try {
-    await api.post("/api/projects/apply", {
-      nickname: sanitizeInput(applyForm.nickname),
-      progress: applyForm.progress,
-      group: applyForm.group,
-      applyIncubator: applyForm.applyIncubator,
-      contact: sanitizeInput(applyForm.contact),
-      source: "project-hall",
+    const ok = await projectApi.submitApplication({
+      title: `${applyForm.group} 项目组申请`,
+      summary: `阶段：${applyForm.progress}`,
+      description: `报名成员：${sanitizeInput(applyForm.nickname)}。联系方式：${sanitizeInput(applyForm.contact)}${applyForm.applyIncubator ? "。申请孵化。" : ""}`,
+      memberClaims: [
+        {
+          displayName: sanitizeInput(applyForm.nickname),
+          roleInProject: applyForm.progress,
+        },
+      ],
     });
+    if (!ok) throw new Error(t("projectHub.applyFailed"));
     toast.success(t("projectHub.applySuccess"));
     closeApplyModal();
   } catch (e: unknown) {
@@ -751,15 +756,17 @@ const handleProjectSubmit = async (): Promise<void> => {
   if (Object.values(projectErrors).some(Boolean)) return;
   isSubmittingProject.value = true;
   try {
-    await api.post("/api/projects/create", {
-      name: sanitizeInput(projectForm.name),
+    const ok = await projectApi.submitApplication({
+      title: sanitizeInput(projectForm.name),
+      summary: sanitizeInput(projectForm.description),
       description: sanitizeInput(projectForm.description),
-      roles: projectForm.roles.split(",").map(sanitizeInput).filter(Boolean),
-      contact: sanitizeInput(projectForm.contact),
-      source: "project-hall",
+      memberClaims: [],
     });
+    if (!ok) throw new Error(t("projectHub.createFailed"));
     toast.success(t("projectHub.createSuccess"));
     closeProjectModal();
+    // 发起成功后刷新广场列表
+    allProjects.value = await projectApi.listProjects();
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : t("projectHub.createFailed");
     toast.error(msg);

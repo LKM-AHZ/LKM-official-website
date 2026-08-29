@@ -3110,6 +3110,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       tabVolunteer: "志愿/专业推荐",
       yesterday: "昨天",
       daysAgo: "{count} 天前",
+      empty: "暂无提问",
     },
 
     projects: {

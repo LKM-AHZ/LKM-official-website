@@ -28,9 +28,12 @@
       </button>
     </div>
 
-    <div class="space-y-3">
+    <div v-if="loading" class="text-sm text-text-muted py-8 text-center">
+      {{ t("common.loading") }}
+    </div>
+    <div v-else class="space-y-3">
       <a
-        v-for="q in filteredQuestions"
+        v-for="q in questions"
         :key="q.id"
         :href="buildUrl(`/qa/${q.id}`)"
         class="profile-card group block"
@@ -40,50 +43,59 @@
             <span
               class="text-xs px-1.5 py-0.5 rounded-full font-medium"
               :class="
-                q.status === 'resolved'
+                q.status !== 'open'
                   ? 'bg-green-100 dark:bg-green-950/30 text-green-500'
                   : 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-500'
               "
             >
               {{
-                q.status === "resolved"
+                q.status !== "open"
                   ? t("page.qa.resolved")
                   : t("page.qa.unresolved")
               }}
             </span>
-            <span v-if="q.bounty" class="text-xs text-amber-500 font-medium">
-              {{ t("page.qa.bounty", { count: q.bounty }) }}
+            <span
+              v-if="q.bountyTotal > 0"
+              class="text-xs text-amber-500 font-medium"
+            >
+              {{ t("page.qa.bounty", { count: q.bountyTotal }) }}
             </span>
           </div>
           <h3
             class="font-semibold text-deep-text group-hover:text-primary transition-colors line-clamp-1"
           >
-            {{ t(q.title) }}
+            {{ q.title }}
           </h3>
           <div
             class="flex items-center justify-between text-xs text-text-muted/60"
           >
             <span
-              >{{ t(q.askerName) }} ·
+              >{{ q.authorName }} ·
               {{ mounted ? formatTime(q.createdAt) : "" }}</span
             >
             <span>
-              {{ t("page.qa.answers", { count: q.answerCount }) }} ·
-              {{ t("page.qa.views", { count: q.viewCount }) }}
+              {{ t("page.qa.answers", { count: q.answerCount }) }}
             </span>
           </div>
         </div>
       </a>
+      <div v-if="!questions.length" class="text-sm text-text-muted py-6 text-center">
+        {{ t("page.qa.empty") }}
+      </div>
     </div>
 
-    <AskQuestionModal v-model:show="askModalOpen" />
+    <AskQuestionModal
+      v-model:show="askModalOpen"
+      :category="activeTab"
+      @published="load"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { t } from "~/lib/i18n";
-import { mockQuestions } from "../data/mock-questions";
+import { qaApi, type QuestionSummary } from "~/lib/api/modules/qa";
 import { buildUrl } from "~/lib/utils/paths";
 import AskQuestionModal from "./AskQuestionModal.vue";
 
@@ -94,16 +106,23 @@ onMounted(() => {
   mounted.value = true;
 });
 
-const activeTab = ref("general");
+const activeTab = ref<"help" | "volunteer">("help");
 const askModalOpen = ref(false);
+const loading = ref(true);
+const questions = ref<QuestionSummary[]>([]);
 const tabs = [
-  { key: "general", label: "page.qa.tabHelp" },
-  { key: "volunteer", label: "page.qa.tabVolunteer" },
+  { key: "help" as const, label: "page.qa.tabHelp" },
+  { key: "volunteer" as const, label: "page.qa.tabVolunteer" },
 ];
 
-const filteredQuestions = computed(() =>
-  mockQuestions.filter((q) => q.type === activeTab.value),
-);
+async function load() {
+  loading.value = true;
+  questions.value = await qaApi.listQuestions(activeTab.value, 1, 50);
+  loading.value = false;
+}
+
+onMounted(load);
+watch(activeTab, load);
 
 function formatTime(dateStr: string): string {
   const date = new Date(dateStr);
