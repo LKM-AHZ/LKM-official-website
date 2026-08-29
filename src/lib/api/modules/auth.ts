@@ -317,10 +317,10 @@ export const authApi = {
   getAvatarUrl: (userId: string | number): string =>
     `/api/v1/auth/avatar/${userId}`,
 
-  // ── 根据用户名获取用户信息 ──
+  // ── 根据用户名获取用户信息（公开，无需登录） ──
   getUserByUsername: (username: string) =>
     get<ProfileInfo>(
-      `/api/auth/user/by-username/${encodeURIComponent(username)}`,
+      `/api/v1/auth/user/by-username/${encodeURIComponent(username)}`,
     ),
 
   // ── 2FA / TOTP ──
@@ -501,8 +501,8 @@ export const authApi = {
     }),
 
   // ── Onboarding ──
-  getOnboarding: () => get<OnboardingState>("/api/auth/onboarding"),
+  getOnboarding: () => get<OnboardingState>("/api/v1/auth/onboarding"),
   setOnboardingStep: (step: number, data: Record<string, unknown>) =>
-    put<OnboardingState>(`/api/auth/onboarding/steps/${step}`, { data }),
-  skipOnboarding: () => post<OnboardingState>("/api/auth/onboarding/skip"),
+    put<OnboardingState>(`/api/v1/auth/onboarding/steps/${step}`, { data }),
+  skipOnboarding: () => post<OnboardingState>("/api/v1/auth/onboarding/skip"),
 };
