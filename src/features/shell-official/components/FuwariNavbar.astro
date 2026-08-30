@@ -18,7 +18,8 @@ interface Props {
 }
 
 const moduleType = Astro.props.module || 'official';
-const switchHref = moduleType === 'official' ? url('/community') : url('/');
+// 官网模式切到社区论坛入口（原 /community 前缀已并入 /forum）
+const switchHref = moduleType === 'official' ? url('/forum') : url('/');
 const switchText = moduleType === 'official' ? t('shell.community') : t('shell.official');
 
 const className = Astro.props.class;
