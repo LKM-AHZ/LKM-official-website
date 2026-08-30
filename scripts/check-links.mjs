@@ -29,8 +29,8 @@ const STATIC_EXT = new Set([
   ".webm",
 ]);
 
-// 关键路径页（已删的 /official/* 前缀路由不再列入；新增页面按需追加）
-const KEY_PAGES = ["/", "/blog/", "/login/", "/register/"];
+// 关键路径页（已删的 /official/*、/blog 旧路由不再列入；新增页面按需追加）
+const KEY_PAGES = ["/", "/login/", "/register/"];
 
 function extractPageHrefs(html) {
   const hrefs = [];

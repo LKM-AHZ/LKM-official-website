@@ -82,34 +82,6 @@ export default defineConfig({
   // 环境变量可覆盖 base（如部署在子路径下）；默认读取 config.yaml
   base: process.env.PUBLIC_BASE_PATH ?? ((siteConfig.base as string) || "/"),
 
-  // 路由扁平化前的旧前缀路径 → 扁平新路径，301 防旧书签/SEO 404。
-  // 动态段用 [...slug] 通配任意深度（如 /official/articles/category/foo → /articles/category/foo）。
-  redirects: {
-    "/official": "/forum",
-    "/official/qa": "/qa",
-    "/official/projects": "/projects",
-    "/official/privacy": "/privacy",
-    "/official/terms": "/terms",
-    "/official/news": "/news",
-    "/official/articles": "/articles",
-    "/community": "/forum",
-    "/community/forum": "/forum",
-    "/community/columns": "/columns",
-    "/community/files": "/files",
-    "/community/competition": "/competition",
-    "/official/qa/[...slug]": "/qa/[...slug]",
-    "/official/projects/[...slug]": "/projects/[...slug]",
-    "/official/news/[...slug]": "/news/[...slug]",
-    "/official/articles/[...slug]": "/articles/[...slug]",
-    "/community/forum/[...slug]": "/forum/[...slug]",
-    "/community/columns/[...slug]": "/columns/[...slug]",
-    "/community/files/[...slug]": "/files/[...slug]",
-    "/community/competition/[...slug]": "/competition/[...slug]",
-    // treehole 前缀迁移到 /treehole：无 slug 时需精确重定向，
-    "/community/treehole": "/treehole",
-    "/community/treehole/[...slug]": "/treehole/[...slug]",
-  },
-
   output: "server",
   adapter: node({ mode: "standalone" }),
 

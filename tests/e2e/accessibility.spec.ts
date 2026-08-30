@@ -5,8 +5,6 @@ const BASE_PATH = process.env.BASE_PATH ?? "";
 
 const KEY_ROUTES = [
   { path: `${BASE_PATH}/`, label: "首页" },
-  { path: `${BASE_PATH}/blog/`, label: "博客列表" },
-  { path: `${BASE_PATH}/blog/about/`, label: "博客关于" },
   { path: `${BASE_PATH}/privacy/`, label: "隐私政策" },
   { path: `${BASE_PATH}/terms/`, label: "服务条款" },
   { path: `${BASE_PATH}/login/`, label: "登录页" },

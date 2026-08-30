@@ -36,7 +36,6 @@ const BASELINE_FILE = resolve(SCRIPT_DIR, "jsbudget-baseline.json");
 
 const PATHS = [
   "/",
-  "/blog",
   "/editor",
   // 如需纳入预算检查在此追加
 ];

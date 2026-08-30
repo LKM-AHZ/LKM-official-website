@@ -21,7 +21,7 @@ import { measureLighthouse, medianMetrics } from "./lib/lighthouse-run.mjs";
 
 // 计划定义的关键路径页（index / 博客 / 编辑器 / 树洞 / 论坛）
 // 注：树洞真实路由为 /treehole
-const DEFAULT_PATHS = ["/", "/blog", "/editor", "/treehole"];
+const DEFAULT_PATHS = ["/", "/editor", "/treehole"];
 
 function parseFlags() {
   const { values } = parseArgs({

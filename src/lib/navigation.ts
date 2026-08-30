@@ -16,7 +16,6 @@ export const footerData = {
       title: "footer.community",
       links: [
         { text: "nav.forum", href: getPermalink("/forum") },
-        { text: "nav.columns", href: getPermalink("/columns") },
         { text: "nav.fileLibrary", href: getPermalink("/files") },
         { text: "nav.competition", href: getPermalink("/competition") },
       ],
@@ -24,8 +23,6 @@ export const footerData = {
     {
       title: "footer.pages",
       links: [
-        { text: "nav.news", href: getPermalink("/news") },
-        { text: "nav.articleList", href: getPermalink("/articles") },
         { text: "nav.projects", href: getPermalink("/projects") },
         { text: "nav.qa", href: getPermalink("/qa") },
       ],

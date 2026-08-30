@@ -1,9 +1,0 @@
----
-import { buildUrl } from '~/lib/utils/paths';
-const redirectUrl = buildUrl('/treehole');
----
-
-<meta http-equiv="refresh" content={`0;url=${redirectUrl}`} />
-<script is:inline define:vars={{ redirectUrl }}>
-  window.location.replace(redirectUrl);
-</script>

@@ -31,11 +31,6 @@ export const communitySidebarLinks: CommunitySidebarLink[] = [
     icon: "material-symbols:forum-outline",
   },
   {
-    text: "nav.columns",
-    href: getPermalink("/columns"),
-    icon: "material-symbols:article-outline",
-  },
-  {
     text: "nav.fileLibrary",
     href: getPermalink("/files"),
     icon: "material-symbols:folder-outline",

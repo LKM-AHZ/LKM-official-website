@@ -1,7 +1,0 @@
----
-// 社区前端不需要独立新闻入口（产品决策 2026-08-27）：/news 重定向到论坛板块入口。
-// 新闻内容归官方发布板块（backend seed official-news），不再作为独立内容区展示。
-import { getPermalink } from '~/lib/utils/permalinks';
-
-return Astro.redirect(getPermalink('/forum'));
----

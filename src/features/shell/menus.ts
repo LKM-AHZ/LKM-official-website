@@ -33,7 +33,6 @@ export const allMenuItems: NavBarLink[] = [
     url: "/forum",
     children: [
       { name: "nav.forum", url: "/forum" },
-      { name: "nav.columns", url: "/columns" },
       { name: "nav.fileLibrary", url: "/files" },
       { name: "nav.qa", url: "/qa" },
       { name: "nav.competition", url: "/competition" },
@@ -44,7 +43,6 @@ export const allMenuItems: NavBarLink[] = [
     url: "/forum",
     children: [
       { name: "nav.forum", url: "/forum" },
-      { name: "nav.columns", url: "/columns" },
       { name: "nav.fileLibrary", url: "/files" },
       { name: "nav.qa", url: "/qa" },
       { name: "nav.projects", url: "/projects" },
