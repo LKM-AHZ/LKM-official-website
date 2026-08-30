@@ -105,6 +105,8 @@ export default defineConfig({
     "/community/columns/[...slug]": "/columns/[...slug]",
     "/community/files/[...slug]": "/files/[...slug]",
     "/community/competition/[...slug]": "/competition/[...slug]",
+    // treehole 前缀迁移到 /treehole：无 slug 时需精确重定向，
+    "/community/treehole": "/treehole",
     "/community/treehole/[...slug]": "/treehole/[...slug]",
   },
 

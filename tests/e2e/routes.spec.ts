@@ -6,15 +6,14 @@ const PUBLIC_ROUTES = [
   { path: `${BASE_PATH}/`, label: "首页" },
   { path: `${BASE_PATH}/blog/`, label: "博客列表" },
   { path: `${BASE_PATH}/blog/about/`, label: "博客关于" },
-  { path: `${BASE_PATH}/official/privacy/`, label: "隐私政策" },
-  { path: `${BASE_PATH}/official/terms/`, label: "服务条款" },
+  { path: `${BASE_PATH}/privacy/`, label: "隐私政策" },
+  { path: `${BASE_PATH}/terms/`, label: "服务条款" },
 ];
 
+// 说明：原 /official/contact、/official/communities 页面已删除，相关用例一并移除
 const DEMO_ROUTES = [
   { path: `${BASE_PATH}/login/`, label: "登录" },
   { path: `${BASE_PATH}/register/`, label: "注册" },
-  { path: `${BASE_PATH}/official/contact/`, label: "联系" },
-  { path: `${BASE_PATH}/official/communities/`, label: "社群" },
 ];
 
 test.describe("关键路由烟雾测试", () => {

@@ -2382,6 +2382,7 @@ export const enFlat = {
   "page.qa.detailPlaceholder": "Describe your question in detail...",
   "page.qa.detailRequired": "Please fill in the detailed question",
   "page.qa.draftSavedToast": "Draft saved",
+  "page.qa.empty": "No questions yet",
   "page.qa.exitConfirmAria": "Exit confirmation",
   "page.qa.exitConfirmExit": "Exit",
   "page.qa.exitConfirmKeep": "Keep editing",

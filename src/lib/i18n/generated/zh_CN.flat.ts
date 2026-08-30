@@ -2238,6 +2238,7 @@ export const zhFlat = {
   "page.qa.detailPlaceholder": "详细描述你的问题...",
   "page.qa.detailRequired": "请填写详细问题",
   "page.qa.draftSavedToast": "草稿已暂存",
+  "page.qa.empty": "暂无提问",
   "page.qa.exitConfirmAria": "退出确认",
   "page.qa.exitConfirmExit": "退出",
   "page.qa.exitConfirmKeep": "我再考虑",
