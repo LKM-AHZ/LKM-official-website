@@ -144,15 +144,21 @@ export const qaApi = {
 
   /** 提问详情。 */
   async getQuestion(id: number): Promise<QuestionDetail | null> {
-    const res = await get<BackendQuestion & { situation: string; images: string[]; answers: BackendAnswer[] }>(
-      `/api/v1/content/qa/questions/${id}`,
-    );
+    const res = await get<
+      BackendQuestion & {
+        situation: string;
+        images: string[];
+        answers: BackendAnswer[];
+      }
+    >(`/api/v1/content/qa/questions/${id}`);
     if (res.isErr()) return null;
     return mapDetail(res.value);
   },
 
   /** 提交提问。 */
-  async createQuestion(input: QuestionCreateInput): Promise<QuestionSummary | null> {
+  async createQuestion(
+    input: QuestionCreateInput,
+  ): Promise<QuestionSummary | null> {
     const res = await post<BackendQuestion>("/api/v1/content/qa/questions", {
       title: input.title,
       situation: input.situation,
