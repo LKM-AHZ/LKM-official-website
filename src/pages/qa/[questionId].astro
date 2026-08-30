@@ -5,7 +5,7 @@ import { communitySidebarLinks } from '~/features/shell-community/data/community
 import { getPermalink } from '~/lib/utils/permalinks';
 import { t } from '~/lib/i18n';
 
-// 详情数据由客户端 island 从后端 /api/v1/qa 拉取（真实动态数据，非 SSG 内同步 mock）。
+// 详情数据由客户端 island 从后端 /api/v1/content/qa 拉取（真实动态数据，非 SSG 内同步 mock）。
 const { questionId } = Astro.params;
 const metadata = { title: `${t('page.qa.title')} —— LKM` };
 ---
