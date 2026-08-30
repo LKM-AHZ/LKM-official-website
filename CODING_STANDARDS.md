@@ -1,6 +1,6 @@
 # LKM 项目代码规范
 
-> 新手从零部署环境 / 安装工具 / 上传改动，见 [GETTING_STARTED.md](./GETTING_STARTED.md)。项目架构与开发要求见 [AGENTS.md](./AGENTS.md)。
+> **新手从零部署环境 / 安装工具 / 上传改动，见 [GETTING_STARTED.md](./GETTING_STARTED.md)。项目架构与开发要求见 [AGENTS.md](./AGENTS.md)。**
 
 ## 工具链
 
