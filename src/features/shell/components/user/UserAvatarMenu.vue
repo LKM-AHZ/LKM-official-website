@@ -85,7 +85,7 @@ const menuRef = ref<HTMLDivElement | null>(null);
 const isOpen = ref(false);
 const isLoggedIn = computed(() => store.isLoggedIn);
 const username = computed(() => store.username);
-// UserInfo.account_level 是 string，需收窄为字面量联合（与 useAuth.ts 归一化一致）
+// UserInfo.account_level 是 string，需收窄为字面量联合（与 auth store 归一化一致）
 const userLevel = computed<"local" | "normal" | "admin">(() => {
   const level = store.user?.account_level;
   return level === "admin" || level === "normal" ? level : "local";

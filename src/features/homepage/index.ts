@@ -1,7 +1,6 @@
 export { default as Hero } from "./components/Hero.astro";
 export { default as HeroText } from "./components/HeroText.astro";
 export { default as Features2 } from "./components/Features2.astro";
-export { default as Features3 } from "./components/Features3.astro";
 export { default as Stats } from "./components/Stats.astro";
 export { default as Pricing } from "./components/Pricing.astro";
 export { default as Testimonials } from "./components/Testimonials.astro";

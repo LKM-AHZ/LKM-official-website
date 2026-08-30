@@ -87,7 +87,7 @@ src/lib/api/
 
 - **后端认证端点**：`/api/auth/*`（不再是 `/auth/*`），含 login/register/refresh/logout/me
 - **Pinia Store**：`src/stores/auth.ts`（`useAuthStore`）— 用户状态、token 管理的单一状态源（`user`/`isLoggedIn`/`session`/`_token`/`_refreshToken`/`onboardingCompleted`），localStorage 持久化（key `lkm-auth-store`）
-- **Flow Composable**：`src/features/auth/composables/` 的 `useLoginFlow`/`useRegisterFlow`/`useRecoveryFlow`/`useOnboardingFlow` 负责登录/注册/找回/引导；`useAuthProvider()`/`useAuth()` 仍存在作兼容桥（投影 store 状态，管理 2FA 过渡态）
+- **Flow Composable**：`src/features/auth/composables/` 的 `useLoginFlow`/`useRegisterFlow`/`useRecoveryFlow`/`useOnboardingFlow` 负责登录/注册/找回/引导
 - **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(getHttpAccessToken())` 统一读写 token，含 JWT request 拦截器（附加 `Authorization: Bearer`）+ 401 自动刷新队列（并发安全，走 `POST /api/auth/refresh`）
 - **GraphQL 认证**：`src/lib/api/graphql/exchanges/auth.ts`（urql `authExchange`）经 `getHttpAccessToken()` 为每个 operation 自动附加 Bearer 头
 - **共享 UI 原语**：`src/features/auth/components/shared/`（AuthShell/AuthCard/AuthField/AuthSegmentedControl/AuthMethodButton/AuthStatus/VerificationCodeField）

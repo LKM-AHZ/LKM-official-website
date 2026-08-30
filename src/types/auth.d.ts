@@ -56,44 +56,6 @@ export interface AuthSuccess {
   requires2FASetup?: boolean;
 }
 
-export interface AuthContextType {
-  state: import("vue").Reactive<AuthState>;
-  login: (
-    method: LoginMethod,
-    credentials: Record<string, string>,
-    account?: User,
-  ) => Promise<LoginResult>;
-  register: (
-    type: "local" | "normal",
-    data: RegisterData,
-  ) => Promise<RegisterResult>;
-  registerNormal?: (
-    username: string,
-    password: string,
-    email?: string,
-    phone?: string,
-  ) => Promise<RegisterResult>;
-  verifyNormalRegister?: (
-    txnId: string,
-    code: string,
-    type: "email" | "phone",
-  ) => Promise<LoginResult>;
-  requestLoginCode?: (
-    contact: string,
-  ) => Promise<
-    Result<import("~/lib/api/modules/auth").MessageResponse, AppError>
-  >;
-  loginCode?: (contact: string, code: string) => Promise<LoginResult>;
-  requestMagicLink?: (
-    email: string,
-  ) => Promise<
-    Result<import("~/lib/api/modules/auth").MessageResponse, AppError>
-  >;
-  verifyMagicLink?: (token: string) => Promise<LoginResult>;
-  logout: () => void;
-  updateUser: (user: User) => void;
-}
-
 export interface RegisterData {
   username: string;
   password?: string;

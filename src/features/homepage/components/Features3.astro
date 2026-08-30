@@ -1,9 +1,0 @@
----
-// Features3 已合并到 Features2（variant='inline'），此文件保持向后兼容
-import Features2 from './Features2.astro';
-import type { Features as Props } from '~/types/core';
-
-const props = Astro.props;
----
-
-<Features2 variant="inline" {...props} />
