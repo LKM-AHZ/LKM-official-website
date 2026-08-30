@@ -34,7 +34,12 @@ import { measureLighthouse, medianMetrics } from "./lib/lighthouse-run.mjs";
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const BASELINE_FILE = resolve(SCRIPT_DIR, "jsbudget-baseline.json");
 
-const PATHS = ["/", "/blog", "/editor", /* "/community/treehole" 暂未就绪，跳过检查 */ "/community"];
+const PATHS = [
+  "/",
+  "/blog",
+  "/editor",
+  /* "/community/treehole" 暂未就绪，跳过检查 */ "/community",
+];
 // 原文为 const PATHS = ["/", "/blog", "/editor", "/community/treehole", "/community"];
 
 // `/editor` 是已确认的接受项（编辑器固有重量）：整页仅告警，不计硬失败。
