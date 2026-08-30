@@ -1,4 +1,4 @@
-// QA 问答 API 客户端 —— 对接后端 /api/v1/qa/*
+// QA 问答 API 客户端 —— 对接后端 /api/v1/content/qa/*
 //
 // 后端 QuestionOut 为 snake_case 字段，这里在客户端层映射为 UI 使用的 camelCase 形状。
 // 读走通用 `get`（返回解包 ApiResp.data 的 Result），写走 `get/post`。
@@ -127,7 +127,7 @@ export const qaApi = {
     limit = 20,
   ): Promise<QuestionSummary[]> {
     const res = await get<PaginatedResponse<BackendQuestion>>(
-      "/api/v1/qa/questions",
+      "/api/v1/content/qa/questions",
       {
         page,
         limit,
@@ -141,7 +141,7 @@ export const qaApi = {
   /** 提问详情。 */
   async getQuestion(id: number): Promise<QuestionDetail | null> {
     const res = await get<BackendQuestion & { situation: string; images: string[]; answers: BackendAnswer[] }>(
-      `/api/v1/qa/questions/${id}`,
+      `/api/v1/content/qa/questions/${id}`,
     );
     if (res.isErr()) return null;
     return mapDetail(res.value);
@@ -149,7 +149,7 @@ export const qaApi = {
 
   /** 提交提问。 */
   async createQuestion(input: QuestionCreateInput): Promise<QuestionSummary | null> {
-    const res = await post<BackendQuestion>("/api/v1/qa/questions", {
+    const res = await post<BackendQuestion>("/api/v1/content/qa/questions", {
       title: input.title,
       situation: input.situation,
       content: input.content,
@@ -165,7 +165,7 @@ export const qaApi = {
   /** 回答问题。 */
   async createAnswer(questionId: number, content: string): Promise<QaAnswer | null> {
     const res = await post<BackendAnswer>(
-      `/api/v1/qa/questions/${questionId}/answers`,
+      `/api/v1/content/qa/questions/${questionId}/answers`,
       { content },
     );
     if (res.isErr()) return null;

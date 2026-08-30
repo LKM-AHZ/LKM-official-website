@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// QA 问题详情（client island）—— 从后端 /api/v1/qa 拉详情并渲染问题与回答。
+// QA 问题详情（client island）—— 从后端 /api/v1/content/qa 拉详情并渲染问题与回答。
 import { onMounted, ref } from "vue";
 import { Icon } from "astro-icon/components";
 import { t } from "~/lib/i18n";

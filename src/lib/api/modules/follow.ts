@@ -33,13 +33,13 @@ export const followApi = {
   unfollowUser: (userId: number) =>
     del<FollowToggle>(`/api/v1/users/${userId}/follow`),
   followBoard: (boardId: number) =>
-    post<FollowToggle>(`/api/v1/boards/${boardId}/follow`),
+    post<FollowToggle>(`/api/v1/content/boards/${boardId}/follow`),
   unfollowBoard: (boardId: number) =>
-    del<FollowToggle>(`/api/v1/boards/${boardId}/follow`),
+    del<FollowToggle>(`/api/v1/content/boards/${boardId}/follow`),
   myFollowingUsers: () =>
     get<FollowListData<FollowUser>>("/api/v1/users/me/following"),
   myFollowingBoards: () =>
-    get<FollowListData<FollowBoard>>("/api/v1/boards/me/following"),
+    get<FollowListData<FollowBoard>>("/api/v1/content/boards/me/following"),
   followStatus: (userId: number) =>
     get<FollowStatus>(`/api/v1/users/${userId}/follow/status`),
 };
