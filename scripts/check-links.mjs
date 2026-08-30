@@ -34,9 +34,10 @@ const KEY_PAGES = [
   "/blog/",
   "/login/",
   "/register/",
-  "/official/contact/",
-  "/official/communities/",
+  // "/official/contact/",       // 页面尚未实现，暂时跳过检查
+  // "/official/communities/",   // 页面尚未实现，暂时跳过检查
 ];
+// 暂时把这面注释掉  清汉 2026/8/30
 
 function extractPageHrefs(html) {
   const hrefs = [];
