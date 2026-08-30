@@ -114,9 +114,7 @@ export const projectApi = {
   },
 
   /** 提交孵化申请。 */
-  async submitApplication(
-    input: ProjectApplicationInput,
-  ): Promise<boolean> {
+  async submitApplication(input: ProjectApplicationInput): Promise<boolean> {
     const res = await post(`/api/v1/projects/applications`, {
       title: input.title,
       summary: input.summary,

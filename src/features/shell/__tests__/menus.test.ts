@@ -19,7 +19,9 @@ describe("menus", () => {
   });
 
   it("nav.community 是唯一内容入口（/forum）", () => {
-    const community = allMenuItems.find((item) => item.name === "nav.community");
+    const community = allMenuItems.find(
+      (item) => item.name === "nav.community",
+    );
     expect(community).toBeTruthy();
     expect(community!.url).toBe("/forum");
   });

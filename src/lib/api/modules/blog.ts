@@ -121,7 +121,11 @@ function mapSeriesDetail(d: {
 /** 统一 GraphQL 错误 → AppError（区分网络层 vs GraphQL 业务错误） */
 function mapErr(
   error:
-    | { message: string; graphQLErrors?: { message: string }[]; networkError?: Error }
+    | {
+        message: string;
+        graphQLErrors?: { message: string }[];
+        networkError?: Error;
+      }
     | string
     | null
     | undefined,
@@ -133,9 +137,15 @@ function mapErr(
         error.graphQLErrors.map((e) => e.message).join("; ") || "graphql error",
       );
     }
-    return new AppError(ErrorCode.NETWORK_ERROR, error.message || "graphql error");
+    return new AppError(
+      ErrorCode.NETWORK_ERROR,
+      error.message || "graphql error",
+    );
   }
-  return new AppError(ErrorCode.NETWORK_ERROR, String(error || "graphql error"));
+  return new AppError(
+    ErrorCode.NETWORK_ERROR,
+    String(error || "graphql error"),
+  );
 }
 
 /** 无消费方读方法的 TODO 占位 err（YAGNI，待按需接入 GraphQL） */

@@ -41,10 +41,7 @@ function revisionLabel(rev: number): string {
     <div v-if="loading" class="text-sm text-text-muted py-12 text-center">
       {{ t("common.loading") }}
     </div>
-    <div
-      v-else-if="!project"
-      class="text-sm text-text-muted py-12 text-center"
-    >
+    <div v-else-if="!project" class="text-sm text-text-muted py-12 text-center">
       <a class="text-primary underline" :href="buildUrl('/projects')">{{
         t("page.projects.title")
       }}</a>
@@ -110,7 +107,9 @@ function revisionLabel(rev: number): string {
       </div>
 
       <!-- 详情 -->
-      <div class="bg-card-bg border border-surface-3 rounded-xl p-6 space-y-4 text-sm">
+      <div
+        class="bg-card-bg border border-surface-3 rounded-xl p-6 space-y-4 text-sm"
+      >
         <div v-if="project.background">
           <h3 class="font-semibold text-deep-text mb-1">
             {{ t("page.projects.background") }}
@@ -191,7 +190,11 @@ function revisionLabel(rev: number): string {
           {{ t("page.projects.reports") }}
         </h3>
         <div class="space-y-4">
-          <div v-for="(r, i) in project.reports" :key="i" class="border-l-2 border-primary pl-4">
+          <div
+            v-for="(r, i) in project.reports"
+            :key="i"
+            class="border-l-2 border-primary pl-4"
+          >
             <div class="flex items-center gap-2 mb-1">
               <span
                 class="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium"

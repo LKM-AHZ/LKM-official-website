@@ -109,7 +109,11 @@ function mapQuestion(b: BackendQuestion): QuestionSummary {
 }
 
 function mapDetail(
-  b: BackendQuestion & { situation: string; images: string[]; answers: BackendAnswer[] },
+  b: BackendQuestion & {
+    situation: string;
+    images: string[];
+    answers: BackendAnswer[];
+  },
 ): QuestionDetail {
   return {
     ...mapQuestion(b),
@@ -140,15 +144,21 @@ export const qaApi = {
 
   /** 提问详情。 */
   async getQuestion(id: number): Promise<QuestionDetail | null> {
-    const res = await get<BackendQuestion & { situation: string; images: string[]; answers: BackendAnswer[] }>(
-      `/api/v1/qa/questions/${id}`,
-    );
+    const res = await get<
+      BackendQuestion & {
+        situation: string;
+        images: string[];
+        answers: BackendAnswer[];
+      }
+    >(`/api/v1/qa/questions/${id}`);
     if (res.isErr()) return null;
     return mapDetail(res.value);
   },
 
   /** 提交提问。 */
-  async createQuestion(input: QuestionCreateInput): Promise<QuestionSummary | null> {
+  async createQuestion(
+    input: QuestionCreateInput,
+  ): Promise<QuestionSummary | null> {
     const res = await post<BackendQuestion>("/api/v1/qa/questions", {
       title: input.title,
       situation: input.situation,
@@ -163,7 +173,10 @@ export const qaApi = {
   },
 
   /** 回答问题。 */
-  async createAnswer(questionId: number, content: string): Promise<QaAnswer | null> {
+  async createAnswer(
+    questionId: number,
+    content: string,
+  ): Promise<QaAnswer | null> {
     const res = await post<BackendAnswer>(
       `/api/v1/qa/questions/${questionId}/answers`,
       { content },

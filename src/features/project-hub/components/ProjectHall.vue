@@ -51,10 +51,7 @@
     </div>
 
     <!-- 项目卡片列表 -->
-    <div
-      v-if="loading"
-      class="text-sm text-text-muted py-12 text-center"
-    >
+    <div v-if="loading" class="text-sm text-text-muted py-12 text-center">
       {{ t("common.loading") }}
     </div>
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -462,7 +459,10 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch, nextTick, onMounted } from "vue";
 import { t } from "~/lib/i18n";
-import { projectApi, type ProjectItem as Project } from "~/lib/api/modules/projects";
+import {
+  projectApi,
+  type ProjectItem as Project,
+} from "~/lib/api/modules/projects";
 import { buildUrl } from "~/lib/utils/paths";
 
 // ==================== 类型 ====================

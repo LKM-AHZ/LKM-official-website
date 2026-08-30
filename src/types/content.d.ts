@@ -2,11 +2,7 @@
 // 收敛论坛讨论帖 / 官方文章 / 专栏连载 / 博客发布产物为单一 ContentItem。
 
 export type ContentType =
-  | "discussion"
-  | "article"
-  | "column_post"
-  | "blog_post"
-  | "qa";
+  "discussion" | "article" | "column_post" | "blog_post" | "qa";
 
 /** 板块（boards 是统一分类轴，支持父/子层级嵌套展示） */
 export interface BoardItem {

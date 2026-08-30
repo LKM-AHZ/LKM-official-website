@@ -155,10 +155,16 @@ const auth = useAuthStore();
 const boards = ref<BoardItem[]>([]);
 
 const canSubmit = computed(
-  () => selectedCategory.value && title.value.trim() && content.value.trim() && !submitting.value,
+  () =>
+    selectedCategory.value &&
+    title.value.trim() &&
+    content.value.trim() &&
+    !submitting.value,
 );
 
-const rootBoards = computed(() => boards.value.filter((b) => b.parent_id == null));
+const rootBoards = computed(() =>
+  boards.value.filter((b) => b.parent_id == null),
+);
 function childrenOf(parentId: number): BoardItem[] {
   return boards.value.filter((b) => b.parent_id === parentId);
 }

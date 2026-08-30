@@ -44,10 +44,11 @@ try {
         childCount: (parentById.get(p.id) ?? []).length,
       }));
   }
-} catch (_e) {
+} catch {
   // 后端不可用时回退静态 mock
 }
-
+// 原文 } catch (_e) { 现已修正   清汉 2026/8/30
+ 
 if (rootBoards.length === 0) {
   rootBoards = getRootCategories().map((c) => ({
     slug: c.slug,

@@ -11,8 +11,9 @@ function getGraphqlUrl(): string {
 
   // SSR: 使用真实后端直连地址
   if (typeof window === "undefined") {
-    return (process.env.API_URL ?? "") + "/graphql";
+    return (process.env.API_URL || "http://localhost:8000") + "/graphql";
   }
+  // 原文为 return (process.env.API_URL ?? "") + "/graphql"; 现已配齐 清汉 2026/8/30
 
   // CSR: 完整 URL（urql 内部用 new URL() 解析，必须有 origin）
   const base = window.__BASE_URL__ || import.meta.env.BASE_URL || "/";

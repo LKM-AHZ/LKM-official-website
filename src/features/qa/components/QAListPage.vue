@@ -79,7 +79,10 @@
           </div>
         </div>
       </a>
-      <div v-if="!questions.length" class="text-sm text-text-muted py-6 text-center">
+      <div
+        v-if="!questions.length"
+        class="text-sm text-text-muted py-6 text-center"
+      >
         {{ t("page.qa.empty") }}
       </div>
     </div>

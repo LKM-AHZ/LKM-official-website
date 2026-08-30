@@ -73,7 +73,9 @@ function formatDate(dateStr: string): string {
           <span>·</span>
           <span>{{ formatDate(question.createdAt) }}</span>
           <span>·</span>
-          <span>{{ t("page.qa.answers", { count: question.answerCount }) }}</span>
+          <span>{{
+            t("page.qa.answers", { count: question.answerCount })
+          }}</span>
         </div>
         <div
           class="mt-4 p-4 bg-card-bg border border-surface-3 rounded-xl text-sm text-deep-text leading-relaxed whitespace-pre-wrap"
@@ -108,10 +110,7 @@ function formatDate(dateStr: string): string {
               v-if="a.isAccepted"
               class="text-xs text-green-500 font-medium mb-2 inline-flex items-center gap-1"
             >
-              <Icon
-                name="material-symbols:check-circle"
-                class="w-3.5 h-3.5"
-              />
+              <Icon name="material-symbols:check-circle" class="w-3.5 h-3.5" />
               {{ t("page.qa.accepted") }}
             </div>
             <div
