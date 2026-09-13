@@ -394,7 +394,6 @@ uv sync
 Resolved 113 packages in 219ms
 Prepared 88 packages in 34m 23s
 Installed 111 packages in 25.00s
- + aiosqlite==0.22.1
  + alembic==1.18.5
  + annotated-doc==0.0.4
 ......

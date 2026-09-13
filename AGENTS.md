@@ -8,7 +8,7 @@ LKM 官方网站，基于 **Astro v7 server 模式**、**Vue 3**、**React**（�
 
 **技术栈：** Astro v7 server | Vue 3 + Composition API | React（编辑器）| Tailwind CSS v4 | TypeScript
 
-> 仅前端仓库；后端为独立部署的真实服务（FastAPI + SQLite 开发 / PostgreSQL 生产），不在此仓库内。
+> 仅前端仓库；后端为独立部署的真实服务（FastAPI + PostgreSQL），不在此仓库内。
 
 ## 快速参考
 
