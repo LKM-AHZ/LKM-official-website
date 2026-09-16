@@ -46,6 +46,9 @@ backend/.pytest_cache/
 tool/
 tools/
 reports/
+# jscpd（clone 检测）的 json/html 报告输出目录；曾被误入库一份 jscpd-report.json
+report/
+
 # scripts/ 默认忽略（保留已跟踪的构建/检查脚本）
 /scripts/
 !/scripts/

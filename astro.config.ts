@@ -78,9 +78,12 @@ export default defineConfig({
     enabled: false,
   },
 
-  site: process.env.PUBLIC_SITE_URL ?? (siteConfig.site as string),
+  // 用 `||` 而非 `??`：`.env` 写成 `PUBLIC_SITE_URL=`（空串）是"留空用默认"的常见写法，
+  // 而 `??` 只在 null/undefined 时兜底、空串会赢 → Astro 直接报 "Invalid URL"，
+  // `astro check` 连源码都不扫就退出（`.env.example` 正是这么写的，故必须容错空串）。
+  site: process.env.PUBLIC_SITE_URL || (siteConfig.site as string),
   // 环境变量可覆盖 base（如部署在子路径下）；默认读取 config.yaml
-  base: process.env.PUBLIC_BASE_PATH ?? ((siteConfig.base as string) || "/"),
+  base: process.env.PUBLIC_BASE_PATH || (siteConfig.base as string) || "/",
 
   output: "server",
   adapter: node({ mode: "standalone" }),
