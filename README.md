@@ -230,7 +230,7 @@ import { SITE, I18N, METADATA, APP_BLOG, UI, ANALYTICS } from "~/lib/config";
 pnpm run build   # 输出到 ./dist/
 ```
 
-推送 `main`（或开 PR）后，GitHub Actions 触发 `build` / `artifacts` / `check` / `test-frontend` 四个 job：生产构建、产物检查（SEO / 内部链接 / Bundle 预算）、`astro check`+ESLint+Prettier、Vitest 单测。**本仓库 CI 不含自动部署 job**，实际部署由外层编排（根目录仓库/nginx 编排）完成。
+推送 `main`（或开 PR）后，GitHub Actions 触发 `build` / `artifacts` / `check` / `test-frontend` 四个 job：生产构建、产物检查（SEO / 内部链接 / Bundle 预算）、`astro check`+ESLint+Prettier、Vitest 单测。**本仓库 CI 不含自动部署 job**，实际部署由外层编排（根目录仓库/APISIX 编排）完成。
 
 > 本仓库 `pnpm run dev` 仅启动 Astro（端口 4321）；后端请求经 `API_URL` 代理到真实后端（见 `.env.example`），未配置则前端仅提供不依赖 API 的页面。
 

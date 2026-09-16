@@ -59,7 +59,6 @@ const metadata = {
 | ---------- | ----------------------- | ---------- |
 | `homepage` | `~/features/homepage/`  | 首页组件   |
 | `blog`     | `~/features/blog/`      | 博客组件   |
-| `team`     | `~/features/team/`      | 团队组件   |
 | `auth`     | `~/features/auth/`      | 认证组件   |
 | `docs`     | `~/features/docs/`      | 文档组件   |
 | `search`   | `~/features/search/`    | 搜索组件   |
