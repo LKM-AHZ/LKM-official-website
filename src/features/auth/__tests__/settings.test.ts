@@ -19,7 +19,7 @@ beforeEach(() => {
 });
 
 function makeUser(over: Record<string, unknown> = {}): {
-  id: number;
+  id: string;
   username: string;
   account_level: string;
   email: string | null;
@@ -27,7 +27,7 @@ function makeUser(over: Record<string, unknown> = {}): {
   [key: string]: unknown;
 } {
   return {
-    id: 1,
+    id: "00000000-0000-7000-8000-000000000001",
     username: "alma",
     account_level: "normal",
     email: null,
@@ -63,7 +63,12 @@ describe("BindMethods", () => {
   it("未绑定时展示「绑定」按钮并可发起邮箱绑定", async () => {
     const requestSpy = vi
       .spyOn(authApi, "bindEmailRequest")
-      .mockResolvedValue(ok({ message: "code sent", record_id: 1 }) as never);
+      .mockResolvedValue(
+        ok({
+          message: "code sent",
+          record_id: "00000000-0000-7000-8000-000000000001",
+        }) as never,
+      );
     const w = mount(BindMethods, {
       props: { user: makeUser() as never },
     });
@@ -107,7 +112,7 @@ describe("PasskeySetup", () => {
     vi.spyOn(authApi, "listPasskeys").mockResolvedValue(
       ok([
         {
-          id: 1,
+          id: "00000000-0000-7000-8000-000000000001",
           credential_id: "c",
           device_name: "我的钥匙",
           created_at: "2026-01-01",

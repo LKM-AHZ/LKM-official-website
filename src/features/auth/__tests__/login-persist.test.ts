@@ -18,12 +18,16 @@ describe("登录态刷新保持", () => {
       ok({
         access_token: "a",
         refresh_token: "r",
-        user_id: 1,
+        user_id: "00000000-0000-7000-8000-000000000001",
         account_level: "local",
       }),
     );
     vi.spyOn(authModule.authApi, "getMe").mockResolvedValue(
-      ok({ id: 1, username: "alma", account_level: "local" }),
+      ok({
+        id: "00000000-0000-7000-8000-000000000001",
+        username: "alma",
+        account_level: "local",
+      }),
     );
 
     const store = useAuthStore();

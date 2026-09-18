@@ -11,7 +11,7 @@
 import { graphql } from "../graphql";
 
 export const BLOG_SERIES_DETAIL = graphql`
-  query BlogSeriesDetail($id: Int!) {
+  query BlogSeriesDetail($id: ID!) {
     blogSeriesDetail(seriesId: $id) {
       id
       ownerId
@@ -39,7 +39,7 @@ export const BLOG_SERIES_DETAIL = graphql`
 `;
 
 export const BLOG_FILE_CONTENT = graphql`
-  query BlogFileContent($seriesId: Int!, $filepath: String!) {
+  query BlogFileContent($seriesId: ID!, $filepath: String!) {
     blogFileContent(seriesId: $seriesId, filepath: $filepath) {
       filepath
       content

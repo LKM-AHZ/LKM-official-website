@@ -7,7 +7,7 @@ import { t } from "~/lib/i18n";
 const DocumentEditor = lazy(() => import("./DocumentEditor"));
 
 interface DocumentIdContext {
-  seriesId?: number;
+  seriesId?: string;
   path?: string;
 }
 
@@ -30,7 +30,7 @@ const RETRY_DELAYS = [1000, 3000, 6000];
 interface Props {
   docId: string;
   adapter: PersistenceAdapter;
-  seriesId?: number;
+  seriesId?: string;
 }
 
 interface State {
@@ -178,7 +178,7 @@ class EditorErrorBoundary extends Component<Props, State> {
 export interface EditorMountProps {
   adapter: PersistenceAdapter;
   /** Git 系列写作：URL ?seriesId 存在时为 series 主键；无则 undefined（admin 本地模式） */
-  seriesId?: number;
+  seriesId?: string;
   /** Git 系列写作：URL ?path（可选），指示打开 series 内指定文件 */
   path?: string;
 }

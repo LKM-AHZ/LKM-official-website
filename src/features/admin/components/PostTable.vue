@@ -4,10 +4,10 @@ import { onMounted } from "vue";
 import { useAdminPagination } from "~/lib/http/useAdminPagination";
 
 interface AdminPostRow {
-  id: number;
+  id: string;
   title: string;
   author_name: string;
-  board_id: number;
+  board_id: string;
   view_count: number;
   comment_count: number;
   created_at: string;

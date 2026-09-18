@@ -5,7 +5,7 @@ import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
 
 interface AdminUserRow {
-  id: number;
+  id: string;
   username: string;
   account_level: string;
   is_locked: boolean;

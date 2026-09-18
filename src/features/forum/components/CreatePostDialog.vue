@@ -165,7 +165,7 @@ const canSubmit = computed(
 const rootBoards = computed(() =>
   boards.value.filter((b) => b.parent_id == null),
 );
-function childrenOf(parentId: number): BoardItem[] {
+function childrenOf(parentId: string): BoardItem[] {
   return boards.value.filter((b) => b.parent_id === parentId);
 }
 
@@ -198,7 +198,7 @@ async function submit() {
   submitting.value = true;
   const res = await contentApi.createItem({
     content_type: "discussion",
-    board_id: Number(selectedCategory.value),
+    board_id: selectedCategory.value,
     title: title.value.trim(),
     content: content.value.trim(),
     tags: tags.value,

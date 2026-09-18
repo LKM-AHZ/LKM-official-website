@@ -4,25 +4,25 @@
 export const BLOG_API = {
   series: {
     list: "/api/v1/blog/series",
-    detail: (id: number) => `/api/v1/blog/series/${id}`,
+    detail: (id: string) => `/api/v1/blog/series/${id}`,
     create: "/api/v1/blog/series",
-    update: (id: number) => `/api/v1/blog/series/${id}`,
-    delete: (id: number) => `/api/v1/blog/series/${id}`,
-    publish: (id: number) => `/api/v1/blog/series/${id}/publish`,
+    update: (id: string) => `/api/v1/blog/series/${id}`,
+    delete: (id: string) => `/api/v1/blog/series/${id}`,
+    publish: (id: string) => `/api/v1/blog/series/${id}/publish`,
   },
   star: {
-    toggle: (id: number) => `/api/v1/blog/series/${id}/star`,
+    toggle: (id: string) => `/api/v1/blog/series/${id}/star`,
   },
   comments: {
-    list: (id: number) => `/api/v1/blog/series/${id}/comments`,
-    create: (id: number) => `/api/v1/blog/series/${id}/comments`,
-    delete: (seriesId: number, commentId: number) =>
+    list: (id: string) => `/api/v1/blog/series/${id}/comments`,
+    create: (id: string) => `/api/v1/blog/series/${id}/comments`,
+    delete: (seriesId: string, commentId: string) =>
       `/api/v1/blog/series/${seriesId}/comments/${commentId}`,
   },
   files: {
-    get: (id: number, filepath: string) =>
+    get: (id: string, filepath: string) =>
       `/api/v1/blog/series/${id}/files/${filepath}`,
-    put: (id: number, filepath: string) =>
+    put: (id: string, filepath: string) =>
       `/api/v1/blog/series/${id}/files/${filepath}`,
   },
   // 文章相关的只读端点对齐后端真实 /api/v1/articles（旧的 blog 假路径已废弃）。
@@ -33,7 +33,7 @@ export const BLOG_API = {
     comments: {
       list: (slug: string) => `/api/v1/articles/${slug}/comments`,
       create: (slug: string) => `/api/v1/articles/${slug}/comments`,
-      delete: (commentId: number) => `/api/v1/articles/comments/${commentId}`,
+      delete: (commentId: string) => `/api/v1/articles/comments/${commentId}`,
     },
   },
   categories: {

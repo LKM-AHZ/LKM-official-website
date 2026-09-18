@@ -6,9 +6,9 @@ import { t } from "~/lib/i18n";
 import FollowButton from "../components/FollowButton.vue";
 
 const users = ref<
-  Array<{ user_id: number; display_name: string; avatar: string | null }>
+  Array<{ user_id: string; display_name: string; avatar: string | null }>
 >([]);
-const boards = ref<Array<{ board_id: number; title: string }>>([]);
+const boards = ref<Array<{ board_id: string; title: string }>>([]);
 const loading = ref(true);
 const error = ref("");
 

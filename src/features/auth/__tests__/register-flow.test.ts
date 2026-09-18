@@ -18,13 +18,17 @@ describe("useRegisterFlow", () => {
       ok({
         access_token: "a",
         refresh_token: "r",
-        user_id: 1,
+        user_id: "00000000-0000-7000-8000-000000000001",
         account_level: "local",
       }),
     );
     // 本地注册成功后 store 会 fetchMe 同步用户，注入 mock 避免真实网络
     vi.spyOn(api.authApi, "getMe").mockResolvedValue(
-      ok({ id: 1, username: "alma", account_level: "local" }),
+      ok({
+        id: "00000000-0000-7000-8000-000000000001",
+        username: "alma",
+        account_level: "local",
+      }),
     );
 
     const flow = useRegisterFlow();

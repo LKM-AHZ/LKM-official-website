@@ -3,7 +3,7 @@ import type { FileEntry } from "../../../../lib/api/modules/file-library";
 import { searchFiles } from "../search";
 
 function mk(
-  id: number,
+  id: string,
   file?: Partial<Omit<FileEntry, "id" | "reviewComment">>,
 ): FileEntry {
   return {
@@ -25,30 +25,35 @@ function mk(
   };
 }
 
+const ID_1 = "00000000-0000-7000-8000-000000000001";
+const ID_2 = "00000000-0000-7000-8000-000000000002";
+const ID_3 = "00000000-0000-7000-8000-000000000003";
+const ID_4 = "00000000-0000-7000-8000-000000000004";
+
 describe("searchFiles", () => {
   const files = [
-    mk(1, { originalName: "量子力学导论_讲义.pdf", tags: ["量子", "讲义"] }),
-    mk(2, { description: "整理的天体物理公开数据集", uploaderName: "七月O" }),
-    mk(3, { categoryName: "线性代数" }),
+    mk(ID_1, { originalName: "量子力学导论_讲义.pdf", tags: ["量子", "讲义"] }),
+    mk(ID_2, { description: "整理的天体物理公开数据集", uploaderName: "七月O" }),
+    mk(ID_3, { categoryName: "线性代数" }),
   ];
 
   it("按文件名命中", () => {
     const res = searchFiles(files, "量子力学导论");
-    expect(res.map((f) => f.id)).toEqual([1]);
+    expect(res.map((f) => f.id)).toEqual([ID_1]);
   });
 
   it("按标签/简介/上传者/分类名命中", () => {
-    expect(searchFiles(files, "讲义").map((f) => f.id)).toEqual([1]);
-    expect(searchFiles(files, "天体").map((f) => f.id)).toEqual([2]);
-    expect(searchFiles(files, "七月O").map((f) => f.id)).toEqual([2]);
-    expect(searchFiles(files, "线性").map((f) => f.id)).toEqual([3]);
+    expect(searchFiles(files, "讲义").map((f) => f.id)).toEqual([ID_1]);
+    expect(searchFiles(files, "天体").map((f) => f.id)).toEqual([ID_2]);
+    expect(searchFiles(files, "七月O").map((f) => f.id)).toEqual([ID_2]);
+    expect(searchFiles(files, "线性").map((f) => f.id)).toEqual([ID_3]);
   });
 
   it("大小写不敏感", () => {
     // categoryName「量子力学」下找（无英文场景），用 uploaderName 造英文测试
-    const en = [mk(4, { uploaderName: "Alice Liu" })];
-    expect(searchFiles(en, "alice").map((f) => f.id)).toEqual([4]);
-    expect(searchFiles(en, "ALICE").map((f) => f.id)).toEqual([4]);
+    const en = [mk(ID_4, { uploaderName: "Alice Liu" })];
+    expect(searchFiles(en, "alice").map((f) => f.id)).toEqual([ID_4]);
+    expect(searchFiles(en, "ALICE").map((f) => f.id)).toEqual([ID_4]);
   });
 
   it("query 为空或纯空白返回 []", () => {

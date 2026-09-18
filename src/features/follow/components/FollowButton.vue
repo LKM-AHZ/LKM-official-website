@@ -8,7 +8,7 @@ import { t } from "~/lib/i18n";
 
 const props = defineProps<{
   targetType: "user" | "board";
-  targetId: number;
+  targetId: string;
   variant?: "primary" | "ghost";
 }>();
 

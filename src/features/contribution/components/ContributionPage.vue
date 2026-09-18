@@ -451,7 +451,7 @@ const dailyCheckedIn = ref(false);
 // ── 真实数据 ref（snake_case 字段直接来自后端） ──
 const loading = ref(true);
 const balance = ref(0);
-const myUserId = ref<number | null>(null);
+const myUserId = ref<string | null>(null);
 const myTitle = ref<string>("");
 const achievements = ref<PointsAchievement[]>([]);
 const pointLogs = ref<PointsLedgerEntry[]>([]);

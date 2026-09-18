@@ -12,12 +12,7 @@ const loading = ref(true);
 const question = ref<QuestionDetail | null>(null);
 
 onMounted(async () => {
-  const id = Number(props.questionId);
-  if (!Number.isFinite(id)) {
-    loading.value = false;
-    return;
-  }
-  question.value = await qaApi.getQuestion(id);
+  question.value = await qaApi.getQuestion(props.questionId);
   loading.value = false;
 });
 

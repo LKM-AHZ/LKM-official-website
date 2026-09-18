@@ -28,7 +28,7 @@ export const CONTENT_ITEMS = graphql`
   query ContentItems(
     $page: Int!
     $pageSize: Int!
-    $boardId: Int
+    $boardId: ID
     $contentType: String
   ) {
     contentItems(
@@ -76,7 +76,7 @@ export const CONTENT_ITEMS = graphql`
 `;
 
 export const CONTENT_ITEM = graphql`
-  query ContentItem($id: Int!) {
+  query ContentItem($id: ID!) {
     contentItem(id: $id) {
       id
       contentType
@@ -148,7 +148,7 @@ export const CONTENT_ITEM_BY_SLUG = graphql`
 `;
 
 export const CONTENT_COMMENTS = graphql`
-  query ContentComments($itemId: Int!, $page: Int!, $pageSize: Int!) {
+  query ContentComments($itemId: ID!, $page: Int!, $pageSize: Int!) {
     contentComments(itemId: $itemId, page: $page, pageSize: $pageSize) {
       items {
         id

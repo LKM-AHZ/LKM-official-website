@@ -8,14 +8,14 @@ export type FeedItemType =
 
 export interface FeedItem {
   item_type: FeedItemType;
-  id: number;
-  author_id: number | null;
+  id: string;
+  author_id: string | null;
   author_name: string;
   title: string;
   content_preview: string;
   created_at: string;
   sort_score: number;
-  board_id: number | null;
+  board_id: string | null;
   url: string;
 }
 

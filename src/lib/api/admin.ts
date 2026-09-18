@@ -17,7 +17,7 @@ import type { AppError } from "~/lib/errors/error-codes";
 import type { Result } from "~/lib/errors/result";
 
 export interface AdminUser {
-  id: number;
+  id: string;
   account_level: string;
   role: string;
 }

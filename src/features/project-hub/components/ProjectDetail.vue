@@ -11,12 +11,7 @@ const loading = ref(true);
 const project = ref<ProjectItem | null>(null);
 
 onMounted(async () => {
-  const id = Number(props.projectId);
-  if (!Number.isFinite(id)) {
-    loading.value = false;
-    return;
-  }
-  project.value = await projectApi.getProject(id);
+  project.value = await projectApi.getProject(props.projectId);
   loading.value = false;
 });
 

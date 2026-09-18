@@ -4,7 +4,7 @@ import type { Result } from "~/lib/errors/result";
 // ── 真实用户类型（对齐后端 UserInfo + profile） ──
 
 export interface User {
-  id: number;
+  id: string;
   username: string;
   account_level: "local" | "normal" | "admin";
   email?: string | null;
@@ -36,7 +36,7 @@ export type AuthFlow =
 export type SessionStatus = "anonymous" | "restoring" | "authenticated";
 
 export interface TempSession {
-  userId: number;
+  userId: string;
   method: LoginMethod;
   isRecovery?: boolean;
 }

@@ -52,22 +52,16 @@ const metadata = {
     const params = new URLSearchParams(window.location.search);
     const rawSeriesId = params.get('seriesId');
     if (rawSeriesId && rawSeriesId.trim() !== '') {
-      const seriesId = Number(rawSeriesId);
-      if (Number.isFinite(seriesId) && seriesId > 0) {
-        const path = params.get('path') ?? undefined;
-        root.render(
-          createElement(EditorMount, {
-            adapter: createGitPersistence(seriesId, path),
-            seriesId,
-            path,
-          }),
-        );
-      } else {
-        // seriesId 非法，回退本地
-        root.render(
-          createElement(EditorMount, { adapter: createLocalPersistence() }),
-        );
-      }
+      // seriesId 为后端 uuid 字符串，直接透传（不再做数值转换/校验）
+      const seriesId = rawSeriesId.trim();
+      const path = params.get('path') ?? undefined;
+      root.render(
+        createElement(EditorMount, {
+          adapter: createGitPersistence(seriesId, path),
+          seriesId,
+          path,
+        }),
+      );
     } else {
       root.render(
         createElement(EditorMount, { adapter: createLocalPersistence() }),

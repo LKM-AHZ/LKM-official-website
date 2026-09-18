@@ -62,7 +62,7 @@ interface DocumentEditorProps {
   documentId: string;
   adapter: PersistenceAdapter;
   /** Git 系列写作模式（URL 带 ?seriesId 时为 series 主键；admin 本地模式为 undefined） */
-  seriesId?: number;
+  seriesId?: string;
 }
 
 import { computeTextMetrics } from "../../engine/text-metrics";

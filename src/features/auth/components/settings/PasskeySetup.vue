@@ -94,8 +94,8 @@ const loadingList = ref(false);
 const error = ref("");
 const newName = ref("");
 const creating = ref(false);
-const confirmDelete = ref<number | null>(null);
-const deletingId = ref<number | null>(null);
+const confirmDelete = ref<string | null>(null);
+const deletingId = ref<string | null>(null);
 // 危险删除 passkey 需 2FA step-up（弹窗承载于本组件）
 const stepUp = useStepUp2FA(t("settings.passkey.deleteStepUpHint"));
 
@@ -148,7 +148,7 @@ async function createPasskey() {
   }
 }
 
-async function doDelete(id: number) {
+async function doDelete(id: string) {
   confirmDelete.value = null;
   deletingId.value = id;
   error.value = "";

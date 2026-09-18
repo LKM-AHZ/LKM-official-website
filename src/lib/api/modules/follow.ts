@@ -13,13 +13,13 @@ export interface FollowStatus {
 }
 
 export interface FollowUser {
-  user_id: number;
+  user_id: string;
   display_name: string;
   avatar: string | null;
 }
 
 export interface FollowBoard {
-  board_id: number;
+  board_id: string;
   title: string;
 }
 
@@ -28,18 +28,18 @@ export interface FollowListData<T> {
 }
 
 export const followApi = {
-  followUser: (userId: number) =>
+  followUser: (userId: string) =>
     post<FollowToggle>(`/api/v1/users/${userId}/follow`),
-  unfollowUser: (userId: number) =>
+  unfollowUser: (userId: string) =>
     del<FollowToggle>(`/api/v1/users/${userId}/follow`),
-  followBoard: (boardId: number) =>
+  followBoard: (boardId: string) =>
     post<FollowToggle>(`/api/v1/content/boards/${boardId}/follow`),
-  unfollowBoard: (boardId: number) =>
+  unfollowBoard: (boardId: string) =>
     del<FollowToggle>(`/api/v1/content/boards/${boardId}/follow`),
   myFollowingUsers: () =>
     get<FollowListData<FollowUser>>("/api/v1/users/me/following"),
   myFollowingBoards: () =>
     get<FollowListData<FollowBoard>>("/api/v1/content/boards/me/following"),
-  followStatus: (userId: number) =>
+  followStatus: (userId: string) =>
     get<FollowStatus>(`/api/v1/users/${userId}/follow/status`),
 };

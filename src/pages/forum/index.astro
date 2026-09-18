@@ -25,7 +25,7 @@ try {
   const res = await contentApi.listBoards();
   const boards: BoardItem[] = res.isOk() ? (res.value?.items ?? []) : [];
   if (boards.length > 0) {
-    const parentById = new Map<number, BoardItem[]>();
+    const parentById = new Map<string, BoardItem[]>();
     for (const b of boards) {
       if (b.parent_id != null) {
         const arr = parentById.get(b.parent_id) ?? [];

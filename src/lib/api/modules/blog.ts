@@ -89,8 +89,8 @@ function mapFileTree(nodes: readonly GraphFileTreeNode[]): FileTreeNode[] {
 
 /** GraphBlogSeriesDetail（camelCase）→ BlogSeriesDetail（snake_case） */
 function mapSeriesDetail(d: {
-  id: number;
-  ownerId: number;
+  id: string;
+  ownerId: string;
   title: string;
   description: string | null;
   coverUrl: string | null;
@@ -167,7 +167,7 @@ export const blogApi = {
 
   /** 系列详情（含文件树）— 被 git-persistence.listDocuments 消费 */
   getSeriesDetail: async (
-    id: number,
+    id: string,
   ): Promise<Result<BlogSeriesDetail, AppError>> => {
     const r = await graphqlClient.query(BLOG_SERIES_DETAIL, { id }).toPromise();
     if (r.error) return err(mapErr(r.error));
@@ -181,7 +181,7 @@ export const blogApi = {
   // ── 文件 ──
   /** 取系列内单个 file 内容 — 被 git-persistence.loadDocument 消费 */
   getFileContent: async (
-    seriesId: number,
+    seriesId: string,
     filepath: string,
   ): Promise<Result<GitFileContent, AppError>> => {
     const r = await graphqlClient
@@ -196,7 +196,7 @@ export const blogApi = {
   },
 
   putSeriesFile: async (
-    seriesId: number,
+    seriesId: string,
     filepath: string,
     content: string,
     message?: string,
@@ -212,7 +212,7 @@ export const blogApi = {
   },
 
   publishSeriesFile: async (
-    seriesId: number,
+    seriesId: string,
     filepath: string,
     override?: Record<string, unknown>,
   ): Promise<Result<ArticleDetail, AppError>> => {
@@ -229,12 +229,12 @@ export const blogApi = {
   // ── 评论 ──
   // TODO: 无消费方，待按需接入 GraphQL
   listComments: async (
-    seriesId: number,
+    seriesId: string,
   ): Promise<Result<ListData<BlogCommentInfo>, AppError>> =>
     notImplemented(BLOG_API.comments.list(seriesId)),
 
   createComment: async (
-    seriesId: number,
+    seriesId: string,
     data: BlogCommentCreate,
   ): Promise<Result<BlogCommentInfo, AppError>> => {
     const result = await post<ApiResponse<BlogCommentInfo>>(
@@ -247,7 +247,7 @@ export const blogApi = {
     );
   },
 
-  deleteComment: (seriesId: number, commentId: number) =>
+  deleteComment: (seriesId: string, commentId: string) =>
     del<null>(BLOG_API.comments.delete(seriesId, commentId)),
 
   // ── 文章（对齐后端真实 /api/v1/articles，返回契约沿用 BlogArticleInfo）──
@@ -288,7 +288,7 @@ export const blogApi = {
 
   // ── 收藏 ──
   toggleStar: async (
-    seriesId: number,
+    seriesId: string,
   ): Promise<Result<BlogStarStatus, AppError>> => {
     const result = await post<ApiResponse<BlogStarStatus>>(
       BLOG_API.star.toggle(seriesId),
@@ -320,7 +320,7 @@ export const blogApi = {
     );
   },
 
-  deleteArticleComment: (commentId: number) =>
+  deleteArticleComment: (commentId: string) =>
     del<null>(BLOG_API.articles.comments.delete(commentId)),
 
   toggleArticleLike: async (

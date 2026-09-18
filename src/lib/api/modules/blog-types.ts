@@ -2,8 +2,8 @@
 // Blog 模块的类型定义 — 从 features/blog-community/types/blog.ts 迁移
 
 export interface BlogSeriesInfo {
-  id: number;
-  owner_id: number;
+  id: string;
+  owner_id: string;
   title: string;
   description: string | null;
   cover_url: string | null;
@@ -31,11 +31,11 @@ export interface GitFileContent {
 }
 
 export interface BlogCommentInfo {
-  id: number;
-  user_id: number;
-  series_id: number;
+  id: string;
+  user_id: string;
+  series_id: string;
   content: string;
-  parent_id: number | null;
+  parent_id: string | null;
   created_at: string;
   updated_at: string;
   profile: {
@@ -55,11 +55,11 @@ export interface BlogStarStatus {
 
 /** 文章评论（后端 ArticleCommentOut，平铺列表，含 parent_id 自引用用于组树）。 */
 export interface ArticleCommentInfo {
-  id: number;
-  article_id: number;
-  user_id: number;
+  id: string;
+  article_id: string;
+  user_id: string;
   content: string;
-  parent_id: number | null;
+  parent_id: string | null;
   created_at: string;
   /** 作者 profile（后端 ProfileInfo），可能缺失。 */
   profile: {
@@ -78,7 +78,7 @@ export interface ArticleLikeStatus {
 /** 文章评论创建入参（后端 ArticleCommentCreate）。 */
 export interface ArticleCommentCreate {
   content: string;
-  parent_id?: number | null;
+  parent_id?: string | null;
 }
 
 export interface ApiResponse<T> {
@@ -92,7 +92,7 @@ export interface ListData<T> {
 }
 
 export interface BlogArticle {
-  seriesId: number;
+  seriesId: string;
   seriesTitle: string;
   seriesDescription: string | null;
   seriesCover: string | null;
@@ -102,7 +102,7 @@ export interface BlogArticle {
 
 export interface BlogCommentCreate {
   content: string;
-  parent_id?: number | null;
+  parent_id?: string | null;
 }
 
 export interface BlogArticleInfo {

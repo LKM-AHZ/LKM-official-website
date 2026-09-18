@@ -24,12 +24,12 @@ export type { PaginatedResponse } from "../types";
 
 /** 板块（boards 是统一分类轴：forum/columns 都已挂 board_id，支持父/子层级） */
 export interface BoardItem {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   description: string;
-  parent_id: number | null;
-  owner_id: number | null;
+  parent_id: string | null;
+  owner_id: string | null;
   status: string;
   require_certified: boolean;
   daily_post_limit: number;
@@ -40,16 +40,16 @@ export type ContentType =
   "discussion" | "article" | "column_post" | "blog_post" | "qa";
 
 export interface ContentItem {
-  id: number;
+  id: string;
   content_type: ContentType;
-  board_id: number;
-  author_id: number | null;
+  board_id: string;
+  author_id: string | null;
   author_name: string;
   publisher: string | null;
   department: string | null;
-  column_id: number | null;
+  column_id: string | null;
   column_title: string;
-  qa_question_id: number | null;
+  qa_question_id: string | null;
   slug: string | null;
   title: string;
   excerpt: string;
@@ -72,20 +72,20 @@ export interface ContentItem {
 }
 
 export interface ContentComment {
-  id: number;
-  content_id: number;
-  author_id: number;
+  id: string;
+  content_id: string;
+  author_id: string;
   author_name: string;
   content: string;
   floor_number: number;
-  parent_id: number | null;
+  parent_id: string | null;
   like_count: number;
   created_at: string;
 }
 
 export interface ContentCreateInput {
   content_type?: ContentType;
-  board_id: number;
+  board_id: string;
   title: string;
   content: string;
   summary?: string | null;
@@ -95,7 +95,7 @@ export interface ContentCreateInput {
   publisher?: string | null;
   department?: string | null;
   keywords?: string[];
-  column_id?: number | null;
+  column_id?: string | null;
   status?: string;
   is_pinned?: boolean;
   is_featured?: boolean;
@@ -135,12 +135,12 @@ function mapErr(
 
 /** GraphBoard（camelCase）→ BoardItem（snake_case） */
 function mapBoard(b: {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   description: string;
-  parentId: number | null;
-  ownerId: number | null;
+  parentId: string | null;
+  ownerId: string | null;
   status: string;
   requireCertified: boolean;
   dailyPostLimit: number;
@@ -162,16 +162,16 @@ function mapBoard(b: {
 
 /** GraphContentItem（camelCase）→ ContentItem（snake_case） */
 function mapItem(i: {
-  id: number;
+  id: string;
   contentType: string;
-  boardId: number;
-  authorId: number | null;
+  boardId: string;
+  authorId: string | null;
   authorName: string;
   publisher: string | null;
   department: string | null;
-  columnId: number | null;
+  columnId: string | null;
   columnTitle: string;
-  qaQuestionId: number | null;
+  qaQuestionId: string | null;
   slug: string | null;
   title: string;
   excerpt: string;
@@ -227,13 +227,13 @@ function mapItem(i: {
 
 /** GraphContentComment（camelCase）→ ContentComment（snake_case） */
 function mapComment(c: {
-  id: number;
-  contentId: number;
-  authorId: number;
+  id: string;
+  contentId: string;
+  authorId: string;
   authorName: string;
   content: string;
   floorNumber: number;
-  parentId: number | null;
+  parentId: string | null;
   likeCount: number;
   createdAt: string;
 }): ContentComment {
@@ -263,7 +263,7 @@ export const contentApi = {
   async listItems(args?: {
     page?: number;
     limit?: number;
-    board_id?: number;
+    board_id?: string;
     content_type?: ContentType;
   }) {
     const r = await graphqlClient
@@ -285,7 +285,7 @@ export const contentApi = {
   },
 
   /** 按 id 取内容详情 */
-  async getItem(id: number) {
+  async getItem(id: string) {
     const r = await graphqlClient.query(CONTENT_ITEM, { id }).toPromise();
     if (r.error) return err(mapErr(r.error));
     if (!r.data?.contentItem)
@@ -305,7 +305,7 @@ export const contentApi = {
   },
 
   /** 评论列表（统一分页） */
-  async listComments(itemId: number, page = 1, limit = 20) {
+  async listComments(itemId: string, page = 1, limit = 20) {
     const r = await graphqlClient
       .query(CONTENT_COMMENTS, { itemId, page, pageSize: limit })
       .toPromise();
@@ -323,14 +323,14 @@ export const contentApi = {
   createItem: (data: ContentCreateInput) =>
     post<ContentItem>("/api/v1/content/items", data),
 
-  deleteItem: (id: number) => del<void>(`/api/v1/content/items/${id}`),
+  deleteItem: (id: string) => del<void>(`/api/v1/content/items/${id}`),
 
-  likeItem: (id: number) => post<void>(`/api/v1/content/items/${id}/like`),
+  likeItem: (id: string) => post<void>(`/api/v1/content/items/${id}/like`),
 
-  unlikeItem: (id: number) => del<void>(`/api/v1/content/items/${id}/like`),
+  unlikeItem: (id: string) => del<void>(`/api/v1/content/items/${id}/like`),
 
   createComment: (
-    itemId: number,
-    data: { content: string; parent_id?: number | null },
+    itemId: string,
+    data: { content: string; parent_id?: string | null },
   ) => post<ContentComment>(`/api/v1/content/items/${itemId}/comments`, data),
 };

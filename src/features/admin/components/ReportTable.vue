@@ -5,7 +5,7 @@ import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
 
 interface AdminReportRow {
-  id: number;
+  id: string;
   type: string;
   target_id: string;
   target_title: string;

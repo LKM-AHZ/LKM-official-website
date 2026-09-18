@@ -2,11 +2,11 @@ import { get, post } from "../../http/client";
 import type { PaginatedResponse } from "../types";
 
 export interface PointsBalance {
-  user_id: number;
+  user_id: string;
   balance: number;
 }
 export interface PointsLedgerEntry {
-  id: number;
+  id: string;
   delta: number;
   balance_after: number;
   reason: string;
@@ -15,13 +15,13 @@ export interface PointsLedgerEntry {
   created_at: string;
 }
 export interface PointsLeaderboardEntry {
-  user_id: number;
+  user_id: string;
   display_name: string;
   balance: number;
   title: string;
 }
 export interface PointsAchievement {
-  id: number;
+  id: string;
   key: string;
   category: string;
   icon: string;
@@ -35,7 +35,7 @@ export interface PointsAchievement {
   unlocked: boolean;
 }
 export interface PointsTask {
-  id: number;
+  id: string;
   key: string;
   title_key: string;
   desc_key: string;
@@ -47,7 +47,7 @@ export interface PointsTask {
   completed: boolean;
 }
 export interface PointsExchangeItem {
-  id: number;
+  id: string;
   key: string;
   name_key: string;
   desc_key: string;

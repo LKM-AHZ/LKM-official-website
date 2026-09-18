@@ -8,7 +8,7 @@ import { adminFetch, readAdminResp } from "~/lib/api/admin";
 export type ModerationAction = "derank" | "hide";
 
 export interface RuleInfo {
-  id: number;
+  id: string;
   pattern: string;
   is_regex: boolean;
   action: ModerationAction;
@@ -86,12 +86,12 @@ export const moderationApi = {
       parse<RuleInfo>(d),
     ),
 
-  updateRule: (id: number, input: RuleUpdateInput) =>
+  updateRule: (id: string, input: RuleUpdateInput) =>
     sendJson(`/api/v1/admin/moderation/rules/${id}`, "PATCH", input).then((d) =>
       parse<RuleInfo>(d),
     ),
 
-  deleteRule: (id: number) =>
+  deleteRule: (id: string) =>
     sendJson(`/api/v1/admin/moderation/rules/${id}`, "DELETE"),
 
   testRule: (text: string) =>

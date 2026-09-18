@@ -10,7 +10,7 @@ export type { PaginatedResponse } from "../types";
 
 /** 文件展示形状（camelCase，由后端 FileInfo 映射而来）。 */
 export interface FileEntry {
-  id: number;
+  id: string;
   originalName: string;
   uploaderName: string;
   mimeType: string;
@@ -27,9 +27,9 @@ export interface FileEntry {
 }
 
 interface BackendFile {
-  id: number;
+  id: string;
   original_name: string;
-  uploader_id: number;
+  uploader_id: string;
   uploader_name: string;
   mime_type: string;
   size: number;
@@ -103,13 +103,13 @@ export const fileLibraryApi = {
     return (res.value.items ?? []).map(mapFile);
   },
 
-  getFile: async (id: string | number): Promise<FileEntry | null> => {
+  getFile: async (id: string): Promise<FileEntry | null> => {
     const res = await get<BackendFile>(`/api/v1/files/${id}`);
     if (res.isErr()) return null;
     return mapFile(res.value);
   },
 
-  getDownloadUrl: async (id: string | number): Promise<DownloadUrlInfo> => {
+  getDownloadUrl: async (id: string): Promise<DownloadUrlInfo> => {
     // 后端该端点由 get_current_user 保护，只认 Bearer 头；generic get() 的
     // needsAuth 白名单未含 /api/v1/files/，这里手动附加 token 经 apiFetch 发起，
     // 与 getContentBlob 保持一致，避免依赖会随白名单变化而失效。
@@ -132,7 +132,7 @@ export const fileLibraryApi = {
     };
   },
 
-  getContentBlob: async (id: string | number): Promise<Blob> => {
+  getContentBlob: async (id: string): Promise<Blob> => {
     const token = getHttpAccessToken();
     const result = await apiFetch(`/api/v1/files/${id}/content`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -143,7 +143,7 @@ export const fileLibraryApi = {
     return res.blob();
   },
 
-  getPreviewUrl: (id: string | number): string => `/api/v1/files/${id}/preview`,
+  getPreviewUrl: (id: string): string => `/api/v1/files/${id}/preview`,
 
   // ── 上传（Phase 2-B）──
   // 该链路由 /files 相关端点保护，只认 Bearer 头；generic get() 的

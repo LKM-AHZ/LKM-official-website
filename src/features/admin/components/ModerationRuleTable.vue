@@ -32,7 +32,7 @@ const testResult = ref<{
 } | null>(null);
 
 const mfa = useAdminMFA();
-const deletingId = ref<number | null>(null);
+const deletingId = ref<string | null>(null);
 
 async function load(): Promise<void> {
   loading.value = true;
@@ -83,7 +83,7 @@ async function save(): Promise<void> {
   await load();
 }
 
-async function removeRule(id: number): Promise<void> {
+async function removeRule(id: string): Promise<void> {
   deletingId.value = id;
   const result = await mfa.run(async () => moderationApi.deleteRule(id));
   deletingId.value = null;

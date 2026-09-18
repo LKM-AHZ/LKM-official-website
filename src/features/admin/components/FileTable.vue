@@ -5,7 +5,7 @@ import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
 
 interface AdminFileRow {
-  id: number;
+  id: string;
   original_name: string;
   uploader_name: string;
   size: number;

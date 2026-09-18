@@ -5,7 +5,7 @@ import type { UserInfo } from "~/lib/api/modules/auth";
 export function useAuthStore(): {
   isLoggedIn: ComputedRef<boolean>;
   currentUser: ComputedRef<UserInfo | null>;
-  userId: ComputedRef<number | null>;
+  userId: ComputedRef<string | null>;
   logout: () => Promise<void>;
   restore: () => void;
 } {

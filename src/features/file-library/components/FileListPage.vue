@@ -559,9 +559,9 @@ async function doUpload() {
 }
 
 // 下载中文件 id 集合（防重复触发 + 按钮 loading 态）
-const downloading = ref<Set<number>>(new Set());
+const downloading = ref<Set<string>>(new Set());
 // 预览中文件 id 集合（防重复触发）
-const previewing = ref<Set<number>>(new Set());
+const previewing = ref<Set<string>>(new Set());
 
 // 下载：approved 文件按后端给出的 kind 分叉。
 // presigned → S3 直连跳转；backend → 鉴权拉 blob 后走合成 <a download>。

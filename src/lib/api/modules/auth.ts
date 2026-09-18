@@ -4,7 +4,7 @@ import { apiFetch } from "../fetch";
 // ── 类型 ──
 
 export interface UserInfo {
-  id: number;
+  id: string;
   username: string;
   account_level: string;
 }
@@ -12,7 +12,7 @@ export interface UserInfo {
 export interface TokenData {
   access_token: string;
   refresh_token: string;
-  user_id: number;
+  user_id: string;
   account_level: string;
   requires_2fa?: boolean;
   setup_required?: boolean;
@@ -92,7 +92,7 @@ export interface TOTPSetupCompleteTempData extends TOTPSetupCompleteData {
 export interface TOTPVerifyData {
   access_token?: string | null;
   refresh_token?: string | null;
-  user_id: number;
+  user_id: string;
   account_level: string;
   trust_device: boolean;
   mfa_verified?: boolean | null;
@@ -135,7 +135,7 @@ export interface PasskeyRegisterCompleteData {
 
 /** GET /auth/passkey/credentials 的单条记录。 */
 export interface PasskeyCredential {
-  id: number;
+  id: string;
   credential_id: string;
   device_name: string;
   created_at: string;
@@ -166,7 +166,7 @@ export interface RecoverTxMsg {
 
 export interface BindCodeRequestData {
   message: string;
-  record_id: number;
+  record_id: string;
 }
 
 export interface BindCodeVerifyData {
@@ -275,12 +275,12 @@ export const authApi = {
   logout: () => post<MessageResponse>("/api/v1/auth/logout"),
 
   // ── 获取用户资料 ──
-  getUserProfile: (userId: number) =>
+  getUserProfile: (userId: string) =>
     get<ProfileInfo>(`/api/v1/auth/${userId}`),
 
   // ── 编辑用户资料 ──
   editProfile: (
-    userId: number,
+    userId: string,
     info: {
       nickname?: string | null;
       avatar?: string | null;
@@ -314,7 +314,7 @@ export const authApi = {
   },
 
   /** 读取头像图片 URL（GET 流式返回，未上传时为 404）。 */
-  getAvatarUrl: (userId: string | number): string =>
+  getAvatarUrl: (userId: string): string =>
     `/api/v1/auth/avatar/${userId}`,
 
   // ── 根据用户名获取用户信息（公开，无需登录） ──
@@ -412,7 +412,7 @@ export const authApi = {
     }),
   listPasskeys: () =>
     get<PasskeyCredential[]>("/api/v1/auth/passkey/credentials"),
-  deletePasskey: (id: number) =>
+  deletePasskey: (id: string) =>
     del<MessageResponse>(`/api/v1/auth/passkey/${id}`),
 
   // ── GitHub OAuth ──

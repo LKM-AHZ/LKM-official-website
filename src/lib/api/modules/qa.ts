@@ -12,7 +12,7 @@ export type QaCategory = "help" | "volunteer";
 
 /** 提问列表项展示形状（camelCase）。 */
 export interface QuestionSummary {
-  id: number;
+  id: string;
   authorName: string;
   title: string;
   content: string;
@@ -22,15 +22,15 @@ export interface QuestionSummary {
   bountyPerPerson: number;
   bountyTotal: number;
   bountyDistributed: number;
-  acceptedAnswerId: number | null;
+  acceptedAnswerId: string | null;
   answerCount: number;
   createdAt: string;
 }
 
 export interface QaAnswer {
-  id: number;
-  questionId: number;
-  authorId: number;
+  id: string;
+  questionId: string;
+  authorId: string;
   content: string;
   isAccepted: boolean;
   createdAt: string;
@@ -53,8 +53,8 @@ export interface QuestionCreateInput {
 
 /** 后端 QuestionOut / QuestionDetail 的 snake_case 形状。 */
 interface BackendQuestion {
-  id: number;
-  author_id: number;
+  id: string;
+  author_id: string;
   author_name: string;
   title: string;
   situation: string;
@@ -65,15 +65,15 @@ interface BackendQuestion {
   bounty_distributed: number;
   status: string;
   category: QaCategory;
-  accepted_answer_id: number | null;
+  accepted_answer_id: string | null;
   answer_count: number;
   created_at: string;
 }
 
 interface BackendAnswer {
-  id: number;
-  question_id: number;
-  author_id: number;
+  id: string;
+  question_id: string;
+  author_id: string;
   content: string;
   is_accepted: boolean;
   created_at: string;
@@ -143,7 +143,7 @@ export const qaApi = {
   },
 
   /** 提问详情。 */
-  async getQuestion(id: number): Promise<QuestionDetail | null> {
+  async getQuestion(id: string): Promise<QuestionDetail | null> {
     const res = await get<
       BackendQuestion & {
         situation: string;
@@ -174,7 +174,7 @@ export const qaApi = {
 
   /** 回答问题。 */
   async createAnswer(
-    questionId: number,
+    questionId: string,
     content: string,
   ): Promise<QaAnswer | null> {
     const res = await post<BackendAnswer>(

@@ -25,7 +25,11 @@ describe("useAuthStore 单一状态源", () => {
     );
     const s = useAuthStore();
     s.setTokens("t", "r");
-    s.user = { id: 1, username: "x", account_level: "local" };
+    s.user = {
+      id: "00000000-0000-7000-8000-000000000001",
+      username: "x",
+      account_level: "local",
+    };
     s.isLoggedIn = true;
     await s.restoreAndValidate();
     expect(s.isLoggedIn).toBe(false);

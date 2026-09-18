@@ -106,7 +106,7 @@ export const useAuthStore = defineStore("auth", () => {
   // 各登录接口会在 setTokens 后先 persist 一次（那时 user 尚空），故这里成功后再 persist，
   // 确保 localStorage 写入完整会话，刷新/restoreFromStorage 才能恢复登录态。
   async function fetchMeAfterLogin(
-    _userId: number,
+    _userId: string,
   ): Promise<Result<AuthSuccess, AppError>> {
     const meResult = await fetchMe();
     if (meResult.isOk()) {

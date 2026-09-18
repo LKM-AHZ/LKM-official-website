@@ -9,7 +9,7 @@ import type { User } from "~/types/auth";
 
 export function makeUser(over: Partial<User> = {}): User {
   return {
-    id: 1,
+    id: "00000000-0000-7000-8000-000000000001",
     username: "alma",
     account_level: "normal",
     email: null,

@@ -6,7 +6,7 @@ import { get, post } from "../../http/client";
 
 /** 项目广场展示形状（camelCase）。 */
 export interface ProjectItem {
-  id: number;
+  id: string;
   title: string;
   summary: string;
   description: string;
@@ -23,14 +23,14 @@ export interface ProjectItem {
   recruitingRoles: string[];
   tags: string[];
   reports: { title: string; content: string; revision: number; date: string }[];
-  members: { id: number; displayName: string; roleInProject: string }[];
+  members: { id: string; displayName: string; roleInProject: string }[];
   createdAt: string;
 }
 
 export interface ProjectMemberClaim {
   displayName: string;
   roleInProject: string;
-  userId?: number | null;
+  userId?: string | null;
 }
 
 export interface ProjectApplicationInput {
@@ -42,11 +42,11 @@ export interface ProjectApplicationInput {
 
 /** 后端 ProjectOut 的 snake_case 形状。 */
 interface BackendProject {
-  id: number;
+  id: string;
   title: string;
   summary: string;
   description: string;
-  applicant_id: number;
+  applicant_id: string;
   applicant_name: string;
   is_incubated: boolean;
   type: "recruiting" | "showcase";
@@ -61,7 +61,7 @@ interface BackendProject {
   tags: string[];
   reports: { title: string; content: string; revision: number; date: string }[];
   members: {
-    id: number;
+    id: string;
     display_name: string;
     role_in_project: string;
     sort_order: number;
@@ -107,7 +107,7 @@ export const projectApi = {
   },
 
   /** 项目详情。 */
-  async getProject(id: number): Promise<ProjectItem | null> {
+  async getProject(id: string): Promise<ProjectItem | null> {
     const res = await get<BackendProject>(`/api/v1/projects/${id}`);
     if (res.isErr()) return null;
     return mapProject(res.value);

@@ -32,7 +32,7 @@ function flattenTree(nodes: FileTreeNode[], prefix = ""): string[] {
 }
 
 export function createGitPersistence(
-  seriesId: number,
+  seriesId: string,
   path?: string,
 ): PersistenceAdapter {
   // path 预留：后续可锁定单文件编辑；当前 editor.astro 据此决定新建还是打开既有文件
