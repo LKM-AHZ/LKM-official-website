@@ -151,7 +151,11 @@ onMounted(() => void load());
                 {{ r.reason || "—" }}
               </td>
               <td class="px-4 py-3 hidden sm:table-cell text-text-muted">
-                {{ r.created_at ? r.created_at.slice(0, 19).replace("T", " ") : "—" }}
+                {{
+                  r.created_at
+                    ? r.created_at.slice(0, 19).replace("T", " ")
+                    : "—"
+                }}
               </td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <template v-if="status === 'pending'">
@@ -183,8 +187,7 @@ onMounted(() => void load());
                   </summary>
                   <pre
                     class="mt-2 p-3 rounded-lg bg-page-bg border border-surface-3 text-xs text-text-muted overflow-x-auto"
-                    >{{ payloadText(r.payload) }}</pre
-                  >
+                    >{{ payloadText(r.payload) }}</pre>
                 </details>
               </td>
             </tr>
