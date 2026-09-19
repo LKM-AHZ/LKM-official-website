@@ -22,6 +22,8 @@ export { timelineApi } from "./modules/timeline";
 export type * from "./modules/timeline";
 export { moderationApi } from "./modules/moderation";
 export type * from "./modules/moderation";
+export { dlqApi } from "./modules/dlq";
+export type * from "./modules/dlq";
 
 // GraphQL 客户端
 export { graphqlClient, graphql } from "./graphql";

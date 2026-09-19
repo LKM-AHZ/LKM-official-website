@@ -47,8 +47,8 @@ const PHONE_RE = /^1[3-9]\d{9}$/;
  * 攻击者可绕过浏览器直接调用 API，因此后端必须再次净化所有输入。（重要的事情说三遍喵！）
  *
  * 后端对接点：（喵，后端大佬可参考！）
- * - POST /api/auth/register        → 需在后端对 username / contact 做二次净化
- * - POST /api/auth/register/verify → 需在后端对 code 做格式校验
+ * - POST /api/v1/auth/register        → 需在后端对 username / contact 做二次净化
+ * - POST /api/v1/auth/register/verify → 需在后端对 code 做格式校验
  */
 const sanitizeInput = (value: string): string => value.replace(/<[^>]*>/g, "");
 

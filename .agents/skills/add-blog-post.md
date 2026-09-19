@@ -1,47 +1,47 @@
-# 添加博客文章
+# 添加博客或新闻内容
 
-## 步骤
+## 先判断内容来源
 
-1. 在 `src/content/posts/` 下创建新的 `.md` 或 `.mdx` 文件
-2. 添加必需的 frontmatter：
+动态前端当前 `src/content.config.ts` 导出空集合，正式博客由真实后端提供。不要在
+`src/content/posts/` 新建文件：该目录和旧的本地博客集合已经不存在。
+
+| 内容类型       | 正确位置                                          | 发布方式                          |
+| -------------- | ------------------------------------------------- | --------------------------------- |
+| 用户博客系列   | 后端 Blog API / Git HTTP                          | 通过社区或 VS Code 扩展创建并推送 |
+| 社区动态内容   | 对应后端业务 API                                  | 通过产品流程创建                  |
+| 公开新闻、公告 | `../LKM-official-static/src/content/docs/<lang>/` | 静态站构建发布                    |
+| 前端测试夹具   | 与测试文件同目录                                  | 只用于测试，不进入生产内容        |
+
+## 添加静态新闻
+
+在 `LKM-official-static` 中为中文和英文创建同名 Markdown 文件：
 
 ```yaml
 ---
-title: "文章标题"
-published: 2026-01-15
-description: "文章描述"
-image: "~/assets/images/your-image.png"
-category: "tutorials"
-tags:
-  - astro
-  - tailwind
-draft: false
+title: 文章标题
+description: 用于列表和 SEO 的摘要
+publishDate: 2026-09-19
+category: news
+image: https://example.com/image.jpg
+tags: [公告, 社区]
+lang: zh
 ---
 ```
 
-3. 使用 Markdown 编写内容（如需嵌入组件可使用 MDX）
-4. 运行 `pnpm run build` 验证文章正确渲染
+要求：
 
-## Frontmatter 字段
+1. 日期使用 `YYYY-MM-DD`，表示首次发布日期。
+2. 中英文文件名一致，`lang` 分别为 `zh` 和 `en`。
+3. 图片必须是可长期访问的 HTTPS URL，优先使用项目自有资产。
+4. 不发布占位文案，不在正文写密码、内部地址或个人敏感信息。
+5. 在静态站目录运行 `pnpm check && pnpm build`。
 
-| 字段          | 是否必填 | 说明                                         |
-| ------------- | -------- | -------------------------------------------- |
-| `title`       | 是       | 文章标题                                     |
-| `published`   | 是       | 发布日期                                     |
-| `updated`     | 否       | 更新日期                                     |
-| `draft`       | 否       | 设为 `true` 则不在列表中显示（默认 `false`） |
-| `description` | 否       | 文章描述/摘要                                |
-| `image`       | 否       | 封面图路径（本地图片用 `~/` 前缀）           |
-| `category`    | 否       | 单个分类名称                                 |
-| `tags`        | 否       | 标签数组                                     |
-| `lang`        | 否       | 语言（默认空字符串）                         |
+## 修改动态博客能力
 
-## URL 模式
+若任务是新增博客字段、页面或交互，应同时检查：
 
-文章路径为 `/blog/{slug}`，slug 由文件名生成。
+- 前端 `src/lib/api/modules/blog.ts` 和相关页面；
+- 后端 `app/modules/blog/` 的 schema、service、router 或 GraphQL；
+- VS Code 扩展中的 API 与 Git HTTP 调用。
 
-## 注意事项
-
-- 阅读时间由 remark 插件自动计算
-- 使用 `~/` 引用的图片在构建时自动优化
-- 使用 `.mdx` 扩展名可在文章中嵌入 Astro 组件
+不得重新引入与真实后端并行的本地内容集合作为生产数据源。

@@ -34,7 +34,7 @@ lkm-official-website/
 │   ├── pages/            # 文件路由（Astro 约定）
 │   ├── layouts/          # 页面布局（BaseLayout/BlogLayout/SidebarLayout 等）
 │   ├── components/       # 通用 UI 组件（primitives/patterns）
-│   ├── features/         # 业务功能模块（25 个）
+│   ├── features/         # 按业务域组织的功能模块
 │   ├── scripts/          # 客户端脚本（blog-init/transitions/photoswipe）
 │   ├── lib/              # 共享库（api/config/constants/errors/http/i18n/markdown-plugins/utils）
 │   ├── assets/           # 静态资源（astro:assets 处理）
@@ -42,9 +42,8 @@ lkm-official-website/
 │   ├── stores/           # Pinia 状态仓库（auth.ts 等）
 │   ├── types/            # TypeScript 类型声明
 │   ├── data/             # 配置文件（config.yaml 等）
-│   ├── content/          # 内容文件
 │   ├── middleware.ts     # 反向代理 /api/* 与 /graphql → 真实后端
-│   └── content.config.ts # 内容集合配置
+│   └── content.config.ts # 当前导出空集合；生产内容来自后端
 ├── scripts/              # 构建/检查脚本
 ├── Dockerfile            # Astro SSR 部署镜像
 └── astro.config.ts       # Astro 配置（server 模式 + Vue/React 集成）
@@ -73,10 +72,10 @@ src/lib/api/
 │   ├── exchanges/     # auth/error exchanges
 │   └── index.ts
 └── modules/           # 按业务模块划分
-    ├── forum.ts / blog.ts / competition.ts / column.ts
-    ├── qa.ts / project.ts / file-library.ts / treehole.ts
-    ├── funding.ts / contribution.ts / search.ts / dashboard.ts
-    ├── team.ts / auth.ts / user.ts / notification.ts
+    ├── auth.ts / blog.ts / content.ts / file-library.ts
+    ├── follow.ts / moderation.ts / official-articles.ts
+    ├── points.ts / projects.ts / qa.ts / timeline.ts
+    └── *.graphql.ts / *-types.ts / *-constants.ts
 ```
 
 所有组件通过 `~/lib/api` 统一访问数据，不直接写 fetch 调用。
@@ -85,22 +84,21 @@ src/lib/api/
 
 认证为**真实后端 JWT 认证**，已移除旧的 mock demo-accounts。仓库不含后端代码，经 `API_URL` 对接真实服务。Pinia `useAuthStore` 是**单一状态源**，Flow composable 是接入层：
 
-- **后端认证端点**：`/api/auth/*`（不再是 `/auth/*`），含 login/register/refresh/logout/me
+- **后端认证端点**：`/api/v1/auth/*`，含 login/register/refresh/logout/me
 - **Pinia Store**：`src/stores/auth.ts`（`useAuthStore`）— 用户状态、token 管理的单一状态源（`user`/`isLoggedIn`/`session`/`_token`/`_refreshToken`/`onboardingCompleted`），localStorage 持久化（key `lkm-auth-store`）
 - **Flow Composable**：`src/features/auth/composables/` 的 `useLoginFlow`/`useRegisterFlow`/`useRecoveryFlow`/`useOnboardingFlow` 负责登录/注册/找回/引导
-- **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(getHttpAccessToken())` 统一读写 token，含 JWT request 拦截器（附加 `Authorization: Bearer`）+ 401 自动刷新队列（并发安全，走 `POST /api/auth/refresh`）
+- **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(getHttpAccessToken())` 统一读写 token，含 JWT request 拦截器（附加 `Authorization: Bearer`）+ 401 自动刷新队列（并发安全，走 `POST /api/v1/auth/refresh`）
 - **GraphQL 认证**：`src/lib/api/graphql/exchanges/auth.ts`（urql `authExchange`）经 `getHttpAccessToken()` 为每个 operation 自动附加 Bearer 头
 - **共享 UI 原语**：`src/features/auth/components/shared/`（AuthShell/AuthCard/AuthField/AuthSegmentedControl/AuthMethodButton/AuthStatus/VerificationCodeField）
 - **类型**：`src/types/auth.d.ts` 定义真实 `User`/`AuthState`/`LoginMethod` 等，**不再有 `DemoUser`**
 
 ### 页面分级
 
-| 类型             | 策略             | 示例                                |
-| ---------------- | ---------------- | ----------------------------------- |
-| A 类（公共内容） | SSR 实时注入数据 | 论坛、竞赛、专栏、问答              |
-| B 类（认证页面） | SSR 转发 Cookie  | 用户主页、通知、仪表盘              |
-| C 类（纯静态）   | 无数据依赖       | 首页、404、登录表单                 |
-| D 类（博客）     | 客户端 MDX       | blog/[slug]（@mdx-js/mdx evaluate） |
+| 类型             | 策略             | 示例                       |
+| ---------------- | ---------------- | -------------------------- |
+| A 类（公共内容） | SSR 实时注入数据 | 论坛、项目、问答、文件列表 |
+| B 类（认证页面） | SSR/客户端认证   | 用户主页、通知、管理后台   |
+| C 类（纯静态）   | 无数据依赖       | 首页、404、登录表单        |
 
 ## 路径别名
 
@@ -148,7 +146,7 @@ import { getPermalink } from "~/lib/utils/permalinks";
 
 所有 icon 通过 `astro-icon` 本地 bundle：
 
-- `astro.config.ts` 中 `icon.include` 配置了 tabler/mdi/fa6 等
+- `astro.config.ts` 中 `icon.include` 由生成文件维护，覆盖 tabler、material-symbols、fa6、flat-color-icons 等
 - Vue 组件使用 `@iconify/vue` 的 `<Icon>`
 - **禁止运行时 Iconify API 调用**
 
@@ -160,7 +158,7 @@ import { getPermalink } from "~/lib/utils/permalinks";
 
 ### Vendor 拆分策略
 
-- `vendor-react`（React/ReactDOM）、`vendor-vue`、`vendor-three`、`vendor-katex`
+- `vendor-react`（React/ReactDOM）、`vendor-vue`、`vendor-katex`、`editor-tiptap`、`editor-codemirror`
 - 非全局重量级依赖（overlayscrollbars/photoswipe）独立拆分
 
 ### CSS 加载
@@ -181,7 +179,7 @@ import { getPermalink } from "~/lib/utils/permalinks";
 修改代码后，务必验证：
 
 1. `pnpm run build` 构建成功
-2. `pnpm run check` 通过（astro check + ESLint + Prettier）
+2. `pnpm run check` 通过（Astro + ESLint + Prettier + jscpd）
 3. `pnpm run test` 通过（前端 Vitest）
 4. `pnpm run test:auth` 通过（认证前端测试）
 5. `pnpm run test:smoke` 和 `pnpm run test:a11y` 通过（Playwright E2E）

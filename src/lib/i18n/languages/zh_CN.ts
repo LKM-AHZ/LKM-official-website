@@ -292,6 +292,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       categories: "板块管理",
       reports: "举报管理",
       moderation: "自动审校",
+      dlq: "死信队列",
     },
     saved: "已保存",
     deleted: "已删除",
@@ -397,6 +398,23 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       views: "浏览",
       createdAt: "时间",
       empty: "暂无帖子",
+    },
+    dlq: {
+      title: "死信队列",
+      statusPending: "待处理",
+      statusRequeued: "已重投",
+      statusDiscarded: "已丢弃",
+      routingKey: "路由键",
+      attempts: "重投次数",
+      reason: "原因",
+      createdAt: "落库时间",
+      payload: "消息体",
+      requeue: "重投",
+      discard: "丢弃",
+      requeued: "已重投",
+      discarded: "已丢弃",
+      confirmDiscard: "确定丢弃这条死信？此操作不可撤销。",
+      empty: "暂无死信",
     },
   },
 
@@ -2947,6 +2965,9 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       },
       moderation: {
         title: "自动审校",
+      },
+      dlq: {
+        title: "死信队列",
       },
       users: {
         title: "用户管理",

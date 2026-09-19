@@ -4,6 +4,9 @@
 >
 > 来源:`withastro/astro` 的 `examples/`(24 个)+ `withastro/starlight` 的 `examples/`(basics / markdoc / tailwind)。
 > 路径前缀:examples 模板为 `examples/<模板>/`,Starlight 为 `starlight/<模板>/`。
+>
+> **状态说明：**这些参考文件未纳入 Git，目录可能因本地下载版本不同而变化。本文是选型索引，
+> 不是当前项目 API 或目录结构的权威来源；复制代码前必须核对当前 Astro 7、Tailwind 4 和项目规范。
 
 ---
 

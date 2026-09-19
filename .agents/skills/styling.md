@@ -2,7 +2,7 @@
 
 ## Tailwind CSS v4 配置
 
-所有 Tailwind 配置都在 `src/core/styles/tailwind.css`，使用 CSS-first 配置方式（`@import 'tailwindcss'`），通过 `@theme` 块定义设计令牌，通过 `@custom-variant` 定义变体。
+Tailwind 入口是 `src/styles/tailwind.css`，使用 CSS-first 配置方式（`@import 'tailwindcss'`），通过 `@theme` 块定义设计令牌。共享变量另见 `src/styles/variables.css`。
 
 ### 暗色模式
 
@@ -64,7 +64,7 @@
 
 ## 修改配色
 
-编辑 `src/core/styles/tailwind.css` 中 `@theme` 块的 CSS 变量值即可。
+编辑 `src/styles/tailwind.css` 与 `src/styles/variables.css` 中对应的语义变量。修改前先搜索变量的现有定义和使用位置，避免建立第二套 token。
 
 ## 修改字体
 

@@ -1,5 +1,8 @@
 # Claude Code Configuration
 
+> 当前项目结构与通用约束以 [AGENTS.md](./AGENTS.md) 为准；全栈文档地图见
+> [../DOCUMENTATION.md](../DOCUMENTATION.md)。本文件只记录 Claude Code 的额外入口，不复制完整规范。
+
 ## 默认加载 Skills
 
 在每次对话开始时，自动加载以下 skills：
@@ -19,10 +22,10 @@
 
 认证对接**真实后端 JWT 认证**，无任何 mock demo-accounts。
 
-- **后端认证端点**：`/api/auth/*`，含 login/register/refresh/logout/me
+- **后端认证端点**：`/api/v1/auth/*`，含 login/register/refresh/logout/me
 - **Pinia Store**：`src/stores/auth.ts`（`useAuthStore`），用户状态、token 管理的**单一状态源**（`user`/`isLoggedIn`/`session`/`_token`/`_refreshToken`/`onboardingCompleted`），localStorage 持久化（key `lkm-auth-store`）
 - **Flow Composable**：登录/注册/找回/引导走 `useLoginFlow`/`useRegisterFlow`/`useRecoveryFlow`/`useOnboardingFlow`
-- **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(getHttpAccessToken())` 统一读写 token，含 JWT request 拦截器 + 401 自动刷新队列（走 `/api/auth/refresh`）
+- **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(getHttpAccessToken())` 统一读写 token，含 JWT request 拦截器 + 401 自动刷新队列（走 `/api/v1/auth/refresh`）
 - **GraphQL 认证**：`src/lib/api/graphql/exchanges/auth.ts`（urql `authExchange`）经 `getHttpAccessToken()` 为操作自动附加 `Authorization: Bearer` 头
 - **共享 UI 原语**：`src/features/auth/components/shared/`（AuthShell/AuthCard/AuthField/AuthSegmentedControl/AuthMethodButton/AuthStatus/VerificationCodeField）
 - **类型**：`src/types/auth.d.ts` 定义真实 `User`（已移除 `DemoUser`）

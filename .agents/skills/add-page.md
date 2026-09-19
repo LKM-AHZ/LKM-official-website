@@ -4,15 +4,14 @@
 
 1. 在 `src/pages/` 下创建新的 `.astro` 文件
 2. 标准页面使用 `PageLayout`，自定义布局使用 `BaseLayout`
-3. 使用 `src/features/` 和 `src/ui/` 中的组件组合页面
+3. 使用 `src/features/` 和 `src/components/` 中的组件组合页面
 
 ## 模板
 
 ```astro
 ---
-import PageLayout from '~/layouts/PageLayout.astro';
-import Hero from '~/features/homepage/Hero.astro';
-import Features from '~/features/homepage/Features.astro';
+import PageLayout from "~/layouts/PageLayout.astro";
+import Hero from "~/features/homepage/components/Hero.astro";
 
 const metadata = {
   title: '页面标题',
@@ -22,21 +21,8 @@ const metadata = {
 
 <PageLayout metadata={metadata}>
   <Hero
-    tagline="可选标签"
     title="页面主标题"
     subtitle="辅助文本"
-    image={{
-      src: '~/assets/images/hero.png',
-      alt: 'Hero 图片描述',
-    }}
-  />
-
-  <Features
-    title="区块标题"
-    items={[
-      { title: '功能 1', description: '描述', icon: 'tabler:star' },
-      { title: '功能 2', description: '描述', icon: 'tabler:rocket' },
-    ]}
   />
 </PageLayout>
 ```
@@ -58,9 +44,9 @@ const metadata = {
 | 模块       | 路径                    | 说明       |
 | ---------- | ----------------------- | ---------- |
 | `homepage` | `~/features/homepage/`  | 首页组件   |
-| `blog`     | `~/features/blog/`      | 博客组件   |
 | `auth`     | `~/features/auth/`      | 认证组件   |
-| `docs`     | `~/features/docs/`      | 文档组件   |
+| `forum`    | `~/features/forum/`     | 论坛组件   |
+| `timeline` | `~/features/timeline/`  | 时间线组件 |
 | `search`   | `~/features/search/`    | 搜索组件   |
 | `shell`    | `~/features/shell/`     | 通用 UI 壳 |
 | (其他)     | `~/features/<feature>/` | 按需查阅   |
@@ -70,3 +56,6 @@ const metadata = {
 - `src/pages/` 下的页面按文件名自动路由
 - 使用 `PageLayout`（含 Header + Footer）或 `BaseLayout`（最简布局）
 - 图标使用 `tabler:icon-name` 格式，来自 `@iconify-json/tabler`
+- 新路由必须补齐页面标题和描述，并检查移动端、键盘导航、暗色模式和 404 行为
+- 页面依赖后端时通过 `~/lib/api` 调用，不在页面里直接散写 `fetch`
+- 完成后运行 `pnpm check`、相关单元测试以及 `pnpm test:smoke`

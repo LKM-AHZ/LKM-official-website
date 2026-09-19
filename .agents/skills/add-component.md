@@ -2,11 +2,11 @@
 
 ## 组件归属判断
 
-| 组件类型                               | 放置位置                  | 说明                          |
-| -------------------------------------- | ------------------------- | ----------------------------- |
-| 通用基础组件（Button、Image、Form 等） | `src/ui/primitives/`      | 无业务逻辑，可跨 feature 复用 |
-| 复合/模式组件（TableOfContents 等）    | `src/ui/patterns/`        | 组合多个 primitive 的通用模式 |
-| 业务功能组件（博客卡片、团队卡片等）   | `src/features/<feature>/` | 与特定业务模块耦合            |
+| 组件类型                               | 放置位置                             | 说明                          |
+| -------------------------------------- | ------------------------------------ | ----------------------------- |
+| 通用基础组件（Button、Image、Form 等） | `src/components/primitives/`         | 无业务逻辑，可跨 feature 复用 |
+| 复合/模式组件（TableOfContents 等）    | `src/components/patterns/`           | 组合多个 primitive 的通用模式 |
+| 业务功能组件                           | `src/features/<feature>/components/` | 与特定业务模块耦合            |
 
 ## 步骤
 
@@ -18,8 +18,8 @@
 
 ```astro
 ---
-import { twMerge } from 'tailwind-merge';
-import type { SomeProps } from '~/core/types';
+import { twMerge } from "tailwind-merge";
+import type { SomeProps } from "~/types/core";
 
 interface Props extends SomeProps {
   className?: string;
@@ -39,4 +39,7 @@ const { className, ...rest } = Astro.props;
 - 接收 `className` 覆写时使用 `twMerge()` 合并
 - 布局组合使用具名插槽（named slots）
 - 业务组件放在 `src/features/<feature>/` 下对应的目录
-- 跨功能复用的通用组件放在 `src/ui/primitives/` 或 `src/ui/patterns/`
+- 跨功能复用的通用组件放在 `src/components/primitives/` 或 `src/components/patterns/`
+- Vue 交互组件使用 `.vue`；React 只用于现有编辑器边界，不为普通页面新增 React island
+- 新增 `client:only` 组件时提供稳定的 `min-height` 容器，避免 CLS
+- 完成后运行 `pnpm check` 和相关 Vitest；影响页面路由时再运行 Playwright 冒烟测试

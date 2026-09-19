@@ -296,6 +296,7 @@ export const en = {
       categories: "Board Management",
       reports: "Report Management",
       moderation: "Auto Moderation",
+      dlq: "Dead Letter Queue",
     },
     saved: "Saved",
     deleted: "Deleted",
@@ -401,6 +402,23 @@ export const en = {
       views: "Views",
       createdAt: "Time",
       empty: "No posts",
+    },
+    dlq: {
+      title: "Dead Letter Queue",
+      statusPending: "Pending",
+      statusRequeued: "Requeued",
+      statusDiscarded: "Discarded",
+      routingKey: "Routing Key",
+      attempts: "Attempts",
+      reason: "Reason",
+      createdAt: "Stored At",
+      payload: "Payload",
+      requeue: "Requeue",
+      discard: "Discard",
+      requeued: "Requeued",
+      discarded: "Discarded",
+      confirmDiscard: "Discard this dead letter? This cannot be undone.",
+      empty: "No dead letters",
     },
   },
 
@@ -3081,6 +3099,9 @@ export const en = {
       },
       moderation: {
         title: "Auto Moderation",
+      },
+      dlq: {
+        title: "Dead Letter Queue",
       },
       users: {
         title: "User Management",

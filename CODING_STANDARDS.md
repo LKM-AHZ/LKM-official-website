@@ -12,14 +12,17 @@
 
 ## Prettier 格式化规则
 
-| 规则            | 值                     |
-| --------------- | ---------------------- |
-| `printWidth`    | 120                    |
-| `tabWidth`      | 2                      |
-| `useTabs`       | false（使用空格缩进）  |
-| `semi`          | true（语句末尾加分号） |
-| `singleQuote`   | true（使用单引号）     |
-| `trailingComma` | es5（允许尾逗号）      |
+项目当前没有单独的 Prettier 配置文件，因此使用 Prettier 3 默认值，并由
+`prettier-plugin-astro` 处理 `.astro` 文件。若未来增加配置，应以配置文件为唯一来源并同步本节。
+
+| 规则            | 值                      |
+| --------------- | ----------------------- |
+| `printWidth`    | 80（默认值）            |
+| `tabWidth`      | 2                       |
+| `useTabs`       | false（使用空格缩进）   |
+| `semi`          | true（语句末尾加分号）  |
+| `singleQuote`   | false（默认使用双引号） |
+| `trailingComma` | all                     |
 
 ## ESLint 规则
 
@@ -55,7 +58,7 @@ const base = import.meta.env.BASE_URL;  // 声明但未使用
 ## 常用命令
 
 ```bash
-pnpm run check    # 运行所有检查：astro check + ESLint + Prettier
+pnpm run check    # Astro + ESLint + Prettier + jscpd
 pnpm run fix      # 自动修复 ESLint + Prettier 问题
 pnpm run build    # 生产构建（CI 会同时运行 check）
 ```
@@ -64,20 +67,21 @@ pnpm run build    # 生产构建（CI 会同时运行 check）
 
 GitHub Actions 配置了一个工作流文件（`.github/workflows/actions.yaml`），内含 4 个 job：
 
-| Job             | 触发              | 内容                                                            |
-| --------------- | ----------------- | --------------------------------------------------------------- |
-| `build`         | PR / Push 到 main | `pnpm install` + `pnpm run build` 生产构建                      |
-| `artifacts`     | PR / Push 到 main | 构建后运行 `check:seo` / `check:links` / `check:budget`         |
-| `check`         | PR / Push 到 main | `pnpm run check`（check:astro + check:eslint + check:prettier） |
-| `test-frontend` | PR / Push 到 main | `pnpm run test`（Vitest 单元测试）                              |
+| Job             | 触发              | 内容                                                    |
+| --------------- | ----------------- | ------------------------------------------------------- |
+| `build`         | PR / Push 到 main | `pnpm install` + `pnpm run build` 生产构建              |
+| `artifacts`     | PR / Push 到 main | 构建后运行 `check:seo` / `check:links` / `check:budget` |
+| `check`         | PR / Push 到 main | `pnpm run check`（Astro + ESLint + Prettier + jscpd）   |
+| `test-frontend` | PR / Push 到 main | `pnpm run test`（Vitest 单元测试）                      |
 
 ### 通过 CI 的门槛
 
 1. **`pnpm run build` 必须成功** — 项目可以无错误地构建
-2. **`pnpm run check` 必须通过** — 包含三项检查：
+2. **`pnpm run check` 必须通过** — 包含四项检查：
    - `astro check` — Astro 类型检查
    - `eslint .` — ESLint 代码规范检查（零 error）
    - `prettier --check .` — Prettier 格式检查（零 warn）
+   - `jscpd src --config .jscpdrc.json` — 重复代码门禁
 3. **`artifacts`（SEO/links/budget）与 `test-frontend`（单测）必须通过**
 
 > 本仓库的 CI 仅负责构建与检查，**不包含自动部署 job**；实际部署由外层编排（见根目录仓库的部署流程）完成。
@@ -152,15 +156,15 @@ import { siteConfig } from "~/lib/config";
 
 ## TypeScript 配置
 
-| 规则               | 值                          |
-| ------------------ | --------------------------- |
-| 继承基类           | `astro/tsconfigs/base`      |
-| `strictNullChecks` | `true`                      |
-| `allowJs`          | `true`                      |
-| `baseUrl`          | `.`                         |
-| 路径映射           | `~/*` → `src/*`             |
-| 包含               | `.astro/types.d.ts`、`**/*` |
-| 排除               | `dist/`、`node_modules`     |
+| 规则               | 值                                          |
+| ------------------ | ------------------------------------------- |
+| 继承基类           | `astro/tsconfigs/base`                      |
+| `strictNullChecks` | `true`                                      |
+| `allowJs`          | `true`                                      |
+| `baseUrl`          | `.`                                         |
+| 路径映射           | `~/*` → `src/*`；代码优先使用这一条通用别名 |
+| 包含               | `.astro/types.d.ts`、`**/*`                 |
+| 排除               | `dist/`、`node_modules`                     |
 
 ## 站点配置
 
@@ -173,7 +177,7 @@ import { siteConfig, navBarConfig, profileConfig } from "~/lib/config";
 | 字段        | 说明                                          |
 | ----------- | --------------------------------------------- |
 | `site.name` | 站点名称（理科迷）                            |
-| `site.base` | 部署路径前缀（`/LKM-official-website`）       |
+| `site.base` | 部署路径前缀（当前为 `/`）                    |
 | `metadata`  | SEO 默认值（标题、描述、Open Graph、Twitter） |
 | `i18n`      | 国际化（语言 `zh-cn`、文字方向 `ltr`）        |
 | `apps.blog` | 博客开关、每页文章数、路径名                  |
@@ -184,19 +188,17 @@ import { siteConfig, navBarConfig, profileConfig } from "~/lib/config";
 
 ## 导航配置
 
-页头和页脚链接在 `src/lib/navigation.ts` 中统一管理：
+页头、页脚和菜单链接在 `src/lib/navigation.ts` 与 `src/features/shell/menus.ts` 中统一管理：
 
 - `headerData` — 顶部导航栏（含嵌套下拉菜单）
 - `footerData` — 底部链接、社交图标、版权信息
 - 所有链接必须使用 `getPermalink()` 生成，不能硬编码路径
 
-## 博客内容
+## 内容来源
 
-博客采用 **Astro content collections**（`src/content.config.ts`，当前集合为空），正式博客内容来自独立部署的真实后端：
-
-- 社区博客为 Vue SPA，路由 `src/pages/blog/`（`index.astro` / `[...slug].astro`）
-- 文章正文经 `useBlogPost`（`src/features/blog-community/composables/useBlogPost.ts`）用 `@mdx-js/mdx` 的 `evaluate()` 在客户端编译（MDX 原文由 `blogApi` 从后端 / Git 仓库源码获取），再经共享 `Callout`/`Figure` 组件映射渲染
-- 不在前端以 `.md` 文件形式管理博客正文；前端不维护内容集合的 posts 目录
+`src/content.config.ts` 当前导出空集合。正式博客和社区内容来自真实后端，公开新闻与公告属于相邻的
+`LKM-official-static` 项目。不要在本仓库创建旧式 `src/content/posts/`，也不要在页面中建立与
+后端并行的生产数据源。
 
 ## 性能规范
 
@@ -222,7 +224,7 @@ CI 的 `artifacts` job 会在构建后运行产物检查（`pnpm run build` 后�
 
 ### Icon 本地化
 
-- 所有 icon 通过 `astro-icon` 的 `include` 配置本地打包，禁止运行时 Iconify API 调用
+- 所有 icon 通过 `astro-icon` 的 `include` 配置本地打包，禁止新增运行时 Iconify API 调用
 - `astro.config.ts` → `integrations.icon.include` 已覆盖 `tabler`、`material-symbols`、`fa6-brands`、`fa6-regular`、`fa6-solid`、`flat-color-icons`
 - 新增 icon 集需同步更新 `include` 列表
 
@@ -238,7 +240,8 @@ CI 的 `artifacts` job 会在构建后运行产物检查（`pnpm run build` 后�
 - 全局使用的框架和图标库加入对应 vendor chunk：
   - `react` / `react-dom` → `vendor-react`
   - `vue` / `@iconify/vue` → `vendor-vue`
-  - `three` → `vendor-three`，`katex` / `rehype-katex` → `vendor-katex`
+  - `katex` / `rehype-katex` → `vendor-katex`
+  - TipTap/ProseMirror → `editor-tiptap`，CodeMirror/Lezer → `editor-codemirror`
 - 页面级小众依赖（overlayscrollbars、photoswipe）保持独立异步加载
 - 新增全局框架依赖时需同步更新 `manualChunks`
 
@@ -251,9 +254,9 @@ CI 的 `artifacts` job 会在构建后运行产物检查（`pnpm run build` 后�
 
 ## Git 规范
 
-| 规则     | 说明                                                                                                                       |
-| -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 主分支   | `main`（所有 push 和 PR 的目标）                                                                                           |
-| 忽略文件 | `dist/`、`node_modules/`、`.astro/`、`.env`、`tools/`、`/scripts/`、`docs/`（仅本地，不提交）、`.claude/`、`.superpowers/` |
-| Commit   | 提交前必须通过 `pnpm run check` 和 `pnpm run build`                                                                        |
-| 换行符   | 统一 LF（`.editorconfig` + `git config core.autocrlf`）                                                                    |
+| 规则     | 说明                                                                                               |
+| -------- | -------------------------------------------------------------------------------------------------- |
+| 主分支   | `main`（所有 push 和 PR 的目标）                                                                   |
+| 忽略文件 | 以 `.gitignore` 为准；包括 `dist/`、`node_modules/`、`.astro/`、`.env`、测试报告和本地 AI/工具目录 |
+| Commit   | 提交前必须通过 `pnpm run check` 和 `pnpm run build`                                                |
+| 换行符   | 统一 LF（`.editorconfig` + `git config core.autocrlf`）                                            |
