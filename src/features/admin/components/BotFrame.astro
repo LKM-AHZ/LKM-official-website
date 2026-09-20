@@ -1,0 +1,49 @@
+---
+/**
+ * 机器人面板内嵌容器（社区后台「机器人」各页共用）。
+ *
+ * 面板跑在 LKMBot 进程里（网关剥掉 /bot 前缀后转发），此处用**同源 iframe** 内嵌，保留面板
+ * 原有 UI 与全部功能。
+ *
+ * 免登链路（详见 LKM-service 的 `app/modules/admin/bot_router.py` 与 LKM-bot 的
+ * `astrbot/dashboard/api/auth_sso.py`）：
+ *   1. 本页在 **SSR 阶段**校验后台会话 cookie，无则直接跳登录页（服务端硬门禁，
+ *      比 AdminLayout 的客户端软门禁更早生效）；
+ *   2. 带 cookie 调 backend 换一张 60s 一次性票据；
+ *   3. iframe 指向面板的 `/api/v1/auth/sso?ticket=...&next=<hash 路由>`，面板验签后用面板
+ *      自己的会话 cookie 落座，并 302 到 `#<hash 路由>`（URL 里不留票据）。
+ *
+ * 拿不到票（后端不可达/auth 未配 RS256 私钥）时降级为无票 iframe —— 面板会落到自带登录页，
+ * 即「需要手动登录一次」，而不是白屏或越权。
+ */
+import { getSsrCookie } from '~/lib/ssr-context';
+import { post } from '~/lib/http/client';
+
+interface Props {
+  /** 面板内的 hash 路由（如 `/platforms`），作为登录后的落地页。 */
+  hashRoute: string;
+  title: string;
+}
+
+const { hashRoute, title } = Astro.props;
+
+if (!getSsrCookie()) {
+  return Astro.redirect('/admin/login');
+}
+
+const result = await post<{ ticket: string; expires_in: number }>(
+  '/api/v1/admin/bot/sso-ticket',
+);
+const ticket = result.isOk() ? result.value?.ticket : undefined;
+const iframeSrc = ticket
+  ? `/bot/api/v1/auth/sso?ticket=${encodeURIComponent(ticket)}&next=${encodeURIComponent(hashRoute)}`
+  : '/bot/';
+---
+
+<iframe
+  src={iframeSrc}
+  title={title}
+  class="w-full flex-1 border-0"
+  referrerpolicy="no-referrer"
+  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"
+></iframe>

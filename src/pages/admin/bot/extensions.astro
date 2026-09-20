@@ -1,0 +1,9 @@
+---
+import { AdminLayout } from '~/features/admin';
+import BotFrame from '~/features/admin/components/BotFrame.astro';
+import { t } from '~/lib/i18n';
+---
+
+<AdminLayout flush>
+  <BotFrame hashRoute="/plugins" title={t('page.admin.bot.extensions.title')} />
+</AdminLayout>

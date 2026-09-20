@@ -2,11 +2,23 @@
 import { Icon } from 'astro-icon/components';
 import { getPermalink } from '~/lib/utils/permalinks';
 import { t } from '~/lib/i18n';
-export interface AdminNavItem {
-  text: string;
-  href: string;
-  icon: string;
+import { buildAdminNav, isActive } from '../nav';
+
+interface Props {
+  /** 内容区去掉内边距并占满视口高度（供全高 iframe，如「机器人」各页）。 */
+  flush?: boolean;
 }
+
+const { flush = false } = Astro.props;
+const groups = buildAdminNav();
+const currentPath = Astro.url.pathname;
+const itemClass = (href: string) =>
+  [
+    'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+    isActive(currentPath, href)
+      ? 'bg-surface-3 text-primary font-medium'
+      : 'text-text-muted hover:bg-surface-3',
+  ].join(' ');
 ---
 
 <div class="min-h-screen bg-page-bg flex">
@@ -16,62 +28,23 @@ export interface AdminNavItem {
       <a href={getPermalink('/admin')} class="text-lg font-bold text-primary">{t('admin.title')}</a>
     </div>
     <nav class="p-2 space-y-1">
-      <a
-        href={getPermalink('/admin')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:dashboard" class="w-4 h-4" />
-        {t('admin.sidebar.dashboard')}
-      </a>
-      <a
-        href={getPermalink('/admin/users')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:users" class="w-4 h-4" />
-        {t('admin.sidebar.users')}
-      </a>
-      <a
-        href={getPermalink('/admin/posts')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:article" class="w-4 h-4" />
-        {t('admin.sidebar.posts')}
-      </a>
-      <a
-        href={getPermalink('/admin/files')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:folder" class="w-4 h-4" />
-        {t('admin.sidebar.files')}
-      </a>
-      <a
-        href={getPermalink('/admin/categories')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:category" class="w-4 h-4" />
-        {t('admin.sidebar.categories')}
-      </a>
-      <a
-        href={getPermalink('/admin/reports')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:flag" class="w-4 h-4" />
-        {t('admin.sidebar.reports')}
-      </a>
-      <a
-        href={getPermalink('/admin/moderation')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:shield-check" class="w-4 h-4" />
-        {t('admin.sidebar.moderation')}
-      </a>
-      <a
-        href={getPermalink('/admin/dlq')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-      >
-        <Icon name="tabler:tools" class="w-4 h-4" />
-        {t('admin.sidebar.dlq')}
-      </a>
+      {
+        groups.map((group) => (
+          <>
+            {group.titleKey && (
+              <div class="px-3 pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-text-muted">
+                {t(group.titleKey)}
+              </div>
+            )}
+            {group.items.map((item) => (
+              <a href={getPermalink(item.href)} class={itemClass(item.href)}>
+                <Icon name={item.icon} class="w-4 h-4" />
+                {t(item.textKey)}
+              </a>
+            ))}
+          </>
+        ))
+      }
       <div class="border-t border-surface-3 my-2"></div>
       <a
         href={getPermalink('/')}
@@ -84,10 +57,8 @@ export interface AdminNavItem {
   </aside>
 
   <!-- 主内容区 -->
-  <div class="flex-1 min-w-0">
-    <div class="p-6">
-      <slot />
-    </div>
+  <div class={flush ? 'flex-1 min-w-0 h-screen flex flex-col' : 'flex-1 min-w-0'}>
+    {flush ? <slot /> : <div class="p-6"><slot /></div>}
   </div>
 </div>
 
