@@ -35,7 +35,7 @@
   --text-main: var(--base-content);
   --text-sub: var(--text-muted);
   --line: var(--line-divider);
-  --card-bg: var(--card-bg);
+  /* --card-bg 直接继承主站 variables.css 的 token；此处自引用会造成循环依赖，整条链路失效 */
   --card-border: var(--line-divider);
   --card-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
   --nav-bg: color-mix(in srgb, var(--base-100) 92%, transparent);

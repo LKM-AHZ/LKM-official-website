@@ -31,7 +31,10 @@ interface Group {
   posts: Post[];
 }
 
-const params = new URLSearchParams(window.location.search);
+// SSR/预渲染时没有 window：组件 setup 期直接读会在服务端抛 "window is not defined"
+const params = new URLSearchParams(
+  typeof window === "undefined" ? "" : window.location.search,
+);
 const tags = params.has("tag") ? params.getAll("tag") : props.tags;
 const categories = params.has("category")
   ? params.getAll("category")

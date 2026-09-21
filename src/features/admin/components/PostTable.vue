@@ -2,6 +2,7 @@
 // 后台帖子管理列表 —— 统一走 useAdminPagination
 import { onMounted } from "vue";
 import { useAdminPagination } from "~/lib/http/useAdminPagination";
+import { t } from "~/lib/i18n";
 
 interface AdminPostRow {
   id: string;

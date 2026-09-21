@@ -1,6 +1,9 @@
 /// <reference types="mdast" />
 import { h } from "hastscript";
 
+/** 合法的 GitHub 仓库标识：owner/name，只允许 GitHub 实际可用的字符集 */
+const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
+
 /**
  * Creates a GitHub Card component.
  *
@@ -15,7 +18,11 @@ export function GithubCardComponent(properties, children) {
       'Invalid directive. ("github" directive must be leaf type "::github{repo="owner/repo"}")',
     ]);
 
-  if (!properties.repo || !properties.repo.includes("/"))
+  // repo 会被内联进 <script>：必须严格校验，否则可突破字符串/脚本体注入任意代码
+  if (
+    typeof properties.repo !== "string" ||
+    !REPO_PATTERN.test(properties.repo)
+  )
     return h(
       "div",
       { class: "hidden" },
@@ -23,6 +30,9 @@ export function GithubCardComponent(properties, children) {
     );
 
   const repo = properties.repo;
+  const [owner, name] = repo.split("/");
+  // 供内联脚本使用的安全字面量（JSON.stringify 会转义引号/反斜杠/角括号外的控制字符）
+  const repoLiteral = JSON.stringify(repo);
   const cardUuid = `GC${Math.random().toString(36).slice(-6)}`; // Collisions are not important
 
   const nAvatar = h(`div#${cardUuid}-avatar`, { class: "gc-avatar" });
@@ -36,10 +46,10 @@ export function GithubCardComponent(properties, children) {
     h("div", { class: "gc-titlebar-left" }, [
       h("div", { class: "gc-owner" }, [
         nAvatar,
-        h("div", { class: "gc-user" }, repo.split("/")[0]),
+        h("div", { class: "gc-user" }, owner),
       ]),
       h("div", { class: "gc-divider" }, "/"),
-      h("div", { class: "gc-repo" }, repo.split("/")[1]),
+      h("div", { class: "gc-repo" }, name),
     ]),
     h("div", { class: "github-logo" }),
   ]);
@@ -58,7 +68,7 @@ export function GithubCardComponent(properties, children) {
     `script#${cardUuid}-script`,
     { type: "text/javascript", defer: true },
     `
-      fetch('https://api.github.com/repos/${repo}', { referrerPolicy: "no-referrer" }).then(response => response.json()).then(data => {
+      fetch('https://api.github.com/repos/' + ${repoLiteral}, { referrerPolicy: "no-referrer" }).then(response => response.json()).then(data => {
         document.getElementById('${cardUuid}-description').innerText = data.description?.replace(/:[a-zA-Z0-9_]+:/g, '') || "Description not set";
         document.getElementById('${cardUuid}-language').innerText = data.language;
         document.getElementById('${cardUuid}-forks').innerText = Intl.NumberFormat('en-us', { notation: "compact", maximumFractionDigits: 1 }).format(data.forks).replaceAll("\u202f", '');
@@ -68,11 +78,11 @@ export function GithubCardComponent(properties, children) {
         avatarEl.style.backgroundColor = 'transparent';
         document.getElementById('${cardUuid}-license').innerText = data.license?.spdx_id || "no-license";
         document.getElementById('${cardUuid}-card').classList.remove("fetch-waiting");
-        console.log("[GITHUB-CARD] Loaded card for ${repo} | ${cardUuid}.")
+        console.log("[GITHUB-CARD] Loaded card for " + ${repoLiteral} + " | ${cardUuid}.")
       }).catch(err => {
         const c = document.getElementById('${cardUuid}-card');
         c?.classList.add("fetch-error");
-        console.warn("[GITHUB-CARD] (Error) Loading card for ${repo} | ${cardUuid}.")
+        console.warn("[GITHUB-CARD] (Error) Loading card for " + ${repoLiteral} + " | ${cardUuid}.")
       })
     `,
   );

@@ -83,6 +83,12 @@ function decodePublicKey<T extends JsonWebElement>(pk: T): T {
       } else if (Array.isArray(value)) {
         (out as JsonWebElement)[key] = new Uint8Array(value as number[]).buffer;
       }
+    } else if (Array.isArray(value)) {
+      // 数组必须逐元素处理：`{ ...arr }` 会退化成索引键对象，
+      // 使 excludeCredentials / allowCredentials / transports 不再是数组，浏览器会直接拒绝。
+      (out as JsonWebElement)[key] = value.map((item) =>
+        item && typeof item === "object" ? decodePublicKey(item) : item,
+      );
     } else if (value && typeof value === "object") {
       (out as JsonWebElement)[key] = decodePublicKey(value);
     }

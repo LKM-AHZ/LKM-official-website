@@ -583,8 +583,10 @@ export default function DocumentEditor({
   const handleSourceChange = useCallback(
     (mdx: string) => {
       sourceMdxRef.current = mdx;
-      if (docId) {
-        triggerSave(lastValidEditorJsonRef.current ?? {});
+      // 源码模式要落盘的是用户刚输入的 MDX 本身（第二个参数），
+      // 且绝不能回退成 `{}`：那会让 exportMdx 产出空串，把磁盘上的文档写空。
+      if (docId && lastValidEditorJsonRef.current) {
+        triggerSave(lastValidEditorJsonRef.current, mdx);
       }
     },
     [docId, triggerSave, sourceMdxRef, lastValidEditorJsonRef],

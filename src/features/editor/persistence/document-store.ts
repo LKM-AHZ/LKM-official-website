@@ -177,6 +177,46 @@ export function updateDocument(
   }
 }
 
+/**
+ * 按调用方给定的 id 落库完整文档（不存在则新建）。
+ * 不能用 createDocument 代替：它会另生成 crypto.randomUUID()，导致调用方持有的 id
+ * 与库内 id 不一致 —— 每次自动保存都查不到、每次都新建一份幽灵文档，正文也全丢。
+ */
+export function upsertDocument(
+  doc: DocumentData,
+): Result<DocumentData, AppError> {
+  try {
+    const drafts = readDrafts();
+    drafts[doc.id] = doc;
+    const wd = writeDrafts(drafts);
+    if (!wd.isOk()) return err(wd.error);
+
+    const index = readIndex();
+    const idx = index.findIndex((m) => m.id === doc.id);
+    const meta: DocumentMeta = {
+      id: doc.id,
+      title: doc.title,
+      lastModified: doc.lastModified,
+      status: doc.status,
+      version: doc.version,
+      slug: doc.slug,
+    };
+    if (idx !== -1) {
+      index[idx] = meta;
+    } else {
+      index.unshift(meta);
+    }
+    const wi = writeIndex(index);
+    if (!wi.isOk()) return err(wi.error);
+
+    return ok(doc);
+  } catch (e) {
+    return err(
+      new AppError("DB_WRITE_FAILED", t("editor.persistence.updateFailed"), e),
+    );
+  }
+}
+
 export function autosave(
   id: string,
   payload: AutosavePayload,

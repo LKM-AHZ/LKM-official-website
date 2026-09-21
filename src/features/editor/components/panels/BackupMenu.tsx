@@ -48,8 +48,10 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
         },
       );
     }
+    // 导出必须写出 docId：导入侧读的就是 doc.docId，剥掉 id 又不起别名会让
+    // 再导入时 id 变成 undefined，静默生成一批不可见的重复文档
     const json = JSON.stringify(
-      fullDocs.map(({ id: _id, ...rest }) => rest),
+      fullDocs.map(({ id, ...rest }) => ({ docId: id, ...rest })),
       null,
       2,
     );
@@ -76,6 +78,8 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
       reader.onload = async () => {
         let data: Array<{
           docId: string;
+          /** 兼容只带 id 的旧版导出 */
+          id?: string;
           title: string;
           contentMdx: string;
           editorJson: unknown;
@@ -118,9 +122,12 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
             return;
           }
         }
+        let imported = 0;
         for (const doc of data) {
+          const docId = doc.docId || doc.id;
+          if (!docId) continue;
           await adapter.saveDocument({
-            id: doc.docId,
+            id: docId,
             title: doc.title,
             contentMdx: doc.contentMdx,
             editorJson: doc.editorJson as Record<string, unknown>,
@@ -132,8 +139,8 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
             updatedAt: new Date().toISOString(),
           });
           await Promise.resolve(
-            adapter.createBackup(doc.docId, {
-              docId: doc.docId,
+            adapter.createBackup(docId, {
+              docId,
               title: doc.title,
               contentMdx: doc.contentMdx,
               editorJson: doc.editorJson,
@@ -141,8 +148,9 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
               version: doc.version,
             }),
           );
+          imported += 1;
         }
-        alert(t("editor.backup.importSuccess", { count: data.length }));
+        alert(t("editor.backup.importSuccess", { count: imported }));
         window.location.reload();
       };
       reader.readAsText(file);

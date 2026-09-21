@@ -138,6 +138,9 @@ const metadata = {
     return div.innerHTML;
   }
 
+  // 模板里的 oninput/onchange 在全局作用域求值，模块作用域的函数必须显式挂到 window
+  (window as unknown as Record<string, () => void>).renderList = renderList;
+
   (window as unknown as Record<string, (id: string, title: string) => void>).handleDelete = function (
     id: string,
     title: string

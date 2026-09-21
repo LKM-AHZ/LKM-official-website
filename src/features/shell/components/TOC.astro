@@ -222,18 +222,28 @@ const maxLevel = siteConfig.toc.depth;
     }
 
     connectedCallback(): void {
+      let initialized = false;
+      const initOnce = (): void => {
+        if (initialized) return;
+        initialized = true;
+        this.init();
+      };
+
       // wait for the onload animation to finish, which makes the `getBoundingClientRect` return correct values
       const element = document.querySelector('.prose');
       if (element) {
-        element.addEventListener(
-          'animationend',
-          () => {
-            this.init();
-          },
-          { once: true }
-        );
+        // animationend 会冒泡：任一后代动画结束都会触发本回调
+        element.addEventListener('animationend', initOnce, { once: true });
+      }
+
+      // 兜底：动画元素缺失、被 animation:none / prefers-reduced-motion 禁用，
+      // 或客户端路由切换时动画早已播完 —— 这些情况下 animationend 永远不会再来，
+      // 必须照常初始化，否则 TOC 会一直「已渲染但完全不响应」。
+      const animations = element?.getAnimations?.() ?? [];
+      if (animations.length === 0) {
+        initOnce();
       } else {
-        console.debug('Animation element not found');
+        Promise.all(animations.map((a) => a.finished)).then(initOnce, initOnce);
       }
     }
 

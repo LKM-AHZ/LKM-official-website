@@ -44,7 +44,11 @@ export interface LoginFlow {
   startMagic: () => Promise<void>;
   continueMagic: () => Promise<void>;
   startPasskey: () => Promise<void>;
-  submit2FA: (verifyCode: string, tempTokenArg?: string) => Promise<void>;
+  submit2FA: (
+    verifyCode: string,
+    tempTokenArg?: string,
+    recoveryCode?: string,
+  ) => Promise<void>;
   init2FASetup: () => Promise<void>;
   complete2FASetup: (code: string) => Promise<void>;
   confirmSetupRecovery: () => void;
@@ -291,6 +295,7 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
   async function submit2FA(
     verifyCode: string,
     tempTokenArg?: string,
+    recoveryCode?: string,
   ): Promise<void> {
     error.value = null;
     loading.value = true;
@@ -305,7 +310,12 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
         );
         return;
       }
-      const r = await authApi.verify2FA(tt, verifyCode);
+      // 恢复码登录与 TOTP 登录共用同一条落库路径，避免任一路径漏写会话
+      const r = await authApi.verify2FA(
+        tt,
+        verifyCode || null,
+        recoveryCode ?? null,
+      );
       if (r.isErr()) {
         setError(r.error);
         return;

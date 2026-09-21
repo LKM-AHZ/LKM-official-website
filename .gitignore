@@ -20,8 +20,10 @@ pnpm-debug.log*
 
 
 # environment variables
+# 只忽略精确 .env 会漏掉 .env.local/.env.staging 等变体，一律按通配忽略
 .env
-.env.production
+.env.*
+!.env.example
 
 # macOS-specific files
 .DS_Store

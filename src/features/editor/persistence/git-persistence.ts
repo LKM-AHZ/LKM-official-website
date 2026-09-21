@@ -31,12 +31,39 @@ function flattenTree(nodes: FileTreeNode[], prefix = ""): string[] {
   return out;
 }
 
+/**
+ * 为新文档挑一个未被占用的 filepath。
+ * deriveSlug 对空标题/纯标点标题统一回退成 "post"，多个新建文档会撞进同一个文件互相覆盖，
+ * 因此在已有文件树里做一次唯一化：`post.mdx` 被占则用 `post-2.mdx`、`post-3.mdx`……
+ */
+async function pickNewFilepath(
+  seriesId: string,
+  title: string,
+): Promise<string> {
+  const base = deriveSlug(title);
+  const detail = await blogApi.getSeriesDetail(seriesId);
+  const taken = new Set(
+    detail.isOk() && detail.value.file_tree
+      ? flattenTree(detail.value.file_tree).filter(isMarkdown)
+      : [],
+  );
+  let candidate = `${base}.mdx`;
+  for (let i = 2; taken.has(candidate); i += 1) {
+    candidate = `${base}-${i}.mdx`;
+  }
+  return candidate;
+}
+
 export function createGitPersistence(
   seriesId: string,
   path?: string,
 ): PersistenceAdapter {
   // path 预留：后续可锁定单文件编辑；当前 editor.astro 据此决定新建还是打开既有文件
   void path;
+
+  // 新建文档的 filepath 只在首次保存时确定、之后复用：
+  // 若每次都重新派生，第二次自动保存会因为上一版文件已存在而再取一个新名字，产生一堆重复文件。
+  let newDocFilepath: string | null = null;
 
   return {
     // id 即 series 内 filepath；从内容首行 "# " 取 title
@@ -59,10 +86,15 @@ export function createGitPersistence(
       } as DocumentData;
     },
 
-    // 新建 docId="new" → deriveSlug(doc.title)+".mdx"；否则用 doc.id
+    // 新建 docId="new" → 首次保存时派生并固定 filepath；否则用 doc.id
     async saveDocument(doc) {
-      const filepath =
-        doc.id === "new" ? `${deriveSlug(doc.title)}.mdx` : doc.id;
+      let filepath: string;
+      if (doc.id === "new") {
+        newDocFilepath ??= await pickNewFilepath(seriesId, doc.title);
+        filepath = newDocFilepath;
+      } else {
+        filepath = doc.id;
+      }
       const r = await blogApi.putSeriesFile(
         seriesId,
         filepath,

@@ -342,6 +342,12 @@ const pending = reactive<Record<BindType, StepState>>({
   email: "idle",
   phone: "idle",
 });
+// confirm 步骤的输入框放的是验证码；待绑定的邮箱/手机号必须单独留存，
+// 否则会把验证码当作 contact 一起发给后端。
+const requestedContact = reactive<Record<BindType, string>>({
+  email: "",
+  phone: "",
+});
 const submitting = reactive<Record<BindType, boolean>>({
   email: false,
   phone: false,
@@ -362,6 +368,7 @@ const busy = computed(() => ({
 function beginBind(type: BindType) {
   errors[type] = "";
   pending[type] = "request";
+  requestedContact[type] = "";
   if (type === "email") email.value = "";
   else phone.value = "";
 }
@@ -393,6 +400,10 @@ async function onSubmit(type: BindType) {
         errors[type] = r.error.message;
         return;
       }
+      // 记下本次请求绑定的联系方式；输入框随后改收验证码，故清空后复用
+      requestedContact[type] = input;
+      if (type === "email") email.value = "";
+      else phone.value = "";
       pending[type] = "confirm";
       return;
     }
@@ -403,7 +414,7 @@ async function onSubmit(type: BindType) {
       errors[type] = t("settings.bind.enterCode");
       return;
     }
-    const contact = type === "email" ? email.value : phone.value;
+    const contact = requestedContact[type];
     const r =
       type === "email"
         ? await authApi.bindEmailVerify(contact, code)

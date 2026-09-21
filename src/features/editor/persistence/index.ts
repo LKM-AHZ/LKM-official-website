@@ -10,8 +10,8 @@ import type {
 import {
   getDocument,
   listDocuments,
-  createDocument as createDoc,
   updateDocument,
+  upsertDocument,
   deleteDocument,
 } from "./document-store";
 
@@ -39,7 +39,9 @@ export function createLocalPersistence(): PersistenceAdapter {
         const result = updateDocument(doc.id, doc);
         return result.isOk();
       }
-      const result = createDoc(doc.title);
+      // 文档不存在时必须按调用方给的 id 落库（含正文/编辑器 JSON/版本），
+      // 否则调用方 id 被丢弃、正文全丢，却仍返回 true 让上层以为保存成功。
+      const result = upsertDocument(doc);
       return result.isOk();
     },
 

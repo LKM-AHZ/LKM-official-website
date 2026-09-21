@@ -27,20 +27,27 @@ export function useAdminMFA(): UseAdminMFA {
     error: "",
   });
   let resolver: ((code?: string) => void) | null = null;
+  let pending: Promise<string | undefined> | null = null;
 
   function requireCode(): Promise<string | undefined> {
     dialog.open = true;
     dialog.error = "";
-    return new Promise<string | undefined>((resolve) => {
+    // 已有 step-up 在途时复用同一个 promise：直接覆盖 resolver 会让先前的调用永远挂起，
+    // 并可能把验证码交给错误的调用方。
+    if (pending) return pending;
+    pending = new Promise<string | undefined>((resolve) => {
       resolver = resolve;
     });
+    return pending;
   }
 
   function finish(code?: string): void {
     dialog.open = false;
     dialog.error = "";
-    resolver?.(code);
+    const resolve = resolver;
     resolver = null;
+    pending = null;
+    resolve?.(code);
   }
 
   function onCancel(): void {

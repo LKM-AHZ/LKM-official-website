@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
+import { safeUrl } from "./url-safety";
 
 interface MarkLike {
   type: string;
@@ -37,11 +38,12 @@ function renderHtmlNode(node: JSONContent): string {
     case "taskItem":
       return `<li>${renderChildren(content) ?? ""}</li>`;
     case "codeBlock":
-      return `<pre><code>${escapeHtml(text)}</code></pre>`;
+      // TipTap 把代码正文放在子 text 节点里，node.text 恒为空 —— 只读 node.text 会导出空代码块
+      return `<pre><code>${renderChildren(content) ?? escapeHtml(text)}</code></pre>`;
     case "horizontalRule":
       return "<hr />";
     case "image":
-      return `<img src="${escapeHtml(String(attrs.src ?? ""))}" alt="${escapeHtml(String(attrs.alt ?? ""))}" />`;
+      return `<img src="${escapeHtml(safeUrl(attrs.src))}" alt="${escapeHtml(String(attrs.alt ?? ""))}" />`;
     case "table":
       return `<table><tbody>${renderChildren(content) ?? ""}</tbody></table>`;
     case "tableRow":
@@ -51,12 +53,14 @@ function renderHtmlNode(node: JSONContent): string {
     case "tableHeader":
       return `<th>${renderChildren(content) ?? escapeHtml(text)}</th>`;
     case "callout": {
-      const ctype = String(attrs.type ?? "info");
-      return `<div class="callout callout-${ctype}">${escapeHtml(String(attrs.title ?? ctype))}</div>`;
+      // ctype 直接进 class 属性，必须先转义；正文（renderChildren）不能丢
+      const ctype = escapeHtml(String(attrs.type ?? "info"));
+      const title = escapeHtml(String(attrs.title ?? attrs.type ?? "info"));
+      return `<div class="callout callout-${ctype}">${title}${renderChildren(content) ?? ""}</div>`;
     }
     case "figure": {
       const img = attrs.src
-        ? `<img src="${escapeHtml(String(attrs.src))}" alt="${escapeHtml(String(attrs.alt ?? ""))}" />`
+        ? `<img src="${escapeHtml(safeUrl(attrs.src))}" alt="${escapeHtml(String(attrs.alt ?? ""))}" />`
         : "";
       const caption = attrs.caption
         ? `<figcaption>${escapeHtml(String(attrs.caption))}</figcaption>`
@@ -82,7 +86,7 @@ function renderText(node: JSONContent): string {
     else if (mark.type === "strike") out = `<del>${out}</del>`;
     else if (mark.type === "code") out = `<code>${out}</code>`;
     else if (mark.type === "link")
-      out = `<a href="${escapeHtml(mark.attrs?.href ?? "#")}">${out}</a>`;
+      out = `<a href="${escapeHtml(safeUrl(mark.attrs?.href))}">${out}</a>`;
     else if (mark.type === "inlineMath")
       out = `<span class="math-inline">$${escapeHtml(mark.attrs?.latex ?? "")}$</span>`;
   }

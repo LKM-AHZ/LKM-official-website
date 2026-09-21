@@ -38,15 +38,16 @@
           type="text"
           class="input input-bordered w-full"
           v-model="code"
-          :placeholder="t('auth.twoFactor.enterSimulatedCode')"
+          :placeholder="t('auth.twoFactor.enter6Digit')"
           maxlength="6"
         />
       </div>
-      <p class="text-xs text-success text-center">
-        {{ t("auth.twoFactor.simulatedCode") }}
-      </p>
       <div v-if="error" class="alert alert-error text-sm">{{ error }}</div>
-      <button type="submit" class="btn btn-primary w-full">
+      <button
+        type="submit"
+        class="btn btn-primary w-full"
+        :disabled="submitting"
+      >
         {{ t("auth.twoFactor.verify") }}
       </button>
       <button
@@ -81,17 +82,20 @@
         />
       </div>
       <div v-if="error" class="alert alert-error text-sm">{{ error }}</div>
-      <button type="submit" class="btn btn-primary w-full">
+      <button
+        type="submit"
+        class="btn btn-primary w-full"
+        :disabled="submitting"
+      >
         {{ t("auth.twoFactor.verify") }}
       </button>
-      <button
+      <!-- 管理员级别不得绕过校验：这里只做提示，绝不 emit success（是否放行由上游权限决定） -->
+      <p
         v-if="props.level === 'admin'"
-        type="button"
-        class="btn btn-ghost w-full btn-sm"
-        @click="emit('success')"
+        class="text-xs text-text-muted text-center"
       >
         {{ t("auth.twoFactor.contactAdmin") }}
-      </button>
+      </p>
     </form>
 
     <!-- Done -->
@@ -127,6 +131,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { authApi } from "~/lib/api/modules/auth";
 import { t } from "~/lib/i18n";
 
 const emit = defineEmits<{
@@ -134,40 +139,73 @@ const emit = defineEmits<{
   (e: "back"): void;
 }>();
 
-const props = defineProps<{
-  level: "normal" | "admin";
-}>();
-
-const DUMMY_RECOVERY_CODES = ["AAAA-BBBB-CCCC", "DDDD-EEEE-FFFF"];
+const props = withDefaults(
+  defineProps<{
+    level: "normal" | "admin";
+    /** 登录/强制 2FA 流程下发的临时令牌；身份与恢复码校验一律在后端完成 */
+    tempToken?: string;
+  }>(),
+  { tempToken: "" },
+);
 
 const step = ref<"verify" | "recovery" | "done">("verify");
 const email = ref("");
 const code = ref("");
 const recoveryCode = ref("");
 const error = ref("");
+const submitting = ref(false);
 
-function handleVerify() {
+async function handleVerify() {
+  error.value = "";
   if (!email.value.trim()) {
     error.value = t("auth.twoFactor.enterEmailError");
     return;
   }
-  if (code.value !== "000000") {
-    error.value = t("auth.twoFactor.wrongCodeError");
+  const value = code.value.trim();
+  if (!/^\d{6}$/.test(value)) {
+    error.value = t("auth.twoFactor.enter6DigitError");
     return;
   }
-  error.value = "";
-  step.value = "recovery";
+  if (!props.tempToken) {
+    error.value = t("messages.auth.missingTempToken");
+    return;
+  }
+  submitting.value = true;
+  try {
+    // 身份校验交给后端：客户端不再持有任何「正确答案」字面量
+    const r = await authApi.verify2FA(props.tempToken, value);
+    if (r.isErr()) {
+      error.value = r.error.message;
+      return;
+    }
+    step.value = "recovery";
+  } finally {
+    submitting.value = false;
+  }
 }
 
-function handleRecovery() {
-  if (
-    DUMMY_RECOVERY_CODES.some(
-      (c) => c === recoveryCode.value.toUpperCase().trim(),
-    )
-  ) {
+async function handleRecovery() {
+  error.value = "";
+  const value = recoveryCode.value.trim();
+  if (!value) {
+    error.value = t("auth.twoFactor.enterRecoveryCode");
+    return;
+  }
+  if (!props.tempToken) {
+    error.value = t("messages.auth.missingTempToken");
+    return;
+  }
+  submitting.value = true;
+  try {
+    // 恢复码由后端与用户已存储的（哈希）恢复码比对，客户端不再内置任何有效恢复码
+    const r = await authApi.verify2FA(props.tempToken, null, value);
+    if (r.isErr()) {
+      error.value = r.error.message;
+      return;
+    }
     step.value = "done";
-  } else {
-    error.value = t("auth.twoFactor.invalidRecoveryCode");
+  } finally {
+    submitting.value = false;
   }
 }
 </script>

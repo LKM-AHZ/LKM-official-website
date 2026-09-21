@@ -4,7 +4,7 @@
 // 说明：echarts@6.1.0 的 `echarts/core`（伪模块）重导出官方 types/dist 类型，`init`/`use`
 // 为函数、`EChartsCoreOption`（即 ECBasicOption）类型可显式标注，故沿用 v5 的按需写法即可。
 // 只注册用到的 LineChart + Grid/Tooltip/Legend/Title 组件 + CanvasRenderer，避免打包全量图标。
-import { ref, shallowRef, onMounted, onBeforeUnmount } from "vue";
+import { ref, shallowRef, onMounted, onBeforeUnmount, nextTick } from "vue";
 import * as echarts from "echarts/core";
 import { LineChart } from "echarts/charts";
 import {
@@ -51,6 +51,10 @@ onMounted(async () => {
     // 无数据时 items 为空仍渲染空折线，不报错
     const items = ((body.data as { items?: TrendItem[] }).items ??
       []) as TrendItem[];
+    // 图表容器在模板里是 v-else：loading 为 true 时 el.value 仍是 null，render() 会静默 return
+    // 且再无第二次调用。必须先摘掉 loading 并等 DOM 更新完再渲染。
+    loading.value = false;
+    await nextTick();
     render({
       tooltip: { trigger: "axis" },
       legend: { data: [t("admin.trend.users"), t("admin.trend.posts")] },

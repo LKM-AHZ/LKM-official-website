@@ -1,11 +1,11 @@
 <template>
   <div class="w-full">
-    <label v-if="label" :for="id" class="label pb-1">
+    <label v-if="label" :for="fieldId" class="label pb-1">
       <span class="label-text font-medium">{{ label }}</span>
     </label>
     <div class="relative">
       <input
-        :id="id"
+        :id="fieldId"
         :type="showPassword ? 'text' : type"
         class="input input-bordered w-full pr-10"
         :class="{ 'input-error': error }"
@@ -13,7 +13,7 @@
         :autocomplete="autocomplete"
         :placeholder="placeholder"
         :aria-describedby="
-          error ? `${id}-error` : hint ? `${id}-hint` : undefined
+          error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined
         "
         :aria-invalid="!!error"
         @input="
@@ -34,12 +34,15 @@
         {{ showPassword ? t("auth.field.hide") : t("auth.field.show") }}
       </button>
     </div>
-    <span v-if="error" :id="`${id}-error`" class="label-text-alt text-error">{{
-      error
-    }}</span>
+    <span
+      v-if="error"
+      :id="`${fieldId}-error`"
+      class="label-text-alt text-error"
+      >{{ error }}</span
+    >
     <span
       v-else-if="hint"
-      :id="`${id}-hint`"
+      :id="`${fieldId}-hint`"
       class="label-text-alt text-text-muted"
       >{{ hint }}</span
     >
@@ -47,10 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref, useId } from "vue";
 import { t } from "~/lib/i18n";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     id?: string;
     label?: string;
@@ -63,6 +66,11 @@ withDefaults(
   }>(),
   { type: "text" },
 );
+
+// 多数调用方不传 id，但 id 会被拼进 aria-describedby 与 label[for]：
+// 直接用 undefined 会渲染出 "undefined-error" 且产生重复 DOM id，这里提供稳定回退。
+const uid = useId();
+const fieldId = computed(() => props.id ?? `auth-field-${uid}`);
 
 const emit = defineEmits<(e: "update:modelValue", v: string) => void>();
 const showPassword = ref(false);

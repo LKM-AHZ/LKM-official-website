@@ -47,6 +47,10 @@ const HOP_BY_HOP_HEADERS = new Set([
   "trailer",
 ]);
 
+// 回程响应头额外要剔除的：body 已被 fetch(undici) 解压，
+// 再透传 content-encoding 会让浏览器对明文 body 二次解压。
+const RESPONSE_ONLY_DROP_HEADERS = new Set(["content-encoding"]);
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   const isProxyPath =
@@ -115,9 +119,27 @@ export const onRequest = defineMiddleware(async (context, next) => {
     });
 
     // 返回真实后端的响应（保留状态码和响应头）
+    // 响应头不能原样透传：除上面被解压/长度失真的头外，直接迭代 Headers 还会把多个
+    // Set-Cookie 合并成一条，破坏 cookie 认证，因此 cookie 单独逐条拷贝。
+    const responseHeaders = new Headers();
+    // getSetCookie 不可用的运行时退化为旧行为（迭代取到的是合并值），避免直接丢 cookie
+    const setCookies = (
+      response.headers as unknown as { getSetCookie?: () => string[] }
+    ).getSetCookie?.();
+    for (const [key, value] of response.headers) {
+      const k = key.toLowerCase();
+      if (HOP_BY_HOP_HEADERS.has(k) || RESPONSE_ONLY_DROP_HEADERS.has(k))
+        continue;
+      if (k === "set-cookie" && setCookies?.length) continue;
+      responseHeaders.append(key, value);
+    }
+    for (const cookie of setCookies ?? []) {
+      responseHeaders.append("set-cookie", cookie);
+    }
+
     return new Response(response.body, {
       status: response.status,
-      headers: response.headers,
+      headers: responseHeaders,
     });
   } catch {
     return new Response(

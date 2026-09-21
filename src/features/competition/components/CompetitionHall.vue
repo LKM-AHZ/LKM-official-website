@@ -75,7 +75,12 @@ const groupedCompetitions = computed(() => {
     upcoming: [],
     ended: [],
   };
-  for (const c of mockCompetitions) groups[c.status].push(c);
+  for (const c of mockCompetitions) {
+    // 未知状态（如后端新增 cancelled/postponed）不能直接 .push，否则 undefined.push
+    // 抛 TypeError 会让整个 computed 失败、整页渲染崩掉
+    if (!groups[c.status]) continue;
+    groups[c.status].push(c);
+  }
   return Object.entries(groups)
     .sort(([a], [b]) => order[a] - order[b])
     .map(([status, items]) => ({ status, items }));

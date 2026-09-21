@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // TimelineFeed.vue — 时间线(read-time 合流 feed)：follow|hot 切换 + 加载更多。
 // 游标分页 → usePagination cursorLoader；登录门控 follow，未登录自动降级 hot。
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { timelineApi } from "~/lib/api";
 import type { FeedItem, TimelineMode } from "~/lib/api/modules/timeline";
 import { usePagination } from "~/lib/http/usePagination";
@@ -12,7 +12,13 @@ const auth = useAuthStore();
 const isLoggedIn = computed(() => auth.isLoggedIn);
 const mode = ref<TimelineMode>("follow");
 
-const { items, loading, error, loadMore } = usePagination<FeedItem>({
+const {
+  items,
+  loading,
+  error,
+  loadMore,
+  refresh: refreshFeed,
+} = usePagination<FeedItem>({
   cursorLoader: async (cursor, limit) => {
     const effective: TimelineMode =
       mode.value === "follow" && isLoggedIn.value ? "follow" : "hot";
@@ -25,9 +31,9 @@ const { items, loading, error, loadMore } = usePagination<FeedItem>({
 const entries = items;
 
 async function loadFirst(): Promise<void> {
-  // 清空并重置游标后拉第一页
-  entries.value = [];
-  await loadMore();
+  // usePagination.refresh() 按 clearOnRefresh 清空列表并复位 lastCursor/hasMore 后重拉第一页；
+  // 手动 `entries.value = []` + loadMore() 会带着旧游标请求（跳过第一页）或被 hasMore 直接拦掉
+  await refreshFeed();
 }
 
 async function switchMode(m: TimelineMode): Promise<void> {
@@ -39,6 +45,12 @@ async function switchMode(m: TimelineMode): Promise<void> {
 async function refresh(): Promise<void> {
   await loadFirst();
 }
+
+// 首屏必须显式触发：usePagination 的 immediate 只对 offset 模式生效，
+// 游标模式下不调用就永远是空列表。
+onMounted(() => {
+  void loadFirst();
+});
 </script>
 
 <template>

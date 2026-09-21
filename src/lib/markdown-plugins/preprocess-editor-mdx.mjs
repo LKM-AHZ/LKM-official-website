@@ -23,6 +23,22 @@ const CALLOUT_LABELS = {
   error: "错误",
   success: "成功",
 };
+/** Figure 对齐白名单（同时用作 CSS 类后缀，不能直接采信编辑器传来的值） */
+const FIGURE_ALIGNS = ["left", "center", "right"];
+
+/**
+ * HTML 转义。编辑器导出的属性值属不可信输入，直接插值可突破标签/属性边界注入标记。
+ * @param {unknown} value
+ * @returns {string}
+ */
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 /** 自闭合 Callout：`<Callout  attrs  />`（attrs 内不再含 `>`） */
 const CALLOUT_SELF = /<Callout\s+([^>]*?)\/>/g;
@@ -37,29 +53,36 @@ const FIGURE_SELF = /<Figure\s+([^>]*?)\/>/g;
 export function preprocessEditorMdx(md) {
   return md
     .replace(CALLOUT_SELF, (_match, attrsStr) => {
-      const type = parseAttr(attrsStr, "type") || "info";
+      // type 同时用作 CSS 类后缀与文案查表键：收敛到白名单，未知值一律按 info 处理
+      const rawType = parseAttr(attrsStr, "type");
+      const type = Object.prototype.hasOwnProperty.call(CALLOUT_LABELS, rawType)
+        ? rawType
+        : "info";
       const title = parseAttr(attrsStr, "title");
       const body = title
-        ? `<h4>${title}</h4>`
-        : `<p>${CALLOUT_LABELS[type] || type}</p>`;
+        ? `<h4>${escapeHtml(title)}</h4>`
+        : `<p>${escapeHtml(CALLOUT_LABELS[type])}</p>`;
       return (
         `<div class="lkm-callout lkm-callout-${type}">` +
-        `<span class="lkm-callout-icon">${CALLOUT_ICONS[type] || CALLOUT_ICONS.info}</span>` +
+        `<span class="lkm-callout-icon">${CALLOUT_ICONS[type]}</span>` +
         `<div class="lkm-callout-body">${body}</div>` +
         `</div>`
       );
     })
     .replace(FIGURE_SELF, (_match, attrsStr) => {
-      const align = parseAttr(attrsStr, "align") || "center";
+      const rawAlign = parseAttr(attrsStr, "align");
+      const align = FIGURE_ALIGNS.includes(rawAlign) ? rawAlign : "center";
       const src = parseAttr(attrsStr, "src");
       const caption = parseAttr(attrsStr, "caption");
-      const width = parseAttr(attrsStr, "width");
+      const rawWidth = parseAttr(attrsStr, "width");
+      // width 进入 style 属性，只接受纯数值，避免注入额外声明
+      const width = /^\d+(\.\d+)?$/.test(rawWidth) ? rawWidth : "";
       const widthAttr = width ? ` style="width:${width}px"` : "";
       const img = src
-        ? `<img src="${src}" alt="${parseAttr(attrsStr, "alt") || ""}"${widthAttr} />`
+        ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(parseAttr(attrsStr, "alt"))}"${widthAttr} />`
         : `<span class="lkm-figure-placeholder">暂无图片</span>`;
       const captionHtml = caption
-        ? `<figcaption class="lkm-figure-caption">${caption}</figcaption>`
+        ? `<figcaption class="lkm-figure-caption">${escapeHtml(caption)}</figcaption>`
         : "";
       return `<figure class="lkm-figure lkm-figure-${align}">${img}${captionHtml}</figure>`;
     });

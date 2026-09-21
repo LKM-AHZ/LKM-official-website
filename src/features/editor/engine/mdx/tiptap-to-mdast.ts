@@ -96,18 +96,18 @@ function convertBlocks(nodes: JSONContent[]): RootContent[] {
             if (align && !alignMap[cellIdx]) alignMap[cellIdx] = align;
           });
         }
-        const rows = rowNodes.map((row, rowIdx) => ({
+        const rows = rowNodes.map((row) => ({
           type: "tableRow" as const,
-          children: (row.content ?? []).map((cell) => {
-            const isHeader = rowIdx === 0 && cell.type === "tableHeader";
-            const cellJson: Record<string, unknown> = {
-              type: "tableCell" as const,
-              children: convertBlocks(cell.content ?? []),
-            };
-            // 首行为表头 → 显式 tableHeader，与导入侧 rowIndex===0 判定一致
-            if (isHeader) cellJson.type = "tableHeader";
-            return cellJson as unknown as RootContent;
-          }) as RootContent[],
+          children: (row.content ?? []).map(
+            (cell) =>
+              ({
+                // GFM mdast 只定义 tableCell，表头由首行隐式决定。
+                // 输出 tableHeader 会让 remark-stringify 抛
+                // "Cannot handle unknown node 'tableHeader'"，含表格的文档直接导不出去。
+                type: "tableCell" as const,
+                children: convertBlocks(cell.content ?? []),
+              }) as unknown as RootContent,
+          ) as RootContent[],
         }));
         const tableNode: Record<string, unknown> = {
           type: "table",

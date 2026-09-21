@@ -53,7 +53,8 @@ const OG_HEIGHT = 626;
  */
 export const adaptOpenGraphImages = async (
   openGraph: MetaDataOpenGraph = {},
-  astroSite: URL | undefined = new URL(""),
+  // 不要给成 `= new URL("")`：显式传 undefined 时会在函数体执行前抛 TypeError: Invalid URL
+  astroSite?: URL,
 ): Promise<MetaDataOpenGraph> => {
   if (!openGraph?.images?.length) return openGraph;
 
@@ -74,7 +75,10 @@ export const adaptOpenGraphImages = async (
       });
 
       return {
-        url: String(new URL(optimized.src, astroSite)),
+        // 无 site（Astro.site 未配置）时退回相对路径，不能拿 undefined 当 base
+        url: astroSite
+          ? String(new URL(optimized.src, astroSite))
+          : optimized.src,
         width: Number(optimized.attributes.width) || OG_WIDTH,
         height: Number(optimized.attributes.height) || OG_HEIGHT,
       };

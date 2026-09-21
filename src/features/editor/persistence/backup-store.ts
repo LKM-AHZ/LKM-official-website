@@ -91,24 +91,31 @@ async function cleanOldSnapshots(db?: IDBDatabase): Promise<void> {
     const tx = database.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
     const index = store.index("timestamp");
-    const count = await new Promise<number>((resolve, reject) => {
-      const req = store.count();
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-    if (count > MAX_SNAPSHOTS) {
-      const toRemove = count - MAX_SNAPSHOTS;
-      const cursorReq = index.openCursor();
-      let removed = 0;
-      cursorReq.onsuccess = () => {
-        const cursor = cursorReq.result;
-        if (cursor && removed < toRemove) {
-          store.delete(cursor.primaryKey);
-          removed++;
-          cursor.continue();
-        }
+    // count 与 cursor 必须在同一个事务里连续发起：先 await count 再开游标时，
+    // 事务可能已经自动提交，openCursor 会抛 InvalidStateError 让清理被整段跳过。
+    // 另外必须等到 tx.oncomplete 才算清理完成 —— saveBackup 紧接着就会 db.close()。
+    await new Promise<void>((resolve, reject) => {
+      const countReq = store.count();
+      countReq.onerror = () => reject(countReq.error);
+      countReq.onsuccess = () => {
+        const toRemove = countReq.result - MAX_SNAPSHOTS;
+        if (toRemove <= 0) return;
+        let removed = 0;
+        const cursorReq = index.openCursor();
+        cursorReq.onerror = () => reject(cursorReq.error);
+        cursorReq.onsuccess = () => {
+          const cursor = cursorReq.result;
+          if (cursor && removed < toRemove) {
+            store.delete(cursor.primaryKey);
+            removed++;
+            cursor.continue();
+          }
+        };
       };
-    }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
   } catch (err) {
     console.warn("[backup-store] 清理旧备份失败:", err);
   }

@@ -10,14 +10,29 @@ function getKey(docId: string): string {
   return `lkm-editor-versions-${docId}`;
 }
 
-export function getVersions(docId: string): VersionEntry[] {
+type VersionsRead = { ok: true; versions: VersionEntry[] } | { ok: false };
+
+/**
+ * 读取版本历史。必须能区分「确实没有历史」与「读不出来」：
+ * 把读取失败当成空历史，saveVersion 就会只写入新条目、静默抹掉整段历史。
+ */
+function readVersions(docId: string): VersionsRead {
   try {
     const raw = localStorage.getItem(getKey(docId));
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return { ok: true, versions: [] };
+    const parsed: unknown = JSON.parse(raw);
+    // 非数组（被外部写坏）同样视为读取失败，顺带避免 getVersion 里 .find 抛 TypeError
+    if (!Array.isArray(parsed)) return { ok: false };
+    return { ok: true, versions: parsed as VersionEntry[] };
   } catch (err) {
     console.warn("[version-store] 读取版本失败:", err);
-    return [];
+    return { ok: false };
   }
+}
+
+export function getVersions(docId: string): VersionEntry[] {
+  const read = readVersions(docId);
+  return read.ok ? read.versions : [];
 }
 
 export function saveVersion(
@@ -25,8 +40,18 @@ export function saveVersion(
   doc: DocumentData,
   message = "",
 ): Result<void, AppError> {
+  const read = readVersions(docId);
+  if (!read.ok) {
+    // 读不出旧历史时中止写入，否则会以「只有一条」覆盖掉整段历史
+    return err(
+      new AppError(
+        "VERSION_READ_FAILED",
+        t("editor.persistence.saveVersionFailed"),
+      ),
+    );
+  }
   try {
-    const versions = getVersions(docId);
+    const versions = read.versions;
     const entry: VersionEntry = {
       version: doc.version,
       contentMdx: doc.contentMdx,

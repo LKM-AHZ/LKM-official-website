@@ -71,7 +71,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useLoginFlow } from "~/features/auth/composables/useLoginFlow";
-import { authApi } from "~/lib/api/modules/auth";
 import { t } from "~/lib/i18n";
 import AuthField from "../shared/AuthField.vue";
 import AuthStatus from "../shared/AuthStatus.vue";
@@ -120,18 +119,9 @@ async function handleRecoverySubmit() {
   }
   recoveryLoading.value = true;
   try {
-    const r = await authApi.verify2FA(props.tempToken, null, code);
-    if (r.isErr()) {
-      flow.error.value = r.error.message;
-      return;
-    }
-    if (props.tempToken && r.value.access_token) {
-      // 恢复码验证成功：写入 token 并同步用户（复用 flow 内部逻辑不满足时手动走 store）
-      flow.successMessage.value = t("auth.twoFactor.recoverySuccess");
-      emit("success", flow.successMessage.value);
-    } else if (!props.tempToken) {
-      flow.error.value = t("auth.twoFactor.testModeTempToken");
-    }
+    // 必须走 flow.submit2FA：它会在成功后写 token / 拉用户 / 持久化 / 触发 onSuccess(),
+    // 组件内自己调 verify2FA 只会 emit success，用户被当作已登录跳转而 store 仍是匿名。
+    await flow.submit2FA("", props.tempToken, code);
   } finally {
     recoveryLoading.value = false;
   }

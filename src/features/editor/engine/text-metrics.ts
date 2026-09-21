@@ -65,30 +65,28 @@ export function computeTextMetrics(
   const cached = cache.get(text);
   if (cached) return cached.result;
 
-  let characters: number;
+  // pretext 的 prepared 对象内部有分段信息，但我们只需要字符数
+  // 直接用文本长度作为字符数（pretext 的 prepare 验证了文本可处理性）
+  const characters = text.length;
+  const words = countWords(text);
+
   try {
     const prepared = prepare(text, "16px / Inter, sans-serif", {
       whiteSpace: "pre-wrap",
     });
-    // pretext 的 prepared 对象内部有分段信息，但我们只需要字符数
-    // 直接用文本长度作为字符数（pretext 的 prepare 验证了文本可处理性）
-    characters = text.length;
     // 清理旧缓存
     if (cache.size >= MAX_CACHE_SIZE) {
       const firstKey = cache.keys().next().value;
-      if (firstKey) cache.delete(firstKey);
+      if (firstKey !== undefined) cache.delete(firstKey);
     }
-    cache.set(text, { prepared, result: { characters, words: 0 } });
+    // words 不依赖 pretext，但必须一起写入缓存：命中缓存时直接返回 result，
+    // 存 words: 0 会让所有已缓存文本的字数恒为 0
+    cache.set(text, { prepared, result: { characters, words } });
   } catch (err) {
     console.warn("[text-metrics] pretext prepare 失败:", err);
-    characters = text.length;
   }
 
-  const words = countWords(text);
-
-  // 更新缓存中的 words（因为 words 不依赖 pretext）
-  const updated = { characters, words };
-  return updated;
+  return { characters, words };
 }
 
 export function clearTextMetricsCache(): void {

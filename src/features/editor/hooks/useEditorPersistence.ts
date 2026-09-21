@@ -14,7 +14,7 @@ export function useEditorPersistence(
   adapter: PersistenceAdapter,
 ): {
   saveStatus: SaveStatus;
-  triggerSave: (content: Record<string, unknown>) => void;
+  triggerSave: (content: Record<string, unknown>, contentMdx?: string) => void;
   loadDraft: () => Promise<DocumentData | null>;
   flushImmediate: (content: Record<string, unknown>) => void;
   importMdxContent: (mdx: string) => Promise<ImportResult>;

@@ -67,9 +67,10 @@ class EditorErrorBoundary extends Component<Props, State> {
     if (error) {
       if (retries < MAX_RETRIES) {
         const delay = RETRY_DELAYS[retries];
-        // 自动重试
+        // 自动重试：首次失败（retries === 0）也必须排定，否则会永远停在
+        // 「重试中」的转圈提示上，既不会重试也没有手动按钮。
+        setTimeout(() => this.handleRetry(), delay);
         if (retries > 0) {
-          setTimeout(() => this.handleRetry(), delay);
           return (
             <div className="rte-root">
               <div className="rte-loading">

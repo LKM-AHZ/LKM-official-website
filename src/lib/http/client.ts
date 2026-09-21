@@ -222,8 +222,10 @@ async function rawRequest<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  // DELETE 也允许带 body：关闭 2FA / 解绑等 step-up 接口需要把验证码放在请求体里，
+  // 之前一并置 undefined 会让这些请求收不到验证码。不传 data 的 DELETE 仍是空 body。
   const body =
-    config.method === "GET" || config.method === "DELETE"
+    config.method === "GET"
       ? undefined
       : config.data !== undefined
         ? JSON.stringify(config.data)

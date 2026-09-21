@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
+import { escapeMarkdownUrl } from "./url-safety";
 
 interface MarkLike {
   type: string;
@@ -44,14 +45,16 @@ function renderBlock(node: JSONContent): string {
       return renderList(content ?? [], false);
     case "codeBlock": {
       const lang = String(attrs.language ?? "");
-      return `\`\`\`${lang}\n${text}\n\`\`\``;
+      // TipTap 把代码正文放在子 text 节点里，node.text 恒为空 —— 只读 node.text 会导出空代码块
+      const code = (content ?? []).map((child) => child.text ?? "").join("");
+      return `\`\`\`${lang}\n${code || text}\n\`\`\``;
     }
     case "horizontalRule":
       return "---";
     case "image": {
       const alt = String(attrs.alt ?? "");
       const src = String(attrs.src ?? "");
-      return `![${alt}](${src})`;
+      return `![${alt}](${escapeMarkdownUrl(src)})`;
     }
     case "table":
       return renderTable(content ?? []);
@@ -66,7 +69,7 @@ function renderBlock(node: JSONContent): string {
       const alt = String(attrs.alt ?? "");
       const caption = String(attrs.caption ?? "");
       if (!src) return "";
-      const img = `![${alt}](${src})`;
+      const img = `![${alt}](${escapeMarkdownUrl(src)})`;
       return caption ? `${img}\n\n*${escapeText(caption)}*` : img;
     }
     case "blockMath":
@@ -89,7 +92,7 @@ function renderInline(nodes: JSONContent[]): string {
       if (type === "text") return renderInlineText(node);
       if (type === "image") {
         const attrs = (node.attrs ?? {}) as Record<string, string>;
-        return `![${attrs.alt ?? ""}](${attrs.src ?? ""})`;
+        return `![${attrs.alt ?? ""}](${escapeMarkdownUrl(attrs.src)})`;
       }
       return renderInline(node.content ?? []);
     })
@@ -108,7 +111,8 @@ function renderInlineText(node: JSONContent): string {
     else if (mark.type === "italic") out = `*${out}*`;
     else if (mark.type === "strike") out = `~~${out}~~`;
     else if (mark.type === "code") out = `\`${out}\``;
-    else if (mark.type === "link") out = `[${out}](${mark.attrs?.href ?? ""})`;
+    else if (mark.type === "link")
+      out = `[${out}](${escapeMarkdownUrl(mark.attrs?.href)})`;
   }
   return out;
 }

@@ -21,6 +21,15 @@ describe("resolveSafeRedirect", () => {
     expect(resolveSafeRedirect("//evil.com")).toBe("/");
     expect(resolveSafeRedirect("\\evil")).toBe("/");
   });
+  it("拒绝经归一化才暴露的站外跳转（反斜杠 / 制表符）", () => {
+    // 浏览器把 `\` 与制表符折叠后就是 `//evil.com`
+    expect(resolveSafeRedirect("/\\evil.com")).toBe("/");
+    expect(resolveSafeRedirect("/\t/evil.com")).toBe("/");
+    expect(resolveSafeRedirect("/\n/evil.com")).toBe("/");
+  });
+  it("保留路径中间的空格", () => {
+    expect(resolveSafeRedirect("/a b/c")).toBe("/a b/c");
+  });
   it("null/空串回退首页", () => {
     expect(resolveSafeRedirect(null)).toBe("/");
     expect(resolveSafeRedirect("")).toBe("/");

@@ -168,7 +168,7 @@ export default function ExportMenu({ editor }: ExportMenuProps): ReactElement {
               <path d="M16 13H8" />
               <path d="M16 17H8" />
             </svg>
-            {t("editor.exportMd")}X
+            {t("editor.exportMdx")}
           </button>
           <button
             type="button"
