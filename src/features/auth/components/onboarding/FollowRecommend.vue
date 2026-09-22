@@ -63,18 +63,14 @@
         <Icon
           :icon="item.icon"
           class="w-8 h-8 shrink-0 mt-0.5"
-          :class="
-            selectedSet.has(item.id) ? 'text-primary' : 'text-text-muted'
-          "
+          :class="selectedSet.has(item.id) ? 'text-primary' : 'text-text-muted'"
         />
         <div class="flex-1 min-w-0">
           <div
             class="font-medium text-sm text-deep-text flex items-center gap-2"
           >
             {{ t(item.name) }}
-            <span
-              v-if="selectedSet.has(item.id)"
-              class="text-primary text-xs"
+            <span v-if="selectedSet.has(item.id)" class="text-primary text-xs"
               >✓</span
             >
           </div>
@@ -116,9 +112,7 @@
             class="font-medium text-sm text-deep-text flex items-center gap-2"
           >
             {{ t(item.name) }}
-            <span
-              v-if="selectedSet.has(item.id)"
-              class="text-primary text-xs"
+            <span v-if="selectedSet.has(item.id)" class="text-primary text-xs"
               >✓</span
             >
           </div>

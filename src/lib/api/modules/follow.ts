@@ -4,6 +4,9 @@
 
 import { get, post, del } from "../../http/client";
 
+// 后端两个端点的字段名本就不同，各自照抄契约、不在前端改名对齐：
+// 关注/取关（POST|DELETE /follow*）返回 {following}，状态查询（/follow/status）返回 {is_following}。
+// 消费方也各自按对应字段读取（FollowButton.vue:40 读 is_following，:55 读 following）。
 export interface FollowToggle {
   following: boolean;
 }

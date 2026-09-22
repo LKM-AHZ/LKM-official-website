@@ -30,7 +30,7 @@ export default function ObsidianImagePicker({ onSelect }: Props): ReactElement {
       ref={inputRef}
       type="file"
       accept="image/*"
-      style={{ display: "none" }}
+      className="hidden"
       onChange={(e) => {
         const file = e.target.files?.[0] ?? null;
         // 清空 value：否则连续两次选同一个文件不会再触发 change，回调静默不执行

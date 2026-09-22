@@ -32,8 +32,20 @@ const muted = computed(() => state.settings.muted);
 
 const SYMBOLS = ["✨", "🌸", "🫧", "⭐", "🌿", "💫", "🍃", "🕯️"];
 
-const particles = ref([]);
-const stars = ref([]);
+// 显式元素类型：ref([]) 会推断成 never[]，模板里 p.style/s.style 的绑定随之失去类型检查
+// （style 里既有字符串拼接出的长度也有数值，故取值类型是 string | number）
+interface ParticleItem {
+  id: number;
+  symbol: string;
+  style: Record<string, string | number>;
+}
+interface StarItem {
+  id: number;
+  style: Record<string, string | number>;
+}
+
+const particles = ref<ParticleItem[]>([]);
+const stars = ref<StarItem[]>([]);
 
 const MOBILE_MAX_WIDTH = 768;
 let isMobileLayout = false;
@@ -42,7 +54,7 @@ function makeParticles() {
   const isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
   isMobileLayout = isMobile;
   const count = isMobile ? 14 : 26;
-  const arr = [];
+  const arr: ParticleItem[] = [];
   for (let i = 0; i < count; i++) {
     const size = 10 + Math.random() * 18;
     arr.push({
@@ -54,14 +66,16 @@ function makeParticles() {
         fontSize: size + "px",
         animationDuration: 14 + Math.random() * 16 + "s",
         animationDelay: -Math.random() * 20 + "s",
-        opacity: 0.3 + Math.random() * 0.5,
+        // 行内 opacity 会被 rise 关键帧（0%/10%/90%/100% 都声明了 opacity）整段盖掉，
+        // 想保留每颗粒子的随机上限只能经自定义属性传给关键帧
+        "--max-o": 0.3 + Math.random() * 0.5,
       },
     });
   }
   particles.value = arr;
 
   const starCount = isMobile ? 18 : 34;
-  const sarr = [];
+  const sarr: StarItem[] = [];
   for (let i = 0; i < starCount; i++) {
     sarr.push({
       id: i,
@@ -81,7 +95,7 @@ function makeParticles() {
 // 只在跨越移动端断点时重建：否则旋转屏幕/拖窗口后会一直用挂载时的数量（桌面 26/34 留在手机上）。
 // 不按每个 resize 像素重建，避免粒子随机位置反复跳变。
 function onViewportChange() {
-  if ((window.innerWidth < MOBILE_MAX_WIDTH) !== isMobileLayout) makeParticles();
+  if (window.innerWidth < MOBILE_MAX_WIDTH !== isMobileLayout) makeParticles();
 }
 
 onMounted(() => {
@@ -124,10 +138,10 @@ onUnmounted(() => {
     opacity: 0;
   }
   10% {
-    opacity: 0.8;
+    opacity: var(--max-o, 0.8);
   }
   90% {
-    opacity: 0.8;
+    opacity: var(--max-o, 0.8);
   }
   100% {
     transform: translateY(-110vh) translateX(40px) rotate(360deg);

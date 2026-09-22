@@ -7,7 +7,10 @@ export const GET: APIRoute = () => {
   // 模块顶层求值发生在导入期，Node standalone 下会让整个服务起不来（而不只是 /robots.txt 出错）。
   let sitemapLine = "";
   try {
-    const basePath = import.meta.env.BASE_URL.replace(/^\/+/, "").replace(/\/?$/, "/");
+    const basePath = import.meta.env.BASE_URL.replace(/^\/+/, "").replace(
+      /\/?$/,
+      "/",
+    );
     const sitemapUrl = new URL(
       `${basePath}sitemap-index.xml`,
       new URL(import.meta.env.SITE).origin,

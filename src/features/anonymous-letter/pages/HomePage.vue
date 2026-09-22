@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import LetterCard from "../components/LetterCard.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -180,14 +180,27 @@ function load() {
   );
 }
 
+// 跨标签页同步。swup 换页时 document 是复用的，不在卸载时摘掉监听会每次导航漏一个
+// （闭包还持有本组件的 ref，等于把已卸载的组件一直留在内存里）
 onMounted(() => {
   load();
   typeLoop();
+  window.addEventListener("storage", load);
 });
 
-// 跨标签页同步
-if (typeof window !== "undefined") {
-  window.addEventListener("storage", load);
+onBeforeUnmount(() => {
+  window.removeEventListener("storage", load);
+});
+
+// 每封信只分配一次随机权重（本次会话内不再变），保证「随机」排序稳定、不随重算抖动
+const randomRanks = new Map();
+function randomRank(id) {
+  let rank = randomRanks.get(id);
+  if (rank === undefined) {
+    rank = Math.random();
+    randomRanks.set(id, rank);
+  }
+  return rank;
 }
 
 const filtered = computed(() => {
@@ -209,7 +222,9 @@ const filtered = computed(() => {
         ((a.likes || 0) + (a.favorites || 0)),
     );
   } else if (sort.value === "random") {
-    list.sort(() => Math.random() - 0.5);
+    // 随机排序按信件 id 缓存一次随机权重：Math.random() 作比较器既不是均匀排列、
+    // 又会在每次重算（点赞/收藏都会触发）时重排，卡片会当场跳位
+    list.sort((a, b) => randomRank(a.id) - randomRank(b.id));
   } else {
     list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }
@@ -233,8 +248,8 @@ function setCat(c) {
   activeCat.value = c;
   activeMood.value = "";
 }
-function setTag(t) {
-  activeTag.value = t;
+function setTag(tagKey) {
+  activeTag.value = tagKey;
 }
 function filterByMood(m) {
   activeMood.value = activeMood.value === m ? "" : m;

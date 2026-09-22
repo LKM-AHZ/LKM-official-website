@@ -10,6 +10,7 @@ import SiteNavbar from '~/features/shell-official/components/SiteNavbar.astro';
 import { allMenuItems } from '~/features/shell/menus';
 import { filterNavbarByNames } from '~/lib/navigation';
 import { siteConfig } from '~/lib/config';
+import { t } from '~/lib/i18n';
 import type { NavBarLink } from '~/types/config';
 import { BANNER_HEIGHT, BANNER_HEIGHT_EXTEND, MAIN_PANEL_OVERLAPS_BANNER_HEIGHT } from '~/lib/constants/constants';
 import Layout from './BlogLayout.astro';
@@ -72,7 +73,7 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
         <div id="banner" class="overflow-hidden relative w-full h-full">
           <Image
             id="banner-img"
-            alt="Banner image of the blog"
+            alt={t('blog.bannerAlt')}
             src={`~/assets/images/${String(siteConfig.banner.src).replace(/^assets\/images\//, '')}`}
             layout="cover"
             class="object-cover h-full w-full transition duration-700 opacity-0 scale-105"
@@ -102,7 +103,7 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
               id="banner-credit"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Visit image source"
+              aria-label={t('blog.imageSourceLabel')}
               class:list={[
                 'group onload-animation transition-all absolute flex justify-center items-center rounded-full ' +
                   'px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9',

@@ -44,7 +44,7 @@ const columnsClass =
               <div class="mt-0.5">
                 {itemTitle && <h3 class="text-[17px] font-semibold text-deep-text leading-snug">{itemTitle}</h3>}
                 {description && (
-                  <p
+                  <div
                     class:list={[{ 'mt-2': itemTitle }, 'text-[14px] text-text-muted leading-relaxed']}
                     set:html={description}
                   />

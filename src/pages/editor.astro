@@ -30,8 +30,8 @@ const metadata = {
       </a>
     </div>
     <div id="editor-root" class="flex-1 min-h-0">
-      <div class="flex items-center justify-center h-full">
-        <span class="loading loading-spinner loading-md"></span>
+      <div class="flex items-center justify-center h-full" role="status" aria-live="polite">
+        <span class="loading loading-spinner loading-md" aria-hidden="true"></span>
         <span class="ml-2 text-deep-text/50">{t('page.admin.documents.loadingEditor')}</span>
       </div>
     </div>

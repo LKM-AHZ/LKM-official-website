@@ -194,12 +194,14 @@ export default function PreviewPanel({
     };
   }, [editor]);
 
-  // useMemo 缓存递归渲染结果，避免 editor state 变化导致的无意义重算
+  // useMemo 缓存递归渲染结果，避免 editor state 变化导致的无意义重算。
+  // editor 也必须进依赖：换实例（组件被复用到另一个编辑器）而新实例恰好共享 doc 引用时，
+  // 只盯 editor.state.doc 会漏算一次
   const content = useMemo(() => {
     const json = editor.getJSON();
     const nodes = (json?.content ?? []) as JSONContent[];
     return nodes.map((node, i) => renderNode(node, i));
-  }, [editor.state.doc]);
+  }, [editor, editor.state.doc]);
 
   return <div className="rte-editor-content">{content}</div>;
 }

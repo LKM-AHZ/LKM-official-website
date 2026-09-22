@@ -19,10 +19,13 @@ async function load(): Promise<void> {
     followApi.myFollowingUsers(),
     followApi.myFollowingBoards(),
   ]);
+  // 两个请求各自失败都要能看到原因：只留第一条会把另一个列表的错误吞掉
+  const messages: string[] = [];
   if (uRes.isOk()) users.value = uRes.value.items;
-  else error.value = uRes.error.message;
+  else messages.push(uRes.error.message);
   if (bRes.isOk()) boards.value = bRes.value.items;
-  else if (!error.value) error.value = bRes.error.message;
+  else messages.push(bRes.error.message);
+  error.value = messages.join("；");
   loading.value = false;
 }
 

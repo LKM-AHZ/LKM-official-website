@@ -27,7 +27,9 @@
     </div>
     <div class="min-w-0 flex-1">
       <!-- message 作为插槽兜底内容：同时传 message 与默认插槽时只显示一处，不会重复两遍 -->
-      <span class="block"><slot>{{ message }}</slot></span>
+      <span class="block"
+        ><slot>{{ message }}</slot></span
+      >
     </div>
   </div>
 </template>

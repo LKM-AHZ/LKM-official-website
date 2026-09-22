@@ -151,10 +151,7 @@ export function useRegisterFlow(
     try {
       if (type.value === "local") {
         // 本地注册：使用用户输入的密码，无随机生成
-        const r = await store.registerLocal(
-          trimmedUsername,
-          password.value,
-        );
+        const r = await store.registerLocal(trimmedUsername, password.value);
         if (r.isErr()) return fail(r.error.message);
         stage.value = "done";
         succeed();
@@ -163,9 +160,7 @@ export function useRegisterFlow(
 
       // 普通账户：发送验证码，进入 verify 步（喵，等验证码来敲门～）
       const email = useEmail.value ? contact.value.trim() : null;
-      const phone = !useEmail.value
-        ? contact.value.trim()
-        : null;
+      const phone = !useEmail.value ? contact.value.trim() : null;
       const r = await store.registerNormal(
         trimmedUsername,
         password.value,

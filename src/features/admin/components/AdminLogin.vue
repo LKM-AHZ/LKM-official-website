@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onBeforeUnmount } from "vue";
 import { NForm, NFormItem, NInput, NButton, NAlert } from "naive-ui";
 import { useAdminAuthStore } from "~/stores/adminAuth";
 import { t } from "~/lib/i18n";
@@ -11,6 +11,13 @@ const password = ref("");
 const submitting = ref(false);
 const error = ref("");
 const success = ref(false);
+// 成功后跳后台首页的定时器句柄：组件在 600ms 内卸载（swup 换页 / 用户手动离开）时要清掉，
+// 否则定时器会在已卸载的组件上执行跳转
+let redirectTimer: number | null = null;
+
+onBeforeUnmount(() => {
+  if (redirectTimer !== null) window.clearTimeout(redirectTimer);
+});
 
 async function handleSubmit() {
   // 防重入：按钮的 :disabled 要等一次渲染才生效，表单回车提交更是绕过按钮，
@@ -27,7 +34,8 @@ async function handleSubmit() {
     success.value = true;
     // 成功提示由下方 NAlert 呈现（不再用 useMessage，避免无 provider）
     // 稍作停留展示成功态后跳回后台首页
-    window.setTimeout(() => {
+    redirectTimer = window.setTimeout(() => {
+      redirectTimer = null;
       window.location.href = "/admin";
     }, 600);
   } catch (e) {

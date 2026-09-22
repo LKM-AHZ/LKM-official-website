@@ -18,7 +18,8 @@ function pickFrom<T extends string>(
   allowed: readonly T[],
   fallback: T,
 ): T {
-  return typeof value === "string" && (allowed as readonly string[]).includes(value)
+  return typeof value === "string" &&
+    (allowed as readonly string[]).includes(value)
     ? (value as T)
     : fallback;
 }
@@ -36,6 +37,9 @@ const SITE_LANGS = [
   "id",
 ] as const;
 const BANNER_POSITIONS = ["top", "center", "bottom"] as const;
+
+/** Expressive Code 主题缺省值：ecCfg 兜底与末尾取值共用同一字面量，避免两处漂移 */
+const DEFAULT_EC_THEME = "github-dark";
 
 interface RawCredit {
   enable?: boolean;
@@ -82,7 +86,7 @@ const cfg = projectConfig.fuwari as
 const siteCfg = cfg?.site ?? {};
 const profileCfg = cfg?.profile ?? {};
 const licCfg = cfg?.license ?? {};
-const ecCfg = cfg?.expressiveCode ?? { theme: "github-dark" };
+const ecCfg = cfg?.expressiveCode ?? { theme: DEFAULT_EC_THEME };
 
 export const siteConfig: SiteConfig = {
   title: siteCfg.title || "Fuwari",
@@ -145,5 +149,6 @@ export const licenseConfig: LicenseConfig = {
 };
 
 export const expressiveCodeConfig: ExpressiveCodeConfig = {
-  theme: ecCfg.theme ?? "github-dark",
+  // 用 || 而非 ??：空串同样视为「没配」，与上面各字段的兜底策略一致
+  theme: ecCfg.theme || DEFAULT_EC_THEME,
 };

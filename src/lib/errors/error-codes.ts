@@ -36,7 +36,9 @@ export class AppError extends Error {
     message: string,
     public cause?: unknown,
   ) {
-    super(message);
+    // cause 交给原生 Error 通道：它定义的是不可枚举自有属性，而参数属性的后续赋值
+    // 只会更新已存在的属性（不改变可枚举性），Object.keys/序列化不会把它当业务字段列出来
+    super(message, { cause });
     this.name = "AppError";
   }
 }

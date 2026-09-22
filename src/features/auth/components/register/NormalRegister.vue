@@ -40,7 +40,8 @@
         type="button"
         class="btn btn-xs"
         :class="flow.useEmail ? 'btn-primary' : 'btn-ghost'"
-        @click="flow.useEmail = true"
+        :aria-pressed="flow.useEmail"
+        @click="switchChannel(true)"
       >
         {{ t("register.normal.useEmail") }}
       </button>
@@ -48,7 +49,8 @@
         type="button"
         class="btn btn-xs"
         :class="!flow.useEmail ? 'btn-primary' : 'btn-ghost'"
-        @click="flow.useEmail = false"
+        :aria-pressed="!flow.useEmail"
+        @click="switchChannel(false)"
       >
         {{ t("register.normal.usePhone") }}
       </button>
@@ -113,6 +115,21 @@
       ></span>
       <span v-else>{{ t("register.normal.verifyAndFinish") }}</span>
     </button>
+    <!-- 重发入口：verify 步此前既不展示 flow.countdown 也没有重发动作，
+         用户收不到验证码就只能重来。复用 submit()（它就是发起注册/重发验证码的那个动作），
+         倒计时期间禁用，避免重复下发 -->
+    <button
+      type="button"
+      class="btn btn-ghost w-full btn-sm"
+      :disabled="flow.countdownRunning || flow.loading"
+      @click="flow.submit()"
+    >
+      {{
+        flow.countdownRunning
+          ? t("register.normal.resendCountdown", { seconds: flow.countdown })
+          : t("register.normal.resend")
+      }}
+    </button>
     <button
       type="button"
       class="btn btn-ghost w-full btn-sm"
@@ -129,5 +146,17 @@ import { t } from "~/lib/i18n";
 import AuthField from "../shared/AuthField.vue";
 import AuthStatus from "../shared/AuthStatus.vue";
 
-defineProps<{ flow: RegisterFlow }>();
+const props = defineProps<{ flow: RegisterFlow }>();
+
+/**
+ * 切换联系方式（邮箱/手机）。
+ * 必须清空 contact：Vue 会复用同一个 <input> 节点（只换 id/type/label），
+ * 残留的邮箱值会让手机校验以 invalidPhone 拒绝，反之亦然——
+ * 用户看到的是「格式不对」，而不知道那是上一步留下的值。
+ */
+function switchChannel(useEmail: boolean): void {
+  if (props.flow.useEmail === useEmail) return;
+  props.flow.useEmail = useEmail;
+  props.flow.contact = "";
+}
 </script>

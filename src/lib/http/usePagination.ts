@@ -79,7 +79,6 @@ export function usePagination<T>(
   const error = ref<string | null>(null);
   const hasMore = ref(cursorLoader !== undefined && cursorLoader !== null);
   const lastCursor = ref<string | null>(null);
-  const endReached = ref(false);
 
   /** 统一：req 返回指定页数据，replaceAll 决定清空还是追加。 */
   async function fetchPage(
@@ -108,18 +107,21 @@ export function usePagination<T>(
     const data = r.value;
     if (cursorLoader) {
       const c = data as CursorPage<T>;
+      // 追加用 concat 而非 push(...items)：spread 整页会让实参个数等于页大小，
+      // 后端返回超大页时会撞上 JS 引擎的实参上限（RangeError: Maximum call stack size exceeded）
       if (replaceAll) items.value = c.items;
-      else items.value.push(...c.items);
+      else items.value = items.value.concat(c.items);
       lastCursor.value = c.next_cursor ?? null;
-      endReached.value =
+      // 空串/null/undefined 都视为没有下一页（后端三种都出现过）
+      hasMore.value = !(
         c.next_cursor === undefined ||
         c.next_cursor === null ||
-        c.next_cursor === "";
-      hasMore.value = !endReached.value;
+        c.next_cursor === ""
+      );
     } else {
       const d = data as PaginatedResponse<T>;
       if (replaceAll) items.value = d.items;
-      else items.value.push(...d.items);
+      else items.value = items.value.concat(d.items);
       total.value = d.total;
       totalPages.value = d.pages;
       page.value = d.page;
@@ -138,7 +140,6 @@ export function usePagination<T>(
     if (clearOnRefresh) items.value = [];
     page.value = 1;
     lastCursor.value = null;
-    endReached.value = false;
     const firstLoad = items.value.length === 0;
     if (firstLoad) initialLoading.value = true;
     await fetchPage(1, null, true);

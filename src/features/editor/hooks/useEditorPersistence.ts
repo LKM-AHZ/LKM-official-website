@@ -53,12 +53,14 @@ export function useEditorPersistence(
   const exportMdxContent = useCallback(
     async (
       json: Record<string, unknown>,
-      frontmatter: Record<string, unknown> = {},
+      // 缺省用 importMdxContent 存下的 frontmatter：与自动保存路径（getFrontmatter）同一来源，
+      // 否则不传该参数就会把标题/tags 等元信息整段丢掉
+      frontmatter: Record<string, unknown> = frontmatterRef.current,
     ): Promise<string> => {
-      const nodes =
-        typeof json === "object" && json !== null && "content" in json
-          ? (json as { content: unknown[] }).content
-          : [];
+      // content 存在但不是数组（手改/损坏的 editorJson）时不能直接 cast：
+      // 非数组会让 exportMdx 内部的转换链抛错，或产出空的 MDX
+      const raw = (json as { content?: unknown }).content;
+      const nodes = Array.isArray(raw) ? raw : [];
       const result = exportMdx(
         nodes as Parameters<typeof exportMdx>[0],
         frontmatter,

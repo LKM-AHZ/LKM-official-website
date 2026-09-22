@@ -104,14 +104,35 @@ const { items } = Astro.props;
     }
   }
 
+  // 只在元素确实参与渲染时测量：隐藏的那一套（hidden md:block / md:hidden）rect 全为 0，
+  // 照画会写出一条所有点都塌在原点的退化路径
+  function isRendered(el: Element): boolean {
+    return el.getClientRects().length > 0;
+  }
+
   function drawTimeline(wrap: Element): void {
     const list = wrap.querySelector('[data-tl-list]');
     if (!list) return;
     const svgDesktop = wrap.querySelector('[data-tl-svg-desktop]') as SVGSVGElement | null;
-    if (svgDesktop) drawOne(wrap, svgDesktop, list.querySelectorAll('[data-tl-dot-desktop]'), false);
+    if (svgDesktop && isRendered(svgDesktop)) {
+      drawOne(wrap, svgDesktop, list.querySelectorAll('[data-tl-dot-desktop]'), false);
+    }
     const svgMobile = wrap.querySelector('[data-tl-svg-mobile]') as SVGSVGElement | null;
-    if (svgMobile) drawOne(wrap, svgMobile, list.querySelectorAll('[data-tl-dot-mobile]'), true);
+    if (svgMobile && isRendered(svgMobile)) {
+      drawOne(wrap, svgMobile, list.querySelectorAll('[data-tl-dot-mobile]'), true);
+    }
   }
+
+  function redrawAllTimelines(): void {
+    document.querySelectorAll('[data-timeline]').forEach((wrap) => drawTimeline(wrap));
+  }
+
+  // md 断点两侧是两套 SVG 与圆点：跨断点时外层盒子可能尺寸不变、ResizeObserver 不触发，
+  // 于是刚露出来的那套仍是空的（或隐藏期写下的退化路径），必须显式重画。
+  // 768px 与 Tailwind 默认 md 一致（本仓未在 @theme 覆盖断点）
+  window
+    .matchMedia('(min-width: 768px)')
+    .addEventListener('change', redrawAllTimelines);
 
   function initTimelines(): void {
     document.querySelectorAll('[data-timeline]').forEach((wrap) => {

@@ -13,8 +13,16 @@ async function exportData() {
   exportStatus.value = "";
   try {
     const questions = (await db.questions.toArray()) as Question[];
+    // 题目通过 folderId 引用文件夹：只导题目会留下一堆指向不存在文件夹的数据，
+    // 故连同 folders 一起导出；version 记下 Dexie schema 版本，便于将来的导入端做兼容判断
+    const folders = await db.folders.toArray();
     const json = JSON.stringify(
-      { questions, exportedAt: new Date().toISOString() },
+      {
+        version: db.verno,
+        questions,
+        folders,
+        exportedAt: new Date().toISOString(),
+      },
       null,
       2,
     );
@@ -26,8 +34,12 @@ async function exportData() {
     const now = new Date();
     const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     a.download = `starhope-backup-${localDate}.json`;
+    // 必须先挂进文档再 click：Firefox/Safari 对游离的 <a> 不触发下载
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    // 立刻 revoke 会在浏览器真正读完 blob 之前就释放它（下载被中断/文件损坏），让出一轮任务再回收
+    setTimeout(() => URL.revokeObjectURL(url), 0);
     exportStatus.value = t("starhope.settings.exportSuccess");
   } catch (error) {
     // 静默吞掉时 IndexedDB/Blob 的失败没有任何线索（配额超限、库已关闭、结构化克隆失败等）

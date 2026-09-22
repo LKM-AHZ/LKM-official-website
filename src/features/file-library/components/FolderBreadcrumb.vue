@@ -17,19 +17,21 @@
     >
       {{ t("community.fileLibrary.allCategories") }}
     </button>
-    <span v-for="node in path" :key="node.id" class="flex items-center gap-1">
+    <span
+      v-for="(node, index) in path"
+      :key="node.id"
+      class="flex items-center gap-1"
+    >
       <span class="text-text-muted/60 select-none">/</span>
       <button
         class="px-1.5 py-0.5 rounded-md transition-colors"
         :class="
-          node.id === path[path.length - 1].id
+          index === path.length - 1
             ? 'text-primary font-medium cursor-default'
             : 'text-deep-text hover:text-primary hover:bg-surface-3'
         "
-        :disabled="node.id === path[path.length - 1].id"
-        :aria-current="
-          node.id === path[path.length - 1].id ? 'page' : undefined
-        "
+        :disabled="index === path.length - 1"
+        :aria-current="index === path.length - 1 ? 'page' : undefined"
         @click="emit('navigate', node.id)"
       >
         {{ t(node.name) }}

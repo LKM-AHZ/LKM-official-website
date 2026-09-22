@@ -32,7 +32,7 @@ function getApiBase(): string {
 const DEFAULT_TIMEOUT_MS = 15_000;
 
 /** 请求配置（原 axios 的 AxiosRequestConfig 最小等价子集，仅含现有消费方所用到字段）。 */
-interface RequestConfig {
+export interface RequestConfig {
   url?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   /** GET 等查询参数，扁平对象 → 拼到 query string（与 axios params 一致）。 */
@@ -54,44 +54,45 @@ export interface HttpAuthSessionAdapter {
 
 let _adapter: HttpAuthSessionAdapter | null = null;
 
+/** Pinia auth store 的持久化键（与 src/stores/auth.ts 的 persist 键一致），只在此声明一次 */
+const AUTH_STORAGE_KEY = "lkm-auth-store";
+
+/** 认证 store 持久化快照（只取本适配器关心的两个 token 字段） */
+interface StoredAuth {
+  _token?: string;
+  _refreshToken?: string;
+}
+
+/** 读取持久化快照：隐私模式/禁用存储/载荷损坏时返回 null，由调用方降级 */
+function readStoredAuth(): StoredAuth | null {
+  try {
+    const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+    return saved ? (JSON.parse(saved) as StoredAuth) : null;
+  } catch {
+    return null;
+  }
+}
+
 const defaultAdapter: HttpAuthSessionAdapter = {
   getAccessToken() {
-    try {
-      const saved = localStorage.getItem("lkm-auth-store");
-      if (saved) {
-        const data = JSON.parse(saved);
-        return data._token ?? null;
-      }
-    } catch {
-      // ignore
-    }
-    return null;
+    return readStoredAuth()?._token ?? null;
   },
   getRefreshToken() {
-    try {
-      const saved = localStorage.getItem("lkm-auth-store");
-      if (saved) {
-        const data = JSON.parse(saved);
-        return data._refreshToken ?? null;
-      }
-    } catch {
-      // ignore
-    }
-    return null;
+    return readStoredAuth()?._refreshToken ?? null;
   },
   setTokens(a, r) {
     try {
-      const store = JSON.parse(localStorage.getItem("lkm-auth-store") || "{}");
+      const store: StoredAuth = readStoredAuth() ?? {};
       store._token = a;
       store._refreshToken = r;
-      localStorage.setItem("lkm-auth-store", JSON.stringify(store));
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(store));
     } catch {
       // ignore
     }
   },
   clear() {
     try {
-      localStorage.removeItem("lkm-auth-store");
+      localStorage.removeItem(AUTH_STORAGE_KEY);
     } catch {
       /* ignore */
     }

@@ -198,7 +198,8 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
                 version: doc.version,
               }),
             );
-            if (backed === false) throw new Error(`createBackup 失败: ${docId}`);
+            if (backed === false)
+              throw new Error(`createBackup 失败: ${docId}`);
             imported += 1;
           }
         } catch (err) {

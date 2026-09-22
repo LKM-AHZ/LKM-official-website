@@ -3,7 +3,7 @@
     <!-- 未登录 -->
     <a
       v-if="!isLoggedIn"
-      :href="buildUrl('/login')"
+      :href="navUrl('/login')"
       class="btn-plain scale-animation rounded-lg h-11 px-4 font-bold active:scale-95 flex items-center gap-1.5 text-sm text-primary hover:bg-primary/10 transition-colors"
       @click.prevent="openLogin"
     >
@@ -34,7 +34,7 @@
       </div>
 
       <a
-        :href="buildUrl('/profile')"
+        :href="navUrl('/profile')"
         class="flex items-center gap-2.5 px-4 py-2 text-sm text-deep-text hover:bg-page-bg transition-colors"
         @click="close"
       >
@@ -42,7 +42,7 @@
         {{ t("user.profile") }}
       </a>
       <a
-        :href="buildUrl('/contribution')"
+        :href="navUrl('/contribution')"
         class="flex items-center gap-2.5 px-4 py-2 text-sm text-deep-text hover:bg-page-bg transition-colors"
         @click="close"
       >
@@ -50,7 +50,7 @@
         {{ t("user.contribution") }}
       </a>
       <a
-        :href="buildUrl('/account')"
+        :href="navUrl('/account')"
         class="flex items-center gap-2.5 px-4 py-2 text-sm text-deep-text hover:bg-page-bg transition-colors"
         @click="close"
       >
@@ -75,10 +75,15 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
-import { buildUrl } from "~/lib/utils/paths";
+import { buildAuthUrl, buildUrl } from "~/lib/utils/paths";
 import { useAuthStore } from "~/stores/auth";
 
-defineProps<{ base?: string }>();
+const props = defineProps<{ base?: string }>();
+
+// 宿主布局注入的运行时 base（FuwariNavbar 传 url('/')）；未注入时回落到编译期 BASE_URL。
+// 两者同源，注入时只是让子路径部署下链接与宿主拼法保持一致
+const navUrl = (path: string): string =>
+  props.base ? buildAuthUrl(props.base, path) : buildUrl(path);
 
 const store = useAuthStore();
 const menuRef = ref<HTMLDivElement | null>(null);

@@ -24,6 +24,9 @@ export function buildUrl(path: string): string {
 
 // ── Permalink 拼接 ──
 
+// 只支持「根相对路径名」形态（如 "" 或 "/sub"，见 config.yaml 的 site.base 与 site.ts 的
+// `base: site.base ?? "/"`）：下面一律按 `"/" + 段拼接` 组装，传完整 URL（https://host/sub）
+// 会被拼成 "/https://host/sub/..."。需要子路径部署时请填 pathname，不要填站点绝对 URL。
 const BASE_PATHNAME = SITE.base || "/";
 
 /** 内容集合目录（与 content glob 的约定同步；目录一旦调整只改这一处） */
@@ -74,6 +77,9 @@ export function buildPermalink(
       path = BLOG_BASE;
       break;
     case "asset": {
+      // 刻意提前返回、不走下面的 trailingSlash 处理：资源是文件而非路由，
+      // 补尾斜杠（/img/a.png/）会指向目录、让资源 404。组装方式与下面 page/post 分支相同，
+      // 但此处豁免尾部斜杠，故不复用同一段收尾逻辑。
       const parts = [BASE_PATHNAME, slug]
         .map((el) => trimSlash(el))
         .filter((el) => !!el);

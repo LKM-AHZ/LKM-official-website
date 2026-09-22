@@ -234,7 +234,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted } from "vue";
 import { NMessageProvider, NDialogProvider, NModalProvider } from "naive-ui";
 import Particles from "./Particles.vue";
 import { useApp } from "../stores/app";
@@ -254,20 +254,25 @@ let synced = false;
 
 function forceSync() {
   if (synced) return;
-  // 同步色相
-  const hue = localStorage.getItem("hue");
-  if (hue) document.documentElement.style.setProperty("--hue", hue);
+  // 同步色相。隐私模式/禁用 Cookie 下 localStorage 读取会抛 SecurityError：
+  // 从 onMounted 里逃逸会中断整个 shell 初始化，下面的 app.setTheme 便永不执行、主题停在未同步状态
+  try {
+    const hue = localStorage.getItem("hue");
+    if (hue) document.documentElement.style.setProperty("--hue", hue);
+  } catch (e) {
+    console.warn("[treehole] 读取色相失败", e);
+  }
   // 以实际落地的 .dark class 为唯一事实来源同步主题。
   // 原实现按 localStorage.theme/matchMedia 推导 expectedDark 并在不一致时 location.reload()，
   // 但 synced 是组件内变量、刷新后归零：只要推导结果与最终 class 持续不符（例如主题由主站其它来源决定
   // 或由异步脚本后置清除），就会无限重载使页面不可用。这也与 stores/app.ts「主题跟随主站 .dark class」的约定一致。
   synced = true;
-  app.setTheme(document.documentElement.classList.contains("dark") ? "night" : "day");
+  app.setTheme(
+    document.documentElement.classList.contains("dark") ? "night" : "day",
+  );
 }
 
 onMounted(forceSync);
-
-onUnmounted(() => {});
 </script>
 
 <style scoped>

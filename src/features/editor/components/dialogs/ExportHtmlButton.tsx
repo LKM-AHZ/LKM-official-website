@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import { t } from "~/lib/i18n";
+import { getLocale, t } from "~/lib/i18n";
 import { serializeHtml } from "../../engine/serialize-html";
 
 export function handleExportHtml(editor: Editor): void {
@@ -10,7 +10,7 @@ export function handleExportHtml(editor: Editor): void {
     >[0];
     const body = serializeHtml(content);
     const html = `<!doctype html>
-<html lang="zh-CN">
+<html lang="${getLocale()}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // DlqTable.vue — 后台死信队列：按状态查看、重投、丢弃。
 // 列表/重投/丢弃均走 adminFetch（后端 require_admin，无 2FA step-up）。
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { dlqApi } from "~/lib/api";
 import type { DlqMessageInfo, DlqStatus } from "~/lib/api/modules/dlq";
 import { t } from "~/lib/i18n";
@@ -19,6 +19,9 @@ const loading = ref(false);
 const error = ref("");
 const message = ref("");
 const actingId = ref<string | null>(null);
+// 任一行动作在途时禁用**所有**行的按钮：只按行禁用的话，多行会被并发重投/丢弃，
+// 各自触发的 load() 交错回来只会展示中间态
+const busy = computed(() => actingId.value !== null);
 
 // 请求序号：快速切换状态时较早的慢响应可能后到，只让最新一次请求的结果落地
 let loadSeq = 0;
@@ -174,7 +177,7 @@ onMounted(() => void load());
                   <button
                     type="button"
                     class="text-primary hover:underline mr-3 disabled:opacity-40"
-                    :disabled="actingId === r.id"
+                    :disabled="busy"
                     @click="requeue(r.id)"
                   >
                     {{ t("admin.dlq.requeue") }}
@@ -182,7 +185,7 @@ onMounted(() => void load());
                   <button
                     type="button"
                     class="text-red-500 hover:underline disabled:opacity-40"
-                    :disabled="actingId === r.id"
+                    :disabled="busy"
                     @click="discard(r.id)"
                   >
                     {{ t("admin.dlq.discard") }}

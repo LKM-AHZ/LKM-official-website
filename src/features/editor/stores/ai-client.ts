@@ -152,10 +152,12 @@ export async function requestAiCompletion(
   const model = _model;
 
   // ---- 2. Build prompt ----------------------------------------------------
-  let prompt = (PROMPT_TEMPLATES[input.operation] ?? "{context}").replace(
-    "{context}",
-    input.context,
-  );
+  // 直接下标取会被原型链命中：operation 声明为 string，传 "constructor"/"toString" 之类会拿到
+  // Object.prototype 上的成员（truthy），绕过 ?? 兜底后在 .replace 处抛 TypeError
+  const template = Object.hasOwn(PROMPT_TEMPLATES, input.operation)
+    ? PROMPT_TEMPLATES[input.operation]
+    : "{context}";
+  let prompt = template.replace("{context}", input.context);
   if (input.operation === "翻译") {
     prompt = prompt.replace("{language}", input.language || "英文");
   }
@@ -247,6 +249,19 @@ export async function requestAiCompletion(
   }
 
   // ---- 7. Parse and validate JSON body ------------------------------------
+  // 第 10 步只按解码后的 content 长度判上限，而 response.json() 会先把整个响应体读进内存：
+  // 这里先用 content-length 拦一道，超大响应不必等解码完才发现
+  //（chunked 响应没有该头，仍由第 10 步兜住）
+  const declaredLength = Number(response.headers.get("content-length") ?? "");
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) {
+    await response.body?.cancel().catch(() => {});
+    return err(
+      t("editorData.errTooLarge", {
+        bytes: declaredLength,
+        max: MAX_RESPONSE_BYTES,
+      }),
+    );
+  }
   let data: unknown;
   try {
     data = await response.json();

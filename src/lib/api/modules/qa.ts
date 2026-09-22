@@ -79,6 +79,13 @@ interface BackendAnswer {
   created_at: string;
 }
 
+/** 详情端点比列表多出的字段：原先在两处（mapDetail 入参与 getQuestion 的泛型）各内联一遍，易漂移 */
+interface BackendQuestionDetail extends BackendQuestion {
+  situation: string;
+  images: string[];
+  answers: BackendAnswer[];
+}
+
 function mapAnswer(a: BackendAnswer): QaAnswer {
   return {
     id: a.id,
@@ -108,13 +115,7 @@ function mapQuestion(b: BackendQuestion): QuestionSummary {
   };
 }
 
-function mapDetail(
-  b: BackendQuestion & {
-    situation: string;
-    images: string[];
-    answers: BackendAnswer[];
-  },
-): QuestionDetail {
+function mapDetail(b: BackendQuestionDetail): QuestionDetail {
   return {
     ...mapQuestion(b),
     situation: b.situation,
@@ -144,13 +145,9 @@ export const qaApi = {
 
   /** 提问详情。 */
   async getQuestion(id: string): Promise<QuestionDetail | null> {
-    const res = await get<
-      BackendQuestion & {
-        situation: string;
-        images: string[];
-        answers: BackendAnswer[];
-      }
-    >(`/api/v1/content/qa/questions/${id}`);
+    const res = await get<BackendQuestionDetail>(
+      `/api/v1/content/qa/questions/${id}`,
+    );
     if (res.isErr()) return null;
     return mapDetail(res.value);
   },

@@ -41,6 +41,8 @@ const loading = ref(true);
 // 卸载后请求才返回时不能再建图表：onBeforeUnmount 已经 dispose，
 // 这里再 init 会在已脱离文档的元素上留下一个永不释放的 ECharts 实例
 let disposed = false;
+// ECharts canvas 只在 init 时按容器尺寸定尺：后台侧边栏折叠/窗口缩放都不会自适应
+let resizeObserver: ResizeObserver | null = null;
 
 function render(opt: EChartsCoreOption) {
   if (disposed || !el.value) return;
@@ -81,6 +83,10 @@ onMounted(async () => {
         },
       ],
     });
+    if (el.value) {
+      resizeObserver = new ResizeObserver(() => chart.value?.resize());
+      resizeObserver.observe(el.value);
+    }
   } catch (e) {
     if (!disposed)
       error.value = e instanceof Error ? e.message : t("admin.loadFailed");
@@ -91,6 +97,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   disposed = true;
+  resizeObserver?.disconnect();
+  resizeObserver = null;
   chart.value?.dispose();
   chart.value = null;
 });
@@ -100,6 +108,6 @@ onBeforeUnmount(() => {
   <div>
     <div v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</div>
     <div v-if="loading" class="h-72 animate-pulse bg-card-bg rounded-xl" />
-    <div v-else ref="el" class="h-72 w-full" />
+    <div v-else-if="!error" ref="el" class="h-72 w-full" />
   </div>
 </template>

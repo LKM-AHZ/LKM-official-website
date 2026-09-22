@@ -1,6 +1,10 @@
 /**
  * 板块分类数据 — 基于现有 QQ 群数据结构映射
  * 用户可见字段（name/description）已替换为 i18n key，渲染时需用 t(field) 显示。
+ *
+ * ⚠️ memberCount / postCount / todayPostCount 是占位种子数据，不是真实统计：
+ * 多个板块（physics 与 cosmos-astronomy、psychology 与 earth-science 等）刻意共用同一组数字，
+ * 真实数值应来自后端统计接口，勿据此判断数据异常或据此做展示决策。
  */
 
 export interface ForumCategory {
@@ -583,7 +587,9 @@ export function getChildCategories(parentId: string): ForumCategory[] {
 const CATEGORY_BY_SLUG = new Map<string, ForumCategory>();
 for (const c of forumCategories) {
   if (CATEGORY_BY_SLUG.has(c.slug) && import.meta.env.DEV) {
-    console.warn(`[forum] 分类 slug 重复：${c.slug}（查找只会命中先出现的那个）`);
+    console.warn(
+      `[forum] 分类 slug 重复：${c.slug}（查找只会命中先出现的那个）`,
+    );
   }
   CATEGORY_BY_SLUG.set(c.slug, c);
 }

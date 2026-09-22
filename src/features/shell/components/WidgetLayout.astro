@@ -11,19 +11,24 @@ interface Props {
   class?: string;
   style?: string;
 }
-const { id, name, isCollapsed, collapsedHeight, style } = Astro.props;
+// collapsedHeight 给默认值：缺省时 height: var(--collapsed-height) 是无效声明，
+// 正文不会被裁却仍渲染「展开」按钮，状态自相矛盾
+const { id, name, isCollapsed, collapsedHeight = '7.5rem', style } = Astro.props;
 const className = Astro.props.class;
+// 自定义属性挂在实例自身（而不是用 define:vars）：define:vars 会写到 :root，
+// 多实例时互相覆盖，且会让样式表脱离组件作用域变成全局选择器
+const hostStyle = `--collapsed-height:${collapsedHeight};${style ?? ''}`;
 ---
 
 <widget-layout
   data-id={id}
-  data-is-collapsed={String(isCollapsed)}
+  data-is-collapsed={String(Boolean(isCollapsed))}
   class={twMerge(
     'pb-4',
     'bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none',
     className
   )}
-  style={style}
+  style={hostStyle}
 >
   <div
     class="font-bold transition text-lg text-text-muted-900 dark:text-text-muted-100 relative ml-8 mt-4 mb-2
@@ -32,13 +37,17 @@ const className = Astro.props.class;
   >
     {name}
   </div>
-  <div id={id} class:list={['collapse-wrapper px-4 overflow-hidden', { collapsed: isCollapsed }]}>
+  <div
+    id={id}
+    inert={isCollapsed}
+    class:list={['collapse-wrapper px-4 overflow-hidden', { collapsed: isCollapsed }]}
+  >
     <slot />
   </div>
   {
     isCollapsed && (
       <div class="expand-btn px-4 -mb-2">
-        <button class="btn-plain rounded-lg w-full h-9">
+        <button type="button" aria-controls={id} aria-expanded="false" class="btn-plain rounded-lg w-full h-9">
           <div class="text-primary flex items-center justify-center gap-2 -translate-x-2">
             <Icon name="material-symbols:more-horiz" class="text-[1.75rem]" /> {t('common.more')}
           </div>
@@ -48,17 +57,21 @@ const className = Astro.props.class;
   }
 </widget-layout>
 
-<style define:vars={{ collapsedHeight }}>
-  .collapsed {
-    height: var(--collapsedHeight);
+<style>
+  .collapse-wrapper.collapsed {
+    height: var(--collapsed-height);
   }
 </style>
 
 <script>
   class WidgetLayout extends HTMLElement {
-    constructor() {
-      super();
+    // connectedCallback 会在节点被移动/重新插入时再次触发，用标记避免重复绑定
+    wired = false;
 
+    connectedCallback() {
+      // DOM 读取与事件绑定必须在这里而不是 constructor：构造函数可能在子节点尚未
+      // 解析时（元素升级瞬间）执行，那时 querySelector 拿不到按钮与正文
+      if (this.wired) return;
       if (this.dataset.isCollapsed !== 'true') return;
 
       // 用结构选择器而非 `#${id}`：id 含 CSS 特殊字符时 querySelector 会抛 SyntaxError，
@@ -66,8 +79,14 @@ const className = Astro.props.class;
       const btn = this.querySelector<HTMLElement>(':scope > .expand-btn');
       const wrapper = this.querySelector<HTMLElement>(':scope > .collapse-wrapper');
       if (!btn || !wrapper) return;
+      this.wired = true;
       btn.addEventListener('click', () => {
         wrapper.classList.remove('collapsed');
+        // 收起态还有两处标记要一起撤掉：inert（否则展开后内容仍不可聚焦）
+        // 与 aria-expanded/data-is-collapsed（否则读屏与外部消费者一直读到「已收起」）
+        wrapper.removeAttribute('inert');
+        btn.setAttribute('aria-expanded', 'true');
+        this.dataset.isCollapsed = 'false';
         btn.classList.add('hidden');
       });
     }

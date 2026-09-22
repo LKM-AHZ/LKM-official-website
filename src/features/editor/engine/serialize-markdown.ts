@@ -187,7 +187,9 @@ function renderTable(rows: JSONContent[]): string {
   // 单元格里的 `|` 会截断行、换行会破坏表格结构，故先转义再拼；
   // 列数一律按表头对齐（多则截断、少则补空），否则整行错位
   const renderCell = (cell: JSONContent): string =>
-    renderInline(cell.content ?? "")
+    // 兜底必须是 [] 而不是 ""：renderInline 要的是节点数组，空串没有 .map，
+    // 空单元格（无 content）会让导表整个抛 TypeError
+    renderInline(cell.content ?? [])
       .replace(/\|/g, "\\|")
       .replace(/\r?\n/g, " ")
       .trim();

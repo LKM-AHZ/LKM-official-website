@@ -12,7 +12,10 @@ export type ClassMap = Record<string, string>;
 
 // 同时供 Button.astro 的 <a> 与 <button> 两个分支使用：先把 a 原生的 type（链接资源 MIME）
 // omit 掉，再声明按钮语义的 type，避免用不相关语义覆盖同名原生属性
-export interface CallToAction extends Omit<HTMLAttributes<"a">, "slot" | "type"> {
+export interface CallToAction extends Omit<
+  HTMLAttributes<"a">,
+  "slot" | "type"
+> {
   variant?: "primary" | "secondary" | "tertiary" | "link";
   text?: string;
   icon?: string;

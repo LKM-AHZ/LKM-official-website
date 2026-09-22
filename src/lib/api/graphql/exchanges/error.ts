@@ -4,9 +4,20 @@ import { clearHttpSession, refreshSession } from "~/lib/http/client";
 // 循环依赖安全：graphqlClient 仅在异步刷新回调内访问，模块求值阶段不触碰
 import { graphqlClient } from "../client";
 
+/**
+ * 判定是否为 HTTP 401。
+ *
+ * 实测（@urql/core 6.0.3，构造一个返回 401 的 fetch 后观察 OperationResult.error）：
+ * 非 2xx 响应得到的是 `CombinedError{ response, graphQLErrors }`，**networkError 为 undefined**，
+ * 状态码只挂在 `error.response.status` 上。原先只读 networkError.status 时该判定恒为 false，
+ * 401 的自动刷新分支从未执行过；两个位置都读才能同时覆盖「HTTP 非 2xx」与「transport 层错误」。
+ */
 function isUnauthorized(error: unknown): boolean {
-  const netErr = error as { networkError?: { status?: number } };
-  return netErr?.networkError?.status === 401;
+  const err = error as {
+    networkError?: { status?: number };
+    response?: { status?: number };
+  };
+  return (err?.networkError?.status ?? err?.response?.status) === 401;
 }
 
 /**

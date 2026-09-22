@@ -61,14 +61,12 @@ describe("BindMethods", () => {
   });
 
   it("未绑定时展示「绑定」按钮并可发起邮箱绑定", async () => {
-    const requestSpy = vi
-      .spyOn(authApi, "bindEmailRequest")
-      .mockResolvedValue(
-        ok({
-          message: "code sent",
-          record_id: "00000000-0000-7000-8000-000000000001",
-        }) as never,
-      );
+    const requestSpy = vi.spyOn(authApi, "bindEmailRequest").mockResolvedValue(
+      ok({
+        message: "code sent",
+        record_id: "00000000-0000-7000-8000-000000000001",
+      }) as never,
+    );
     const w = mount(BindMethods, {
       props: { user: makeUser() as never },
     });

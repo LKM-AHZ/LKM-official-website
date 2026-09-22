@@ -9,6 +9,7 @@ export const en = {
     back: "Back",
     more: "More",
     loading: "Loading...",
+    loadError: "Failed to load, please try again later",
     viewAll: "View all",
     search: "Search",
     submit: "Submit",
@@ -193,6 +194,10 @@ export const en = {
   blog: {
     tags: "Tags",
     categories: "Categories",
+    categoryLabel: "View all posts in the {name} category",
+    tagLabel: "View all posts with the {name} tag",
+    bannerAlt: "Banner image of the blog",
+    imageSourceLabel: "Visit image source",
     recentPosts: "Recent Posts",
     rssSubscribe: "RSS",
     collapse: "Collapse",
@@ -1039,6 +1044,7 @@ export const en = {
     system: "System",
     resetToDefault: "Reset to Default",
     lightDarkMode: "Light/Dark Mode",
+    toggleMode: "Toggle between Dark and Light mode",
     displaySettings: "Display Settings",
   },
 
@@ -1244,6 +1250,7 @@ export const en = {
       githubUnavailable:
         "This login method is being connected to the backend and is temporarily unavailable",
       githubComingSoon: "Coming soon",
+      passkeyComingSoon: "Coming soon",
       githubCancelled: "Authorization cancelled, please try again",
       passkeyUnavailable:
         "This login method is being connected to the backend and is temporarily unavailable",
@@ -1375,6 +1382,8 @@ export const en = {
       sendCode: "Send verification code",
       codeSentEmail: "Verification code sent to your email",
       codeSentPhone: "Verification code sent to your phone",
+      resend: "Resend verification code",
+      resendCountdown: "Resend in {seconds}s",
       code: "Verification code",
       codePlaceholder: "Enter verification code",
       verifyAndFinish: "Verify and finish sign-up",
@@ -2200,6 +2209,7 @@ export const en = {
       title: "Forum",
       subtitle: "Pick a topic and join the discussion!",
       members: "members",
+      subBoards: "sub-boards",
       posts: "posts",
       postsShort: "posts",
       todayPosts: "Today {count}",
@@ -2329,6 +2339,8 @@ export const en = {
       trueFalse: "True/False",
       answer: "Answer:",
       explanation: "Explanation:",
+      noQuestions: "No questions match the current filter",
+      noCompetitions: "No competitions available yet",
     },
     fileLibrary: {
       title: "File Library",
@@ -2352,6 +2364,9 @@ export const en = {
       downloadCount: "{count} downloads",
       view: "View",
       viewDetails: "View details →",
+      preview: "Preview",
+      download: "Download",
+      selectedFile: "Selected: {name} ({size})",
       noMatchingFiles: "No files match your criteria",
       uploadTitle: "Upload File",
       uploadDropHint: "Click or drag files here",
@@ -2788,6 +2803,14 @@ export const en = {
       backHome: "Back to Home",
     },
 
+    serverError: {
+      title: "Server Error",
+      error: "Error",
+      message: "Sorry, something went wrong on our end.",
+      hint: "Please try again later, or head back to the homepage.",
+      backHome: "Back to Home",
+    },
+
     official: {
       anonymous: "Anonymous member",
 
@@ -3088,6 +3111,7 @@ export const en = {
         edit: "Edit",
         delete: "Delete",
         disable: "Disable",
+        empty: "No categories yet",
       },
       files: {
         title: "File Review",
@@ -3133,6 +3157,7 @@ export const en = {
         metaDescription: "LKM Admin — Document List",
         title: "Document Management",
         searchPlaceholder: "Search documents...",
+        statusFilter: "Filter by status",
         all: "All",
         draft: "Draft",
         published: "Published",
@@ -3603,6 +3628,7 @@ export const en = {
     cancel: "Cancel",
     confirm: "Confirm",
     delete: "Delete",
+    copyFailed: "Copy failed",
     loadingEditor: "Loading editor...",
     retryingEditor: "Retrying editor load... ({retries}/{total})",
     editorLoadRetryNotice: "Editor load failed, retrying...",

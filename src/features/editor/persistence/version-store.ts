@@ -62,9 +62,18 @@ export function saveVersion(
       createdAt: new Date().toISOString(),
     };
 
+    // 同一 doc.version 重复保存（写失败后重试、或版本号没被推进）必须先删旧条目：
+    // getVersion 只取第一个匹配项，留着旧条目会让「恢复版本」拿到过期的那份内容
+    const existingIndex = versions.findIndex((v) => v.version === doc.version);
+    if (existingIndex !== -1) versions.splice(existingIndex, 1);
+
     versions.unshift(entry);
 
     if (versions.length > MAX_VERSIONS) {
+      // 截断会丢历史：留一条痕迹，否则用户与排查者都无从得知更早的版本已被丢弃
+      console.warn(
+        `[version-store] 版本数超过上限 ${MAX_VERSIONS}，丢弃最旧版本`,
+      );
       versions.length = MAX_VERSIONS;
     }
 

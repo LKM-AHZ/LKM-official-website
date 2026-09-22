@@ -3,6 +3,8 @@ import { Icon } from 'astro-icon/components';
 import { Button, Headline, WidgetWrapper } from '~/components/primitives';
 import type { Pricing as Props } from '~/types/core';
 
+// 注意：price 可能是数字 0（免费档），模板里必须显式判 null/undefined/空串而不能用真值判断，
+// 否则整张价格卡会被静默丢掉
 const {
   title = '',
   subtitle = '',
@@ -24,7 +26,7 @@ const {
         prices &&
           prices.map(({ title: planTitle, subtitle: planSubtitle, price, period, items, callToAction, hasRibbon = false, ribbonTitle }) => (
             <div class="col-span-3 mx-auto flex w-full sm:col-span-1 md:col-span-1 lg:col-span-1 xl:col-span-1 ">
-              {price && period && (
+              {price !== null && price !== undefined && price !== '' && period && (
                 <div class="relative rounded-[12px] bg-page-bg border border-surface-3 px-6 py-8 flex w-full max-w-sm flex-col justify-between text-center card-hover">
                   {hasRibbon && ribbonTitle && (
                     <div class="absolute right-[-5px] 2xl:right-[-8px] rtl:right-auto rtl:left-[-8px] rtl:2xl:left-[-10px] top-[-5px] 2xl:top-[-10px] z-[1] h-[100px] w-[100px] overflow-hidden text-right">

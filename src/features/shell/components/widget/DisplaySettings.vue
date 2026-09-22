@@ -9,9 +9,19 @@ import { getDefaultHue, getHue, setHue } from "~/lib/utils/setting-utils";
 const hue = ref(250);
 const defaultHue = ref(250);
 
+// 挂载时用存储/站点默认值回填 hue 也会触发下面的 watcher：不加标记就会把「站点默认色相」
+// 当成用户选择写进 localStorage，此后 siteConfig.themeColor.hue 再改也带不动这批用户。
+// 必须用 flush: 'sync' 让 watcher 在赋值当场同步执行，标记才来得及生效
+let hydrating = true;
+
 onMounted(() => {
-  hue.value = getHue();
+  try {
+    hue.value = getHue();
+  } catch (e) {
+    console.warn("[display] 读取色相失败", e);
+  }
   defaultHue.value = getDefaultHue();
+  hydrating = false;
 });
 
 function resetHue() {
@@ -19,11 +29,20 @@ function resetHue() {
   hue.value = defaultHue.value;
 }
 
-watch(hue, (val) => {
-  if (val !== undefined) {
-    setHue(val);
-  }
-});
+watch(
+  hue,
+  (val) => {
+    if (hydrating || val === undefined) return;
+    // 隐私模式/禁用 Cookie 下 localStorage 读写会抛 SecurityError，
+    // 从 watcher 里逃逸就是未捕获异常，且拖动滑杆会反复触发
+    try {
+      setHue(val);
+    } catch (e) {
+      console.warn("[display] 保存色相失败", e);
+    }
+  },
+  { flush: "sync" },
+);
 </script>
 
 <template>
@@ -38,6 +57,7 @@ watch(hue, (val) => {
         {{ t("theme.color") }}
         <button
           :aria-label="t('theme.resetToDefault')"
+          :disabled="hue === defaultHue"
           class="btn-regular w-7 h-7 rounded-md active:scale-90 will-change-transform"
           :class="{ 'opacity-0 pointer-events-none': hue === defaultHue }"
           @click="resetHue"

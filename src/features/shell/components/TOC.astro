@@ -96,6 +96,17 @@ const maxLevel = siteConfig.toc.depth;
 }
 
 <script>
+  // decodeURIComponent 遇到畸形百分号转义（标题含裸 `%`，如 "完成度 100%"）会抛 URIError：
+  // 在点击处理器里抛出会静默中断锚点跳转，在 init() 里抛出更会让整个 TOC 初始化中止
+  function safeDecodeHash(hash: string | undefined): string {
+    if (!hash) return '';
+    try {
+      return decodeURIComponent(hash.substring(1));
+    } catch {
+      return '';
+    }
+  }
+
   class TableOfContents extends HTMLElement {
     tocEl: HTMLElement | null = null;
     visibleClass = 'visible';
@@ -220,7 +231,7 @@ const maxLevel = siteConfig.toc.depth;
       const anchor = event.composedPath().find((element) => element instanceof HTMLAnchorElement);
 
       if (anchor) {
-        const id = decodeURIComponent(anchor.hash?.substring(1));
+        const id = safeDecodeHash(anchor.hash);
         const idx = this.headingIdxMap.get(id);
         if (idx !== undefined) {
           this.anchorNavTarget = this.headings[idx];
@@ -278,7 +289,7 @@ const maxLevel = siteConfig.toc.depth;
       this.sections = new Array(this.tocEntries.length);
       this.headings = new Array(this.tocEntries.length);
       for (let i = 0; i < this.tocEntries.length; i++) {
-        const id = decodeURIComponent(this.tocEntries[i].hash?.substring(1));
+        const id = safeDecodeHash(this.tocEntries[i].hash);
         const heading = document.getElementById(id);
         const section = heading?.parentElement;
         if (heading instanceof HTMLElement && section instanceof HTMLElement) {
@@ -298,7 +309,11 @@ const maxLevel = siteConfig.toc.depth;
     disconnectedCallback(): void {
       this.sections.forEach((section) => this.observer.unobserve(section));
       this.observer.disconnect();
-      this.tocEl?.removeEventListener('click', this.handleAnchorClick);
+      // 必须带同样的 capture 选项：removeEventListener 只匹配注册时相同的 capture 值，
+      // 否则每次重新连接（Swup 换页）都会残留一个捕获阶段处理器及其持有的 this
+      this.tocEl?.removeEventListener('click', this.handleAnchorClick, {
+        capture: true,
+      });
     }
   }
 

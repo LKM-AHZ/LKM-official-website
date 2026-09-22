@@ -19,6 +19,7 @@ const RawMdxPlaceholder = memo(function RawMdxPlaceholder({
   getPos,
 }: RawMdxPlaceholderProps) {
   const [showSource, setShowSource] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const source = (node.attrs.source as string) ?? "";
   const sourceKind = (node.attrs.sourceKind as string) ?? "flow";
   const truncatedSource =
@@ -40,8 +41,11 @@ const RawMdxPlaceholder = memo(function RawMdxPlaceholder({
   const handleCopy = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(source);
+      setCopyFailed(false);
     } catch (err) {
+      // 仓库没有 toast 基建：只用按钮自身文案暴露失败，否则复制失败是静默的
       console.warn("[RawMdxPlaceholder] 剪贴板操作失败:", err);
+      setCopyFailed(true);
     }
   };
 
@@ -96,7 +100,7 @@ const RawMdxPlaceholder = memo(function RawMdxPlaceholder({
           className="rte-btn rte-btn--ghost rte-btn--xs"
           onClick={handleCopy}
         >
-          {t("editor.rawMdx.copy")}
+          {t(copyFailed ? "editor.copyFailed" : "editor.rawMdx.copy")}
         </button>
         <button
           type="button"

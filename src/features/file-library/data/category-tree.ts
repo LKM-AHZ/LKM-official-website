@@ -136,13 +136,16 @@ export function getCategoryPath(id: string): FileCategory[] {
   const path: FileCategory[] = [];
   let current: FileCategory | undefined = getCategory(id);
   const seen = new Set<string>();
-  while (current && !seen.has(current.id)) {
+  while (current) {
+    if (seen.has(current.id)) return []; // 数据成环：回退到根
     seen.add(current.id);
     path.unshift(current);
-    current =
-      current.parentId === null ? undefined : getCategory(current.parentId);
+    if (current.parentId === null) return path; // 正常闭合到根节点
+    current = getCategory(current.parentId);
   }
-  return current ? [] : path; // 遇环或父缺省时返回空，回退到根
+  // 父链断裂（parentId 指向不存在的分类）也返回空：返回已累积的截断路径会让调用方
+  // 把「数学」当成根渲染出一段半截面包屑
+  return [];
 }
 
 /** 是否叶子：分类存在且无子分类。不存在的 id 返回 false，避免拼错的分类被当成可挂文件的叶子。 */
@@ -154,12 +157,20 @@ export function isLeaf(id: string): boolean {
 export function countFilesInCategory(
   id: string,
   files: { categoryId: string }[],
+  visited: Set<string> = new Set(),
 ): number {
+  // 树数据没有运行时校验，parentId 互指（成环）会让递归永不终止并爆栈：
+  // 与 getCategoryPath 一样用访问集合兜底，两个遍历助手行为保持一致
+  if (visited.has(id)) return 0;
+  visited.add(id);
   const direct = files.filter((f) => f.categoryId === id).length;
   const children = getChildren(id);
   if (children.length === 0) return direct;
   return (
     direct +
-    children.reduce((sum, c) => sum + countFilesInCategory(c.id, files), 0)
+    children.reduce(
+      (sum, c) => sum + countFilesInCategory(c.id, files, visited),
+      0,
+    )
   );
 }

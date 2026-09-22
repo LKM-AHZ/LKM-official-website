@@ -133,8 +133,8 @@ const links: NavBarLink[] = Astro.props.links;
       }
       <LightDarkSwitch client:load />
       <LanguageSwitcher client:load />
-      <NotificationBell client:load />
-      <UserAvatarMenu client:load base={url('/')} />
+      <NotificationBell client:idle />
+      <UserAvatarMenu client:idle base={url('/')} />
       <button
         aria-label="Menu"
         name="Nav Menu"
@@ -148,7 +148,7 @@ const links: NavBarLink[] = Astro.props.links;
         />
       </button>
     </div>
-    <DisplaySettings client:load />
+    <DisplaySettings client:idle />
   </div>
 </div>
 <!-- Extracted reference: src/features/shell/scripts/navbar.ts (navbar scripts) -->
@@ -287,11 +287,11 @@ const links: NavBarLink[] = Astro.props.links;
       set:html={`async function loadPagefind() {
     try {
         // eslint-disable-next-line no-restricted-globals
-        var response = await fetch('${url('/pagefind/pagefind.js')}', { method: 'HEAD' });
+        var response = await fetch(scriptUrl, { method: 'HEAD' });
         if (!response.ok) {
             throw new Error('Pagefind script not found: ' + response.status);
         }
-        var pagefind = await import('${url('/pagefind/pagefind.js')}');
+        var pagefind = await import(scriptUrl);
         await pagefind.options({ excerptLength: 20 });
         window.pagefind = pagefind;
         document.dispatchEvent(new CustomEvent('pagefindready'));

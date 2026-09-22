@@ -154,6 +154,11 @@ export interface BlogAboutInfo {
   content: string;
 }
 
+/**
+ * blog 模块的分页信封：page / page_size / total_pages。
+ * 与 api/types.ts 的 PaginatedResponse（items / total / page / pages）字段名不同，
+ * 是两套后端响应形状，不要合并成同一个类型（合并会丢掉 page_size 的语义）。
+ */
 export interface PaginatedData<T> {
   items: T[];
   total: number;

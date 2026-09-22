@@ -1,3 +1,7 @@
+// src/lib/api/modules/points.ts — 积分/打卡域 API。
+// 契约：所有方法返回 Result<T, AppError>（不抛异常，见 http/client 的「所有请求返回 Result」原则），
+// 字段为后端 snake_case 原样、不做 camelCase 映射，消费方需自行分支 isOk()/isErr() 处理错误。
+
 import { get, post } from "../../http/client";
 import type { PaginatedResponse } from "../types";
 

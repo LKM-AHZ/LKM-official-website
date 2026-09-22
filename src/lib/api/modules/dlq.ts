@@ -10,20 +10,19 @@ export type DlqStatus = "pending" | "requeued" | "discarded";
 export interface DlqMessageInfo {
   id: string;
   routing_key: string;
-  status: string;
+  /** 与 list(status) 共用同一联合，避免响应侧退化成裸 string 后与请求侧漂移 */
+  status: DlqStatus;
   attempts: number;
   reason: string | null;
   created_at: string | null;
   payload: unknown;
 }
 
-async function getJson(url: string): Promise<unknown> {
-  const res = await adminFetch(url);
-  const body = await readAdminResp(res);
-  return body.data;
-}
-
-async function sendJson(url: string, method: string): Promise<unknown> {
+/** 唯一的请求出口：GET 与 POST 只差 method，原先拆成的两个近乎相同的 helper 已合一 */
+async function request(
+  url: string,
+  method: "GET" | "POST" = "GET",
+): Promise<unknown> {
   const res = await adminFetch(url, { method });
   const body = await readAdminResp(res);
   return body.data;
@@ -31,7 +30,7 @@ async function sendJson(url: string, method: string): Promise<unknown> {
 
 export const dlqApi = {
   list: (status: DlqStatus = "pending") =>
-    getJson(`/api/v1/admin/dlq?status=${encodeURIComponent(status)}`).then(
+    request(`/api/v1/admin/dlq?status=${encodeURIComponent(status)}`).then(
       // 包络缺 data/items（空体、非 JSON、后端异常）时，原来是裸断言后直接取 .items，
       // 会抛 TypeError 或返回 undefined；这里退化成空列表
       (d) => {
@@ -40,7 +39,7 @@ export const dlqApi = {
       },
     ),
 
-  requeue: (id: string) => sendJson(`/api/v1/admin/dlq/${id}/requeue`, "POST"),
+  requeue: (id: string) => request(`/api/v1/admin/dlq/${id}/requeue`, "POST"),
 
-  discard: (id: string) => sendJson(`/api/v1/admin/dlq/${id}/discard`, "POST"),
+  discard: (id: string) => request(`/api/v1/admin/dlq/${id}/discard`, "POST"),
 };

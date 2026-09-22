@@ -215,7 +215,8 @@
               <div class="text-sm font-medium text-deep-text truncate">
                 {{ entry.display_name }}
               </div>
-              <div class="text-xs text-text-muted/60">
+              <!-- 后端未给称号时直接不渲染：动态拼接 key 会把原始 key 当文案显示出来 -->
+              <div v-if="entry.title" class="text-xs text-text-muted/60">
                 {{ t(`contributionData.leaderboard.titles.${entry.title}`) }}
               </div>
             </div>
@@ -375,9 +376,14 @@
                         class="h-full rounded-full bg-primary transition-all"
                         :style="{
                           width:
-                            (task.current_progress / task.requirement_count) *
-                              100 +
-                            '%',
+                            (task.requirement_count > 0
+                              ? Math.min(
+                                  100,
+                                  (task.current_progress /
+                                    task.requirement_count) *
+                                    100,
+                                )
+                              : 0) + '%',
                         }"
                       ></div>
                     </div>
@@ -435,9 +441,13 @@ const POINT_LOG_KEYS: Record<string, string> = {
 // 当前用户在排行榜上的称号查找（myUserId 就绪后调用）
 async function refreshMyTitle() {
   if (USE_MOCK_FALLBACK || myUserId.value === null) return;
-  const res = await pointsApi.getLeaderboard(leaderboardPeriod.value, 50);
+  // 固定发起时的周期：await 期间用户可能已切到别的周期，再读 .value 会把旧周期的
+  // 数据写进新周期的桶里（排行榜与称号都会错位）
+  const period = leaderboardPeriod.value;
+  const res = await pointsApi.getLeaderboard(period, 50);
+  if (period !== leaderboardPeriod.value) return; // 期间已切换：丢弃这次过期结果
   if (res.isOk()) {
-    leaderboardMap.value[leaderboardPeriod.value] = res.value.items;
+    leaderboardMap.value[period] = res.value.items;
     const me = res.value.items.find((e) => e.user_id === myUserId.value);
     // 即便当前周期不在榜（无 title），也标记为已查，避免反复重查
     myTitle.value = me?.title ?? "";
@@ -524,9 +534,11 @@ onMounted(async () => {
 // 公开端点：排行榜 + 兑换项（无需登录）
 async function loadPublic() {
   if (USE_MOCK_FALLBACK) return;
-  const lbRes = await pointsApi.getLeaderboard(leaderboardPeriod.value, 50);
-  if (lbRes.isOk()) {
-    leaderboardMap.value[leaderboardPeriod.value] = lbRes.value.items;
+  // 同 refreshMyTitle：周期在 await 期间可能已变，只有请求发出时的周期仍是当前周期才落库
+  const period = leaderboardPeriod.value;
+  const lbRes = await pointsApi.getLeaderboard(period, 50);
+  if (lbRes.isOk() && period === leaderboardPeriod.value) {
+    leaderboardMap.value[period] = lbRes.value.items;
     // 尝试在当前排行榜中定位当前用户以显示其称号
     // （首屏时 myUserId 可能尚未就绪，此处定位只是尽力而为，真正的 title 查找
     //   在 loadPrivate 赋值 myUserId 后经 refreshMyTitle 完成）
@@ -569,8 +581,9 @@ async function switchPeriod(p: "daily" | "weekly" | "total") {
   const res = await pointsApi.getLeaderboard(p, 50);
   if (res.isOk()) {
     leaderboardMap.value[p] = res.value.items;
-    // 切换周期时同步刷新当前用户在榜 title（myTitle 依赖 leaderboardPeriod）
-    if (myUserId.value !== null) {
+    // 切换周期时同步刷新当前用户在榜 title（myTitle 依赖 leaderboardPeriod）；
+    // 连续切换时慢响应后到，p 已不是当前周期，此时不能覆盖当前周期的称号
+    if (p === leaderboardPeriod.value && myUserId.value !== null) {
       const me = res.value.items.find((e) => e.user_id === myUserId.value);
       myTitle.value = me?.title ?? "";
     }

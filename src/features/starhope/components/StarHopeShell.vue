@@ -44,7 +44,11 @@ watch(
       await purgeLocalData();
       localStorage.setItem(LOCAL_OWNER_KEY, current);
     }
-    if (id) void pullAll();
+    // pullAll 只吞掉各 entity 的 Result 错误，IndexedDB 抛错（toArray/bulkPut 失败）仍会
+    // reject 整个 promise：这里是它唯一的调用点，不兜住就是未处理拒绝且用户毫无反馈
+    if (id) {
+      void pullAll().catch((e) => console.error("[starhope] 初始同步失败", e));
+    }
   },
   { immediate: true },
 );

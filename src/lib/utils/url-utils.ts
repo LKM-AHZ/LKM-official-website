@@ -1,10 +1,17 @@
 import { t } from "~/lib/i18n";
 import { buildUrl } from "./paths";
 
+/**
+ * 路径比较用的归一化：去掉首尾斜杠 + 忽略大小写。
+ * 大小写不敏感是**刻意**的：本站路由（blog/archive 等）由我们固定生成，
+ * 但地址栏手输、外链回跳可能带任意大小写，按大小写敏感比较会让导航高亮失效。
+ * 查询串/哈希不参与比较：该函数只用于判断「是不是同一个页面」。
+ */
+const normalizePath = (p: string): string =>
+  p.replace(/^\/+|\/+$/g, "").toLowerCase();
+
 export function pathsEqual(path1: string, path2: string): boolean {
-  const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
-  const normalizedPath2 = path2.replace(/^\/|\/$/g, "").toLowerCase();
-  return normalizedPath1 === normalizedPath2;
+  return normalizePath(path1) === normalizePath(path2);
 }
 
 export function getPostUrlBySlug(slug: string): string {

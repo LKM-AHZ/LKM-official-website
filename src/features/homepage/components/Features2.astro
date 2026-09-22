@@ -30,6 +30,9 @@ const {
 
 const isInline = variant === 'inline';
 
+// 两种变体的间距类必须各写在自己分支里：gap-8 与 gap-5/gap-6 互相冲突，
+// 同时出现时谁生效只取决于 Tailwind 产物的样式顺序，不可依赖
+
 const columnsClass =
   columns === 4
     ? 'lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2'
@@ -82,7 +85,7 @@ function itemContainerClass() {
 
   {
     items.length > 0 && (
-      <div class:list={['grid mx-auto gap-8 md:gap-y-12', isInline ? 'mt-12' : 'gap-5 md:gap-6 gap-x-8', columnsClass]}>
+      <div class:list={['grid mx-auto', isInline ? 'mt-12 gap-8 md:gap-y-12' : 'gap-5 md:gap-6 gap-x-8', columnsClass]}>
         {items.map(({ title: itemTitle, description, icon, callToAction }) => (
           <div class={itemContainerClass()}>
             <div class={isInline ? 'flex flex-row max-w-full sm:max-w-md' : ''}>
@@ -95,7 +98,7 @@ function itemContainerClass() {
                   ) : (
                     <img
                       src={icon || defaultIcon || ''}
-                      alt={itemTitle || 'Avatar'}
+                      alt=""
                       class="mb-6 w-12 h-12 rounded-full object-cover shadow-sm border border-surface-3"
                     />
                   )}

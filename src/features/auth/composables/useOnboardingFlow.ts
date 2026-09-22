@@ -72,6 +72,12 @@ export function useOnboardingFlow(
         return;
       }
       const res = r.value;
+      // get<T>() 只做 `ok(data as T)`，没有运行时校验：body 为空/形状不符时 res 可能是
+      // null 或非对象，直接取字段会抛 TypeError（本函数没有 catch，会冒成未处理拒绝）
+      if (!res || typeof res !== "object") {
+        setError();
+        return;
+      }
       if (res.completed) {
         completed.value = true;
         return;
@@ -84,7 +90,7 @@ export function useOnboardingFlow(
         if (
           Number.isInteger(numKey) &&
           numKey >= 1 &&
-          numKey <= 4 &&
+          numKey <= MAX_ONBOARDING_STEP &&
           data[key] &&
           typeof data[key] === "object"
         ) {
@@ -94,7 +100,9 @@ export function useOnboardingFlow(
       dataByStep.value = next;
       // 首个未完成步骤优先：后端回传的 step，否则退回到第 1 步
       const resume =
-        res.step >= 1 && res.step <= 4 ? (res.step as OnboardingStepNumber) : 1;
+        res.step >= 1 && res.step <= MAX_ONBOARDING_STEP
+          ? (res.step as OnboardingStepNumber)
+          : 1;
       step.value = resume;
     } finally {
       loading.value = false;
@@ -109,6 +117,16 @@ export function useOnboardingFlow(
     stepNum: number,
     data: Record<string, unknown>,
   ): Promise<boolean> {
+    // load() 对分步数据做了 1..MAX 的边界校验，这里同样要拦：越界/非整数会写进
+    // dataByStep 造出假步骤，还会把非法步骤号发给后端
+    if (
+      !Number.isInteger(stepNum) ||
+      stepNum < 1 ||
+      stepNum > MAX_ONBOARDING_STEP
+    ) {
+      setError();
+      return false;
+    }
     loading.value = true;
     error.value = null;
     try {
@@ -119,10 +137,17 @@ export function useOnboardingFlow(
       }
       dataByStep.value[stepNum] = data;
       const res = r.value;
-      if (res.step >= 1 && res.step <= 4) {
+      if (!res || typeof res !== "object") {
+        setError();
+        return false;
+      }
+      if (res.step >= 1 && res.step <= MAX_ONBOARDING_STEP) {
         step.value = res.step as OnboardingStepNumber;
       }
       completed.value = res.completed;
+      // 后端判定流程已完成时必须走 finish()（与 skipAll/markDone 一致）：否则调用方
+      // 照旧 goNext()，用户会停在一个已完成向导的更靠后的步骤上且永不跳转
+      if (completed.value) finish();
       return true;
     } finally {
       loading.value = false;

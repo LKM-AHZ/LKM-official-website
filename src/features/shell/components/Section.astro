@@ -1,6 +1,12 @@
 ---
 import { Headline, WidgetWrapper } from '~/components/primitives';
-import type { Features as Props } from '~/types/core';
+import type { Widget, Headline as HeadlineType } from '~/types/core';
+
+// 最小 props 契约（与 homepage/components/Section.astro 同口径）：此前直接复用 Features 作为 Props，
+// 声明了 items/columns/variant/image 等本包装件从不读取的字段，调用方传了也只会被静默丢弃
+interface Props extends Widget, Pick<HeadlineType, 'title' | 'subtitle' | 'tagline'> {
+  classes?: Widget['classes'];
+}
 
 const {
   title = await Astro.slots.render('title'),
@@ -25,7 +31,7 @@ const {
     : undefined}
   bg={bg}
 >
-  <Headline title={title} subtitle={subtitle} tagline={tagline} classes={classes?.headline as Record<string, string>} />
+  <Headline title={title} subtitle={subtitle} tagline={tagline} classes={classes?.headline} />
 
   <slot />
 </WidgetWrapper>

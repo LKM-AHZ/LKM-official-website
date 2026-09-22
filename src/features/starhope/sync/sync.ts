@@ -75,7 +75,9 @@ let _flushTimer: ReturnType<typeof setTimeout> | null = null;
 function scheduleFlush(): void {
   if (_flushTimer) clearTimeout(_flushTimer);
   _flushTimer = setTimeout(() => {
-    void flush();
+    // flush 只保证「推送成功才清 outbox」，IndexedDB 抛错时整个 promise 会 reject：
+    // 不兜住就是未处理拒绝（待推记录仍在 outbox，下次 enqueue 会重试，不丢数据）
+    void flush().catch((e) => console.warn("[starhope] flush 失败", e));
   }, 300);
 }
 

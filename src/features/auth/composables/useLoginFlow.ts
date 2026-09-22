@@ -168,7 +168,12 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
         setError(r.error);
         return;
       }
-      if (await handle2FARequirement(r.value, t("messages.auth.passkeyFirstTime2fa")))
+      if (
+        await handle2FARequirement(
+          r.value,
+          t("messages.auth.passkeyFirstTime2fa"),
+        )
+      )
         return;
       succeed();
     } catch (e) {

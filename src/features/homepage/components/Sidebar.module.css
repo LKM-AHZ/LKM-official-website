@@ -5,8 +5,11 @@
   width: 240px;
 }
 
+/* 收起态判定有两处：.collapsed（Sidebar.astro 的脚本始终与 html 标记同步切换）
+   与 html.sidebar-collapsed（BaseLayout 首帧内联脚本设置，首帧就靠它生效）。
+   html 侧选择器限定到本模块的 .shell，避免影响页面上任何其它带 data-sidebar 的节点。 */
 .shell:global(.collapsed),
-:global(html.sidebar-collapsed [data-sidebar]) {
+:global(html.sidebar-collapsed) .shell {
   width: 67px;
 }
 
@@ -17,7 +20,7 @@
   }
 
   .shell:global(.collapsed),
-  :global(html.sidebar-collapsed [data-sidebar]) {
+  :global(html.sidebar-collapsed) .shell {
     width: 50px;
     padding-left: 4px;
   }
@@ -53,12 +56,10 @@
     border-width: 2px;
   }
 
+  /* 收起态按钮本体宽 36px 且为圆形，给 svg 设 min-width 会盖过基础规则的 width:16px、
+     把箭头挤出中心；要放大点击区请改 .toggle 本体。 */
   .toggle {
     height: 32px;
-  }
-
-  .toggle svg {
-    min-width: 36px;
   }
 }
 
@@ -80,10 +81,17 @@
 /* ── 导航列表 ── */
 .nav {
   position: relative;
+  /* 72px = 顶部固定栏高度（与 Sidebar.astro 的 top-[72px] 成对）；
+     dvh 优先，移动端地址栏收起时 100vh 会算大导致列表底部被裁。 */
   height: calc(100vh - 72px);
+  height: calc(100dvh - 72px);
   list-style: none;
   margin: 0;
-  padding: 0;
+  /* 外层 shell 是 overflow-hidden：导航项多时必须自己能滚，
+     并在底部留出绝对定位的 .toggle（bottom:8px, 36px 高）的位置，否则末尾条目被压在按钮下 */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 0 52px;
 }
 
 .nav li {

@@ -157,6 +157,17 @@ function notImplemented<T>(endpoint: string): Result<T, AppError> {
   return err(new AppError(ErrorCode.UNKNOWN_ERROR, "待按需接入 GraphQL"));
 }
 
+/**
+ * 拆掉写接口的 {code,msg,data} 包络取 data。
+ * 原先把这段 match 在 put/publish/create/star 等 6 处各抄一遍，改包络语义时必然漏改。
+ */
+function unwrap<T>(r: Result<ApiResponse<T>, AppError>): Result<T, AppError> {
+  return r.match(
+    (v) => ok(v.data),
+    (e) => err(e),
+  );
+}
+
 /** 博客 REST API — 纯函数对象，不包含 Vue 响应式状态 */
 export const blogApi = {
   // ── 系列 ──
@@ -204,10 +215,7 @@ export const blogApi = {
       BLOG_API.files.put(seriesId, filepath),
       { content, message },
     );
-    return result.match(
-      (v) => ok(v.data),
-      (e) => err(e),
-    );
+    return unwrap(result);
   },
 
   publishSeriesFile: async (
@@ -219,10 +227,7 @@ export const blogApi = {
       BLOG_API.series.publish(seriesId),
       { filepath, override },
     );
-    return result.match(
-      (v) => ok(v.data),
-      (e) => err(e),
-    );
+    return unwrap(result);
   },
 
   // ── 评论 ──
@@ -240,12 +245,11 @@ export const blogApi = {
       BLOG_API.comments.create(seriesId),
       data,
     );
-    return result.match(
-      (value) => ok(value.data),
-      (e) => err(e),
-    );
+    return unwrap(result);
   },
 
+  // DELETE 契约：后端不返回可用 body（唯一有意义的信息是 HTTP 状态），故不像其它写方法那样
+  // 拆 {code,msg,data} 包络——调用方只需判断 Result 的 ok/err，不要读取 value
   deleteComment: (seriesId: string, commentId: string) =>
     del<null>(BLOG_API.comments.delete(seriesId, commentId)),
 
@@ -292,10 +296,7 @@ export const blogApi = {
     const result = await post<ApiResponse<BlogStarStatus>>(
       BLOG_API.star.toggle(seriesId),
     );
-    return result.match(
-      (value) => ok(value.data),
-      (e) => err(e),
-    );
+    return unwrap(result);
   },
 
   // ── 文章评论与点赞（/api/v1/articles/*）──
@@ -313,12 +314,10 @@ export const blogApi = {
       BLOG_API.articles.comments.create(slug),
       data,
     );
-    return result.match(
-      (value) => ok(value.data),
-      (e) => err(e),
-    );
+    return unwrap(result);
   },
 
+  // 同 deleteComment：DELETE 无可用 body，不拆包络
   deleteArticleComment: (commentId: string) =>
     del<null>(BLOG_API.articles.comments.delete(commentId)),
 
@@ -328,9 +327,6 @@ export const blogApi = {
     const result = await post<ApiResponse<ArticleLikeStatus>>(
       BLOG_API.articles.like(slug),
     );
-    return result.match(
-      (value) => ok(value.data),
-      (e) => err(e),
-    );
+    return unwrap(result);
   },
 };

@@ -291,6 +291,7 @@
                 >
                 <ConfirmDialog
                   :open="confirmLogout"
+                  danger
                   :title="t('settings.logoutTitle')"
                   :message="t('settings.logoutMessage')"
                   :confirm-text="t('settings.logoutTitle')"

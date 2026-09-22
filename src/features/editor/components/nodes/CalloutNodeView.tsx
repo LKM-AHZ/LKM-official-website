@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useRef } from "react";
 import type { Node } from "@tiptap/pm/model";
 import type { Editor } from "@tiptap/core";
 import { NodeViewWrapper } from "@tiptap/react";
-import { t } from "~/lib/i18n";
+import { t, type TranslationKey } from "~/lib/i18n";
 import CalloutView from "../shared/CalloutView";
 
 interface CalloutNodeViewProps {
@@ -15,18 +15,16 @@ interface CalloutNodeViewProps {
 const CALLOUT_TYPES = ["info", "warning", "error", "success"] as const;
 type CalloutType = (typeof CALLOUT_TYPES)[number];
 
-/** option 标签 key（值走 i18n 展示） */
-const TYPE_LABEL_KEYS: Record<string, string> = {
+/** option 标签 key（值走 i18n 展示）；按 CalloutType 收窄，键写错在编译期就被拦下 */
+const TYPE_LABEL_KEYS: Record<CalloutType, TranslationKey> = {
   info: "editor.callout.info",
   warning: "editor.callout.warning",
   error: "editor.callout.error",
   success: "editor.callout.success",
 };
 
-function typeLabel(type: string): string {
-  return t(
-    (TYPE_LABEL_KEYS[type] ?? "editor.callout.info") as Parameters<typeof t>[0],
-  );
+function typeLabel(type: CalloutType): string {
+  return t(TYPE_LABEL_KEYS[type]);
 }
 
 const CalloutNodeView = memo(function CalloutNodeView({
@@ -129,7 +127,7 @@ const CalloutNodeView = memo(function CalloutNodeView({
             value={ctype}
             onChange={(e) => updateAttributes({ type: e.target.value })}
           >
-            {Object.keys(TYPE_LABEL_KEYS).map((k) => (
+            {CALLOUT_TYPES.map((k) => (
               <option key={k} value={k}>
                 {typeLabel(k)}
               </option>

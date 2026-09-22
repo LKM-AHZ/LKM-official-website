@@ -101,13 +101,14 @@ function transformTags(md) {
       const rawAlign = parseAttr(attrsStr, "align");
       const align = FIGURE_ALIGNS.includes(rawAlign) ? rawAlign : "center";
       const src = parseAttr(attrsStr, "src");
+      const alt = parseAttr(attrsStr, "alt");
       const caption = parseAttr(attrsStr, "caption");
       const rawWidth = parseAttr(attrsStr, "width");
       // width 进入 style 属性，只接受纯数值，避免注入额外声明
       const width = /^\d+(\.\d+)?$/.test(rawWidth) ? rawWidth : "";
       const widthAttr = width ? ` style="width:${width}px"` : "";
       const img = src
-        ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(parseAttr(attrsStr, "alt"))}"${widthAttr} />`
+        ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"${widthAttr} />`
         : `<span class="lkm-figure-placeholder">暂无图片</span>`;
       const captionHtml = caption
         ? `<figcaption class="lkm-figure-caption">${escapeHtml(caption)}</figcaption>`

@@ -4,7 +4,9 @@ export interface MockNotification {
     "reply" | "like" | "follow" | "system" | "file_approved" | "file_rejected";
   title: string;
   content: string;
-  referenceType: string;
+  // 与 type 一样收敛为字面量联合：消费方可能据此解析跳转目标，拼错应在编译期报错
+  //（contribution 的 PointReferenceType 已是同一做法）
+  referenceType: "post" | "comment" | "user" | "file" | "competition";
   referenceId: string;
   isRead: boolean;
   createdAt: string;

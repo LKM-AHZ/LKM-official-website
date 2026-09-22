@@ -5,7 +5,9 @@
   --page-width: 1280px;
 
   /* 统一动画 Token */
-  --ease: var(--ease-out); /* 通用缓动：全站 transition 引用的 var(--ease) 此前未定义，整条 transition 声明会被判无效而静默失效 */
+  --ease: var(
+    --ease-out
+  ); /* 通用缓动：全站 transition 引用的 var(--ease) 此前未定义，整条 transition 声明会被判无效而静默失效 */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);

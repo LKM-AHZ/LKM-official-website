@@ -65,13 +65,29 @@ function openEdit(r: RuleInfo): void {
 }
 
 async function save(): Promise<void> {
+  // 按钮在 pattern 为空时是禁用的，这里只是回车/程序化调用的兜底
   if (!pattern.value.trim()) return;
+  if (isRegex.value) {
+    // 先在本地编译一次：非法模式交给后端只会拿到一个更晚的错误；同时避免把
+    // 连语法都不成立的正则发出去
+    try {
+      new RegExp(pattern.value.trim());
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : t("admin.loadFailed");
+      return;
+    }
+  }
+  // weight 的 min/max 只是 HTML 提示，非原生提交不会校验；v-model.number 还会给出
+  // ""/NaN。这里收敛到 [0,1]，异常值回落 0.5
+  const w = Number(weight.value);
   const input: RuleCreateInput = {
     pattern: pattern.value.trim(),
     is_regex: isRegex.value,
     action: action.value,
-    weight: weight.value,
+    weight: Number.isFinite(w) ? Math.min(1, Math.max(0, w)) : 0.5,
   };
+  error.value = "";
+  message.value = "";
   try {
     const result = await mfa.run(async () =>
       editing.value
@@ -91,6 +107,9 @@ async function save(): Promise<void> {
 
 async function removeRule(id: string): Promise<void> {
   deletingId.value = id;
+  // 清掉上一轮的结果横幅：否则旧的「已保存/已删除」会被当成本次操作的结果
+  error.value = "";
+  message.value = "";
   try {
     const result = await mfa.run(async () => moderationApi.deleteRule(id));
     if (result === null) return; // 用户取消 2FA
@@ -106,12 +125,15 @@ async function removeRule(id: string): Promise<void> {
 
 async function testRules(): Promise<void> {
   if (!testText.value.trim()) return;
+  error.value = "";
+  message.value = "";
   try {
     testResult.value = await mfa.run(async () =>
       moderationApi.testRule(testText.value),
     );
   } catch (e) {
-    message.value = e instanceof Error ? e.message : t("admin.loadFailed");
+    // 失败必须写 error：message 在模板里是绿色成功样式，错误串会以「成功」的样子展示
+    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
   }
 }
 
@@ -281,7 +303,8 @@ onMounted(() => void load());
         <div class="flex gap-2">
           <button
             type="button"
-            class="flex-1 px-4 py-2 rounded-lg text-sm bg-primary text-on-primary hover:bg-primary/90"
+            class="flex-1 px-4 py-2 rounded-lg text-sm bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40"
+            :disabled="!pattern.trim()"
             @click="save"
           >
             {{ t("admin.save") }}

@@ -7,9 +7,11 @@
  *
  * 免登链路（详见 LKM-service 的 `app/modules/admin/bot_router.py` 与 LKM-bot 的
  * `astrbot/dashboard/api/auth_sso.py`）：
- *   1. 本页在 **SSR 阶段**校验后台会话 cookie，无则直接跳登录页（服务端硬门禁，
- *      比 AdminLayout 的客户端软门禁更早生效）；
- *   2. 带 cookie 调 backend 换一张 60s 一次性票据；
+ *   1. 本页在 SSR 阶段先做一次**廉价预筛**：完全没有 cookie 才直接跳登录页。
+ *      注意 `getSsrCookie()` 返回整条 cookie 头，只能证明「带了些 cookie」（站点自己
+ *      就写 lkm-locale），**不是**会话有效性证明 —— 会话是否成立以第 2 步换票接口的
+ *      应答为准（该接口本身要求 admin 会话）；
+ *   2. 带 cookie 调 backend 换一张 60s 一次性票据；被拒（4xx）则跳登录页；
  *   3. iframe 指向面板的 `/api/v1/auth/sso?ticket=...&next=<hash 路由>`，面板验签后用面板
  *      自己的会话 cookie 落座，并 302 到 `#<hash 路由>`（URL 里不留票据）。
  *
@@ -18,6 +20,7 @@
  */
 import { getSsrCookie } from '~/lib/ssr-context';
 import { post } from '~/lib/http/client';
+import { ErrorCode } from '~/lib/errors/error-codes';
 
 interface Props {
   /** 面板内的 hash 路由（如 `/platforms`），作为登录后的落地页。 */
@@ -34,15 +37,32 @@ if (!getSsrCookie()) {
 const result = await post<{ ticket: string; expires_in: number }>(
   '/api/v1/admin/bot/sso-ticket',
 );
+
+if (result.isErr()) {
+  // 4xx = 后端已按后台会话判定请求不成立（换票接口要求 admin 会话）→ 按未登录处理，
+  // 而不是降级成「面板自己的登录页」。5xx/网络错误仍走降级，后端故障时不至于打不开页面。
+  if (result.error.code === ErrorCode.HTTP_CLIENT_ERROR) {
+    return Astro.redirect('/admin/login');
+  }
+  // 换票失败此前被静默吞成 undefined，线上只看到「面板要求手动登录」，无从判断坏在哪一步
+  console.error('[BotFrame] 换 SSO 票据失败，降级为无票 iframe:', result.error);
+}
+
 const ticket = result.isOk() ? result.value?.ticket : undefined;
 // 页面内嵌的是「按用户签发、一次性」的 SSO ticket：任何共享缓存/CDN 一旦缓存本页，
 // 就可能把 A 的 ticket 发给 B（重放/会话固定），故显式声明不可缓存。
 Astro.response.headers.set('Cache-Control', 'private, no-store');
+// 降级分支也带上 hashRoute：面板是 hash 路由的单页应用，能识别就直达用户点开的分区
+// （识别不了也只是落回默认页，无副作用）
 const iframeSrc = ticket
   ? `/bot/api/v1/auth/sso?ticket=${encodeURIComponent(ticket)}&next=${encodeURIComponent(hashRoute)}`
-  : '/bot/';
+  : `/bot/#${hashRoute}`;
 ---
 
+<!-- sandbox 的组合是**显式声明能力**，不是隔离边界：面板与本站同源，
+     allow-same-origin + allow-scripts 下被嵌文档本就能摘掉自己的 sandbox 属性并触达
+     父文档；反过来去掉 allow-same-origin 又会打断面板的同站会话 cookie（免登链路依赖它）。
+     真正的门禁是后端会话 + 一次性 SSO 票据，故保留该组合并在此说明意图。 -->
 <iframe
   src={iframeSrc}
   title={title}

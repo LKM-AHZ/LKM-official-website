@@ -61,13 +61,7 @@ onMounted(() => {
   // 清理 URL 中的敏感参数，避免 token 留在地址栏/历史记录。
   // 条件要覆盖 refresh_token / 2FA 标记（只有它们时同样敏感）；保留 search：
   // query 里可能有后端或代理附加的 redirect/state，直接丢掉会造成坏跳转
-  if (
-    token ||
-    refreshToken ||
-    tempToken ||
-    requires2FA ||
-    setupRequired
-  ) {
+  if (token || refreshToken || tempToken || requires2FA || setupRequired) {
     window.history.replaceState(
       {},
       "",

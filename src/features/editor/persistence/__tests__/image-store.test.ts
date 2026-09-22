@@ -3,6 +3,7 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import Dexie from "dexie";
 import {
+  BLOB_REF_PREFIX,
   collectImageSrcs,
   saveImageBlob,
   findImageByOrgName,
@@ -55,5 +56,7 @@ describe("image-store orgName 索引", () => {
 });
 
 function sortedPrefixRef(x: string | null): boolean {
-  return typeof x === "string" && x.startsWith("blob:");
+  // 引用前缀必须引用导出的常量：写死字面量会在前缀变更时静默失效
+  //（`blob:` 是原生 ObjectURL 的 scheme，已改用 `idb:`，见 image-store.ts 的说明）
+  return typeof x === "string" && x.startsWith(BLOB_REF_PREFIX);
 }

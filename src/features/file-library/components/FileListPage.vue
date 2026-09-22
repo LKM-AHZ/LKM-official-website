@@ -168,7 +168,7 @@
                     icon="material-symbols:visibility-outline"
                     class="w-3.5 h-3.5 inline -mt-0.5 mr-1"
                   />
-                  预览
+                  {{ t("community.fileLibrary.preview") }}
                 </button>
                 <button
                   type="button"
@@ -188,7 +188,7 @@
                   {{
                     downloading.has(file.id)
                       ? t("common.loading")
-                      : "下载"
+                      : t("community.fileLibrary.download")
                   }}
                 </button>
               </template>
@@ -299,9 +299,12 @@
               </p>
             </label>
             <p v-if="selectedFile" class="text-sm text-deep-text text-center">
-              已选择：{{ selectedFile.name }}（{{
-                formatSize(selectedFile.size)
-              }}）
+              {{
+                t("community.fileLibrary.selectedFile", {
+                  name: selectedFile.name,
+                  size: formatSize(selectedFile.size),
+                })
+              }}
             </p>
             <div>
               <label class="block text-sm font-medium text-deep-text mb-1">{{

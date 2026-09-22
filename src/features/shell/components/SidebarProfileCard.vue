@@ -67,6 +67,7 @@ const props = defineProps<{ username?: string }>();
 type UserCard = {
   nickname?: string | null;
   avatar?: string | null;
+  bio?: string | null;
   contact_links?: ContactLink[];
 } & {
   username: string;
@@ -79,11 +80,16 @@ const hasUserMode = computed(() => !!props.username);
 
 // 通用卡默认值 = 理科迷卡
 const displayName = computed(() =>
-  hasUserMode.value && user.value
-    ? user.value.nickname || user.value.username || "?"
+  hasUserMode.value
+    ? // 资料还没拉到/拉取失败时回退到「被请求的那个用户名」：原来直接落到 else 分支，
+      // 会把理科迷卡的身份显示在别人的资料卡上
+      user.value?.nickname || user.value?.username || props.username || "?"
     : profileConfig.name || "",
 );
-const bio = computed(() => (hasUserMode.value ? "" : profileConfig.bio || ""));
+// 用户模式原来恒为空串，getUserByUsername 返回的 bio 取了却从不渲染
+const bio = computed(() =>
+  hasUserMode.value ? user.value?.bio || "" : profileConfig.bio || "",
+);
 const links = computed(() =>
   hasUserMode.value ? user.value?.contact_links || [] : profileConfig.links,
 );
@@ -106,7 +112,7 @@ onMounted(async () => {
       user.value = { ...d, username: props.username };
     },
     () => {
-      /* user stays null → 回退理科迷卡 */
+      /* user stays null → 标题回退到 props.username（不再借用理科迷卡身份） */
     },
   );
 });

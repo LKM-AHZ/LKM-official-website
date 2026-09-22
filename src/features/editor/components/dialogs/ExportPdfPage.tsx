@@ -5,12 +5,10 @@ import { t } from "~/lib/i18n";
 
 interface ExportPdfPageProps {
   content: JSONContent[];
-  title?: string;
 }
 
 export default function ExportPdfPage({
   content,
-  title,
 }: ExportPdfPageProps): ReactElement {
   // 本组件每次导出只渲染一次，memo 无收益；且若调用方原地改动 content 数组/节点，
   // memo 的引用比较会命中旧缓存、导出漏掉最新改动。直接算。
@@ -20,7 +18,7 @@ export default function ExportPdfPage({
     <html>
       <head>
         <meta charSet="utf-8" />
-        <title>{title || t("editor.exportDocument")}</title>
+        <title>{t("editor.exportDocument")}</title>
         <style>{`
           @page {
             size: A4;

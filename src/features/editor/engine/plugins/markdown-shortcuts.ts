@@ -6,6 +6,20 @@
  * 与 @tiptap/extension-link 等 InputRule 并存。
  */
 
+/**
+ * 危险伪协议。href 会被 DocumentEditor.applyConvert 直接写进 link mark，
+ * 导出/渲染后就是可点击的伪协议链接（存储型 XSS）。
+ * 判定前先剔除控制字符与空白：浏览器解析 URL 时会丢弃它们，`java\tscript:` 否则能绕过。
+ */
+// eslint-disable-next-line no-control-regex -- 这里就是要匹配并剔除控制字符
+const CONTROL_CHARS = /[\u0000-\u0020\u007f-\u009f]/g;
+const DANGEROUS_SCHEME = /^(?:javascript|vbscript|data|file):/i;
+
+/** 只拦危险伪协议，其余（http(s)/协议相对/相对路径/锚点）原样放行，不误伤既有链接 */
+function safeHref(raw: string): string {
+  return DANGEROUS_SCHEME.test(raw.replace(CONTROL_CHARS, "")) ? "#" : raw;
+}
+
 /** 待转换候选：`from`/`to` 为文档字符串中的命中区间 */
 export interface Detected {
   from: number;
@@ -32,7 +46,9 @@ export function detectLink(text: string): Detected | null {
     from: fullStart + idx,
     to: text.length,
     kind: "link",
-    href: m[3],
+    // 调用方（DocumentEditor.applyConvert）会把它直接写进 link mark 的 href，
+    // 而 `[^()\s]+` 会连 javascript:/data: 一起放行 → 导出/渲染后是可点击的伪协议
+    href: safeHref(m[3]),
     label: m[2] ?? "",
   };
 }

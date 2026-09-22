@@ -117,6 +117,27 @@ export interface ContentCreateInput {
   is_featured?: boolean;
 }
 
+/**
+ * 统一分页信封映射：listItems / listComments 共用，默认值（尤其 pages）不会一处改一处漏。
+ * 两个后端分页对象字段名一致（items/total/page/pages），只是条目类型不同，故按 mapper 泛化。
+ */
+function mapPage<TIn, TOut>(
+  d: {
+    items?: TIn[];
+    total?: number;
+    page?: number;
+    pages?: number;
+  } | null,
+  mapper: (item: TIn) => TOut,
+): { items: TOut[]; total: number; page: number; pages: number } {
+  return {
+    items: (d?.items ?? []).map(mapper),
+    total: d?.total ?? 0,
+    page: d?.page ?? 1,
+    pages: d?.pages ?? 1,
+  };
+}
+
 /** 统一 GraphQL 错误 → AppError（区分网络层 vs GraphQL 业务错误） */
 function mapErr(
   error:
@@ -292,12 +313,7 @@ export const contentApi = {
       .toPromise();
     if (r.error) return err(mapErr(r.error));
     const d = r.data?.contentItems;
-    return ok({
-      items: (d?.items ?? []).map(mapItem),
-      total: d?.total ?? 0,
-      page: d?.page ?? 1,
-      pages: d?.pages ?? 1,
-    });
+    return ok(mapPage(d, mapItem));
   },
 
   /** 按 id 取内容详情 */
@@ -327,12 +343,7 @@ export const contentApi = {
       .toPromise();
     if (r.error) return err(mapErr(r.error));
     const d = r.data?.contentComments;
-    return ok({
-      items: (d?.items ?? []).map(mapComment),
-      total: d?.total ?? 0,
-      page: d?.page ?? 1,
-      pages: d?.pages ?? 1,
-    });
+    return ok(mapPage(d, mapComment));
   },
 
   // —— 以下写方法保留 REST ——

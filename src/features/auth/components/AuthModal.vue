@@ -37,17 +37,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, defineAsyncComponent } from "vue";
+import {
+  h,
+  ref,
+  onMounted,
+  onUnmounted,
+  defineAsyncComponent,
+  type FunctionalComponent,
+} from "vue";
 import { t } from "~/lib/i18n";
+
+// 子页 chunk 拉取失败时（弱网、部署后旧 chunk 失效）defineAsyncComponent 默认不渲染任何内容，
+// 模态里只剩一张空白卡片，用户既看不到原因也没有重试入口；给三个异步子页统一挂上失败文案 + 重试。
+const AsyncLoadError: FunctionalComponent<{ retry?: () => void }> = ({
+  retry,
+}) =>
+  h("div", { class: "p-8 text-center space-y-3" }, [
+    h("p", { class: "text-sm text-text-muted" }, t("common.loadError")),
+    h(
+      "button",
+      {
+        type: "button",
+        class: "btn btn-primary btn-sm",
+        onClick: () => retry?.(),
+      },
+      t("common.retry"),
+    ),
+  ]);
+
 // 三个认证子页改为异步组件：仅在模态打开时按需加载，
 // 避免登录/注册/找回把各自 JS 塞进全站每页的关键路径（首屏 TBT 成本）。
-const LoginPage = defineAsyncComponent(() => import("./login/LoginPage.vue"));
-const RegisterPage = defineAsyncComponent(
-  () => import("./register/RegisterPage.vue"),
-);
-const RecoveryPage = defineAsyncComponent(
-  () => import("./recovery/RecoveryPage.vue"),
-);
+const LoginPage = defineAsyncComponent({
+  loader: () => import("./login/LoginPage.vue"),
+  errorComponent: AsyncLoadError,
+});
+const RegisterPage = defineAsyncComponent({
+  loader: () => import("./register/RegisterPage.vue"),
+  errorComponent: AsyncLoadError,
+});
+const RecoveryPage = defineAsyncComponent({
+  loader: () => import("./recovery/RecoveryPage.vue"),
+  errorComponent: AsyncLoadError,
+});
 
 type View = "login" | "register" | "recovery";
 

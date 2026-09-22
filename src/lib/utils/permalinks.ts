@@ -11,8 +11,10 @@ import type { BuildPermalinkOptions } from "./paths";
 
 export { BLOG_BASE, CATEGORY_BASE, TAG_BASE };
 
+// 不加 `as string`：APP_BLOG 的类型（AppBlogConfig.post.permalink）本就是 string，
+// 断言在这里只会挡住「配置类型被改坏」的信号，配置组装点（config/site.ts:175）已做 ?? 兜底
 export const POST_PERMALINK_PATTERN = trimSlash(
-  (APP_BLOG?.post?.permalink as string) ?? `${BLOG_BASE}/%slug%`,
+  APP_BLOG.post.permalink ?? `${BLOG_BASE}/%slug%`,
 );
 
 export const getCanonical = (path = ""): string | URL => {

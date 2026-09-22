@@ -346,8 +346,7 @@ export const authApi = {
   },
 
   /** 读取头像图片 URL（GET 流式返回，未上传时为 404）。 */
-  getAvatarUrl: (userId: string): string =>
-    `/api/v1/auth/avatar/${userId}`,
+  getAvatarUrl: (userId: string): string => `/api/v1/auth/avatar/${userId}`,
 
   // ── 根据用户名获取用户信息（公开，无需登录） ──
   getUserByUsername: (username: string) =>

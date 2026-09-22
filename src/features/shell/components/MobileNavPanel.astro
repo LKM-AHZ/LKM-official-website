@@ -127,6 +127,8 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
       panelRoot.setAttribute('aria-hidden', 'false');
       overlay.classList.remove('opacity-0');
       panel.classList.remove('translate-x-full');
+      // 记下打开前的行内 overflow，关闭时还原：直接写 '' 会丢掉页面原有的值
+      panelRoot.dataset.navPrevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       document.body.classList.add(openClass);
     }
@@ -137,8 +139,15 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
 
       overlay.classList.add('opacity-0');
       panel.classList.add('translate-x-full');
-      document.body.style.overflow = '';
       document.body.classList.remove(openClass);
+      // 仍有别的面板开着就保持锁定；全关才还原，避免第二个面板/弹层还锁着时被提前解锁
+      let anyOpen = false;
+      document.querySelectorAll('[data-nav-panel]').forEach(function (p) {
+        if (!p.classList.contains('translate-x-full')) anyOpen = true;
+      });
+      if (!anyOpen) {
+        document.body.style.overflow = panelRoot.dataset.navPrevOverflow ?? '';
+      }
 
       setTimeout(function () {
         if (panel.classList.contains('translate-x-full')) {
@@ -192,7 +201,8 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
       panelRoot.querySelectorAll('[data-nav-accordion-trigger]').forEach(function (trigger) {
         trigger.addEventListener('click', function () {
           const arrow = trigger.querySelector('[data-nav-accordion-arrow]');
-          const content = trigger.nextElementSibling;
+          // 用显式 hook 而非 nextElementSibling：模板一旦在触发器与内容间插入节点就会静默失效
+          const content = trigger.parentElement?.querySelector('[data-nav-accordion-content]');
           if (!content) return;
           if (content.classList.contains('hidden')) {
             content.classList.remove('hidden');

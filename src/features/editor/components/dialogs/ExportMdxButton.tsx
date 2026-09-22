@@ -6,7 +6,7 @@ import { serializeMarkdown } from "../../engine/serialize-markdown";
 
 function getContent(editor: Editor): JSONContent[] {
   const json = editor.getJSON();
-  return (json?.content ?? []) as JSONContent[];
+  return json?.content ?? [];
 }
 
 function downloadText(text: string, extension: "md" | "mdx"): void {

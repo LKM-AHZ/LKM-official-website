@@ -132,8 +132,13 @@ function particleStyle(n) {
 }
 
 function formatTime(ts) {
-  const d = new Date(ts);
-  const diff = Date.now() - ts;
+  // 备份导入的数据里 createdAt 可能是 ISO 串或任意值：Date.parse 失败时原来会走进日期分支
+  // 渲染出 NaN/NaN，必须先在边界归一化
+  const time = typeof ts === "number" ? ts : Date.parse(String(ts));
+  if (!Number.isFinite(time)) return "";
+  const d = new Date(time);
+  // 时钟偏移（ts 在未来）时 diff 为负，Math.max 兜成 0 → 显示「刚刚」而不是负数的「-3 分钟前」
+  const diff = Math.max(0, Date.now() - time);
   if (diff < 60000) return t("treehole.letterCard.justNow");
   if (diff < 3600000)
     return t("treehole.letterCard.minutesAgo", {

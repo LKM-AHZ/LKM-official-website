@@ -74,16 +74,11 @@ const search = async (keyword: string, autoManaged: boolean): Promise<void> => {
   try {
     let searchResults: SearchResult[] = [];
 
-    if (
-      import.meta.env.PROD &&
-      pagefindLoaded.value &&
-      (window as Record<string, unknown>).pagefind
-    ) {
-      const response = await (
-        window as Record<string, unknown>
-      ).pagefind.search(keyword);
+    if (import.meta.env.PROD && pagefindLoaded.value && window.pagefind) {
+      const response = await window.pagefind.search(keyword);
+      // item.data() 的形状由 env.d.ts 的 Window.pagefind 声明，无需再断言
       searchResults = await Promise.all(
-        response.results.map((item: Record<string, unknown>) => item.data()),
+        response.results.map((item) => item.data()),
       );
     } else if (import.meta.env.DEV) {
       searchResults = fakeResult;
@@ -104,12 +99,12 @@ const search = async (keyword: string, autoManaged: boolean): Promise<void> => {
 };
 
 function initPagefind() {
-  if (initialized.value) return;
+  // 不能用 initialized 早退：pagefind 脚本可能晚于 2s 兜底定时器才就绪，
+  // 一旦提前置位、后面的 pagefindready 被早退挡掉，pagefindLoaded 就永远是 false，
+  // 之后每次输入都走空分支并刷 console.error（搜索永久失效且无用户可见反馈）。
+  // 本函数会被 pagefindready/pagefindloaderror/兜底定时器多次调用，只重算这两个状态即可
   initialized.value = true;
-  pagefindLoaded.value =
-    typeof window !== "undefined" &&
-    !!(window as Record<string, unknown>).pagefind &&
-    typeof (window as Record<string, unknown>).pagefind.search === "function";
+  pagefindLoaded.value = typeof window.pagefind?.search === "function";
 }
 
 onMounted(() => {

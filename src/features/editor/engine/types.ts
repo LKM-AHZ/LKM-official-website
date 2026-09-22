@@ -44,13 +44,8 @@ export interface AutosaveResponse {
   currentVersion?: number;
 }
 
-export interface DocumentVersion {
-  version: number;
-  contentMdx: string;
-  editorJson: Record<string, unknown>;
-  message: string;
-  createdAt: string;
-}
+/** 与 VersionEntry 同形（历史上重复声明过一份），收敛为别名以免两处各自漂移 */
+export type DocumentVersion = VersionEntry;
 
 export interface PublishPayload {
   title: string;
@@ -58,14 +53,9 @@ export interface PublishPayload {
   contentMdx: string;
 }
 
-// 索引概要：继承 DocumentMeta，自动获得 slug? 字段，使 listDocuments() 返回的索引可直接为 wiki 双链解析取 slug
-export interface DocumentSummary extends DocumentMeta {
-  id: string;
-  title: string;
-  lastModified: string;
-  status: "draft" | "published" | "archived";
-  version: number;
-}
+// 索引概要：与 DocumentMeta 同形（逐字段重复声明过一遍，基类加字段就会静默漂移），
+// 收敛为别名；slug? 本就由 DocumentMeta 提供，listDocuments() 的索引可直接为 wiki 双链解析取 slug
+export type DocumentSummary = DocumentMeta;
 
 export interface VersionEntry {
   version: number;

@@ -31,7 +31,13 @@
         </option>
       </select>
     </div>
-    <div class="space-y-3">
+    <p
+      v-if="filteredQuestions.length === 0"
+      class="text-center py-12 text-sm text-text-muted"
+    >
+      {{ t("community.competition.noQuestions") }}
+    </p>
+    <div v-else class="space-y-3">
       <div
         v-for="q in filteredQuestions"
         :key="q.id"

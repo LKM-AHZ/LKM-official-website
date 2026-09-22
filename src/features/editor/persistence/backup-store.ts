@@ -87,6 +87,11 @@ export async function saveBackup(
   }
 }
 
+/**
+ * 快照总量上限是**全局**的（所有文档共享 30 条），不是每文档 30 条：
+ * 这是刻意的存储上界，代价是文档多时会给别的文档腾位。要改成按文档保留，
+ * 需要先定「每文档保留多少条」的策略（总量会随之失去上界）。
+ */
 async function cleanOldSnapshots(db?: IDBDatabase): Promise<void> {
   const database = db || (await openDB());
   if (!database) return;
@@ -137,23 +142,34 @@ export async function getBackups(): Promise<Result<BackupMeta[], AppError>> {
       );
     const tx = db.transaction(STORE_NAME, "readonly");
     const store = tx.objectStore(STORE_NAME);
-    const request = store.getAll();
-    const results = await new Promise<BackupData[]>((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+    // 用游标逐条投影，而不是 getAll() 全量读进来再丢掉 contentMdx/editorJson：
+    // 列表视图只要 4 个字段，快照正文可能很大。主键取自 cursor.primaryKey（keyPath
+    // 自增，必然存在），不再对可选的 BackupData.id 做非空断言。
+    const metas: BackupMeta[] = [];
+    await new Promise<void>((resolve, reject) => {
+      const cursorReq = store.openCursor();
+      cursorReq.onerror = () => reject(cursorReq.error);
+      cursorReq.onsuccess = () => {
+        const cursor = cursorReq.result;
+        if (!cursor) {
+          resolve();
+          return;
+        }
+        const record = cursor.value as BackupData;
+        metas.push({
+          id: Number(cursor.primaryKey),
+          docId: record.docId,
+          title: record.title,
+          timestamp: record.timestamp,
+        });
+        cursor.continue();
+      };
     });
     return ok(
-      results
-        .sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-        )
-        .map((r) => ({
-          id: r.id!,
-          docId: r.docId,
-          title: r.title,
-          timestamp: r.timestamp,
-        })),
+      metas.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      ),
     );
   } catch (e) {
     console.warn("[backup-store] 读取备份列表失败:", e);
@@ -236,6 +252,13 @@ export function exportAllToJson(docs: BackupData[]): Result<string, AppError> {
   }
 }
 
+/** 导入条数上限（常量而非配置：没有按环境变化的理由）。备份文件完全不可信，
+ *  不设上限时一个超大 JSON 会把 IndexedDB 灌满。 */
+const MAX_IMPORT_ENTRIES = 500;
+
+/** 只接受 DocumentMeta 里定义的三种状态，其余一律回落 draft */
+const STATUS_VALUES = new Set(["draft", "published", "archived"]);
+
 export function importFromJson(json: string): Result<BackupData[], AppError> {
   try {
     const parsed = JSON.parse(json);
@@ -244,17 +267,30 @@ export function importFromJson(json: string): Result<BackupData[], AppError> {
         new AppError("IMPORT_FAILED", t("editor.backup.invalidJsonFormat")),
       );
     }
-    return ok(
-      parsed.map((item: Record<string, unknown>) => ({
-        docId: String(item.docId || ""),
-        title: String(item.title || ""),
-        contentMdx: String(item.contentMdx || ""),
+    // 导入的 JSON 来自用户手上的文件，不能只做 String()/Number() 转换就落库：
+    // 缺 docId 会变成 docId="" 的孤儿记录（恢复时找不到归属），Number("x") 会把
+    // version 写成 NaN 并原样持久化，status 也可能是任意串。故逐条校验：
+    // 无归属的条目直接跳过（部分导入优于整包失败），其余值收敛到已知的取值范围。
+    const entries: BackupData[] = [];
+    for (const item of parsed.slice(0, MAX_IMPORT_ENTRIES) as Array<
+      Record<string, unknown>
+    >) {
+      const docId = String(item.docId ?? "");
+      if (!docId) continue;
+      const version = Number(item.version);
+      const status = String(item.status ?? "draft");
+      entries.push({
+        docId,
+        title: String(item.title ?? ""),
+        contentMdx: String(item.contentMdx ?? ""),
         editorJson: item.editorJson ?? null,
-        status: String(item.status || "draft"),
-        version: Number(item.version || 1),
+        status: STATUS_VALUES.has(status) ? status : "draft",
+        version:
+          Number.isFinite(version) && version > 0 ? Math.floor(version) : 1,
         timestamp: String(item.timestamp || new Date().toISOString()),
-      })),
-    );
+      });
+    }
+    return ok(entries);
   } catch (e) {
     return err(
       new AppError(

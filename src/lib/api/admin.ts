@@ -4,12 +4,11 @@
 //  - 凭证只在 httpOnly cookie 中，前端 JS 不读不存 token；同域请求自动带 cookie。
 //  - 统一使用"单一守卫 + 防重入"：401/403 只由守卫跳一次 /admin/login，
 //    避免并发多请求同时 401 时重复跳转；登录页自身不再跳登录，防止死循环。
-//  - 后端 admin router prefix="/admin"，经 src/middleware.ts 代理为 /api/v1/admin/...
-//    （middleware 已代理 /api 开头），故这里请求 `/admin/...` 即可。
 //  - 底层走 src/lib/api/fetch.ts 的 apiFetch（统一 base URL + timeout + Result），
 //    符合仓库"不直接调 fetch"的约束。
 //  - 路径前缀用 /api/v1/admin：src/middleware.ts 只代理 /api/ 开头并**原样转发**路径，
 //    与仓库其余调用一致（如 /api/v1/admin/content/items），cookie Path=/api/v1/admin 也与之匹配。
+//    （原先这里另有一句「故请求 /admin/... 即可」，与实际调用（全为 /api/v1/admin/...）矛盾，已删）
 
 import { apiFetch } from "~/lib/api/fetch";
 import { t } from "~/lib/i18n";

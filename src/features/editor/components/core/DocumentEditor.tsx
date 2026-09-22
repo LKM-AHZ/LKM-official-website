@@ -95,7 +95,6 @@ export default function DocumentEditor({
     loadDraft,
     flushImmediate,
     importMdxContent,
-    exportMdxContent,
     sourceMdxRef,
     frontmatterRef,
     lastValidJsonRef: lastValidEditorJsonRef,
@@ -577,7 +576,6 @@ export default function DocumentEditor({
     [
       mode,
       editor,
-      exportMdxContent,
       importMdxContent,
       sourceMdxRef,
       frontmatterRef,
@@ -822,7 +820,7 @@ export default function DocumentEditor({
                     : "rte-btn rte-btn--ghost rte-btn--xs"
                 }
                 onClick={() => setAiPanelOpen(!aiPanelOpen)}
-                title="AI 助手"
+                title={t("editor.ai.writingAssistant")}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

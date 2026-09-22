@@ -15,7 +15,9 @@ const currentPath = Astro.url.pathname;
 const itemClass = (href: string) =>
   [
     'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
-    isActive(currentPath, href)
+    // isActive 比的是逻辑路径，而 pathname 带 site.base（子路径部署时如 /blog/admin/users），
+    // 这里把 href 也过一遍 getPermalink，保证两侧同为「带 base」的形态
+    isActive(currentPath, getPermalink(href))
       ? 'bg-surface-3 text-primary font-medium'
       : 'text-text-muted hover:bg-surface-3',
   ].join(' ');
@@ -65,23 +67,15 @@ const itemClass = (href: string) =>
 <script>
   // 后台页面访问守卫：校验 cookie 会话，未登录/失效则跳登录页。
   // 凭证在 httpOnly cookie（@respond 后端是最终防线），这里只做 UX 层软门禁。
-  import { apiFetch } from '~/lib/api/fetch';
+  // 直接复用 lib/api/admin 的 bootAdminSession：它共享 adminFetch 的 401/403 跳转守卫
+  // （含防重入锁与 2FA 识别）。先前这里自己写了一份跳转逻辑，两套跳转在并发 401 时
+  // 会互相竞争，还会漏掉「先清重入锁」这一步。
+  import { bootAdminSession } from '~/lib/api/admin';
 
   (async () => {
-    // 已是登录页则不再拦截
+    // 已是登录页则不再校验（跳转守卫本身也会跳过登录页，这里省掉一次无谓请求）
     if (window.location.pathname.startsWith('/admin/login')) return;
-
-    try {
-      const result = await apiFetch('/api/v1/admin/auth/me', { method: 'GET' });
-      // 401/403 = 未登录或后台权限不足 → 跳登录页
-      if (result.isOk() && (result.value.status === 401 || result.value.status === 403)) {
-        // 防重入：仅在未处于登录页时跳转一次
-        window.location.replace('/admin/login');
-      } else if (result.isErr()) {
-        // 网络/超时/5xx 时不强闯，避免打不开后台业务页；由具体请求各自报错。
-      }
-    } catch {
-      // 兜底
-    }
+    // 网络/超时/5xx 时返回 null，不强行跳转，避免打不开后台业务页
+    await bootAdminSession();
   })();
 </script>

@@ -26,7 +26,7 @@ export function GithubCardComponent(properties, children) {
     return h(
       "div",
       { class: "hidden" },
-      'Invalid repository. ("repo" attributte must be in the format "owner/repo")',
+      'Invalid repository. ("repo" attribute must be in the format "owner/repo")',
     );
 
   const repo = properties.repo;
@@ -66,7 +66,8 @@ export function GithubCardComponent(properties, children) {
 
   const nScript = h(
     `script#${cardUuid}-script`,
-    { type: "text/javascript", defer: true },
+    // 不带 defer：defer 只对带 src 的外部脚本生效，内联脚本上写了也是被浏览器忽略的无效属性
+    { type: "text/javascript" },
     `
       fetch('https://api.github.com/repos/' + ${repoLiteral}, { referrerPolicy: "no-referrer" }).then(response => { if (!response.ok) throw new Error('GitHub API ' + response.status); return response.json(); }).then(data => {
         document.getElementById('${cardUuid}-description').innerText = data.description?.replace(/:[a-zA-Z0-9_]+:/g, '') || "Description not set";

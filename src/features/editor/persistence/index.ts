@@ -102,6 +102,9 @@ export function createLocalPersistence(): PersistenceAdapter {
       },
     ): Promise<boolean> => {
       try {
+        // 不再用 `as Parameters<typeof saveBackupToStore>[1]` 断言：BackupData 增删必填字段时
+        // 断言会掩盖不兼容。这里的 docId/timestamp 是 BackupData 的必填字段，
+        // 但 saveBackup 内部会用入参 docId 与「当下时间」覆盖它们，故两者只是占位
         const result = await saveBackupToStore(docId, {
           docId,
           title: data.title,
@@ -110,7 +113,7 @@ export function createLocalPersistence(): PersistenceAdapter {
           status: data.status,
           version: data.version,
           timestamp: new Date().toISOString(),
-        } as Parameters<typeof saveBackupToStore>[1]);
+        });
         return result.isOk();
       } catch (e) {
         console.warn("[persistence] createBackup 失败:", e);

@@ -66,7 +66,9 @@ export function normalizeBase(raw: string): string {
 function getBase(): string {
   if (typeof window !== "undefined") {
     return normalizeBase(
-      String((window as unknown as { __BASE_URL__?: string }).__BASE_URL__ ?? "/"),
+      String(
+        (window as unknown as { __BASE_URL__?: string }).__BASE_URL__ ?? "/",
+      ),
     );
   }
   // SSR 无 window：用编译期注入的 base，保证服务端与客户端对同一输入算出相同结果

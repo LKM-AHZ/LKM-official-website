@@ -79,7 +79,7 @@ export function addReply(
   text: string,
 ): CommentReply | null {
   const threads = read(docId);
-  const thread = threads.find((t) => t.id === threadId);
+  const thread = threads.find((item) => item.id === threadId);
   if (!thread) return null;
   const reply: CommentReply = {
     id: crypto.randomUUID(),
@@ -92,30 +92,36 @@ export function addReply(
   return reply;
 }
 
-export function resolveThread(docId: string, threadId: string): void {
+/** resolve/reopen 只差一个布尔值：共用同一套「读-改-写」骨架，避免两份拷贝各自漂移 */
+function setResolved(docId: string, threadId: string, resolved: boolean): void {
   const threads = read(docId);
-  const thread = threads.find((t) => t.id === threadId);
+  const thread = threads.find((item) => item.id === threadId);
   if (thread) {
-    thread.resolved = true;
+    thread.resolved = resolved;
     write(docId, threads);
   }
 }
 
+export function resolveThread(docId: string, threadId: string): void {
+  setResolved(docId, threadId, true);
+}
+
 export function reopenThread(docId: string, threadId: string): void {
-  const threads = read(docId);
-  const thread = threads.find((t) => t.id === threadId);
-  if (thread) {
-    thread.resolved = false;
-    write(docId, threads);
-  }
+  setResolved(docId, threadId, false);
 }
 
 export function deleteThread(docId: string, threadId: string): void {
   let threads = read(docId);
-  threads = threads.filter((t) => t.id !== threadId);
+  threads = threads.filter((item) => item.id !== threadId);
   write(docId, threads);
 }
 
 export function clearComments(docId: string): void {
-  localStorage.removeItem(getKey(docId));
+  // 与 read/write 保持一致：隐私模式/禁用存储时访问 localStorage 会抛 SecurityError，
+  // 不该让它冒到调用方
+  try {
+    localStorage.removeItem(getKey(docId));
+  } catch (err) {
+    console.warn("[comment-store] 清空评论失败:", err);
+  }
 }

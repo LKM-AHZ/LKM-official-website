@@ -157,13 +157,15 @@ class EditorErrorBoundary extends Component<Props, State> {
               <button
                 className="rte-btn rte-btn--primary rte-btn--sm"
                 onClick={() => {
+                  // 这里只做一次 state 更新就够：setState 是异步的，紧随其后的
+                  // handleRetry() 读到的仍是旧 retries(=MAX_RETRIES)，会被自身守卫拦下，
+                  // 实际推动重试的是 errorVersion 变化（改变 Suspense key）
                   const v = this.state.errorVersion;
                   this.setState({
                     retries: 0,
                     error: null,
                     errorVersion: v + 1,
                   });
-                  this.handleRetry();
                 }}
               >
                 {t("editor.retry")}
@@ -175,7 +177,9 @@ class EditorErrorBoundary extends Component<Props, State> {
       );
     }
 
-    // 使用 errorVersion 作为 Suspense key，仅重新触发 lazy 加载，不重建编辑器实例
+    // errorVersion 作为 Suspense key：key 变化会重建整棵子树（DocumentEditor 会被卸载重挂，
+    // 不复用实例）。这是重试路径想要的语义——只有懒加载失败/error 状态才会走到改 key，
+    // 此时并没有需要保留的编辑器状态；不要在正常路径上改它
     return (
       <Suspense
         key={errorVersion}
@@ -230,7 +234,10 @@ export default function EditorMount({
 
   return (
     <div className="rte-root">
+      {/* key 换文档号：错误边界自身没有 componentDidUpdate 重置逻辑，不换 key 时
+          上一个文档的错误/重试计数会留住，把新文档也一直挡在错误界面里 */}
       <EditorErrorBoundary
+        key={docId}
         docId={docId}
         adapter={adapter}
         seriesId={seriesId}

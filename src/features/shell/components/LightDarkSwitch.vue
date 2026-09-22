@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "~/lib/constants/constants";
 import { t } from "~/lib/i18n";
 import { Icon } from "@iconify/vue";
@@ -11,18 +11,31 @@ import {
 import type { LIGHT_DARK_MODE } from "~/types/config";
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
+// 初值刻意固定为 AUTO_MODE（与 SSR 输出一致，避免水合不一致），真实值在 onMounted 同步
 const mode = ref<LIGHT_DARK_MODE>(AUTO_MODE);
+
+// 系统配色变化只在「跟随系统」时需要重算：显式选定的亮/暗再套用一次等于用本组件的旧值
+// 覆盖文档主题，会把其它组件（如 setTheme）刚写入的结果顶掉
+const changeThemeWhenSchemeChanged = (): void => {
+  if (mode.value === AUTO_MODE) applyThemeToDocument(mode.value);
+};
+let darkModePreference: MediaQueryList | null = null;
 
 onMounted(() => {
   // localStorage 里可能是历史/任意值（getStoredTheme 只做了类型断言、没有校验）：
   // 不在 seq 内时 seq.indexOf 返回 -1，点击切换会静默跳到 LIGHT_MODE 而不是从当前状态轮转
   const stored = getStoredTheme();
   mode.value = seq.includes(stored) ? stored : AUTO_MODE;
-  const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
-  const changeThemeWhenSchemeChanged = () => {
-    applyThemeToDocument(mode.value);
-  };
+  darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
   darkModePreference.addEventListener("change", changeThemeWhenSchemeChanged);
+});
+
+onUnmounted(() => {
+  // 不摘除会在换页重挂时累积监听器，也让旧实例无法回收
+  darkModePreference?.removeEventListener(
+    "change",
+    changeThemeWhenSchemeChanged,
+  );
 });
 
 function switchScheme(newMode: LIGHT_DARK_MODE) {

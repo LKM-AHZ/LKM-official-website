@@ -68,28 +68,30 @@ const rankList = computed(() => {
   const within = range.value === "today" ? 86400000 : 7 * 86400000;
   // 每次重算都重新读存储：onMounted 快照在「同会话内别处改了信件」后不会更新，
   // 榜单会长期停在打开页面那一刻的数据（storage 非响应式，只能按需重读）。
-  return getLetters()
-    .filter((l) => l.status === "published" && l.privacy === "public")
-    .filter((l) => {
-      // createdAt 可能缺失（编辑已有信件时 WritePage 会写入 undefined），
-      // 原写法 now - undefined → NaN，比较恒为 false，这些信件会被静默剔除榜单；
-      // 这里回退到 updatedAt 并显式校验有效性。
-      const created = Number(l.createdAt ?? l.updatedAt);
-      return Number.isFinite(created) && now - created < within;
-    })
-    // 热度只算一次并用 Number() 归一（原写法 `b.likes || 0` 挡不住字符串 "5" 这类值，
-    // 会变成字符串拼接）；同分时按 createdAt 降序、再按 id 兜底，保证顺序确定
-    .map((l) => ({
-      ...l,
-      heat: (Number(l.likes) || 0) + (Number(l.favorites) || 0),
-    }))
-    .sort(
-      (a, b) =>
-        b.heat - a.heat ||
-        (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0) ||
-        String(a.id).localeCompare(String(b.id)),
-    )
-    .slice(0, 20);
+  return (
+    getLetters()
+      .filter((l) => l.status === "published" && l.privacy === "public")
+      .filter((l) => {
+        // createdAt 可能缺失（编辑已有信件时 WritePage 会写入 undefined），
+        // 原写法 now - undefined → NaN，比较恒为 false，这些信件会被静默剔除榜单；
+        // 这里回退到 updatedAt 并显式校验有效性。
+        const created = Number(l.createdAt ?? l.updatedAt);
+        return Number.isFinite(created) && now - created < within;
+      })
+      // 热度只算一次并用 Number() 归一（原写法 `b.likes || 0` 挡不住字符串 "5" 这类值，
+      // 会变成字符串拼接）；同分时按 createdAt 降序、再按 id 兜底，保证顺序确定
+      .map((l) => ({
+        ...l,
+        heat: (Number(l.likes) || 0) + (Number(l.favorites) || 0),
+      }))
+      .sort(
+        (a, b) =>
+          b.heat - a.heat ||
+          (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0) ||
+          String(a.id).localeCompare(String(b.id)),
+      )
+      .slice(0, 20)
+  );
 });
 </script>
 

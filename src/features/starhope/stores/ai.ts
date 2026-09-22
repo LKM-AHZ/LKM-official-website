@@ -12,6 +12,32 @@ const isGenerating = ref(false);
 const streamContent = ref("");
 const error = ref<string | null>(null);
 
+// 上面这些 ref 是模块级单例，跨组件、跨账号共享：记下当前缓存属于哪个账号，
+// 账号一变（登出再换号登录）就先清空，否则上一个账号的会话内容会留在界面上
+let loadedUserId: string | null = null;
+
+function resetState(): void {
+  agents.value = [];
+  messages.value = [];
+  currentAgentId.value = null;
+  streamContent.value = "";
+  error.value = null;
+}
+
+/** 默认智能体的出厂配置：这些值会发给模型侧（不是界面文案，故不经 t()），
+ *  集中一处便于调整，不必在函数体里翻找 */
+const DEFAULT_AGENT_CONFIG: Pick<
+  AiAgent,
+  "systemPrompt" | "service" | "model" | "temperature" | "topP" | "maxTokens"
+> = {
+  systemPrompt: "你是一个有用的学习助手。请用中文回答。",
+  service: "openai",
+  model: "gpt-4o",
+  temperature: 0.7,
+  topP: 1,
+  maxTokens: 4096,
+};
+
 export function useAiStore(): {
   agents: Ref<AiAgent[]>;
   currentAgentId: Ref<string | null>;
@@ -42,11 +68,20 @@ export function useAiStore(): {
 
   async function loadAgents(): Promise<void> {
     try {
-      if (!auth.isLoggedIn.value) return;
-      agents.value = await db.aiAgents
-        .where("userId")
-        .equals(auth.userId.value!)
-        .toArray();
+      const uid = auth.userId.value;
+      if (!auth.isLoggedIn.value || !uid) {
+        // 登出后（island 仍挂载）必须清掉缓存，否则界面还留着上一个会话的智能体与消息
+        resetState();
+        loadedUserId = null;
+        return;
+      }
+      if (loadedUserId !== uid) {
+        // 换号登录：messages 不会被下面的分支覆盖（currentAgentId 非空就不重选智能体），
+        // 不清就会把上一个账号的对话留在界面上
+        resetState();
+        loadedUserId = uid;
+      }
+      agents.value = await db.aiAgents.where("userId").equals(uid).toArray();
       if (agents.value.length === 0) {
         await createDefaultAgent();
       }
@@ -62,15 +97,10 @@ export function useAiStore(): {
 
   async function createDefaultAgent(): Promise<AiAgent> {
     const agent: AiAgent = {
+      ...DEFAULT_AGENT_CONFIG,
       id: crypto.randomUUID(),
       userId: String(auth.userId.value!),
       name: t("starhopeData.ai.defaultAgentName"),
-      systemPrompt: "你是一个有用的学习助手。请用中文回答。",
-      service: "openai",
-      model: "gpt-4o",
-      temperature: 0.7,
-      topP: 1,
-      maxTokens: 4096,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -83,11 +113,15 @@ export function useAiStore(): {
   async function createAgent(
     data: Omit<AiAgent, "id" | "userId" | "createdAt">,
   ): Promise<AiAgent | undefined> {
+    // 未登录时 userId 是 null，String(null) 会写出 userId:"null" 的孤儿智能体，
+    // 还会一并入同步队列（loadAgents/sendMessage 都有这道门，这里补齐）
+    const uid = auth.userId.value;
+    if (!auth.isLoggedIn.value || !uid) return;
     try {
       const agent: AiAgent = {
         ...data,
         id: crypto.randomUUID(),
-        userId: String(auth.userId.value!),
+        userId: uid,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

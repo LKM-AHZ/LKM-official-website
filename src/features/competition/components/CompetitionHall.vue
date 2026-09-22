@@ -1,5 +1,11 @@
 <template>
   <div class="space-y-8">
+    <p
+      v-if="groupedCompetitions.length === 0"
+      class="text-center py-12 text-sm text-text-muted"
+    >
+      {{ t("community.competition.noCompetitions") }}
+    </p>
     <div v-for="group in groupedCompetitions" :key="group.status">
       <h2 class="text-lg font-semibold text-deep-text mb-3">
         {{ statusLabel(group.status) }}
@@ -86,11 +92,13 @@ const groupedCompetitions = computed(() => {
     if (!groups[c.status]) continue;
     groups[c.status].push(c);
   }
-  return Object.entries(groups)
-    .sort(([a], [b]) => order[a] - order[b])
-    // 去掉空分组：三个状态键总是存在，零比赛的组会渲染出「只有标题、没有卡片」的孤立段落
-    .filter(([, items]) => items.length > 0)
-    .map(([status, items]) => ({ status, items }));
+  return (
+    Object.entries(groups)
+      .sort(([a], [b]) => order[a] - order[b])
+      // 去掉空分组：三个状态键总是存在，零比赛的组会渲染出「只有标题、没有卡片」的孤立段落
+      .filter(([, items]) => items.length > 0)
+      .map(([status, items]) => ({ status, items }))
+  );
 });
 
 function statusLabel(s: string) {

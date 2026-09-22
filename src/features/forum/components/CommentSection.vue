@@ -70,7 +70,9 @@
               v-if="parentAuthor(comment)"
               class="text-xs text-text-muted/60"
             >
-              {{ t("community.forum.replyTo", { name: parentAuthor(comment) }) }}
+              {{
+                t("community.forum.replyTo", { name: parentAuthor(comment) })
+              }}
             </span>
           </div>
           <p class="text-sm text-deep-text mt-1 leading-relaxed">
@@ -141,13 +143,17 @@ let focusTimer: number | null = null;
 
 // 点赞数展示值：liked 时 +1（本地乐观态，未持久化），0 也要显示 "0" 而不是空串
 function likeCountFor(comment: Comment): number {
-  return (comment.likeCount ?? 0) + (likedComments.value.has(comment.id) ? 1 : 0);
+  return (
+    (comment.likeCount ?? 0) + (likedComments.value.has(comment.id) ? 1 : 0)
+  );
 }
 
 // 被回复者：本地列表里能找到父评论时显示（跨页父评论不在本地则不显示）
 function parentAuthor(comment: Comment): string {
   if (!comment.parentId) return "";
-  return comments.value.find((c) => c.id === comment.parentId)?.authorName ?? "";
+  return (
+    comments.value.find((c) => c.id === comment.parentId)?.authorName ?? ""
+  );
 }
 
 function submitComment() {
@@ -173,10 +179,12 @@ function submitComment() {
 function startReply(id: string, author: string) {
   replyToId.value = id;
   replyToAuthor.value = author;
-  // Focus textarea
-  setTimeout(() => {
-    const textarea = document.querySelector("textarea");
-    textarea?.focus();
+  // 只聚焦本组件的输入框：document.querySelector("textarea") 会命中文档里第一个
+  // textarea（帖子编辑器、别的评论区、弹窗），把焦点抢到不相干的控件上
+  if (focusTimer !== null) window.clearTimeout(focusTimer);
+  focusTimer = window.setTimeout(() => {
+    focusTimer = null;
+    commentInputEl.value?.focus();
   }, 50);
 }
 
@@ -184,6 +192,12 @@ function cancelReply() {
   replyToId.value = "";
   replyToAuthor.value = "";
 }
+
+onBeforeUnmount(() => {
+  // 卸载后定时器再 focus 会碰到已脱离文档的节点（swup 换页时 document 复用，残留定时器
+  // 更会跨页触发）
+  if (focusTimer !== null) window.clearTimeout(focusTimer);
+});
 
 function toggleCommentLike(id: string) {
   // ref(new Set()) 本身是响应式的：add/delete 就会触发模板更新，重建 Set 只是多分配对象

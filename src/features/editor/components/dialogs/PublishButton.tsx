@@ -69,7 +69,7 @@ export default function PublishButton({
     persistStatus("archived");
   };
 
-  const status = doc.status as DocumentData["status"];
+  const status = doc.status;
 
   return (
     <>

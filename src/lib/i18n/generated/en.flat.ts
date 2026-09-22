@@ -196,6 +196,7 @@ export const enFlat = {
   "auth.login.noAccount": "Don't have an account?",
   "auth.login.otherMethods": "Other ways to log in",
   "auth.login.passkey": "Passkey",
+  "auth.login.passkeyComingSoon": "Coming soon",
   "auth.login.passkeyHint":
     "Authenticate with your device fingerprint, face or PIN",
   "auth.login.passkeyTitle": "Log in with a passkey",
@@ -282,9 +283,11 @@ export const enFlat = {
   "blog.articleCount": "{count} articles",
   "blog.articleListTitle": "Article list",
   "blog.author": "Author",
+  "blog.bannerAlt": "Banner image of the blog",
   "blog.categories": "Categories",
   "blog.categoriesTitle": "Article Categories",
   "blog.categoryArticleCount": "{count} articles",
+  "blog.categoryLabel": "View all posts in the {name} category",
   "blog.collapse": "Collapse",
   "blog.commentPlaceholder": "Write your thoughts...",
   "blog.comments": "Comments",
@@ -298,6 +301,7 @@ export const enFlat = {
   "blog.giscusNeedsConfig": "Comments require Giscus configuration.",
   "blog.homeSubtitle":
     "Technical sharing and reflections from community members",
+  "blog.imageSourceLabel": "Visit image source",
   "blog.license": "License",
   "blog.like": "Like",
   "blog.loginPromptPrefix": "Please ",
@@ -346,6 +350,7 @@ export const enFlat = {
   "blog.share.wechatScanTitle": "Scan to share on WeChat",
   "blog.share.weibo": "Share to Weibo",
   "blog.starCount": "{count} favorites",
+  "blog.tagLabel": "View all posts with the {name} tag",
   "blog.tags": "Tags",
   "blog.tagsTitle": "Article Tags",
   "blog.title": "Blog",
@@ -430,6 +435,7 @@ export const enFlat = {
   "common.create": "Create",
   "common.delete": "Delete",
   "common.edit": "Edit",
+  "common.loadError": "Failed to load, please try again later",
   "common.loading": "Loading...",
   "common.more": "More",
   "common.no": "No",
@@ -476,6 +482,8 @@ export const enFlat = {
     "Exam submitted! Correct: {correct}/{total} ({percent}%)",
   "community.competition.explanation": "Explanation:",
   "community.competition.next": "Next",
+  "community.competition.noCompetitions": "No competitions available yet",
+  "community.competition.noQuestions": "No questions match the current filter",
   "community.competition.notFound": "Competition not found",
   "community.competition.ongoing": "Ongoing",
   "community.competition.participants": "Participants:",
@@ -502,6 +510,7 @@ export const enFlat = {
   "community.fileLibrary.descriptionLabel": "Description",
   "community.fileLibrary.descriptionPlaceholder":
     "Briefly describe the file...",
+  "community.fileLibrary.download": "Download",
   "community.fileLibrary.downloadCount": "{count} downloads",
   "community.fileLibrary.fileCount": "{count} files",
   "community.fileLibrary.listView": "List view",
@@ -509,10 +518,12 @@ export const enFlat = {
   "community.fileLibrary.noSubcategories":
     "No subcategories under this category",
   "community.fileLibrary.otherType": "Other",
+  "community.fileLibrary.preview": "Preview",
   "community.fileLibrary.searchPlaceholder": "Search files…",
   "community.fileLibrary.searchResults":
     'Searching for "{query}" — {count} files',
   "community.fileLibrary.selectCategory": "Select a category",
+  "community.fileLibrary.selectedFile": "Selected: {name} ({size})",
   "community.fileLibrary.sortMostDownloaded": "Most downloaded",
   "community.fileLibrary.sortNewest": "Newest",
   "community.fileLibrary.statusApproved": "Approved ✓",
@@ -596,6 +607,7 @@ export const enFlat = {
     "Report submitted: {reason}. We will handle it as soon as possible.",
   "community.forum.reportTitle": "Report Post",
   "community.forum.selectCategory": "Select a category",
+  "community.forum.subBoards": "sub-boards",
   "community.forum.submitComment": "Post Comment",
   "community.forum.subtitle": "Pick a topic and join the discussion!",
   "community.forum.tagsLabel": "Tags (optional, press Enter to add)",
@@ -892,6 +904,7 @@ export const enFlat = {
   "editor.confirmRestoreVersion":
     "Restore to version {version}? Unsaved changes will be lost.",
   "editor.confirmTitle": "Confirm action",
+  "editor.copyFailed": "Copy failed",
   "editor.delete": "Delete",
   "editor.documentTitlePlaceholder": "Document title",
   "editor.editorLoadFailed": "Editor failed to load",
@@ -1213,7 +1226,7 @@ export const enFlat = {
   "follow.loginToFollow": "Login to follow",
   "follow.unfollow": "Unfollow",
   "footer.community": "Community",
-  "footer.copyright": "LKM &copy; 2026 · All rights reserved.",
+  "footer.copyright": "LKM © 2026 · All rights reserved.",
   "footer.legal": "Legal",
   "footer.pages": "Pages",
   "footer.privacyPolicy": "Privacy Policy",
@@ -1804,6 +1817,7 @@ export const enFlat = {
   "page.admin.categories.delete": "Delete",
   "page.admin.categories.disable": "Disable",
   "page.admin.categories.edit": "Edit",
+  "page.admin.categories.empty": "No categories yet",
   "page.admin.categories.memberStats": "{members} members · {posts} posts",
   "page.admin.categories.title": "Category Management",
   "page.admin.dashboard.title": "Dashboard",
@@ -1825,6 +1839,7 @@ export const enFlat = {
   "page.admin.documents.noDocuments": "No documents yet",
   "page.admin.documents.published": "Published",
   "page.admin.documents.searchPlaceholder": "Search documents...",
+  "page.admin.documents.statusFilter": "Filter by status",
   "page.admin.documents.title": "Document Management",
   "page.admin.files.title": "File Review",
   "page.admin.login.metaTitle": "Admin Login",
@@ -2459,6 +2474,12 @@ export const enFlat = {
   "page.resourcesNote":
     "Below are external academic/education platforms. Content is provided by third parties; please verify before visiting.",
   "page.resourcesTitle": "Resources",
+  "page.serverError.backHome": "Back to Home",
+  "page.serverError.error": "Error",
+  "page.serverError.hint":
+    "Please try again later, or head back to the homepage.",
+  "page.serverError.message": "Sorry, something went wrong on our end.",
+  "page.serverError.title": "Server Error",
   "page.submitLinkHint": "To submit a link, contact the maintainer",
   "page.treehole.bottleDescription":
     "Put your thoughts into a bottle, hand them to the current, and wait for a stranger's reply.",
@@ -2785,6 +2806,8 @@ export const enFlat = {
     "Enter a password (at least 6 characters)",
   "register.normal.phone": "Phone number",
   "register.normal.phonePlaceholder": "Enter phone number",
+  "register.normal.resend": "Resend verification code",
+  "register.normal.resendCountdown": "Resend in {seconds}s",
   "register.normal.sendCode": "Send verification code",
   "register.normal.useEmail": "Use email",
   "register.normal.usePhone": "Use phone number",
@@ -3118,7 +3141,7 @@ export const enFlat = {
     "This group is not limited to LKM members themselves — others and professional music lovers are also welcome to discuss music theory and vocal basics, instrument exchange and teaching, music creation, music appreciation, and related topics. The group also organizes LKM galas and various event preparations, giving everyone a bigger and better stage~~",
   "team.communities.hobby.music.name": "Tubie Music Club",
   "team.communities.hobby.rhythm.desc":
-    "The Cooking Club mainly explores the chemical reactions behind cooking, for sharing culinary skills and showing off your homemade dishes. In the future, if possible, we will also host live streams and tutorials on cooking.",
+    "Discuss rhythm games, share charts and techniques.",
   "team.communities.hobby.rhythm.name": "Rhythm Game Club (Anime-style)",
   "team.communities.hobby.scifi.desc":
     "Our love for and pursuit of technology has never stopped, and neither has our imagination of the sci-fi world — what would the world really be like in an age of extreme technological advancement? Come discuss your ideas and sci-fi writing here! Join the Sci-Fi Club — it is all part of the plan!",
@@ -3131,7 +3154,7 @@ export const enFlat = {
   "team.members.julyA.desc": "The main workhorse of website development",
   "team.members.julyA.dream": "I do not want to be a workhorse in the future",
   "team.members.julyAhong.desc":
-    "To be filled in — still a student settling in (let us look forward to their growth~",
+    "To be filled in — still a student settling in (let us look forward to their growth~)",
   "team.members.julyAleng.desc":
     "An undergraduate math major at a Tier-2 school, math enthusiast whose favorite areas are analysis and number theory",
   "team.members.julyAleng.dream":
@@ -3213,14 +3236,14 @@ export const enFlat = {
   "team.members.julyQinghan.dream": "Dream: No obligation to disclose",
   "team.members.julyQinghan.quote": "— WELCOME TO OUR KINGDOM!",
   "team.members.julyQingqian.desc":
-    "A bit of a lurker with not much knowledge in stock (",
+    "A bit of a lurker with not much knowledge in stock",
   "team.members.julyQingqian.dream": "Dream: Become a researcher",
   "team.members.julyQishui.desc": "A freshman in fluid mechanics at LMU Munich",
   "team.members.julyQishui.dream":
     "Dream: Contribute to China's fluid mechanics",
   "team.members.julyQishui.quote": "— Effort always pays off",
   "team.members.julyRobin.desc":
-    "To be filled in — still a student settling in (let us look forward to their growth~",
+    "To be filled in — still a student settling in (let us look forward to their growth~)",
   "team.members.julySanchishui.desc":
     "Chemistry, love love love it! (A fervent chemistry fanatic)",
   "team.members.julySanqi.desc": "A vow made rashly invites misfortune",
@@ -3339,6 +3362,7 @@ export const enFlat = {
   "theme.lightDarkMode": "Light/Dark Mode",
   "theme.resetToDefault": "Reset to Default",
   "theme.system": "System",
+  "theme.toggleMode": "Toggle between Dark and Light mode",
   "timeline.empty": "Nothing here yet.",
   "timeline.follow": "Following",
   "timeline.hot": "Popular",

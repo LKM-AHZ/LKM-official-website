@@ -44,7 +44,10 @@ export function cacheGet<T>(key: string): T | null {
 }
 
 /** 在途请求表：key → 尚未 settle 的请求，供并发去重 */
-const inflight = new Map<string, Promise<{ data: unknown; error: string | null }>>();
+const inflight = new Map<
+  string,
+  Promise<{ data: unknown; error: string | null }>
+>();
 
 /** 写入缓存 */
 export function cacheSet<T>(

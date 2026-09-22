@@ -10,7 +10,9 @@ import { t } from "~/lib/i18n";
 
 const auth = useAuthStore();
 const isLoggedIn = computed(() => auth.isLoggedIn);
-const mode = ref<TimelineMode>("follow");
+// 未登录时 loader 实际请求的是 hot（见下方 cursorLoader 的 effective 兜底），
+// 但标签高亮跟着 mode 走：初值再固定为 follow 就会出现「follow 高亮却看到 hot 内容」
+const mode = ref<TimelineMode>(isLoggedIn.value ? "follow" : "hot");
 
 const {
   items,
@@ -72,7 +74,8 @@ onMounted(() => {
       </h1>
       <button
         type="button"
-        class="text-sm text-text-muted hover:text-primary"
+        class="text-sm text-text-muted hover:text-primary disabled:opacity-40"
+        :disabled="loading"
         @click="refresh"
       >
         {{ t("timeline.refresh") }}
@@ -159,6 +162,15 @@ onMounted(() => {
         </a>
       </li>
     </ul>
+
+    <!-- 有旧数据时列表照常显示，翻页/刷新失败只在这里提示：否则用户点「加载更多」失败
+         会毫无反馈（首屏错误分支被 entries.length === 0 挡住） -->
+    <p
+      v-if="error && entries.length > 0"
+      class="mt-4 text-sm text-red-500 text-center"
+    >
+      {{ error }}
+    </p>
 
     <div class="mt-6 text-center">
       <button

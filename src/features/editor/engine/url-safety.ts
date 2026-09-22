@@ -6,8 +6,14 @@
  * 这里统一做 scheme 白名单，相对路径与锚点照常放行。
  */
 
-/** 允许的绝对 scheme（其余一律降级为 #） */
-const SAFE_SCHEMES = /^(https?:|mailto:|tel:)$/i;
+/**
+ * 允许的绝对 scheme（其余一律降级为 #）。
+ *
+ * 注意**不要**在末尾加 `$`：加了之后本正则只匹配「裸 scheme 字符串」（如 `"https:"`），
+ * 而真实 URL（`https://x.com/a`、`mailto:a@b.c`、`tel:+86`）会**全部被判为不安全而降级成 `#`**
+ * ——导出的 HTML 里所有链接与图片就都没了。这里要的是「以该 scheme 开头」的前缀匹配。
+ */
+const SAFE_SCHEMES = /^(https?:|mailto:|tel:)/i;
 /** 形如 `foo:` 的 scheme 前缀 */
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 /**

@@ -30,29 +30,93 @@ export function buildAdminNav(): AdminNavGroup[] {
   return [
     {
       items: [
-        { textKey: 'admin.sidebar.dashboard', href: '/admin', icon: 'tabler:dashboard' },
-        { textKey: 'admin.sidebar.users', href: '/admin/users', icon: 'tabler:users' },
-        { textKey: 'admin.sidebar.posts', href: '/admin/posts', icon: 'tabler:article' },
-        { textKey: 'admin.sidebar.files', href: '/admin/files', icon: 'tabler:folder' },
-        { textKey: 'admin.sidebar.categories', href: '/admin/categories', icon: 'tabler:category' },
-        { textKey: 'admin.sidebar.reports', href: '/admin/reports', icon: 'tabler:flag' },
-        { textKey: 'admin.sidebar.moderation', href: '/admin/moderation', icon: 'tabler:shield-check' },
-        { textKey: 'admin.sidebar.dlq', href: '/admin/dlq', icon: 'tabler:tools' },
+        {
+          textKey: "admin.sidebar.dashboard",
+          href: "/admin",
+          icon: "tabler:dashboard",
+        },
+        {
+          textKey: "admin.sidebar.users",
+          href: "/admin/users",
+          icon: "tabler:users",
+        },
+        {
+          textKey: "admin.sidebar.posts",
+          href: "/admin/posts",
+          icon: "tabler:article",
+        },
+        {
+          textKey: "admin.sidebar.files",
+          href: "/admin/files",
+          icon: "tabler:folder",
+        },
+        {
+          textKey: "admin.sidebar.categories",
+          href: "/admin/categories",
+          icon: "tabler:category",
+        },
+        {
+          textKey: "admin.sidebar.reports",
+          href: "/admin/reports",
+          icon: "tabler:flag",
+        },
+        {
+          textKey: "admin.sidebar.moderation",
+          href: "/admin/moderation",
+          icon: "tabler:shield-check",
+        },
+        {
+          textKey: "admin.sidebar.dlq",
+          href: "/admin/dlq",
+          icon: "tabler:tools",
+        },
       ],
     },
     {
       // 机器人（LKMBot 面板）：每项对应后台内嵌面板的一个页面（同源 iframe）。
       // 面板自身的侧边栏仍可跳到其余页面（会话、人格、定时任务等），故此处只放常用入口。
-      titleKey: 'admin.sidebar.botGroup',
+      titleKey: "admin.sidebar.botGroup",
       items: [
-        { textKey: 'admin.sidebar.bot.overview', href: '/admin/bot', icon: 'tabler:robot' },
-        { textKey: 'admin.sidebar.bot.platforms', href: '/admin/bot/platforms', icon: 'tabler:plug-connected' },
-        { textKey: 'admin.sidebar.bot.providers', href: '/admin/bot/providers', icon: 'tabler:brain' },
-        { textKey: 'admin.sidebar.bot.config', href: '/admin/bot/config', icon: 'tabler:adjustments' },
-        { textKey: 'admin.sidebar.bot.extensions', href: '/admin/bot/extensions', icon: 'tabler:puzzle' },
-        { textKey: 'admin.sidebar.bot.knowledge', href: '/admin/bot/knowledge', icon: 'tabler:book' },
-        { textKey: 'admin.sidebar.bot.logs', href: '/admin/bot/logs', icon: 'tabler:file-text' },
-        { textKey: 'admin.sidebar.bot.settings', href: '/admin/bot/settings', icon: 'tabler:settings' },
+        {
+          textKey: "admin.sidebar.bot.overview",
+          href: "/admin/bot",
+          icon: "tabler:robot",
+        },
+        {
+          textKey: "admin.sidebar.bot.platforms",
+          href: "/admin/bot/platforms",
+          icon: "tabler:plug-connected",
+        },
+        {
+          textKey: "admin.sidebar.bot.providers",
+          href: "/admin/bot/providers",
+          icon: "tabler:brain",
+        },
+        {
+          textKey: "admin.sidebar.bot.config",
+          href: "/admin/bot/config",
+          icon: "tabler:adjustments",
+        },
+        {
+          textKey: "admin.sidebar.bot.extensions",
+          href: "/admin/bot/extensions",
+          icon: "tabler:puzzle",
+        },
+        {
+          textKey: "admin.sidebar.bot.knowledge",
+          href: "/admin/bot/knowledge",
+          icon: "tabler:book",
+        },
+        {
+          textKey: "admin.sidebar.bot.logs",
+          href: "/admin/bot/logs",
+          icon: "tabler:file-text",
+        },
+        {
+          textKey: "admin.sidebar.bot.settings",
+          href: "/admin/bot/settings",
+          icon: "tabler:settings",
+        },
       ],
     },
   ];
@@ -63,7 +127,7 @@ function normalize(path: string): string {
   // 只去尾斜杠时，一旦调用方传进 `/admin/users?page=2` 这类带查询串的 URL 就永远不匹配，
   // 高亮会静默丢失（当前调用方传的是 pathname，故暂未暴露）
   const pathname = path.split(/[?#]/, 1)[0];
-  return pathname.length > 1 && pathname.endsWith('/')
+  return pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
     : pathname;
 }

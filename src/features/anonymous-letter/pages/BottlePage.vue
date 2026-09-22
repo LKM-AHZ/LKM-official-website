@@ -98,10 +98,7 @@
             rows="4"
           ></textarea>
           <div class="dialog-actions">
-            <button
-              class="chip"
-              @click="closeThrowDialog"
-            >
+            <button class="chip" @click="closeThrowDialog">
               {{ t("treehole.bottle.cancel") }}
             </button>
             <button

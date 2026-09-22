@@ -62,27 +62,45 @@ const cards: StatCard[] = [
   },
 ];
 
-onMounted(async () => {
-  try {
-    const [statsRes, reportRes] = await Promise.all([
-      adminFetch("/api/v1/admin/stats"),
-      adminFetch("/api/v1/admin/reports?status=pending&size=1"),
-    ]);
-    const sb = await readAdminResp(statsRes);
-    stats.value = sb.data as AdminStats;
-    const rb = await readAdminResp(reportRes);
-    pendingReports.value = (rb.data as { total?: number }).total ?? 0;
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
-  } finally {
-    loading.value = false;
+async function loadStats(): Promise<void> {
+  const res = await adminFetch("/api/v1/admin/stats");
+  const body = await readAdminResp(res);
+  stats.value = body.data as AdminStats;
+}
+
+async function loadPendingReports(): Promise<void> {
+  const res = await adminFetch("/api/v1/admin/reports?status=pending&size=1");
+  const body = await readAdminResp(res);
+  pendingReports.value = (body.data as { total?: number }).total ?? 0;
+}
+
+// Promise.all 是 fail-fast：任一路失败会把另一路已经拿到的结果一起丢掉、所有卡片显示 0；
+// 改为各请求独立结算，单路失败只影响它自己的卡片
+async function load(): Promise<void> {
+  loading.value = true;
+  error.value = "";
+  const results = await Promise.allSettled([loadStats(), loadPendingReports()]);
+  for (const r of results) {
+    if (r.status === "rejected") {
+      error.value =
+        r.reason instanceof Error ? r.reason.message : t("admin.loadFailed");
+    }
   }
-});
+  loading.value = false;
+}
+
+onMounted(load);
 </script>
 
 <template>
   <div>
-    <div v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</div>
+    <!-- 失败态给一条重试路径：否则只能整页刷新 -->
+    <div v-if="error" class="text-sm text-red-500 mb-4 flex items-center gap-3">
+      <span>{{ error }}</span>
+      <button type="button" class="underline hover:no-underline" @click="load">
+        {{ t("common.retry") }}
+      </button>
+    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <template v-if="loading">
@@ -90,24 +108,20 @@ onMounted(async () => {
           <n-skeleton text :repeat="2" />
         </n-card>
       </template>
-      <a
-        v-for="c in cards"
-        v-else
-        :key="c.key"
-        :href="c.to"
-        class="no-underline"
-      >
-        <n-card hoverable class="cursor-pointer !h-full">
-          <n-statistic :value="c.value()" :label="t(`admin.stats.${c.key}`)">
-            <template #prefix>
-              <span
-                class="inline-block w-2.5 h-2.5 rounded-full mr-2 align-middle"
-                :class="c.dotClass"
-              />
-            </template>
-          </n-statistic>
-        </n-card>
-      </a>
+      <template v-else>
+        <a v-for="c in cards" :key="c.key" :href="c.to" class="no-underline">
+          <n-card hoverable class="cursor-pointer !h-full">
+            <n-statistic :value="c.value()" :label="t(`admin.stats.${c.key}`)">
+              <template #prefix>
+                <span
+                  class="inline-block w-2.5 h-2.5 rounded-full mr-2 align-middle"
+                  :class="c.dotClass"
+                />
+              </template>
+            </n-statistic>
+          </n-card>
+        </a>
+      </template>
     </div>
   </div>
 </template>

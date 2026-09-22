@@ -9,6 +9,13 @@ interface BubbleMenuWrapperProps {
   onComment?: (from: number, to: number, text: string) => void;
 }
 
+// 气泡定位参数：与 .rte-bubble-menu 的实际高度/内边距耦合，改菜单尺寸时只需调这里。
+// BUBBLE_MIN_TOP_GAP 是顶部最小留白，BUBBLE_OFFSET_Y 是选中行上方预留的气泡高度，
+// BUBBLE_EDGE_MARGIN 是水平方向距两侧视口的最小留白（左右共用，避免两边不对称）
+const BUBBLE_MIN_TOP_GAP = 8;
+const BUBBLE_OFFSET_Y = 44;
+const BUBBLE_EDGE_MARGIN = 80;
+
 const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
   editor,
   onComment,
@@ -50,7 +57,9 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
         }
         lastSelectionRef.current = { from, to, empty };
 
-        if (empty || from === to) {
+        // Selection.empty 按定义就是 from === to（NodeSelection/AllSelection 的 empty 均为 false
+        // 且 from !== to），故不再重复判 from === to
+        if (empty) {
           setShow(false);
           return;
         }
@@ -71,10 +80,10 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
           return;
         }
         setPos({
-          top: Math.max(8, start.top - 44),
+          top: Math.max(BUBBLE_MIN_TOP_GAP, start.top - BUBBLE_OFFSET_Y),
           left: Math.min(
-            window.innerWidth - 80,
-            Math.max(80, (start.left + end.right) / 2),
+            window.innerWidth - BUBBLE_EDGE_MARGIN,
+            Math.max(BUBBLE_EDGE_MARGIN, (start.left + end.right) / 2),
           ),
         });
         setShow(true);
@@ -121,10 +130,12 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
   // 链接浮层打开时需保留组件挂载（浮层依赖浏览器事件、点击外部关闭），此时不显示气泡按钮本体
   if (!show && !linkOpen) return null;
 
+  // 用独立的 translate 属性而不是 transform：.rte-bubble-menu 的入场动画
+  // （@keyframes rte-pop-in）会整体覆盖 transform，动画期间 -50% 居中失效、结束才回弹
   return (
     <div
       className="rte-bubble-menu"
-      style={{ top: pos.top, left: pos.left, transform: "translateX(-50%)" }}
+      style={{ top: pos.top, left: pos.left, translate: "-50% 0" }}
     >
       <button
         type="button"
@@ -210,9 +221,7 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
       </div>
       {/* 复用 CommentBubbleButton（它把动作挂在 click 上，键盘 Enter/Space 也能加批注；
           原来内联的这份只写 onMouseDown，键盘用户点不到），避免两份实现各自漂移 */}
-      {onComment && (
-        <CommentBubbleButton editor={editor} onClick={onComment} />
-      )}
+      {onComment && <CommentBubbleButton editor={editor} onClick={onComment} />}
     </div>
   );
 });

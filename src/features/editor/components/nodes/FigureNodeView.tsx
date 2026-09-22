@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useRef } from "react";
+import type { ReactElement } from "react";
 import type { Node } from "@tiptap/pm/model";
 import type { Editor } from "@tiptap/core";
 import { NodeViewWrapper } from "@tiptap/react";
@@ -16,6 +17,32 @@ function toFigureSize(raw: string): number | undefined {
   const n = Number(raw);
   if (!Number.isFinite(n) || n <= 0) return undefined;
   return Math.min(Math.round(n), MAX_FIGURE_WIDTH);
+}
+
+/** 三个文本字段的 label + input 结构完全一致：抽成一处渲染，样式/属性不会各自漂移 */
+function TextField({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}): ReactElement {
+  return (
+    <>
+      <label className="text-xs font-medium block mb-1">{label}</label>
+      <input
+        type="text"
+        className="rte-input rte-input--sm w-full mb-2"
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </>
+  );
 }
 
 interface FigureNodeViewProps {
@@ -75,35 +102,23 @@ const FigureNodeView = memo(function FigureNodeView({
           ref={panelRef}
           className="absolute top-full left-0 mt-1 z-30 bg-page-bg border border-surface-3 rounded-lg shadow-lg p-3 w-72 max-w-[calc(100vw-2rem)]"
         >
-          <label className="text-xs font-medium block mb-1">
-            {t("editor.figure.imageUrl")}
-          </label>
-          <input
-            type="text"
-            className="rte-input rte-input--sm w-full mb-2"
+          <TextField
+            label={t("editor.figure.imageUrl")}
             value={src}
             placeholder="https://..."
-            onChange={(e) => updateAttributes({ src: e.target.value })}
+            onChange={(v) => updateAttributes({ src: v })}
           />
-          <label className="text-xs font-medium block mb-1">
-            {t("editor.figure.altText")}
-          </label>
-          <input
-            type="text"
-            className="rte-input rte-input--sm w-full mb-2"
+          <TextField
+            label={t("editor.figure.altText")}
             value={alt}
             placeholder={t("editor.figure.imageDescription")}
-            onChange={(e) => updateAttributes({ alt: e.target.value })}
+            onChange={(v) => updateAttributes({ alt: v })}
           />
-          <label className="text-xs font-medium block mb-1">
-            {t("editor.figure.caption")}
-          </label>
-          <input
-            type="text"
-            className="rte-input rte-input--sm w-full mb-2"
+          <TextField
+            label={t("editor.figure.caption")}
             value={caption}
             placeholder={t("editor.figure.captionPlaceholder")}
-            onChange={(e) => updateAttributes({ caption: e.target.value })}
+            onChange={(v) => updateAttributes({ caption: v })}
           />
           <div className="flex gap-2 mb-2">
             <div className="flex-1">

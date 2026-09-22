@@ -9,7 +9,11 @@ export function exportMdx(
   editorContent: JSONContent[],
   frontmatter: Record<string, unknown> = {},
 ): MdxExport {
-  const root: Root = tiptapToMdast(editorContent);
+  // 这里是导出链路的公共边界：持久化的 editor JSON 缺失/损坏时 content 可能不是数组，
+  // 直接往下传会在 convertBlocks 的 for...of 里抛 “nodes is not iterable”，
+  // 报错点离真正的原因很远，故在边界处先归一化
+  const safeContent = Array.isArray(editorContent) ? editorContent : [];
+  const root: Root = tiptapToMdast(safeContent);
   const normalized = normalizeMDAST(root);
   const mdx = serializeMDAST(normalized, frontmatter);
   // 返回浅拷贝并剔除 undefined：yaml.dump 会略过值为 undefined 的键，

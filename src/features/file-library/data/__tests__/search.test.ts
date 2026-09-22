@@ -33,7 +33,10 @@ const ID_4 = "00000000-0000-7000-8000-000000000004";
 describe("searchFiles", () => {
   const files = [
     mk(ID_1, { originalName: "量子力学导论_讲义.pdf", tags: ["量子", "讲义"] }),
-    mk(ID_2, { description: "整理的天体物理公开数据集", uploaderName: "七月O" }),
+    mk(ID_2, {
+      description: "整理的天体物理公开数据集",
+      uploaderName: "七月O",
+    }),
     mk(ID_3, { categoryName: "线性代数" }),
   ];
 

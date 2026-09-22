@@ -15,7 +15,9 @@ function shortYear(raw: string): string {
   return m ? m[0] : raw;
 }
 
-const step = 360 / items.length;
+// 空列表时 360/0 会得到 Infinity，随后的 rotate(Infinitydeg)/rotate(NaNdeg) 是无效 CSS
+//（items 为空时页面本就无卡片可展示，角度给 0 即可）
+const step = items.length > 0 ? 360 / items.length : 0;
 const clockYears = items.map((i) => shortYear(i.year));
 ---
 
@@ -94,6 +96,9 @@ const clockYears = items.map((i) => shortYear(i.year));
                 <div
                   class="clock-tick-mark flex items-center justify-center text-neutral-600 dark:text-neutral-100"
                   data-ct-tick={i}
+                  role="button"
+                  tabindex="0"
+                  aria-label={clockYears[i]}
                 >
                   <span class="clock-tick-year text-neutral-600 dark:text-neutral-100 leading-none">
                     {clockYears[i]}
@@ -117,6 +122,9 @@ const clockYears = items.map((i) => shortYear(i.year));
     if (!track || !clockCol || allPrevBtns.length === 0 || allNextBtns.length === 0) return;
 
     const total = track.querySelectorAll('.ct-card').length;
+    // 无卡片时下面 360/total 会得到 Infinity，指针角度变成 rotate(NaNdeg)；
+    // 此时也没有任何刻度/卡片可交互，直接不初始化
+    if (total === 0) return;
     let currentIndex = 0;
     const angleStep = 360 / total;
 
@@ -156,6 +164,8 @@ const clockYears = items.map((i) => shortYear(i.year));
       clockCol.querySelectorAll('[data-ct-tick]').forEach((el) => {
         const idx = parseInt(el.getAttribute('data-ct-tick') || '0');
         el.classList.toggle('clock-tick-active', idx === currentIndex);
+        // 刻度可聚焦（role=button），读屏需要知道当前停在哪一年
+        el.setAttribute('aria-current', idx === currentIndex ? 'true' : 'false');
       });
     }
 
@@ -174,11 +184,21 @@ const clockYears = items.map((i) => shortYear(i.year));
     });
 
     // 钟表刻度点击 → 切换到对应事件
+    function selectTick(tick: Element): void {
+      const idx = parseInt(tick.getAttribute('data-ct-tick') || '0');
+      currentIndex = idx;
+      update();
+    }
+
     clockCol.querySelectorAll('[data-ct-tick]').forEach((tick) => {
-      tick.addEventListener('click', () => {
-        const idx = parseInt(tick.getAttribute('data-ct-tick') || '0');
-        currentIndex = idx;
-        update();
+      tick.addEventListener('click', () => selectTick(tick));
+      // 刻度带 role=button/tabindex，必须同时支持键盘激活，否则聚焦后按 Enter/Space 没反应
+      tick.addEventListener('keydown', (e) => {
+        // addEventListener 的签名给的是 Event，key 需要自行收窄
+        const key = (e as KeyboardEvent).key;
+        if (key !== 'Enter' && key !== ' ') return;
+        e.preventDefault();
+        selectTick(tick);
       });
     });
 

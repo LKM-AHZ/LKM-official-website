@@ -43,10 +43,14 @@ export default function ImageUrlPopover({
           {t("editor.insertImage")}
         </h3>
         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-deep-text/70 block mb-1">
+          <label
+            htmlFor="image-url-input"
+            className="text-sm font-medium text-deep-text/70 block mb-1"
+          >
             {t("editor.imageUrl")}
           </label>
           <input
+            id="image-url-input"
             type="url"
             className="rte-input"
             value={src}
@@ -58,10 +62,14 @@ export default function ImageUrlPopover({
             autoFocus
           />
           {error && <p className="text-xs text-error">{error}</p>}
-          <label className="text-sm font-medium text-deep-text/70 block mb-1">
+          <label
+            htmlFor="image-alt-input"
+            className="text-sm font-medium text-deep-text/70 block mb-1"
+          >
             {t("editor.altText")}
           </label>
           <input
+            id="image-alt-input"
             type="text"
             className="rte-input"
             value={alt}

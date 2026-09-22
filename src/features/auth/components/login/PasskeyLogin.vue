@@ -10,7 +10,7 @@
       </p>
       <p class="text-xs text-text-muted">{{ t("auth.login.passkeyHint") }}</p>
       <button type="button" class="btn btn-primary" disabled>
-        {{ t("auth.login.githubComingSoon") }}
+        {{ t("auth.login.passkeyComingSoon") }}
       </button>
     </div>
   </div>

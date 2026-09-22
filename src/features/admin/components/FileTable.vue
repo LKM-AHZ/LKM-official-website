@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 后台文件审核列表 —— 统一走 useAdminPagination（按 status 过滤）
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
 
@@ -36,6 +36,8 @@ function fmtSize(bytes: number): string {
   return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
+// 首屏加载由 useAdminPagination → usePagination 的 immediate（默认 true）在 setup 期完成，
+// 这里再挂 onMounted(refresh) 会重复发一次同样的第 1 页请求
 const { items, total, page, totalPages, loading, error, refresh, goTo } =
   useAdminPagination<AdminFileRow>((page, limit) => {
     const params = new URLSearchParams({
@@ -53,8 +55,6 @@ function setFilter(f: "all" | "pending" | "approved" | "rejected") {
   page.value = 1;
   void refresh();
 }
-
-onMounted(() => void refresh());
 </script>
 
 <template>

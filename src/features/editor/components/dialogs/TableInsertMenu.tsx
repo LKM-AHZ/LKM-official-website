@@ -39,6 +39,14 @@ export default function TableInsertMenu({
     setFocusCol((c) => clamp(c + dc, 0, MAX_COLS - 1));
   }, []);
 
+  // 方向键后把真实焦点落到目标格子：只改 state 的话 activeElement 仍停在容器上，
+  // 视觉光标与真实焦点分离（读屏也播报不到当前格）
+  useEffect(() => {
+    gridRef.current
+      ?.querySelector<HTMLButtonElement>(`#${getCellId(focusRow, focusCol)}`)
+      ?.focus();
+  }, [focusRow, focusCol, getCellId]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
@@ -60,6 +68,10 @@ export default function TableInsertMenu({
           break;
         case "Enter":
         case " ":
+          // 焦点在格子按钮上时交给按钮的原生激活（它同样插入 focusRow/focusCol 尺寸）：
+          // 这里再插一次会双发——Enter 的默认动作就是 click，空格更是 keyup 才触发 click，
+          // preventDefault 拦不住 keyup
+          if (e.target !== e.currentTarget) break;
           e.preventDefault();
           // 与 onClick 保持一致：任意单元格都能插入（focus 为 0/0 时就是 1×1），
           // 原 `focusRow > 0 && focusCol > 0` 会把 1×1 和所有 1×N、N×1 都挡掉
@@ -82,16 +94,17 @@ export default function TableInsertMenu({
   return (
     <div className="rte-link-popover">
       <p className="text-xs text-deep-text/60 mb-2">
-        {activeRows > 0 && activeCols > 0
-          ? t("editor.tableInsert.tableLabel", {
-              rows: activeRows,
-              cols: activeCols,
-            })
-          : t("editor.tableInsert.selectSize")}
+        {t("editor.tableInsert.tableLabel", {
+          rows: activeRows,
+          cols: activeCols,
+        })}
       </p>
+      {/* role="group" 而非 role="grid"：grid 要求 row 包 gridcell，而这里的格子是 CSS grid
+          的直接子节点（加 row 包裹会破坏栅格布局，display:contents 又会被部分浏览器从
+          无障碍树里摘掉）。格子按钮各自带「第 r 行第 c 列」的 aria-label，语义够用 */}
       <div
         ref={gridRef}
-        role="grid"
+        role="group"
         aria-label={t("editor.tableInsert.gridLabel")}
         className="rte-table-menu outline-none"
         style={{ gridTemplateColumns: `repeat(${MAX_COLS}, 24px)` }}
@@ -113,7 +126,7 @@ export default function TableInsertMenu({
             return (
               <button
                 key={getCellId(r, c)}
-                role="gridcell"
+                id={getCellId(r, c)}
                 type="button"
                 className={`rte-table-cell ${isActive ? "is-active" : ""}`}
                 tabIndex={isFocused ? 0 : -1}

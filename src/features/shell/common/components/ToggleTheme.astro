@@ -2,6 +2,7 @@
 import { Icon } from 'astro-icon/components';
 
 import { UI } from '~/lib/config';
+import { t } from '~/lib/i18n';
 
 export interface Props {
   label?: string;
@@ -11,7 +12,7 @@ export interface Props {
 }
 
 const {
-  label = 'Toggle between Dark and Light mode',
+  label = t('theme.toggleMode'),
   class:
     className = 'text-text-muted hover:bg-page-bg focus:outline-none focus:ring-4 focus:ring-[var(--primary)] rounded-lg text-sm p-2.5 inline-flex items-center',
   iconClass = 'w-6 h-6',

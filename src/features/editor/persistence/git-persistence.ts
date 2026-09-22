@@ -92,7 +92,11 @@ export function createGitPersistence(
       if (r.isErr()) {
         // 只返回 null 会把服务端/网络错误和「文件不存在」混成同一种结果，
         // 上层只能显示空文档、无从判断是失败还是空文件
-        console.warn("[git-persistence] loadDocument 失败:", id, r.error.message);
+        console.warn(
+          "[git-persistence] loadDocument 失败:",
+          id,
+          r.error.message,
+        );
         return null;
       }
       const f = r.value;

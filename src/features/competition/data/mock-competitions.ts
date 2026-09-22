@@ -22,7 +22,22 @@ export interface MockQuestion {
   difficulty: number;
 }
 
-export const mockCompetitions: MockCompetition[] = [
+/**
+ * 由起止日期推导状态（单一事实来源）：写死的 status 会随日期推移与日期窗口脱节，
+ * 而 CompetitionHall 正是按 status 分组的，脱节会让比赛归错组、徽章显示错误。
+ * 起止按本地时间解析，结束当天仍算「进行中」。
+ */
+function deriveStatus(
+  startDate: string,
+  endDate: string,
+): MockCompetition["status"] {
+  const now = Date.now();
+  if (now < Date.parse(`${startDate}T00:00:00`)) return "upcoming";
+  if (now > Date.parse(`${endDate}T23:59:59`)) return "ended";
+  return "ongoing";
+}
+
+const competitionEntries: Array<Omit<MockCompetition, "status">> = [
   {
     id: "comp-1",
     title: "competitionData.competitions.comp1.title",
@@ -30,7 +45,6 @@ export const mockCompetitions: MockCompetition[] = [
     startDate: "2026-07-20",
     endDate: "2026-08-10",
     duration: 120,
-    status: "ongoing",
     participantCount: 156,
     category: "competitionData.competitions.comp1.category",
   },
@@ -40,8 +54,9 @@ export const mockCompetitions: MockCompetition[] = [
     description: "competitionData.competitions.comp2.description",
     startDate: "2026-08-15",
     endDate: "2026-08-25",
+    // 数学建模挑战赛是持续多日的赛事（三人组队 + 提交论文），此处填的是赛事时长
+    // 而非单次答题时长；答题计时由 ExamInterface 自己的 EXAM_SECONDS 控制
     duration: 4320,
-    status: "upcoming",
     participantCount: 0,
     category: "competitionData.competitions.comp2.category",
   },
@@ -51,8 +66,8 @@ export const mockCompetitions: MockCompetition[] = [
     description: "competitionData.competitions.comp3.description",
     startDate: "2026-09-01",
     endDate: "2026-09-03",
+    // 2880 分钟 = 48 小时，与 comp3 描述里的「48 小时极限编程挑战」一致
     duration: 2880,
-    status: "upcoming",
     participantCount: 0,
     category: "competitionData.competitions.comp3.category",
   },
@@ -63,11 +78,14 @@ export const mockCompetitions: MockCompetition[] = [
     startDate: "2026-07-01",
     endDate: "2026-07-15",
     duration: 60,
-    status: "ended",
     participantCount: 89,
     category: "competitionData.competitions.comp4.category",
   },
 ];
+
+export const mockCompetitions: MockCompetition[] = competitionEntries.map(
+  (c) => ({ ...c, status: deriveStatus(c.startDate, c.endDate) }),
+);
 
 export const mockQuestions: MockQuestion[] = [
   {

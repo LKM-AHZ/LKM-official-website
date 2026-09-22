@@ -25,14 +25,18 @@ const props = defineProps<{
 const fetchedArticles = ref<ServerArticle[]>([]);
 // 服务端已传入数据时不应先进 loading：否则首帧渲染占位、onMounted 才切到正文，白白丢掉 SSR 内容并闪一下
 const loading = ref(!props.articles);
+// fetchWithCache 从不 reject（失败以 error 字段返回、data 为 null），只靠 finally 收尾会把
+// 失败吞成「一片空白」，与「确实没有新闻」无法区分
+const errorMessage = ref("");
 
 // 受控：有 props 直接渲染；无 props 走本地 fetch
 const articles = computed<ServerArticle[]>(
   () => props.articles ?? fetchedArticles.value,
 );
 
-const DEFAULT_COVER = `${import.meta.env.BASE_URL || "/"}images/article-default.png`;
+// baseUrl 与封面默认路径同源：只写一次，避免 BASE_URL 表达式在文件里重复漂移
 const baseUrl = import.meta.env.BASE_URL || "/";
+const DEFAULT_COVER = `${baseUrl}images/article-default.png`;
 const CACHE_KEY = "articles:latest";
 const CACHE_TTL = 5 * 60 * 1000; // 5 分钟
 
@@ -44,7 +48,7 @@ onMounted(async () => {
   }
   try {
     // 响应条目含 published 原始日期字段（与 ServerArticle 渲染形状不同）
-    const { data } = await fetchWithCache<{
+    const { data, error } = await fetchWithCache<{
       items: Array<
         Omit<ServerArticle, "publishedText"> & {
           published: string;
@@ -68,6 +72,8 @@ onMounted(async () => {
             day: "numeric",
           }),
         }));
+    } else if (error) {
+      errorMessage.value = error;
     }
   } finally {
     loading.value = false;
@@ -81,11 +87,14 @@ onMounted(async () => {
          会被静默丢弃（不传时才用 common.loading） -->
     <slot>{{ t("common.loading") }}</slot>
   </div>
+  <div v-else-if="errorMessage" class="text-center py-4 text-text-muted">
+    {{ errorMessage }}
+  </div>
   <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <a
       v-for="article in articles"
       :key="article.slug"
-      :href="`${baseUrl}articles/${article.slug}`"
+      :href="`${baseUrl}articles/${encodeURIComponent(article.slug)}`"
       class="profile-card group flex flex-col"
     >
       <div class="profile-inner h-full flex flex-col">

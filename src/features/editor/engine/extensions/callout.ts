@@ -34,13 +34,20 @@ export const Callout = Node.create({
 });
 
 export function parseCalloutProps(node: unknown): Record<string, unknown> {
-  const raw = node as Record<string, unknown>;
+  // node 来自 MDX 解析结果（unknown）：null/非对象直接视为「无属性」，否则取 attributes 就抛
+  // TypeError；attributes 非数组时 for...of 也会抛，故一并按「无属性」兜底
+  const raw = (node && typeof node === "object" ? node : {}) as Record<
+    string,
+    unknown
+  >;
   const attrs: Record<string, unknown> = {};
-  const attributes = (raw.attributes ?? []) as Array<{
-    type: string;
-    name: string;
-    value: string | number | boolean;
-  }>;
+  const attributes = Array.isArray(raw.attributes)
+    ? (raw.attributes as Array<{
+        type: string;
+        name: string;
+        value: string | number | boolean;
+      }>)
+    : [];
 
   for (const attr of attributes) {
     if (attr.type === "mdxJsxAttribute") {

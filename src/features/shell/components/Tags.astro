@@ -34,7 +34,7 @@ const style = Astro.props.style;
   <div class="flex gap-2 flex-wrap">
     {
       tags.map((tag) => (
-        <ButtonTag href={getTagUrl(tag.name)} label={`View all posts with the ${tag.name} tag`}>
+        <ButtonTag href={getTagUrl(tag.name)} label={t('blog.tagLabel', { name: tag.name })}>
           {tag.name}
         </ButtonTag>
       ))

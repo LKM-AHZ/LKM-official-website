@@ -163,7 +163,6 @@ const SlashMenu = memo(function SlashMenu({
   const [tableMode, setTableMode] = useState(false);
   const [mathMode, setMathMode] = useState<MathDraft | null>(null);
   const [imageMode, setImageMode] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const q = query.toLowerCase();
   const filtered = useMemo(
@@ -202,9 +201,15 @@ const SlashMenu = memo(function SlashMenu({
           if (sub === "table") {
             setTableMode(true);
           } else if (sub === "inlineMath") {
-            setMathMode({ isBlock: false, initialLatex: DEFAULT_INLINE_MATH_LATEX });
+            setMathMode({
+              isBlock: false,
+              initialLatex: DEFAULT_INLINE_MATH_LATEX,
+            });
           } else if (sub === "blockMath") {
-            setMathMode({ isBlock: true, initialLatex: DEFAULT_BLOCK_MATH_LATEX });
+            setMathMode({
+              isBlock: true,
+              initialLatex: DEFAULT_BLOCK_MATH_LATEX,
+            });
           } else if (sub === "image") {
             setImageMode(true);
           } else {
@@ -290,7 +295,6 @@ const SlashMenu = memo(function SlashMenu({
   if (tableMode) {
     return (
       <div
-        ref={menuRef}
         className="rte-slash-menu"
         style={{ top: position.top, left: position.left }}
       >
@@ -315,7 +319,6 @@ const SlashMenu = memo(function SlashMenu({
 
   return (
     <div
-      ref={menuRef}
       className="rte-slash-menu"
       style={{ top: position.top, left: position.left }}
     >

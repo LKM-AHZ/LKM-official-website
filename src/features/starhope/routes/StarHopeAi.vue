@@ -30,6 +30,14 @@ async function handleSend() {
   await ai.sendMessage(inputText.value.trim());
   inputText.value = "";
 }
+
+// 中文输入法敲 Enter 是上屏候选词，不判断合成态会把没确认完的半句直接发出去
+// （MessagesPage 用同样的 composition 标记）
+const composing = ref(false);
+function onEnterKey(e: KeyboardEvent): void {
+  if (e.isComposing || composing.value) return;
+  void handleSend();
+}
 </script>
 
 <template>
@@ -38,6 +46,10 @@ async function handleSend() {
       <h3 class="text-sm font-semibold text-deep-text mb-3">
         {{ t("starhope.ai.title") }}
       </h3>
+      <!-- loadAgents 失败时 store 会写 ai.error：不读它侧栏就永远空白且毫无反馈 -->
+      <p v-if="ai.error.value" class="mb-2 text-xs text-red-500">
+        {{ ai.error.value }}
+      </p>
       <div class="space-y-1 flex-1 overflow-y-auto">
         <div
           v-for="agent in ai.agents.value"
@@ -124,7 +136,9 @@ async function handleSend() {
             <textarea
               v-model="inputText"
               rows="2"
-              @keydown.enter.exact.prevent="handleSend"
+              @keydown.enter.exact.prevent="onEnterKey"
+              @compositionstart="composing = true"
+              @compositionend="composing = false"
               class="flex-1 rounded-xl border border-surface-3 bg-page-bg px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none"
               :placeholder="t('starhope.ai.inputPlaceholder')"
               :disabled="ai.isGenerating.value"

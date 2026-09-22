@@ -1,12 +1,17 @@
 import type { NavBarLink } from "~/types/config";
 import { getPermalink } from "./utils/permalinks";
 
-/** 按一级菜单名（name）白名单过滤顶栏链接；names 未传(undefined)时不过滤，原样返回；空数组会返回空列表。 */
+/**
+ * 按一级菜单名（name）白名单过滤顶栏链接；names 未传(undefined)时不过滤；空数组会返回空列表。
+ *
+ * 始终返回**新数组**（入参常是模块级单例 allMenuItems，直接返回原引用会让调用方的
+ * sort/push 污染全站导航）；但元素仍是共享引用，调用方不得就地修改 item / item.children。
+ */
 export function filterNavbarByNames(
   links: NavBarLink[],
   names?: string[],
 ): NavBarLink[] {
-  if (!names) return links;
+  if (!names) return [...links];
   return links.filter((item) => names.includes(item.name));
 }
 
@@ -31,6 +36,17 @@ interface FooterData {
   footNote: string;
 }
 
+// 隐私/条款两条在 legal 分组与 secondaryLinks 里各出现一次：文案与路径只在这里声明，
+// 两处按各自需要的顺序引用同一对常量，避免改了一处漏另一处造成死链
+const privacyLink: FooterLink = {
+  text: "footer.privacyPolicy",
+  href: getPermalink("/privacy"),
+};
+const termsLink: FooterLink = {
+  text: "footer.terms",
+  href: getPermalink("/terms"),
+};
+
 export const footerData: FooterData = {
   links: [
     {
@@ -50,19 +66,10 @@ export const footerData: FooterData = {
     },
     {
       title: "footer.legal",
-      links: [
-        {
-          text: "footer.privacyPolicy",
-          href: getPermalink("/privacy"),
-        },
-        { text: "footer.terms", href: getPermalink("/terms") },
-      ],
+      links: [privacyLink, termsLink],
     },
   ],
-  secondaryLinks: [
-    { text: "footer.terms", href: getPermalink("/terms") },
-    { text: "footer.privacyPolicy", href: getPermalink("/privacy") },
-  ],
+  secondaryLinks: [termsLink, privacyLink],
   socialLinks: [
     {
       ariaLabel: "Github",

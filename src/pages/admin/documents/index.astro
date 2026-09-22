@@ -18,10 +18,16 @@ const metadata = {
           type="text"
           class="input input-bordered input-sm flex-1 sm:w-48"
           placeholder={t('page.admin.documents.searchPlaceholder')}
+          aria-label={t('page.admin.documents.searchPlaceholder')}
           id="search-input"
           oninput="renderList()"
         />
-        <select class="select select-bordered select-sm" id="status-filter" onchange="renderList()">
+        <select
+          class="select select-bordered select-sm"
+          id="status-filter"
+          aria-label={t('page.admin.documents.statusFilter')}
+          onchange="renderList()"
+        >
           <option value="all">{t('page.admin.documents.all')}</option>
           <option value="draft">{t('page.admin.documents.draft')}</option>
           <option value="published">{t('page.admin.documents.published')}</option>
@@ -41,7 +47,7 @@ const metadata = {
 
 <script>
   import { buildUrl } from '~/lib/utils/paths';
-  import { t } from '~/lib/i18n';
+  import { getLocale, t } from '~/lib/i18n';
 
   interface DocumentMeta {
     id: string;
@@ -137,7 +143,7 @@ const metadata = {
         <a href="${buildUrl('/editor')}?id=${encodeURIComponent(doc.id)}" class="flex-1 min-w-0">
           <h3 class="font-medium truncate">${escapeHtml(doc.title)}</h3>
           <p class="text-xs text-deep-text/50 mt-1">
-            ${new Date(doc.lastModified).toLocaleString('zh-CN')} ·
+            ${new Date(doc.lastModified).toLocaleString(getLocale())} ·
             <span class="badge badge-xs ${doc.status === 'published' ? 'badge-success' : doc.status === 'archived' ? 'badge-error' : 'badge-ghost'}">${statusLabels[doc.status] ?? doc.status}</span>
           </p>
         </a>

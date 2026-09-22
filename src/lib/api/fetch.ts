@@ -74,6 +74,10 @@ function mergeAbortSignals(signals: AbortSignal[]): {
  *
  * 自动处理 SSR/CSR base URL 拼接，添加默认 timeout。
  * 调用方通过 init.signal 传入自定义 AbortController（会与内部 timeout 合并）。
+ *
+ * 契约提醒：**非 2xx 也是 ok(Response)**。本 wrapper 只负责网络层（连通性/超时/取消），
+ * 不做状态码判定，因为调用方多为 SSE/流式读取，需要拿到 4xx/5xx 的响应体自行处理；
+ * 因此调用方必须自己检查 response.ok，否则鉴权失败会被当成成功。
  */
 export async function apiFetch(
   url: string,
@@ -89,9 +93,11 @@ export async function apiFetch(
     ? mergeAbortSignals([timeoutCtl.signal, externalSignal])
     : { signal: timeoutCtl.signal, cleanup: (): void => {} };
 
-  const { signal: _sig, timeout: _to, ...restInit } = init || {};
-  void _sig;
-  void _to;
+  // 解构只为从 init 里剔除 signal/timeout（两者已单独处理），剩下的透传给 fetch；
+  // 被剔除的两个键仍需命名，故保留占位绑定
+  const { signal: _signal, timeout: _timeout, ...restInit } = init ?? {};
+  void _signal;
+  void _timeout;
 
   try {
     // eslint-disable-next-line no-restricted-globals

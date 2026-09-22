@@ -136,12 +136,16 @@ const reportReasons = computed(() => [
 
 function toggleLike() {
   liked.value = !liked.value;
-  likeCount.value += liked.value ? 1 : -1;
+  // 下界保护：服务端给的计数为 0 但本地态是「已点赞」时，取消会算出 -1 并直接渲染出来
+  likeCount.value = Math.max(0, likeCount.value + (liked.value ? 1 : -1));
 }
 
 function toggleBookmark() {
   bookmarked.value = !bookmarked.value;
-  bookmarkCount.value += bookmarked.value ? 1 : -1;
+  bookmarkCount.value = Math.max(
+    0,
+    bookmarkCount.value + (bookmarked.value ? 1 : -1),
+  );
 }
 
 function handleShare() {

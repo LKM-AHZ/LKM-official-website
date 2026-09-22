@@ -39,7 +39,8 @@ export function useAdminPagination<T>(
       const body = await readAdminResp(res);
       // code==0 但 data 缺失/形状不对时不能直接断言：否则 undefined.items 会以
       // 「Cannot read properties of undefined」的形式暴露给后台用户
-      const data = body.data as Partial<PaginatedResponse<T>> | null | undefined;
+      const data = body.data as
+        Partial<PaginatedResponse<T>> | null | undefined;
       if (
         !data ||
         !Array.isArray(data.items) ||

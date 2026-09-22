@@ -22,7 +22,7 @@
               :class="{ active: activeId === c.id, blocked: c.blocked }"
               @click="selectConv(c)"
             >
-              <div class="conv-avatar">{{ c.peerCodename.charAt(0) }}</div>
+              <div class="conv-avatar">{{ c.peerCodename?.charAt(0) }}</div>
               <div class="conv-info">
                 <b>{{ c.peerCodename }}</b>
                 <small>{{ lastMsg(c) }}</small>
@@ -43,7 +43,9 @@
         <section class="chat glass" v-if="active">
           <div class="chat-head">
             <div class="chat-peer">
-              <div class="conv-avatar">{{ active.peerCodename.charAt(0) }}</div>
+              <div class="conv-avatar">
+                {{ active.peerCodename?.charAt(0) }}
+              </div>
               <div>
                 <b>{{ active.peerCodename }}</b>
                 <small>{{
@@ -58,7 +60,7 @@
               <button
                 class="mini"
                 @click="clearConvConfirm"
-                v-if="active.messages.length"
+                v-if="active.messages?.length"
               >
                 {{ t("treehole.messages.clear") }}
               </button>
@@ -69,7 +71,7 @@
           </div>
 
           <div class="chat-body" ref="chatBody">
-            <div v-if="active.messages.length" class="bubbles">
+            <div v-if="active.messages?.length" class="bubbles">
               <div
                 v-for="(m, i) in active.messages"
                 :key="m.id || i"
@@ -156,7 +158,8 @@ onMounted(() => {
 });
 
 function lastMsg(c) {
-  if (!c.messages.length) return t("treehole.messages.noMsg");
+  // 导入的备份只校验到「是数组」这一层，历史 schema 的会话可能缺 messages/peerCodename
+  if (!c.messages?.length) return t("treehole.messages.noMsg");
   const m = c.messages[c.messages.length - 1];
   return (
     (m.recalled
@@ -169,6 +172,10 @@ function lastMsg(c) {
 
 function selectConv(c) {
   activeId.value = c.id;
+  // text 是所有会话共用的一个 ref：不在这里清空，A 的草稿会被顺手发给 B
+  text.value = "";
+  // 切过来后定位到最新一条，否则停留在上一段历史的滚动位置
+  nextTick(scrollBottom);
 }
 
 // 中文输入法用 Enter 上屏候选词时也会触发 keyup.enter：不判断 composition 会提前/重复发送

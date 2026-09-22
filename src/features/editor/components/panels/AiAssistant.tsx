@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
-import type { Editor } from "@tiptap/core";
+import type { Editor, JSONContent } from "@tiptap/core";
 import {
   setAiConfig,
   requestAiCompletion,
@@ -26,6 +26,22 @@ const OPERATION_LABELS: Record<string, string> = {
 };
 
 const THIRD_PARTY_NOTICE = t("editor.ai.thirdPartyNotice");
+
+/**
+ * 把模型返回的文本按行拆成纯文本段落。
+ * insertContent 收到字符串会当 HTML 走 DOMParser（tiptap 的 createNodeFromContent），
+ * 第三方模型输出里的 <img>/<a> 等标记会变成真实节点；面板预览本就是纯文本，
+ * 按段落插入既避免解析标记，也保住换行。
+ */
+function toPlainTextContent(text: string): JSONContent[] {
+  return text
+    .split("\n")
+    .map((line) =>
+      line
+        ? { type: "paragraph", content: [{ type: "text", text: line }] }
+        : { type: "paragraph" },
+    );
+}
 
 export default function AiAssistant({
   editor,
@@ -121,7 +137,7 @@ export default function AiAssistant({
 
   const handleInsert = (): void => {
     if (result) {
-      editor.chain().focus().insertContent(result).run();
+      editor.chain().focus().insertContent(toPlainTextContent(result)).run();
       setResult("");
     }
   };
@@ -140,11 +156,11 @@ export default function AiAssistant({
         .focus()
         .setTextSelection({ from, to })
         .deleteSelection()
-        .insertContent(result)
+        .insertContent(toPlainTextContent(result))
         .run();
     } else {
       // 结果基于文档兜底上下文（发起时没有选区）：插到当前光标处，不删任何内容
-      editor.chain().focus().insertContent(result).run();
+      editor.chain().focus().insertContent(toPlainTextContent(result)).run();
     }
     setResult("");
   };
