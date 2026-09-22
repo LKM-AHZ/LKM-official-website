@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onUnmounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import { getCategory, getPaper, moodKey } from "../stores/constants";
 import {
@@ -119,7 +119,7 @@ import {
   appendMessage,
 } from "../stores/storage";
 import { useApp } from "../stores/app";
-import { t } from "~/lib/i18n";
+import { t, getLocale } from "~/lib/i18n";
 
 const app = useApp();
 
@@ -129,11 +129,16 @@ const replyText = ref("");
 const replyFontLarge = ref(false);
 const replySent = ref(false);
 
-const poolCount = computed(() => {
-  const all = getLetters();
-  return all.filter((l) => l.status === "published" && l.privacy === "public")
-    .length;
-});
+// 数据源做成 ref：原写法 computed 里直接读 localStorage（无响应式依赖），Vue 会永久缓存首次结果，
+// 池子大小与空态提示不会再随数据变化重算；改成依赖 ref 后每次挂载/替换数据都会重算
+const letters = ref(getLetters());
+
+const poolCount = computed(
+  () =>
+    letters.value.filter(
+      (l) => l.status === "published" && l.privacy === "public",
+    ).length,
+);
 
 const catInfo = computed(() => {
   if (!current.value) return { emoji: "💌", label: "" };
@@ -155,7 +160,12 @@ const replyFontSize = computed(() => {
   return (replyFontLarge.value ? baseSize * 1.15 : baseSize) + "rem";
 });
 
+let pickTimer = null;
+let replySentTimer = null;
+
 function pickRandom() {
+  // 防重入：「换一封」等入口没有 disabled 保护，连点会让多个定时器竞态覆盖 current
+  if (picking.value) return;
   const all = getLetters();
   const pool = all.filter(
     (l) => l.status === "published" && l.privacy === "public",
@@ -168,7 +178,8 @@ function pickRandom() {
   replyText.value = "";
   replySent.value = false;
   // slight delay for animation feel
-  setTimeout(() => {
+  clearTimeout(pickTimer);
+  pickTimer = setTimeout(() => {
     current.value = pool[Math.floor(Math.random() * pool.length)];
     picking.value = false;
   }, 400);
@@ -193,15 +204,23 @@ function sendReply() {
   });
   replyText.value = "";
   replySent.value = true;
-  setTimeout(() => {
+  clearTimeout(replySentTimer);
+  replySentTimer = setTimeout(() => {
     replySent.value = false;
   }, 3000);
 }
 
+// 卸载时清掉在途定时器，避免组件销毁后仍写响应式状态
+onUnmounted(() => {
+  clearTimeout(pickTimer);
+  clearTimeout(replySentTimer);
+});
+
 function formatDate(ts) {
   if (!ts) return "";
   const d = new Date(ts);
-  return d.toLocaleDateString("zh-CN", {
+  // 跟页面其余文案同源：写死 zh-CN 会让 en 用户看到中文格式日期
+  return d.toLocaleDateString(getLocale(), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

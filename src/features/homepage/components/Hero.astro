@@ -17,14 +17,14 @@ const {
 ---
 
 <section
-  class="relative not-prose h-screen min-h-screen flex flex-col justify-center overflow-hidden"
+  class="relative not-prose min-h-screen flex flex-col justify-center"
   {...id ? { id } : {}}
   data-hero-section
 >
   <div class="absolute inset-0 z-0" aria-hidden="true">
     <slot name="bg" />
   </div>
-  <div class="relative z-10 pointer-events-none max-w-7xl mx-auto px-4 sm:px-6">
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
     <div class="py-16 md:py-[80px]">
       <div class="text-center pb-10 md:pb-[80px] max-w-5xl mx-auto">
         {tagline && <p class="text-base text-secondary font-bold tracking-wide uppercase " set:html={tagline} />}

@@ -3,13 +3,20 @@ import type { ReactElement } from "react";
 import { t } from "~/lib/i18n";
 
 export default function FullscreenButton(): ReactElement {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  // 以真实 DOM 为准初始化：挂载时若已处于全屏（或错过了 fullscreenchange），
+  // 否则按钮图标与调用方向都是反的
+  const [isFullscreen, setIsFullscreen] = useState(
+    () => !!document.fullscreenElement,
+  );
 
   const toggle = useCallback(() => {
+    // 全屏 API 会因权限/iframe 策略/浏览器不支持而 reject；失败时按真实 DOM 状态回滚，
+    // 同时避免未处理的 rejection
+    const resync = (): void => setIsFullscreen(!!document.fullscreenElement);
     if (isFullscreen) {
-      document.exitFullscreen?.();
+      void document.exitFullscreen?.()?.catch(resync);
     } else {
-      document.documentElement.requestFullscreen?.();
+      void document.documentElement.requestFullscreen?.()?.catch(resync);
     }
   }, [isFullscreen]);
 

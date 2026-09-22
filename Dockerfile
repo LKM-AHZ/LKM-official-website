@@ -30,12 +30,17 @@ ENV PORT=4321
 # 服务端代码通过 process.env.API_URL 在运行时读取。
 
 # standalone 服务入口 + 生产依赖 + 清单
-COPY --from=builder /app/dist ./dist
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# 属主在 COPY 时一次给到 node：下面那条 chown 是非递归的，只改 /app 目录本身，
+# dist/ 与 node_modules/ 仍归 root，运行时往子目录写（sessions/日志/缓存）依旧 EACCES。
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node --from=prod-deps /app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /app/package.json ./package.json
 
-# 使 /app 可写，供 Astro sessions（文件系统存储于 .astro/sessions）写入
+# /app 目录本身也归 node：Astro sessions 会在 /app 下新建 .astro/（目录级授权即可，无需 -R 复制整个 node_modules 层）
 RUN chown node:node /app
+# Astro standalone 服务未注册 SIGTERM handler，而 PID 1 收到「默认处置」的 SIGTERM 会被内核忽略：
+# 没有 init 时 docker stop / k8s 删 Pod 只能等到超时被 SIGKILL，在途 SSR 请求全部丢弃。
+RUN apk add --no-cache tini
 # 以非 root 用户运行（node:alpine 内置 node 用户）
 USER node
 EXPOSE 4321
@@ -44,4 +49,5 @@ EXPOSE 4321
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO- http://127.0.0.1:4321/robots.txt >/dev/null || exit 1
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "dist/server/entry.mjs"]

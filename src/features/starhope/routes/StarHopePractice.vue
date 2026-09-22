@@ -1,25 +1,16 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useQuestionBankStore } from "../stores/question-bank";
-import { usePracticeStore } from "../stores/practice";
-import { useNavigationStore } from "../stores/navigation";
 import { t } from "~/lib/i18n";
 
+// 本页目前只是「题库数量」占位页：练习作答 UI 尚未实现，
+// 原先的 _start()/_nav 从未被引用（死接线），故移除；
+// 等实现练习流程时再接回 usePracticeStore().startPractice。
 const bank = useQuestionBankStore();
-const practice = usePracticeStore();
-const _nav = useNavigationStore();
 
 onMounted(async () => {
   await bank.loadQuestions();
 });
-
-async function _start(_questionIds: string[]) {
-  await practice.startPractice({
-    questionIds: _questionIds,
-    mode: "realtime",
-    type: "practice",
-  });
-}
 </script>
 
 <template>

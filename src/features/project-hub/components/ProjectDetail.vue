@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 项目详情（client island）—— 从后端 /api/v1/projects/{id} 拉取并渲染。
 import { onMounted, ref } from "vue";
-import { t } from "~/lib/i18n";
+import { getLocale, t } from "~/lib/i18n";
 import { projectApi, type ProjectItem } from "~/lib/api/modules/projects";
 import { buildUrl } from "~/lib/utils/paths";
 
@@ -16,7 +16,12 @@ onMounted(async () => {
 });
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("zh-CN", {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  // 后端字段缺失/非法时 toLocaleDateString 会把 "Invalid Date" 直接渲染给用户
+  if (Number.isNaN(d.getTime())) return "";
+  // 硬编码 zh-CN 会让英文站也显示中文日期，改从 i18n 取当前 Locale
+  return d.toLocaleDateString(getLocale(), {
     year: "numeric",
     month: "long",
     day: "numeric",

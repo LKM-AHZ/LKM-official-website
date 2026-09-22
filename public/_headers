@@ -1,11 +1,15 @@
-# GitHub Pages 不支持自定义 HTTP 头文件。
-# Cloudflare Pages 中可用 `_headers`，但部署到 GitHub Pages 时此文件不生效。
+# 本文件对当前部署不生效（保留作历史参考，勿据此判断线上缓存行为）。
 #
-# 如需缓存控制，请使用以下各层：
-#   - `<meta http-equiv>` 标签（HTML 内联声明，浏览器遵守但被代理忽略）
-#   - `astro.config.ts` 中 site/base 生成 <link rel="preconnect"> 和 `<link rel="dns-prefetch">`
-#   - Astro 静态资源的 content hash 文件名自带隐式 long-cache
+# 现状：站点是 `output: "server"` + node standalone 适配器（docker-compose / k8s 直接运行
+# dist/server/entry.mjs，前置 APISIX 网关 / 托管层），静态资源响应头由网关决定，
+# 没有任何一方会读取这个 `_headers` 文件；仓库内也没有任何地方下发 Cache-Control。
 #
-# 原规则（仅供参考，部署时不生效）：
-# /_astro/*
+# 排查缓存时常见的三个误解：
+#   - `<meta http-equiv="Cache-Control">` 现代浏览器会忽略、代理更不看；
+#     本项目唯一的 http-equiv 是 SecurityHeaders.astro 里的 CSP，与缓存无关。
+#   - `src/layouts/BaseLayout.astro` 里硬编码的 <link rel="preconnect"> 只是连接预热
+#     （仓库里没有 dns-prefetch），不构成缓存方案。
+#   - 带 content hash 的文件名本身不会产生长缓存，仍要服务端显式下发 Cache-Control。
+#
+# 若确需长缓存：在网关 / 托管层为 /_astro/* 下发
 #   Cache-Control: public, max-age=31536000, immutable

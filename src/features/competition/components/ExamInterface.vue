@@ -50,7 +50,7 @@
             "
             @click="answers[currentIndex] = i"
           >
-            <span class="font-mono text-text-muted mr-2">{{ labels[i] }}.</span
+            <span class="font-mono text-text-muted mr-2">{{ labelOf(i) }}.</span
             >{{ t(opt) }}
           </button>
         </div>
@@ -102,23 +102,34 @@ const answers = ref<(number | undefined)[]>(
   new Array(questions.value.length).fill(undefined),
 );
 const currentIndex = ref(0);
-const remaining = ref(7200); // 120 minutes
-let timer: ReturnType<typeof setInterval>;
+const EXAM_SECONDS = 7200; // 120 minutes
+const remaining = ref(EXAM_SECONDS);
+let timer: ReturnType<typeof setInterval> | undefined;
+let deadline = 0;
+let submitted = false;
 
 const currentQ = computed(() => questions.value[currentIndex.value]);
 const answeredCount = computed(
   () => answers.value.filter((a) => a !== undefined).length,
 );
 
-const labels = ["A", "B", "C", "D"];
+// 按选项下标现算字母标号：原来写死 A-D，题目超过 4 个选项时会渲染出 undefined
+const labelOf = (i: number): string => String.fromCharCode(65 + i);
 
 onMounted(() => {
+  // 用墙钟截止时间而不是每秒自减：后台标签页被节流或事件循环卡顿时，自减会漂移
+  // （计时器少跑，等于多给考试时间）
+  deadline = Date.now() + EXAM_SECONDS * 1000;
   timer = setInterval(() => {
-    if (remaining.value > 0) remaining.value--;
+    remaining.value = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    // 到点必须自动交卷：原来只停止递减，interval 还在空转，学生可以继续答题
+    if (remaining.value === 0) submit();
   }, 1000);
 });
 
-onUnmounted(() => clearInterval(timer));
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
 
 function formatTime(s: number): string {
   const m = Math.floor(s / 60);
@@ -127,10 +138,13 @@ function formatTime(s: number): string {
 }
 
 function submit() {
+  // 自动交卷与手动提交可能同时触发，用标志避免重复弹窗/重复跳转
+  if (submitted) return;
+  submitted = true;
   const correct = answers.value.filter(
     (a, i) => a === questions.value[i].answer,
   ).length;
-  clearInterval(timer);
+  if (timer) clearInterval(timer);
   alert(
     t("community.competition.examSubmitted", {
       correct,

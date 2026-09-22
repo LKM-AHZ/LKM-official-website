@@ -35,7 +35,8 @@ interface Props {
   description?: string;
   lang?: string;
   setOGTypeArticle?: boolean;
-  math?: boolean;
+  // 原先还有个 math?: boolean，但组件从不读它、katex CSS 又是无条件引入
+  // （见文件顶部 import），这个属性根本无法生效，保留只会误导页面作者
   navItems?: string[];
 }
 
@@ -78,7 +79,11 @@ const bannerOffsetByPosition = {
   center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
   bottom: '0',
 };
-const bannerOffset = bannerOffsetByPosition[siteConfig.banner.position || 'center'];
+// 取值来自用户 YAML：position 写错（如 "middle"）时查表得 undefined，
+// 会让 translateY(var(--bannerOffset)) 变成非法 CSS 而静默丢掉横幅偏移，故显式兜底 center
+const bannerOffset =
+  bannerOffsetByPosition[siteConfig.banner.position || 'center'] ??
+  bannerOffsetByPosition.center;
 ---
 
 <!doctype html>
@@ -178,10 +183,15 @@ const bannerOffset = bannerOffsetByPosition[siteConfig.banner.position || 'cente
   define:vars={{
     bannerOffset,
     'banner-height': `${BANNER_HEIGHT}vh`,
+    // 下面多条规则读的是 --banner-height-home，此前从未定义（height 全部退化成 auto）；
+    // 与 --banner-height 同值，等于原先的预期高度
+    'banner-height-home': `${BANNER_HEIGHT}vh`,
   }}
 >
   @layer components {
-    .enable-banner.is-home #banner-wrapper {
+    /* body 上挂的是字面 token `lg:is-home`（见下方 class:list 与 blog-transitions.ts），
+       选择器必须转义冒号才匹配得到，否则 .enable-banner.is-home 系列规则全是死规则 */
+    .enable-banner.lg\:is-home #banner-wrapper {
       height: var(--banner-height-home);
       transform: translateY(var(--banner-height-extend));
     }
@@ -189,7 +199,7 @@ const bannerOffset = bannerOffsetByPosition[siteConfig.banner.position || 'cente
       height: var(--banner-height-home);
     }
 
-    .enable-banner.is-home #banner {
+    .enable-banner.lg\:is-home #banner {
       height: var(--banner-height-home);
       transform: translateY(0);
     }
@@ -197,14 +207,14 @@ const bannerOffset = bannerOffsetByPosition[siteConfig.banner.position || 'cente
       height: var(--banner-height-home);
       transform: translateY(var(--bannerOffset));
     }
-    .enable-banner.is-home #main-grid {
+    .enable-banner.lg\:is-home #main-grid {
       transform: translateY(var(--banner-height-extend));
     }
     .enable-banner #navbar-wrapper {
       height: calc(var(--banner-height-home) - 4.5rem);
       transition: height var(--duration-slow) var(--ease-out);
     }
-    .enable-banner.is-home #sidebar-sticky {
+    .enable-banner.lg\:is-home #sidebar-sticky {
       top: calc(1rem - var(--banner-height-extend));
     }
     .navbar-hidden {

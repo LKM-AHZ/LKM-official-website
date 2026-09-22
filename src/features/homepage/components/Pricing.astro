@@ -22,10 +22,10 @@ const {
     <div class="grid grid-cols-3 gap-4 text-deep-text sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
       {
         prices &&
-          prices.map(({ title, subtitle, price, period, items, callToAction, hasRibbon = false, ribbonTitle }) => (
+          prices.map(({ title: planTitle, subtitle: planSubtitle, price, period, items, callToAction, hasRibbon = false, ribbonTitle }) => (
             <div class="col-span-3 mx-auto flex w-full sm:col-span-1 md:col-span-1 lg:col-span-1 xl:col-span-1 ">
               {price && period && (
-                <div class="rounded-[12px] bg-page-bg border border-surface-3 px-6 py-8 flex w-full max-w-sm flex-col justify-between text-center card-hover">
+                <div class="relative rounded-[12px] bg-page-bg border border-surface-3 px-6 py-8 flex w-full max-w-sm flex-col justify-between text-center card-hover">
                   {hasRibbon && ribbonTitle && (
                     <div class="absolute right-[-5px] 2xl:right-[-8px] rtl:right-auto rtl:left-[-8px] rtl:2xl:left-[-10px] top-[-5px] 2xl:top-[-10px] z-[1] h-[100px] w-[100px] overflow-hidden text-right">
                       <span class="absolute top-[19px] right-[-21px] rtl:right-auto rtl:left-[-21px] block w-full rotate-45 rtl:-rotate-45 bg-primary text-center text-[10px] font-bold uppercase leading-5 text-on-primary shadow-[0_3px_10px_-5px_rgba(0,0,0,0.3)] before:absolute before:left-0 before:top-full before:z-[-1] before:border-[3px] before:border-r-transparent before:border-b-transparent before:border-l-[var(--primary)] before:border-t-[var(--primary)] before:content-[''] after:absolute after:right-0 after:top-full after:z-[-1] after:border-[3px] after:border-l-transparent after:border-b-transparent after:border-r-[var(--primary)] after:border-t-[var(--primary)] after:content-['']">
@@ -34,12 +34,12 @@ const {
                     </div>
                   )}
                   <div class="px-2 py-0">
-                    {title && (
+                    {planTitle && (
                       <h3 class="text-center text-[17px] font-semibold uppercase leading-6 tracking-wide mb-2 text-deep-text">
-                        {title}
+                        {planTitle}
                       </h3>
                     )}
-                    {subtitle && <p class="text-[14px] text-text-muted">{subtitle}</p>}
+                    {planSubtitle && <p class="text-[14px] text-text-muted">{planSubtitle}</p>}
                     <div class="my-8">
                       <div class="flex items-center justify-center text-center mb-1">
                         <span class="text-5xl">$</span>

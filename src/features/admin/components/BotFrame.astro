@@ -35,6 +35,9 @@ const result = await post<{ ticket: string; expires_in: number }>(
   '/api/v1/admin/bot/sso-ticket',
 );
 const ticket = result.isOk() ? result.value?.ticket : undefined;
+// 页面内嵌的是「按用户签发、一次性」的 SSO ticket：任何共享缓存/CDN 一旦缓存本页，
+// 就可能把 A 的 ticket 发给 B（重放/会话固定），故显式声明不可缓存。
+Astro.response.headers.set('Cache-Control', 'private, no-store');
 const iframeSrc = ticket
   ? `/bot/api/v1/auth/sso?ticket=${encodeURIComponent(ticket)}&next=${encodeURIComponent(hashRoute)}`
   : '/bot/';

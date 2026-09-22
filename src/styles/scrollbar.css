@@ -1,7 +1,9 @@
 @reference "tailwindcss";
 .scrollbar-base.os-scrollbar {
   @apply transition-all;
-  pointer-events: unset;
+  /* 不要设 pointer-events: unset：unset 对可继承属性等于 inherit，既受祖先影响，
+     又会让整条 16px 隐形沟槽可点击（autoHide 时吞掉右/下边缘内容的点击）。
+     轨道/滑块的交互由库自身的 .os-scrollbar-*-interactive 规则开启。 */
 
   &.os-scrollbar-horizontal {
     @apply py-1 px-2 h-4;

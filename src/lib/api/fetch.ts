@@ -40,13 +40,21 @@ function createTimeoutSignal(timeoutMs: number): {
 }
 
 /**
- * 合并多个 AbortSignal：任一触发则合并后的 signal 触发
+ * 合并多个 AbortSignal：任一触发则合并后的 signal 触发。
+ * 返回 cleanup 供请求结束后摘除监听 —— 外部 signal 常被调用方长期复用，
+ * 不摘除会让 abort 监听随请求次数累积（内存泄漏）。
  */
-function mergeAbortSignals(signals: AbortSignal[]): AbortSignal {
+function mergeAbortSignals(signals: AbortSignal[]): {
+  signal: AbortSignal;
+  cleanup: () => void;
+} {
   const controller = new AbortController();
+  const cleanup = (): void => {
+    signals.forEach((s) => s.removeEventListener("abort", onAbort));
+  };
   const onAbort = (): void => {
     controller.abort();
-    signals.forEach((s) => s.removeEventListener("abort", onAbort));
+    cleanup();
   };
   signals.forEach((s) => {
     if (s.aborted) {
@@ -55,7 +63,10 @@ function mergeAbortSignals(signals: AbortSignal[]): AbortSignal {
     }
     s.addEventListener("abort", onAbort, { once: true });
   });
-  return controller.signal;
+  // 已有 signal 处于 aborted 时提前返回，这里补一次 cleanup，
+  // 否则循环中先前已注册的监听不会被摘除
+  if (controller.signal.aborted) cleanup();
+  return { signal: controller.signal, cleanup };
 }
 
 /**
@@ -74,9 +85,9 @@ export async function apiFetch(
 
   const timeoutCtl = createTimeoutSignal(timeout);
   const externalSignal = init?.signal;
-  const mergedSignal = externalSignal
+  const merged = externalSignal
     ? mergeAbortSignals([timeoutCtl.signal, externalSignal])
-    : timeoutCtl.signal;
+    : { signal: timeoutCtl.signal, cleanup: (): void => {} };
 
   const { signal: _sig, timeout: _to, ...restInit } = init || {};
   void _sig;
@@ -86,16 +97,20 @@ export async function apiFetch(
     // eslint-disable-next-line no-restricted-globals
     const response = await fetch(fullUrl, {
       ...restInit,
-      signal: mergedSignal,
+      signal: merged.signal,
     });
-    timeoutCtl.clear();
     return ok(response);
   } catch (e: unknown) {
-    timeoutCtl.clear();
-
-    if (e instanceof DOMException && e.name === "AbortError") {
+    if (e instanceof Error && e.name === "AbortError") {
+      // 只有内部超时器触发才算超时；外部 signal 主动取消（离开页面/卸载组件）
+      // 不该被上报成超时。用 instanceof Error 而非 DOMException：polyfill/运行时
+      // 可能抛 name 为 AbortError 的普通 Error。
+      const timedOut = timeoutCtl.signal.aborted;
       return err(
-        new AppError(ErrorCode.HTTP_TIMEOUT, t("messages.timeoutOrCancelled")),
+        new AppError(
+          timedOut ? ErrorCode.HTTP_TIMEOUT : ErrorCode.NETWORK_ERROR,
+          t("messages.timeoutOrCancelled"),
+        ),
       );
     }
 
@@ -106,5 +121,9 @@ export async function apiFetch(
         t("messages.networkRequestFailed", { error: message.slice(0, 300) }),
       ),
     );
+  } finally {
+    // 无论成功失败都清超时器并摘除合并 signal 上的 abort 监听
+    timeoutCtl.clear();
+    merged.cleanup();
   }
 }

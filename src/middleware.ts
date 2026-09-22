@@ -13,6 +13,9 @@ import { ensureDict } from "~/lib/i18n";
 import { SUPPORTED_LOCALES } from "~/lib/i18n/types";
 import type { Locale } from "~/lib/i18n/types";
 
+// 只填 origin：下面用 `new URL(pathname, base)` 拼接，而 URL 构造会用绝对 pathname 覆盖
+// base 的路径部分 —— API_URL=https://api.example.com/v1 会被静默丢掉 /v1。
+// 现行部署（compose 与 k8s）都是 http://backend:8000，无路径。
 const API_TARGET = process.env.API_URL ?? "";
 
 /** 从请求 Cookie 解析当前 locale（缺省 zh-CN 默认语）。畸形编码回退默认语。 */
@@ -22,7 +25,8 @@ function localeFromCookie(cookieHeader: string | null): Locale {
     if (m) {
       try {
         const parsed = decodeURIComponent(m[1]);
-        if ((SUPPORTED_LOCALES as string[]).includes(parsed))
+        // SUPPORTED_LOCALES 已是 readonly 元组，转 readonly string[] 才能调 includes
+        if ((SUPPORTED_LOCALES as readonly string[]).includes(parsed))
           return parsed as Locale;
       } catch {
         // 畸形 percent-encoding 回退默认语
@@ -53,8 +57,12 @@ const RESPONSE_ONLY_DROP_HEADERS = new Set(["content-encoding"]);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+  // /graphql 必须精确匹配或带路径分隔符：startsWith("/graphql") 会把 /graphqlql、
+  // /graphql-docs 之类的前端路由也转发给后端，页面再也渲染不出来
   const isProxyPath =
-    pathname.startsWith("/api/") || pathname.startsWith("/graphql");
+    pathname.startsWith("/api/") ||
+    pathname === "/graphql" ||
+    pathname.startsWith("/graphql/");
 
   // 非代理路径：建立 SSR 请求上下文，供页面 SSR 数据获取转发 Cookie
   if (!isProxyPath) {
@@ -99,7 +107,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
       API_TARGET,
     );
 
-    // 转发客户端原始请求头（Cookie、Authorization 等），跳过 hop-by-hop 头
+    // 转发客户端原始请求头（Cookie、Authorization 等），跳过 hop-by-hop 头。
+    // X-Real-IP / X-Forwarded-* 刻意不剥离：网关（APISIX global rule）用 $remote_addr 以 set 语义
+    // 覆写过它们，且 astro 容器不发布端口、生产流量必经网关；后端 client_ip() 正是靠
+    // 网关注入的 X-Real-IP 做限流与审计（见 LKM-service/app/core/client_ip.py）。
     const headers = new Headers();
     for (const [key, value] of context.request.headers) {
       if (HOP_BY_HOP_HEADERS.has(key.toLowerCase())) continue;
@@ -107,15 +118,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     // 构建转发请求
+    // 必须按二进制转发：上传（multipart/form-data）走 text() 会按 UTF-8 解码再编码，
+    // 非文本字节被破坏；content-type 原样透传，arrayBuffer 不改变语义
     const body = ["GET", "HEAD"].includes(context.request.method)
       ? undefined
-      : await context.request.text();
+      : await context.request.arrayBuffer();
 
     // eslint-disable-next-line no-restricted-globals
     const response = await fetch(targetUrl.toString(), {
       method: context.request.method,
       headers,
       body,
+      // 默认 follow 会在服务端跟随后端的 3xx（如登录后跳 /dashboard），浏览器拿到的是最终
+      // 页面的 body、状态码变成 200，3xx 上的 Set-Cookie 也会丢。manual 让重定向原样回到浏览器。
+      redirect: "manual",
     });
 
     // 返回真实后端的响应（保留状态码和响应头）
@@ -141,7 +157,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
       status: response.status,
       headers: responseHeaders,
     });
-  } catch {
+  } catch (error) {
+    // 裸 catch 会把后端不可达（DNS/TLS/连接重置）与客户端断开（AbortError）混成同一个 502，
+    // 排障时无从区分，这里至少把原因留在服务端日志里
+    console.error("[middleware] proxy upstream request failed", {
+      path: pathname,
+      error,
+    });
     return new Response(
       JSON.stringify({
         error: { code: "PROXY_ERROR", message: "后端服务不可用" },

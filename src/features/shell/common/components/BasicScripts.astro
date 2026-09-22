@@ -179,8 +179,10 @@ import { UI } from '~/lib/config';
       document.documentElement.classList.add('motion-safe:scroll-smooth');
     };
 
-    window.onload = onLoad;
-    window.onpageshow = onPageShow;
+    // 不用 window.onload/onpageshow 赋值：那会覆盖其它脚本（含第三方）已注册的同名处理器，
+    // 且覆盖不报错、只静默失效。addEventListener 是叠加而非替换。
+    window.addEventListener('load', onLoad);
+    window.addEventListener('pageshow', onPageShow);
 
     document.addEventListener('astro:after-swap', () => {
       initTheme();

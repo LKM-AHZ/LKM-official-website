@@ -10,10 +10,13 @@ interface Props {
 }
 
 const { id, class: className, links, module: navModule = 'official' } = Astro.props;
-const baseClasses = 'sticky top-0 z-50 bg-white dark:bg-[oklch(0.23_0.015_var(--hue))]';
+// 这里只负责定位：背景/圆角等外观由 FuwariNavbar 的内层导航条自己渲染，
+// 两边各写一份 dark: 变体迟早会漂移
+const baseClasses = 'sticky top-0 z-50';
 const mergedClass = [baseClasses, className].filter(Boolean).join(' ');
 ---
 
-<div id={id || 'navbar-wrapper'} class={mergedClass}>
-  <FuwariNavbar links={links} module={navModule} />
-</div>
+<header id={id || 'navbar-wrapper'} class={mergedClass}>
+  <!-- 调用方传的 class 同时转给 FuwariNavbar：它才是真正渲染导航外观的元素 -->
+  <FuwariNavbar links={links} module={navModule} class={className} />
+</header>

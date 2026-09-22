@@ -12,7 +12,9 @@ export type FlatDict = Record<string, string>;
 
 /** 将嵌套词典扁平化为 `a.b.c` 路径 → 字符串 */
 export function flatten(dict: NestedDict, prefix = ""): FlatDict {
-  const out: FlatDict = {};
+  // 无原型对象：词典里出现 `__proto__`/`constructor` 这类键时，
+  // 普通对象上的 [[Set]] 会命中原型访问器、把键静默丢掉（甚至污染原型链）
+  const out: FlatDict = Object.create(null) as FlatDict;
   for (const [key, value] of Object.entries(dict)) {
     const path = prefix ? `${prefix}.${key}` : key;
     if (typeof value === "string") {

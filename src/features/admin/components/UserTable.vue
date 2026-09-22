@@ -38,6 +38,11 @@ const { items, total, page, totalPages, loading, error, refresh, goTo } =
 const rows = items;
 const load = refresh;
 
+// refresh() 内部已把 page 复位为 1（usePagination.ts），模板里再写 page = 1 是重复且易漂移的。
+function runSearch(): void {
+  void load();
+}
+
 onMounted(() => void load());
 </script>
 
@@ -49,18 +54,12 @@ onMounted(() => void load());
         type="text"
         :placeholder="t('admin.users.searchPlaceholder')"
         class="px-3 py-1.5 rounded-lg text-sm bg-page-bg border border-surface-3 focus:outline-none focus:border-primary"
-        @keyup.enter="
-          page = 1;
-          load();
-        "
+        @keyup.enter="runSearch"
       />
       <button
         class="px-3 py-1.5 rounded-lg text-sm font-medium bg-primary text-on-primary"
         :disabled="loading"
-        @click="
-          page = 1;
-          load();
-        "
+        @click="runSearch"
       >
         {{ t("common.search") }}
       </button>

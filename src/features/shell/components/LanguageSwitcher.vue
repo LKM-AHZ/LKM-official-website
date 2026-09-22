@@ -2,13 +2,14 @@
 import { ref } from "vue";
 import { t } from "~/lib/i18n";
 import { useI18n } from "~/lib/i18n/composables/useI18n";
+import type { Locale } from "~/lib/i18n/types";
 import { Icon } from "@iconify/vue";
 
 const { locale, setLocale } = useI18n();
 
 const isOpen = ref(false);
 
-const options = [
+const options: { value: Locale; label: string }[] = [
   { value: "zh-CN", label: t("languageSwitcher.zh") },
   { value: "en", label: t("languageSwitcher.en") },
 ];
@@ -17,10 +18,12 @@ function toggle() {
   isOpen.value = !isOpen.value;
 }
 
-function select(next: "zh-CN" | "en") {
+function select(next: Locale) {
   isOpen.value = false;
   if (next === locale.value) return;
   setLocale(next);
+  // 整页刷新是必需的：服务端渲染的文案/`lang` 属性只在下次请求时才会按新 locale 输出，
+  // 只靠 setLocale 的响应式更新无法改动已经渲染好的 SSR 内容
   window.location.reload();
 }
 </script>
@@ -31,7 +34,6 @@ function select(next: "zh-CN" | "en") {
       aria-label="Language"
       class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       @click="toggle"
-      @mouseenter="isOpen = true"
     >
       <Icon icon="material-symbols:language" class="text-[1.25rem]" />
     </button>

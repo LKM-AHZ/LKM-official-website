@@ -10,6 +10,7 @@
  */
 export function avatarUrl(avatarKey?: string): string | undefined {
   if (!avatarKey) return undefined;
-  const base = avatarKey.replace(/\.(jpe?g|png)$/i, "");
+  // 后缀剥离要覆盖后端可能给回的各种图片扩展名，否则 xxx.webp 会变成 xxx.webp.webp（404）
+  const base = avatarKey.replace(/\.(jpe?g|png|webp|gif|bmp|avif)$/i, "");
   return `/api/v1/avatars/${encodeURIComponent(base)}.webp`;
 }

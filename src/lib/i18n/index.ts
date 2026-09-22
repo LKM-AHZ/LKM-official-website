@@ -21,7 +21,8 @@ const dictPromises: Partial<Record<Locale, Promise<FlatDict>>> = {};
 
 /**
  * 确保某 locale 的词典已载入（memoize）。en 走动态 import() 独立 chunk，
- * 命中后写入注册表供 t() 同步读取。SSR 端 zh-默认已同步可用，en 在 SSR 也同步 import。
+ * 命中后写入注册表供 t() 同步读取。SSR 端 zh-CN 默认已同步可用；
+ * en 不是同步的 —— 需由 SSR 侧（如 middleware）先 await 本函数再渲染，否则 t() 只能回退 zh-CN。
  */
 export async function ensureDict(locale: Locale): Promise<FlatDict> {
   const existing = loadedDicts[locale];
@@ -32,27 +33,39 @@ export async function ensureDict(locale: Locale): Promise<FlatDict> {
     locale === "en"
       ? import("./generated/en.flat").then((m) => m.enFlat)
       : Promise.resolve(zhFlat)
-  ).then((dict) => {
-    loadedDicts[locale] = dict;
-    return dict;
-  });
+  )
+    .then((dict) => {
+      loadedDicts[locale] = dict;
+      return dict;
+    })
+    .catch((err) => {
+      // 载入失败（chunk 404 / 产物缺失）不能把 rejected promise 永久 memoize：
+      // 否则 middleware 的 await 之后每次请求都失败，且该 locale 永不恢复。
+      // 清掉 memo 让下次调用重试，本次降级为默认语词典。
+      delete dictPromises[locale];
+      console.error(`[i18n] 词典载入失败 locale=${locale}`, err);
+      return zhFlat;
+    });
   return dictPromises[locale]!;
+}
+
+/** 语言标记 → 受支持 Locale 的唯一匹配规则（无法匹配返回 null，由调用方决定回退） */
+function matchLocale(raw: string | null | undefined): Locale | null {
+  if (!raw) return null;
+  const lang = raw.toLowerCase().replace("_", "-");
+  if (lang.startsWith("en")) return "en";
+  if (lang.startsWith("zh")) return "zh-CN";
+  return null;
 }
 
 /** 根据配置默认语言推断 Locale */
 function localeFromConfig(): Locale {
-  const lang = (I18N.language || "").toLowerCase().replace("_", "-");
-  if (lang.startsWith("en")) return "en";
-  return "zh-CN";
+  return matchLocale(I18N.language) ?? "zh-CN";
 }
 
-/** 根据原始语言标记推断支持的 Locale */
+/** 根据原始语言标记推断支持的 Locale（未知语种回落到配置语言） */
 function normalizeLocale(raw: string | null | undefined): Locale {
-  if (!raw) return localeFromConfig();
-  const lang = raw.toLowerCase().replace("_", "-");
-  if (lang.startsWith("en")) return "en";
-  if (lang.startsWith("zh")) return "zh-CN";
-  return localeFromConfig();
+  return matchLocale(raw) ?? localeFromConfig();
 }
 
 /** 解析当前 Locale —— SSR 优先读请求 Cookie，CSR 优先读 localStorage，缺省回落到站点配置语言 */

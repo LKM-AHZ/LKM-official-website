@@ -39,7 +39,10 @@
             <button
               v-for="a in accents"
               :key="a[0]"
+              type="button"
               class="accent-dot"
+              :aria-label="`${t('treehole.settings.accentColor')} ${a[0]}`"
+              :aria-pressed="state.settings.accent === a[0]"
               :class="{ active: state.settings.accent === a[0] }"
               :style="{
                 background: `linear-gradient(135deg, ${a[0]}, ${a[1]})`,
@@ -94,7 +97,11 @@
             <small>{{ t("treehole.settings.whiteNoiseDesc") }}</small>
           </div>
           <button
+            type="button"
             class="switch"
+            role="switch"
+            :aria-label="t('treehole.settings.whiteNoise')"
+            :aria-checked="state.settings.audioOn"
             :class="{ on: state.settings.audioOn }"
             @click="toggleAudio"
           >
@@ -109,7 +116,11 @@
             <small>{{ t("treehole.settings.highContrastDesc") }}</small>
           </div>
           <button
+            type="button"
             class="switch"
+            role="switch"
+            :aria-label="t('treehole.settings.highContrast')"
+            :aria-checked="highContrast"
             :class="{ on: highContrast }"
             @click="toggleHighContrast()"
           >
@@ -124,8 +135,12 @@
             <small>{{ t("treehole.settings.lowPerfDesc") }}</small>
           </div>
           <button
+            type="button"
             class="switch"
-            :class="{ on: lowPerf }"
+            role="switch"
+            :aria-label="t('treehole.settings.lowPerf')"
+            :aria-checked="state.settings.lowPerf"
+            :class="{ on: state.settings.lowPerf }"
             @click="toggleLowPerf()"
           >
             <span class="knob"></span>
@@ -139,7 +154,11 @@
             <small>{{ t("treehole.settings.muteDesc") }}</small>
           </div>
           <button
+            type="button"
             class="switch"
+            role="switch"
+            :aria-label="t('treehole.settings.mute')"
+            :aria-checked="state.settings.muted"
             :class="{ on: state.settings.muted }"
             @click="toggleMuted"
           >
@@ -190,18 +209,16 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import PrivacyDialog from "../components/PrivacyDialog.vue";
 import { useApp } from "../stores/app";
-import * as store from "../stores/storage";
 import { t } from "~/lib/i18n";
 
 const app = useApp();
 const {
   state,
   isNight,
-  lowPerf,
   highContrast,
   setTheme,
   setFontScale,
@@ -224,6 +241,15 @@ const accents = [
 ];
 const customA = ref(state.settings.accent);
 
+// 色板输入框只初始化一次的话，选预设色块/别处改 accent 后它仍显示旧颜色，
+// 用户再确认就会把过期色值写回 store，故跟随 state 同步
+watch(
+  () => state.settings.accent,
+  (a) => {
+    customA.value = a;
+  },
+);
+
 function onCustom() {
   const b = customA.value;
   const b2 = shade(b, 40);
@@ -231,6 +257,9 @@ function onCustom() {
 }
 
 function shade(hex, amt) {
+  // 非 #rrggbb（空串、#abc、被 getSettings 合并弄脏的历史值）解析出来是 NaN 通道，
+  // 会生成 "#NaNNaNNaN" 这种非法颜色；原样返回比产出坏值安全。
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
   const h = hex.replace("#", "");
   let r = parseInt(h.slice(0, 2), 16) + amt;
   let g = parseInt(h.slice(2, 4), 16) + amt;
@@ -242,8 +271,9 @@ function shade(hex, amt) {
 }
 
 function toggleAudio() {
+  // 只改 reactive state：useApp 里已有 deep watch 负责落盘，
+  // 这里再手动 saveSettings 会把整个 settings 对象写两遍
   state.settings.audioOn = !state.settings.audioOn;
-  store.saveSettings({ audioOn: state.settings.audioOn });
 }
 </script>
 

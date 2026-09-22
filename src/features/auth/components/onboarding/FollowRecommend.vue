@@ -6,7 +6,10 @@
       </h3>
       <p class="text-sm text-text-muted mt-1">
         {{
-          t("onboarding.follow.hint", { min: 3, selected: selectedIds.length })
+          t("onboarding.follow.hint", {
+            min: REQUIRED_SELECTIONS,
+            selected: selectedIds.length,
+          })
         }}
       </p>
     </div>
@@ -50,17 +53,18 @@
         type="button"
         class="flex items-start gap-3 p-3 rounded-lg border text-left transition-colors"
         :class="
-          selectedIds.includes(item.id)
+          selectedSet.has(item.id)
             ? 'border-primary bg-primary/5'
             : 'border-surface-3 bg-card-bg hover:border-primary/30'
         "
+        :aria-pressed="selectedSet.has(item.id)"
         @click="toggle(item.id)"
       >
         <Icon
           :icon="item.icon"
           class="w-8 h-8 shrink-0 mt-0.5"
           :class="
-            selectedIds.includes(item.id) ? 'text-primary' : 'text-text-muted'
+            selectedSet.has(item.id) ? 'text-primary' : 'text-text-muted'
           "
         />
         <div class="flex-1 min-w-0">
@@ -69,7 +73,7 @@
           >
             {{ t(item.name) }}
             <span
-              v-if="selectedIds.includes(item.id)"
+              v-if="selectedSet.has(item.id)"
               class="text-primary text-xs"
               >✓</span
             >
@@ -95,16 +99,17 @@
         type="button"
         class="flex items-start gap-3 p-3 rounded-lg border text-left transition-colors"
         :class="
-          selectedIds.includes(item.id)
+          selectedSet.has(item.id)
             ? 'border-primary bg-primary/5'
             : 'border-surface-3 bg-card-bg hover:border-primary/30'
         "
+        :aria-pressed="selectedSet.has(item.id)"
         @click="toggle(item.id)"
       >
         <div
           class="w-8 h-8 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm"
         >
-          {{ t(item.name).charAt(0) }}
+          {{ t(item.name).charAt(0) || "?" }}
         </div>
         <div class="flex-1 min-w-0">
           <div
@@ -112,7 +117,7 @@
           >
             {{ t(item.name) }}
             <span
-              v-if="selectedIds.includes(item.id)"
+              v-if="selectedSet.has(item.id)"
               class="text-primary text-xs"
               >✓</span
             >
@@ -130,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 
@@ -253,8 +258,15 @@ const recommendAuthors: RecommendItem[] = [
   },
 ];
 
+// 最少关注数：模板提示文案与 isComplete 门禁必须同源，避免改一处造成文案/门禁不一致
+const REQUIRED_SELECTIONS = 3;
+
 const activeTab = ref<"category" | "author">("category");
 const selectedIds = ref<string[]>([]);
+
+// Set 化查表：模板里每个条目要比对 3~5 次，数组 includes 是 O(items×selected)，
+// 换成 Set 后每次 O(1)（列表将来接后端数据后差距会放大）
+const selectedSet = computed(() => new Set(selectedIds.value));
 
 function toggle(id: string) {
   const idx = selectedIds.value.indexOf(id);
@@ -266,7 +278,7 @@ function toggle(id: string) {
 }
 
 defineExpose({
-  isComplete: () => selectedIds.value.length >= 3,
+  isComplete: () => selectedIds.value.length >= REQUIRED_SELECTIONS,
   getData: () => [...selectedIds.value],
 });
 </script>

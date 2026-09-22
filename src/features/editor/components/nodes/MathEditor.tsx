@@ -20,7 +20,9 @@ export default function MathEditor({
   const previewRef = useRef<HTMLSpanElement>(null);
 
   const handleConfirm = useCallback(() => {
-    onConfirm(latex || initialLatex);
+    // 预览用的是 trim 后的文本，落库保持一致；只有输入被清空时才回退成原始公式
+    // （空公式会在文档里留下空节点，不如保留原值）
+    onConfirm(latex.trim() || initialLatex);
   }, [latex, initialLatex, onConfirm]);
 
   // 实时渲染 KaTeX 预览

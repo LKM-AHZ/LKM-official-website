@@ -1,6 +1,12 @@
 import { reactive, ref, computed } from "vue";
 import { authApi } from "~/lib/api/modules/auth";
+import type { RecoverRequires2FA } from "~/lib/api/modules/auth";
 import { t } from "~/lib/i18n";
+import type { Result } from "~/lib/errors/result";
+import type { AppError } from "~/lib/errors/error-codes";
+
+/** recoverEmail/Phone/MagicLinkVerify 三个入口返回类型一致，显式标注避免 `let r` 退化成 evolving any */
+type RecoverVerifyResult = Result<RecoverRequires2FA, AppError>;
 
 export type RecoveryStage = "account" | "verify" | "2fa" | "reset" | "done";
 export type RecoveryContact = "email" | "phone" | "magic";
@@ -36,6 +42,9 @@ export interface RecoveryFlow {
  *   - MFA 用户：返回 txn_id + temp_token → 2FA(TOTP) → verifyTotp → complete(new_password)
  * 另支持 Magic Link 发送。
  */
+/** 新密码最小长度：客户端只做第一道校验，后端仍有自己的规则；提成常量避免与文案/测试各写一份 */
+export const MIN_PASSWORD_LENGTH = 6;
+
 export function useRecoveryFlow(
   options: RecoveryFlowOptions = {},
 ): RecoveryFlow {
@@ -96,7 +105,7 @@ export function useRecoveryFlow(
     if (!code.value.trim()) return fail(t("messages.recovery.enterCode"));
     loading.value = true;
     try {
-      let r;
+      let r: RecoverVerifyResult;
       if (contact.value === "email") {
         r = await authApi.recoverEmailVerify(value, code.value.trim());
       } else if (contact.value === "phone") {
@@ -144,7 +153,7 @@ export function useRecoveryFlow(
   // ── Step 3: 设置新密码（MFA 场景走完 verify-totp 后；非 MFA 场景由 verify 直接带新密码）──
   async function stepReset(): Promise<void> {
     error.value = null;
-    if (newPassword.value.length < 6)
+    if (newPassword.value.length < MIN_PASSWORD_LENGTH)
       return fail(t("messages.recovery.passwordTooShort"));
     if (newPassword.value !== confirm.value)
       return fail(t("messages.recovery.passwordMismatch"));
@@ -153,7 +162,7 @@ export function useRecoveryFlow(
       const value = account.value.trim();
       if (!txnId.value) {
         // 非 MFA：传给 verify 步作为新密码
-        let r;
+        let r: RecoverVerifyResult;
         if (contact.value === "email") {
           r = await authApi.recoverEmailVerify(
             value,

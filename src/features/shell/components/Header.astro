@@ -6,9 +6,8 @@ import ToggleTheme from '~/features/shell/common/components/ToggleTheme.astro';
 import ToggleMenu from '~/features/shell/common/components/ToggleMenu.astro';
 import MobileNavPanel from '~/features/shell/components/MobileNavPanel.astro';
 
-import { getHomePermalink } from '~/lib/utils/permalinks';
+import { getAsset, getHomePermalink } from '~/lib/utils/permalinks';
 import { trimSlash } from '~/lib/utils/paths';
-import { getAsset } from '~/lib/utils/permalinks';
 
 interface Link {
   text?: string;
@@ -28,6 +27,8 @@ export interface Props {
   showToggleTheme?: boolean;
   showRssFeed?: boolean;
   showGithub?: boolean;
+  /** GitHub 图标指向的地址；默认沿用本仓库既有账号，可由调用方覆盖（避免把账号写死在共享组件里） */
+  githubUrl?: string;
   position?: string;
 }
 
@@ -38,6 +39,7 @@ const {
   showToggleTheme = false,
   showRssFeed = false,
   showGithub = false,
+  githubUrl = 'https://github.com/LKM-AHZ',
   position = 'center',
 } = Astro.props;
 
@@ -157,7 +159,7 @@ const mobileLinks = toMobileLinks(links);
                 aria-label="GitHub"
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://github.com/LKM-AHZ"
+                href={githubUrl}
               >
                 <Icon name="tabler:brand-github" class="w-5 h-5" />
               </a>
@@ -180,4 +182,7 @@ const mobileLinks = toMobileLinks(links);
   </div>
 </header>
 
+<!-- 注意：这个 id 必须全局唯一，且与 ToggleMenu.astro 里硬编码的 data-mobile-menu-trigger
+     / aria-controls（"mobile-nav-header"，用 querySelector 只取首个匹配）保持一致；
+     同页渲染两个 Header 会导致重复 id、只有第一个汉堡按钮生效。 -->
 <MobileNavPanel id="mobile-nav-header" title={t('nav.navigation')} links={mobileLinks} />

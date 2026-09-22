@@ -4,6 +4,9 @@ import type {
   LIGHT_MODE,
 } from "~/lib/constants/constants";
 
+/** TOC 支持的最大标题层级：类型与渲染逻辑（siteConfig.toc.depth）共用同一处定义 */
+export type TocDepth = 1 | 2 | 3;
+
 export type SiteConfig = {
   title: string;
   subtitle: string;
@@ -27,7 +30,7 @@ export type SiteConfig = {
   };
   toc: {
     enable: boolean;
-    depth: 1 | 2 | 3;
+    depth: TocDepth;
   };
 
   favicon: Favicon[];
@@ -39,11 +42,9 @@ export type Favicon = {
   sizes?: string;
 };
 
-export enum LinkPreset {
-  Home = 0,
-  Archive = 1,
-  About = 2,
-}
+// 用字符串字面量联合而非数字枚举：0(Home) 是 falsy，且数字不可序列化，
+// 消费者得靠 typeof 判分支（全仓库目前没有消费方，保留类型定义备用）
+export type LinkPreset = "home" | "archive" | "about";
 
 export type NavBarLink = {
   name: string;
@@ -75,21 +76,6 @@ export type LicenseConfig = {
 
 export type LIGHT_DARK_MODE =
   typeof LIGHT_MODE | typeof DARK_MODE | typeof AUTO_MODE;
-
-export type BlogPostData = {
-  body: string;
-  title: string;
-  published: Date;
-  description: string;
-  tags: string[];
-  draft?: boolean;
-  image?: string;
-  category?: string;
-  prevTitle?: string;
-  prevSlug?: string;
-  nextTitle?: string;
-  nextSlug?: string;
-};
 
 export type ExpressiveCodeConfig = {
   theme: string;

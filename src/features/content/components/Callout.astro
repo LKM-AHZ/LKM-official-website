@@ -6,12 +6,16 @@ interface Props {
 
 const { type = 'info', title } = Astro.props as Props;
 
-const alertClass = {
-  info: 'alert-info',
-  warning: 'alert-warning',
-  error: 'alert-error',
-  success: 'alert-success',
-}[type];
+// type 的联合类型只在编译期有效：MDX/内容里传进来的值可能不在这四个之内，
+// 此时 alertClass 与 icons[type] 都会是 undefined（渲染成无样式、无图标的空壳），
+// 故两处都回退到 info
+const alertClass =
+  {
+    info: 'alert-info',
+    warning: 'alert-warning',
+    error: 'alert-error',
+    success: 'alert-success',
+  }[type] ?? 'alert-info';
 
 const icons: Record<string, string> = {
   info: 'ℹ️',
@@ -22,7 +26,7 @@ const icons: Record<string, string> = {
 ---
 
 <div class:list={['alert', alertClass, 'my-4 not-prose']}>
-  <span class="text-lg">{icons[type]}</span>
+  <span class="text-lg">{icons[type] ?? icons.info}</span>
   <div>
     {title && <h4 class="font-semibold text-sm">{title}</h4>}
     <div class="text-sm">

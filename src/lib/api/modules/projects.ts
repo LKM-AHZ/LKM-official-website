@@ -109,7 +109,8 @@ export const projectApi = {
   /** 项目详情。 */
   async getProject(id: string): Promise<ProjectItem | null> {
     const res = await get<BackendProject>(`/api/v1/projects/${id}`);
-    if (res.isErr()) return null;
+    // toResult 对非 JSON/空 2xx 体会返回 ok(null)，直接 mapProject 会抛 TypeError
+    if (res.isErr() || !res.value) return null;
     return mapProject(res.value);
   },
 

@@ -47,9 +47,12 @@ const togglePanel = () => {
   panel?.classList.toggle("float-panel-closed");
 };
 
-const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
+// autoManaged = 由本次搜索自动推导面板开合。只有桌面端成立：桌面输入框在面板外，
+// 可以按结果有无开合面板；移动端输入框就在面板内部，自动收起会把用户正在输入的表单一起关掉，
+// 因此移动端面板开合一律交给用户（搜索按钮/点击外部），这里直接返回。
+const setPanelVisibility = (show: boolean, autoManaged: boolean): void => {
   const panel = document.getElementById("search-panel");
-  if (!panel || !isDesktop) return;
+  if (!panel || !autoManaged) return;
   if (show) {
     panel.classList.remove("float-panel-closed");
   } else {
@@ -57,9 +60,9 @@ const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
   }
 };
 
-const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
+const search = async (keyword: string, autoManaged: boolean): Promise<void> => {
   if (!keyword) {
-    setPanelVisibility(false, isDesktop);
+    setPanelVisibility(false, autoManaged);
     result.value = [];
     return;
   }
@@ -90,11 +93,11 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
     }
 
     result.value = searchResults;
-    setPanelVisibility(result.value.length > 0, isDesktop);
+    setPanelVisibility(result.value.length > 0, autoManaged);
   } catch (error) {
     console.error("Search error:", error);
     result.value = [];
-    setPanelVisibility(false, isDesktop);
+    setPanelVisibility(false, autoManaged);
   } finally {
     isSearching.value = false;
   }

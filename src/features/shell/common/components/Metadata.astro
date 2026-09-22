@@ -24,63 +24,87 @@ const {
   twitter = {},
 } = Astro.props;
 
-const mergedOg: MetaDataOpenGraph = merge(
-  {
-    url: canonical,
-    siteName: SITE?.name,
-    images: [],
-    locale: I18N?.language || 'en',
-    type: 'website',
-  },
-  METADATA?.openGraph,
-  { url: canonical, ...openGraph }
-);
+// images 单独按「调用方 > 配置 > 空」取一份，不交给 lodash.merge：
+// merge 对数组是按索引合并而非替换（配置 2 张 + prop 1 张会得到 [prop0, config1]），
+// 而 og:image 只取首图，拼出来的顺序会改掉分享卡主图。
+const mergedImages = openGraph.images ?? METADATA?.openGraph?.images ?? [];
+
+const mergedOg: MetaDataOpenGraph = {
+  ...merge(
+    {
+      url: canonical,
+      siteName: SITE?.name,
+      locale: I18N?.language || 'en',
+      type: 'website',
+    },
+    METADATA?.openGraph,
+    { url: canonical, ...openGraph }
+  ),
+  images: mergedImages,
+};
 
 const adaptedOg = await adaptOpenGraphImages(mergedOg, Astro.site);
-
-const firstImage = adaptedOg?.images?.[0];
 
 function buildOpenGraph(og: MetaDataOpenGraph): SEOProps['openGraph'] | undefined {
   if (!og) return undefined;
 
-  const imageUrl = firstImage?.url || '';
+  // 取第一张「解析成功」的图：原先只看 images[0]，首图解析失败（url 为空）时会连
+  // 后面可用的图一起丢掉
+  const image = adaptedOg?.images?.find((i) => i?.url);
+  const imageUrl = image?.url || '';
+
+  const basic = {
+    title: title || METADATA?.title?.default || '',
+    type: og.type || 'website',
+    url: og.url,
+  };
+  const optional = {
+    description: description || METADATA?.description,
+    // 配置里是 snake_case 的 site_name，astro-seo 要的是 siteName，
+    // 不在这里搬运的话配置的 og:site_name 永远不会生效
+    siteName: METADATA?.openGraph?.site_name || og.siteName,
+    locale: og.locale,
+  };
+
+  // 无图时仍只能返回 undefined：astro-seo 的 SEOProps['openGraph'].basic 把 image 声明为
+  // 必填（去掉这里会直接报 ts(2741)），库的模型里「有 basic 就有 og:image」。
+  // 想让无图页面也拿到 og:title/og:description，只能换库或手写 <meta>，超出本单元范围。
   if (!imageUrl) return undefined;
 
   return {
-    basic: {
-      title: title || METADATA?.title?.default || '',
-      type: og.type || 'website',
-      image: imageUrl,
-      url: og.url,
-    },
-    optional: {
-      description: description || METADATA?.description,
-      locale: og.locale,
-      siteName: og.siteName,
-    },
+    basic: { ...basic, image: imageUrl },
+    optional,
     image: {
       url: imageUrl,
-      width: firstImage?.width,
-      height: firstImage?.height,
-      alt: title || METADATA?.title?.default || '',
+      width: image?.width,
+      height: image?.height,
+      alt: basic.title,
     },
   };
 }
 
+// card 由「实际有没有图」决定：配置里的 cardType 只在其与实际图片状态相容时采用，
+// 否则会出现 summary_large_image 却无图（空白卡）或 summary 有图（浪费大卡）
+const resolvedCard: 'summary_large_image' | 'summary' = adaptedOg?.images?.length
+  ? 'summary_large_image'
+  : 'summary';
+const compatibleCard = (
+  configured: string | undefined,
+): 'summary_large_image' | 'summary' | undefined =>
+  configured === resolvedCard ? resolvedCard : undefined;
+
 const mergedTwitter = merge(
-  {
-    card: (adaptedOg?.images?.length ? 'summary_large_image' : 'summary') as 'summary_large_image' | 'summary',
-  },
+  { card: resolvedCard },
   METADATA?.twitter
     ? {
-        card: METADATA.twitter.cardType as 'summary_large_image' | 'summary' | undefined,
+        card: compatibleCard(METADATA.twitter.cardType),
         site: METADATA.twitter.site,
         creator: METADATA.twitter.handle,
       }
     : {},
   twitter
     ? {
-        card: twitter.cardType as 'summary_large_image' | 'summary' | undefined,
+        card: compatibleCard(twitter.cardType),
         site: twitter.site,
         creator: twitter.handle,
       }

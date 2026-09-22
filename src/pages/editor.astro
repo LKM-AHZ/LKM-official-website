@@ -45,27 +45,47 @@ const metadata = {
   import { createLocalPersistence } from '~/features/editor/persistence/index';
   import { createGitPersistence } from '~/features/editor/persistence/git-persistence';
 
+  /** 后端 series id 是 uuid 字符串 */
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
   const rootEl = document.getElementById('editor-root');
   if (rootEl) {
-    const root = createRoot(rootEl);
-    // 浏览器端解析 URL：带 ?seriesId → Git 系列写作（admin 的 /editor 无 seriesId 保持本地 adapter）
-    const params = new URLSearchParams(window.location.search);
-    const rawSeriesId = params.get('seriesId');
-    if (rawSeriesId && rawSeriesId.trim() !== '') {
-      // seriesId 为后端 uuid 字符串，直接透传（不再做数值转换/校验）
-      const seriesId = rawSeriesId.trim();
-      const path = params.get('path') ?? undefined;
-      root.render(
-        createElement(EditorMount, {
-          adapter: createGitPersistence(seriesId, path),
-          seriesId,
-          path,
-        }),
-      );
-    } else {
-      root.render(
-        createElement(EditorMount, { adapter: createLocalPersistence() }),
-      );
+    try {
+      const root = createRoot(rootEl);
+      // 浏览器端解析 URL：带 ?seriesId → Git 系列写作（admin 的 /editor 无 seriesId 保持本地 adapter）
+      const params = new URLSearchParams(window.location.search);
+      const rawSeriesId = (params.get('seriesId') ?? '').trim();
+      // 形状校验：seriesId 必须是 uuid，path 必须是仓库内相对路径。
+      // 这是前端护栏，真正的读/写授权仍由后端按会话判定（本页不是权限门禁）。
+      const seriesId = UUID_RE.test(rawSeriesId) ? rawSeriesId : '';
+      const rawPath = (params.get('path') ?? '').replace(/^\/+/, '');
+      // 含 .. 段一律丢弃（不静默改写，否则可能打开到另一个文件）
+      const path =
+        rawPath && !rawPath.split('/').includes('..') ? rawPath : undefined;
+      if (rawSeriesId && !seriesId) {
+        console.warn('[editor] seriesId 不是合法 uuid，已忽略并按本地模式打开');
+      }
+      if (seriesId) {
+        root.render(
+          createElement(EditorMount, {
+            adapter: createGitPersistence(seriesId, path),
+            seriesId,
+            path,
+          }),
+        );
+      } else {
+        root.render(
+          createElement(EditorMount, { adapter: createLocalPersistence() }),
+        );
+      }
+    } catch (err) {
+      // 岛屿挂载失败时给出可见提示与恢复入口，否则页面只剩永久空白
+      console.error('[editor] 编辑器挂载失败:', err);
+      rootEl.innerHTML =
+        '<p style="padding:1.5rem;font-size:0.875rem;opacity:.7">' +
+        '编辑器加载失败，请刷新重试，或先' +
+        '<a style="text-decoration:underline" href="/login">登录</a>后重试。' +
+        '</p>';
     }
   }
 </script>

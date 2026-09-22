@@ -21,12 +21,15 @@ const PropertyPanel = memo(function PropertyPanel({
   useEffect(() => {
     const handler = (): void => {
       const { $from } = editor.state.selection;
-      const node = $from.node($from.depth);
+      // $from.node($from.depth) 恒等于 $from.parent（ResolvedPos.parent 就是 node(depth)）：
+      // 选中 callout/figure/image 这类原子块时是 NodeSelection，$from 解析到的是所在块
+      // （通常就是 doc），类型判断永远不成立 → 面板永不渲染。改为看选区后的那个节点。
+      const node = $from.nodeAfter ?? $from.parent;
       if (node && EDITABLE_NODE_TYPES.includes(node.type.name)) {
         setSelectedNode({
           type: node.type.name,
           attrs: { ...node.attrs },
-          pos: $from.start($from.depth),
+          pos: $from.pos,
         });
         setMobileOpen(true);
       } else {
@@ -43,11 +46,9 @@ const PropertyPanel = memo(function PropertyPanel({
   if (!selectedNode) return null;
 
   const handleUpdate = (key: string, value: unknown): void => {
-    editor
-      .chain()
-      .focus()
-      .updateAttributes(selectedNode.type, { [key]: value })
-      .run();
+    // 不能调 focus()：它（经 requestAnimationFrame）会把 DOM 焦点从面板输入框抢回编辑器，
+    // 用户打一个字就丢焦点、后续字符落到正文里。updateAttributes 不需要编辑器处于聚焦态。
+    editor.commands.updateAttributes(selectedNode.type, { [key]: value });
     setSelectedNode((prev) =>
       prev ? { ...prev, attrs: { ...prev.attrs, [key]: value } } : null,
     );

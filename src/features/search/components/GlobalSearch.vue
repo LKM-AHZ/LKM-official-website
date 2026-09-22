@@ -109,13 +109,17 @@ const totalCount = computed(
 );
 
 function toggle() {
-  isOpen.value = !isOpen.value;
+  // 关闭一律走 close()：否则再次打开时还留着上次的关键词与结果，
+  // 与 ESC / 点击外部（都走 close）的行为不一致
   if (isOpen.value) {
-    nextTick(() => {
-      const input = document.getElementById("global-search-input");
-      input?.focus();
-    });
+    close();
+    return;
   }
+  isOpen.value = true;
+  nextTick(() => {
+    const input = document.getElementById("global-search-input");
+    input?.focus();
+  });
 }
 
 function close() {
@@ -151,7 +155,17 @@ function handleClickOutside(e: MouseEvent) {
   const target = e.target as HTMLElement;
   const panel = document.getElementById("global-search-panel");
   const btn = document.getElementById("global-search-btn");
-  if (panel && !panel.contains(target) && btn && !btn.contains(target)) {
+  const mobileBtn = document.getElementById("global-search-mobile-btn");
+  // 移动端触发按钮同样要白名单：Vue 的异步 flush 会在按钮自身的 click 监听器与
+  // 本 document 监听器之间把面板插入文档，不排除就会被这里立刻 close()，面板永远打不开。
+  if (
+    panel &&
+    !panel.contains(target) &&
+    btn &&
+    !btn.contains(target) &&
+    mobileBtn &&
+    !mobileBtn.contains(target)
+  ) {
     close();
   }
 }
@@ -261,6 +275,7 @@ onUnmounted(() => {
             v-for="item in results.posts"
             :key="item.url"
             :href="item.url"
+            @click="close"
             class="flex items-start gap-3 px-2 py-2 rounded-lg hover:bg-page-bg transition-colors group"
           >
             <Icon
@@ -293,6 +308,7 @@ onUnmounted(() => {
             v-for="item in results.files"
             :key="item.url"
             :href="item.url"
+            @click="close"
             class="flex items-start gap-3 px-2 py-2 rounded-lg hover:bg-page-bg transition-colors group"
           >
             <Icon
@@ -325,6 +341,7 @@ onUnmounted(() => {
             v-for="item in results.users"
             :key="item.url"
             :href="item.url"
+            @click="close"
             class="flex items-start gap-3 px-2 py-2 rounded-lg hover:bg-page-bg transition-colors group"
           >
             <Icon

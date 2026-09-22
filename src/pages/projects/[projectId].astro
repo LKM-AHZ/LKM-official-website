@@ -7,7 +7,9 @@ import { t } from '~/lib/i18n';
 
 // 详情数据由客户端 island 从后端 /api/v1/projects/{id} 拉取（真实动态数据，非 SSG 内同步 mock）。
 const { projectId } = Astro.params;
-const metadata = { title: `${t('projectHub.title')} —— LKM` };
+// 词典里没有 projectHub.title（会渲染成 key 字面量）：复用项目大厅同款键，与 projects/index.astro 保持一致
+// （详情页拿不到项目名——数据由客户端 island 拉取，SSR 期只有静态段落标题可用）
+const metadata = { title: `${t('page.projects.title')} —— LKM` };
 ---
 
 <Layout

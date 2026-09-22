@@ -77,7 +77,7 @@ export function usePagination<T>(
   const loading = ref(false);
   const initialLoading = ref(false);
   const error = ref<string | null>(null);
-  const hasMore = ref(cursorLoader != null);
+  const hasMore = ref(cursorLoader !== undefined && cursorLoader !== null);
   const lastCursor = ref<string | null>(null);
   const endReached = ref(false);
 
@@ -111,7 +111,10 @@ export function usePagination<T>(
       if (replaceAll) items.value = c.items;
       else items.value.push(...c.items);
       lastCursor.value = c.next_cursor ?? null;
-      endReached.value = c.next_cursor == null || c.next_cursor === "";
+      endReached.value =
+        c.next_cursor === undefined ||
+        c.next_cursor === null ||
+        c.next_cursor === "";
       hasMore.value = !endReached.value;
     } else {
       const d = data as PaginatedResponse<T>;

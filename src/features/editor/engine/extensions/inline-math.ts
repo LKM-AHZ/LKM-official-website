@@ -15,7 +15,9 @@ export const InlineMath = Mark.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const latex = (HTMLAttributes.latex as string) || "";
+    // 属性是松散类型（可能是数字等），用运行时收窄而不是断言
+    const latex =
+      typeof HTMLAttributes.latex === "string" ? HTMLAttributes.latex : "";
     return [
       "span",
       {

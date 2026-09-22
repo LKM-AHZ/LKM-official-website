@@ -5,4 +5,10 @@ import { getAsset } from '~/lib/utils/permalinks';
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="sitemap" href={getAsset('/sitemap-index.xml')} />
+<!-- type/title 是 HTML 规范对 rel="sitemap" 的期望属性，消费方据此识别资源类型 -->
+<link
+  rel="sitemap"
+  type="application/xml"
+  title="Sitemap"
+  href={getAsset('/sitemap-index.xml')}
+/>

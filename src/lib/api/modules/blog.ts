@@ -16,7 +16,6 @@ import { post, put, del } from "../../http/client";
 import { ok, err } from "../../errors/result";
 import type { Result } from "../../errors/result";
 import { AppError, ErrorCode } from "../../errors/error-codes";
-import type { ErrorCodeType } from "../../errors/error-codes";
 import { graphqlClient } from "../graphql";
 import { BLOG_SERIES_DETAIL, BLOG_FILE_CONTENT } from "./blog.graphql";
 import type {
@@ -150,12 +149,12 @@ function mapErr(
 
 /** 无消费方读方法的 TODO 占位 err（YAGNI，待按需接入 GraphQL） */
 function notImplemented<T>(endpoint: string): Result<T, AppError> {
-  return err(
-    new AppError(
-      ErrorCode.UNKNOWN_ERROR as ErrorCodeType,
-      `待按需接入 GraphQL（原端点 ${endpoint}）`,
-    ),
-  );
+  // 端点只写进开发期日志：它是内部 REST 布局信息，终端用户无从据此处理，
+  // 不应出现在面向用户的错误消息里
+  if (import.meta.env.DEV) {
+    console.warn(`[blog] 待按需接入 GraphQL（原端点 ${endpoint}）`);
+  }
+  return err(new AppError(ErrorCode.UNKNOWN_ERROR, "待按需接入 GraphQL"));
 }
 
 /** 博客 REST API — 纯函数对象，不包含 Vue 响应式状态 */

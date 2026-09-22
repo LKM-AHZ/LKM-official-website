@@ -39,6 +39,22 @@ export interface BoardItem {
 export type ContentType =
   "discussion" | "article" | "column_post" | "blog_post" | "qa";
 
+const CONTENT_TYPES: readonly ContentType[] = [
+  "discussion",
+  "article",
+  "column_post",
+  "blog_post",
+  "qa",
+];
+
+/** 后端枚举属外部输入：未知值不能直接断言进联合类型，回退为最通用的 discussion */
+function toContentType(value: unknown): ContentType {
+  return typeof value === "string" &&
+    (CONTENT_TYPES as readonly string[]).includes(value)
+    ? (value as ContentType)
+    : "discussion";
+}
+
 export interface ContentItem {
   id: string;
   content_type: ContentType;
@@ -194,7 +210,7 @@ function mapItem(i: {
 }): ContentItem {
   return {
     id: i.id,
-    content_type: i.contentType as ContentType,
+    content_type: toContentType(i.contentType),
     board_id: i.boardId,
     author_id: i.authorId,
     author_name: i.authorName,

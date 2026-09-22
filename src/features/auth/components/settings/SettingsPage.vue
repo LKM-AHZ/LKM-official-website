@@ -323,7 +323,6 @@ import BindMethods from "~/features/auth/components/settings/BindMethods.vue";
 import TwoFactorSetup from "~/features/auth/components/settings/TwoFactorSetup.vue";
 import PasskeySetup from "~/features/auth/components/settings/PasskeySetup.vue";
 import ConfirmDialog from "~/features/auth/components/settings/ConfirmDialog.vue";
-import type { User } from "~/types/auth";
 import { authApi, type ContactLink } from "~/lib/api/modules/auth";
 
 const store = useAuthStore();
@@ -357,9 +356,12 @@ const avatarLetter = computed(() =>
   (store.user?.nickname || store.user?.username || "?").charAt(0).toUpperCase(),
 );
 
+// 头像 URL 只由 user.id 派生，重传后字符串不变 → 浏览器直接吃缓存里的旧图，
+// 看起来像上传失败。用版本号做 cache-busting，上传成功后自增。
+const avatarVersion = ref(0);
 const avatarUrl = computed(() =>
   store.user?.avatar && store.user.id
-    ? authApi.getAvatarUrl(store.user.id)
+    ? `${authApi.getAvatarUrl(store.user.id)}?v=${avatarVersion.value}`
     : "",
 );
 
@@ -380,7 +382,8 @@ const levelLabel = computed(() => {
       : t("user.localAccount");
 });
 
-function handleUserUpdate(_user: User) {
+// TwoFactorSetup 的 update 事件不再携带 payload（它只用于刷新提示）
+function handleUserUpdate() {
   message.value = t("settings.securityUpdated");
   setTimeout(() => (message.value = ""), 3000);
 }
@@ -416,11 +419,22 @@ async function onAvatarChange(e: Event) {
   saving.value = true;
   try {
     const res = await authApi.uploadAvatar(file);
+    // 接口在响应体缺 data 时会成功返回 avatar: null —— 那不是「上传成功」，
+    // 直接写进 store 会把头像清空却提示成功（与 handleSaveNickname/Links 的判法保持一致）
+    if (res.avatar === null) {
+      editError.value = t("settings.saveFailed");
+      return;
+    }
     store.updateUser({ ...store.user, avatar: res.avatar });
+    avatarVersion.value += 1;
     message.value = t("settings.profileUpdated");
     setTimeout(() => (message.value = ""), 3000);
-  } catch {
-    editError.value = "头像上传失败";
+  } catch (err) {
+    // 硬编码中文换成 i18n；有服务端错误信息就优先透出，否则给通用文案
+    editError.value =
+      err instanceof Error && err.message
+        ? err.message
+        : t("settings.saveFailed");
   } finally {
     saving.value = false;
     input.value = "";
@@ -433,6 +447,16 @@ function addLink() {
 function removeLink(index: number) {
   editLinks.value.splice(index, 1);
 }
+
+/**
+ * 联系方式链接只放行 http(s) 与站内相对路径，其余（javascript:/data:/vbscript: 等）
+ * 一律置空。这些值会被渲染成 <a href>，不校验等于把注入点交给用户输入。
+ */
+function normalizeHttpUrl(raw: string | undefined): string | undefined {
+  const v = (raw ?? "").trim();
+  if (!v) return undefined;
+  return v.startsWith("/") || /^https?:\/\//i.test(v) ? v : undefined;
+}
 async function handleSaveLinks() {
   saving.value = true;
   editError.value = "";
@@ -443,7 +467,7 @@ async function handleSaveLinks() {
         .map((l) => ({
           name: l.name.trim(),
           icon: l.icon?.trim() || undefined,
-          url: l.url?.trim() || undefined,
+          url: normalizeHttpUrl(l.url),
         }));
       const r = await authApi.editProfile(store.user.id, {
         contact_links: cleaned,

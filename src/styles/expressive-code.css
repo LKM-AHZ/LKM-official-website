@@ -3,9 +3,9 @@
     box-shadow: none;
   }
 
+  /* 共用 tailwind 的 --font-mono：原先这里写死的 "JetBrains Mono Variable" 从未注册过
+     （实际注册的族名是 "JetBrains Mono"，见 astro.config.ts 的 Unfonts families） */
   .title {
-    font-family:
-      "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco,
-      Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: var(--font-mono);
   }
 }

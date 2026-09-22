@@ -77,6 +77,8 @@ export const fileCategories: FileCategory[] = [
   },
 
   // ─── 三级（叶子，挂文件）───
+  // 注意：叶子判定看的是「有没有子节点」，不取决于层级——上面 lang-en 等二级节点
+  // 同样没有子节点、也是可挂文件的叶子，别用层级序号推断
   {
     id: "math-linear-algebra",
     name: "fileLibraryData.categories.mathLinearAlgebra",
@@ -143,9 +145,9 @@ export function getCategoryPath(id: string): FileCategory[] {
   return current ? [] : path; // 遇环或父缺省时返回空，回退到根
 }
 
-/** 是否叶子：无子分类。 */
+/** 是否叶子：分类存在且无子分类。不存在的 id 返回 false，避免拼错的分类被当成可挂文件的叶子。 */
 export function isLeaf(id: string): boolean {
-  return getChildren(id).length === 0;
+  return getCategory(id) !== undefined && getChildren(id).length === 0;
 }
 
 /** 递归统计该分类下（含子孙）的匹配文件总数。files 只需 categoryId 字段。 */

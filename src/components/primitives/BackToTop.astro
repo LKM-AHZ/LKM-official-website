@@ -6,11 +6,32 @@ import { Icon } from 'astro-icon/components';
 <div class="back-to-top-wrapper hidden lg:block">
   <div
     id="back-to-top-btn"
+    data-back-to-top
     class="back-to-top-btn hide flex items-center rounded-2xl overflow-hidden transition"
-    onclick="window.scroll({ top: 0, behavior: 'smooth' })"
   >
-    <button aria-label="Back to Top" class="btn-card h-[3.75rem] w-[3.75rem]">
+    <button type="button" aria-label="Back to Top" class="btn-card h-[3.75rem] w-[3.75rem]">
       <Icon name="material-symbols:keyboard-arrow-up-rounded" class="mx-auto" />
     </button>
   </div>
 </div>
+
+<script>
+  // 不用内联 onclick：Astro 会把内联处理器原样复制进每个实例、且无法被 CSP nonce/hash 覆盖。
+  // 这里在 document 上做一次事件委托（swup 换页后 DOM 被替换也依然有效），
+  // 并尊重 prefers-reduced-motion，避免强制平滑滚动。
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element | null;
+    if (!target?.closest('[data-back-to-top]')) return;
+    event.preventDefault();
+    window.scroll({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  });
+</script>
+
+<style>
+  /* .hide 在 tailwind.css 里只有 opacity/pointer-events，控件仍留在 tab 序和读屏树里：
+     页面在顶部时键盘用户会 focus 到一个看不见、点了也没反应的按钮。补 visibility 真正隐藏。 */
+  .back-to-top-btn.hide {
+    visibility: hidden;
+  }
+</style>

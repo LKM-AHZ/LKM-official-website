@@ -6,9 +6,29 @@ interface Props {
   label?: string;
 }
 const { dot, href, label }: Props = Astro.props;
+
+// href 是自由字符串，与 buildPermalink 同一口径：可执行 scheme（javascript:/vbscript:）
+// 一律不渲染成链接，退化成 <button>
+const safeHref =
+  href && !/^\s*(javascript|vbscript):/i.test(href) ? href : undefined;
 ---
 
-<a href={href} aria-label={label} class="btn-regular h-8 text-sm px-3 rounded-lg">
-  {dot && <div class="h-1 w-1 bg-[var(--btn-content)] dark:bg-card-bg transition rounded-md mr-2" />}
-  <slot />
-</a>
+{
+  /* 没有（或 scheme 不可信）href 时不能渲染 <a>：无链接的 <a> 既不可聚焦、也没有链接语义，
+     看起来像导航却点不动，这种情况退化成真正的 <button> */
+  safeHref ? (
+    <a href={safeHref} aria-label={label} class="btn-regular h-8 text-sm px-3 rounded-lg">
+      {dot && (
+        <div class="h-1 w-1 bg-[var(--btn-content)] dark:bg-card-bg transition rounded-md mr-2" />
+      )}
+      <slot />
+    </a>
+  ) : (
+    <button type="button" aria-label={label} class="btn-regular h-8 text-sm px-3 rounded-lg">
+      {dot && (
+        <div class="h-1 w-1 bg-[var(--btn-content)] dark:bg-card-bg transition rounded-md mr-2" />
+      )}
+      <slot />
+    </button>
+  )
+}

@@ -465,7 +465,9 @@ const leaderboardMap = ref<
 const exchangeItems = ref<PointsExchangeItem[]>([]);
 const tasks = ref<PointsTask[]>([]);
 const checkinStreak = ref(1);
-const checkinReward = ref(5);
+/** 打卡奖励展示值：仅是未打卡时的预期值，实际到账以后端返回的 earned 为准（见 doCheckin） */
+const CHECKIN_REWARD_POINTS = 5;
+const checkinReward = ref(CHECKIN_REWARD_POINTS);
 
 const auth = useAuthStore();
 const isLoggedIn = computed(() => auth.isLoggedIn);

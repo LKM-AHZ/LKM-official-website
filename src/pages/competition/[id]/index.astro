@@ -9,6 +9,11 @@ import { t } from '~/lib/i18n';
 const { id } = Astro.params;
 const comp = mockCompetitions.find((c) => c.id === id);
 
+// server 模式：未知 id 应以 404 响应，避免软 404 被爬虫/监控当成有效页面
+if (!comp) {
+  Astro.response.status = 404;
+}
+
 const metadata = { title: comp ? `${t(comp.title)} —— LKM` : t('page.communityDetail.competition.metaTitle') };
 ---
 
@@ -46,7 +51,10 @@ const metadata = { title: comp ? `${t(comp.title)} —— LKM` : t('page.communi
           </div>
           <div>
             <span class="text-text-muted/60">{t('page.communityDetail.competition.participants')}</span>
-            {comp.participantCount || t('page.communityDetail.competition.pending')}
+            {/* 不能用 `||`：报名人数 0 是合法值，只有未开始的比赛才显示"待定" */}
+            {comp.participantCount > 0 || comp.status !== 'upcoming'
+              ? comp.participantCount
+              : t('page.communityDetail.competition.pending')}
           </div>
         </div>
         {comp.status === 'ongoing' && (

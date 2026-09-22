@@ -120,7 +120,11 @@ const shortcuts = [
         v-for="item in shortcuts"
         :key="item.route"
         class="card-base p-4 cursor-pointer hover:border-primary/30 transition-colors"
+        role="button"
+        tabindex="0"
         @click="navigate(item.route)"
+        @keydown.enter="navigate(item.route)"
+        @keydown.space.prevent="navigate(item.route)"
       >
         <div class="text-2xl mb-2">{{ item.icon }}</div>
         <div class="text-sm font-semibold text-deep-text">

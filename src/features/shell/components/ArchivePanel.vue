@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { t } from "~/lib/i18n";
 import { getPostUrlBySlug } from "~/lib/utils/url-utils";
 
@@ -35,38 +35,51 @@ interface Group {
 const params = new URLSearchParams(
   typeof window === "undefined" ? "" : window.location.search,
 );
-const tags = params.has("tag") ? params.getAll("tag") : props.tags;
-const categories = params.has("category")
-  ? params.getAll("category")
-  : props.categories;
+// 用 computed 而不是普通 const：下面 watchEffect 里读到的才是响应式依赖。
+// 若写成 const，父组件以新的 tags/categories 复用本实例（SPA 内切换标签/分类页）时
+// watchEffect 不会重跑，列表会一直停留在旧筛选结果。
+const tags = computed(() =>
+  params.has("tag") ? params.getAll("tag") : props.tags,
+);
+const categories = computed(() =>
+  params.has("category") ? params.getAll("category") : props.categories,
+);
 const uncategorized = params.get("uncategorized");
 
 const groups = ref<Group[]>([]);
 
-function formatDate(date: Date) {
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
+function formatDate(date: Date | string) {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const month = (parsed.getMonth() + 1).toString().padStart(2, "0");
+  const day = parsed.getDate().toString().padStart(2, "0");
   return `${month}-${day}`;
 }
 
-function formatTag(tagList: string[]) {
+function formatTag(tagList: string[] | undefined) {
+  // 上传/序列化后的文章可能没有 tags：上面筛选用 Array.isArray 兜了，这里渲染同样要兜，
+  // 否则 map 在渲染期直接抛错
+  if (!Array.isArray(tagList)) return "";
   return tagList.map((t) => `#${t}`).join(" ");
 }
 
 watchEffect(() => {
   let filteredPosts: Post[] = props.sortedPosts;
 
-  if (tags.length > 0) {
+  const tagList = tags.value;
+  const categoryList = categories.value;
+
+  if (tagList.length > 0) {
     filteredPosts = filteredPosts.filter(
       (post) =>
         Array.isArray(post.data.tags) &&
-        post.data.tags.some((tag) => tags.includes(tag)),
+        post.data.tags.some((tag) => tagList.includes(tag)),
     );
   }
 
-  if (categories.length > 0) {
+  if (categoryList.length > 0) {
     filteredPosts = filteredPosts.filter(
-      (post) => post.data.category && categories.includes(post.data.category),
+      (post) => post.data.category && categoryList.includes(post.data.category),
     );
   }
 
@@ -74,17 +87,28 @@ watchEffect(() => {
     filteredPosts = filteredPosts.filter((post) => !post.data.category);
   }
 
-  const grouped = filteredPosts.reduce(
-    (acc, post) => {
-      const year = post.data.published.getFullYear();
-      if (!acc[year]) {
-        acc[year] = [];
-      }
-      acc[year].push(post);
-      return acc;
-    },
-    {} as Record<number, Post[]>,
-  );
+  // 年内的文章不依赖调用方顺序：显式按 published 倒序（非法日期由下面的 NaN 过滤处理）
+  const grouped = [...filteredPosts]
+    .sort(
+      (a, b) =>
+        new Date(b.data.published).getTime() -
+        new Date(a.data.published).getTime(),
+    )
+    .reduce(
+      (acc, post) => {
+        // frontmatter 序列化后 published 可能是 ISO 字符串（甚至非法值）：
+        // 直接调 .getFullYear() 会抛 "is not a function"，非法日期则会归到 NaN 分组
+        const published = new Date(post.data.published);
+        if (Number.isNaN(published.getTime())) return acc;
+        const year = published.getFullYear();
+        if (!acc[year]) {
+          acc[year] = [];
+        }
+        acc[year].push(post);
+        return acc;
+      },
+      {} as Record<number, Post[]>,
+    );
 
   const groupedPostsArray = Object.keys(grouped).map((yearStr) => ({
     year: Number.parseInt(yearStr, 10),

@@ -37,6 +37,9 @@ export interface OnboardingFlow {
  * 数据统一由 OnboardingPage→本 flow 提交；各步骤组件不再各自写 localStorage
  * 或独立调 API。
  */
+/** 引导流程的步骤总数（goNext 与"已提交步骤"解析共用同一来源，避免两处各写一个 4） */
+export const MAX_ONBOARDING_STEP = 4;
+
 export function useOnboardingFlow(
   options: OnboardingFlowOptions = {},
 ): OnboardingFlow {
@@ -137,7 +140,7 @@ export function useOnboardingFlow(
         return;
       }
       completed.value = true;
-      error.value = null;
+      // 这里不用再 error.value = null：函数开头已清空，且成功分支不会调用 setError
       finish();
     } finally {
       loading.value = false;
@@ -145,7 +148,8 @@ export function useOnboardingFlow(
   }
 
   function goNext(): void {
-    if (step.value < 4) step.value = (step.value + 1) as OnboardingStepNumber;
+    if (step.value < MAX_ONBOARDING_STEP)
+      step.value = (step.value + 1) as OnboardingStepNumber;
   }
 
   function goPrev(): void {

@@ -4,8 +4,10 @@
  * 背景：菜单原先在 `AdminLayout.astro` 里逐个硬编码 `<a>`，既无分组也无当前项高亮；
  * 「机器人」分组（bot 面板并入社区后台）要求分组标题 + 激活态，故抽成数据 + 纯函数。
  *
- * 约定：`href` 是**逻辑路径**，渲染时经 `getPermalink()` 加 locale 前缀；`textKey` 是
- * i18n key（`t()` 支持点号嵌套）。`isActive` 只做字符串比较，故可脱离 Astro 单测。
+ * 约定：`href` 是**去掉 site.base 的逻辑路径**（如 `/admin/users`）；`getPermalink()` 只拼接
+ * `SITE.base` 与尾斜杠，**不加 locale 前缀**——本项目 locale 由 Cookie（`lkm-locale`）驱动，
+ * URL 里没有 `/en`、`/zh-CN` 段。`isActive` 的前提是两侧同为这种逻辑路径；`textKey` 是 i18n key
+ * （`t()` 支持点号嵌套）。`isActive` 只做字符串比较，故可脱离 Astro 单测。
  */
 
 export interface AdminNavItem {
@@ -56,9 +58,14 @@ export function buildAdminNav(): AdminNavGroup[] {
   ];
 }
 
-/** 去掉尾斜杠（保留根路径 `/`），用于激活态比较。 */
+/** 去掉 query/hash 与尾斜杠（保留根路径 `/`），用于激活态比较。 */
 function normalize(path: string): string {
-  return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+  // 只去尾斜杠时，一旦调用方传进 `/admin/users?page=2` 这类带查询串的 URL 就永远不匹配，
+  // 高亮会静默丢失（当前调用方传的是 pathname，故暂未暴露）
+  const pathname = path.split(/[?#]/, 1)[0];
+  return pathname.length > 1 && pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
 }
 
 /**

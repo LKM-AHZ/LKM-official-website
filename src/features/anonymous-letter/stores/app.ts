@@ -12,7 +12,14 @@ interface AppState {
 
 const isClient = typeof document !== "undefined";
 
-export function useApp(): {
+/** 把主题同步到宿主 .dark class 与 localStorage.theme（整页加载时由主站脚本读回）。 */
+function applyThemeToHost(theme: "day" | "night"): void {
+  if (!isClient) return;
+  document.documentElement.classList.toggle("dark", theme === "night");
+  localStorage.theme = theme === "night" ? "dark" : "light";
+}
+
+interface AppApi {
   state: AppState;
   isNight: ComputedRef<boolean>;
   lowPerf: ComputedRef<boolean>;
@@ -26,7 +33,15 @@ export function useApp(): {
   toggleHighContrast: () => void;
   setRateLimit: (n: number) => void;
   acceptPrivacy: () => void;
-} {
+}
+
+// 单例：useApp 被 5+ 个组件调用，若每次调用都新建 reactive/watch/监听器，
+// 会得到多份互不同步的状态、重复写 storage、并持续泄漏 astro:after-swap 监听器。
+let singleton: AppApi | null = null;
+
+export function useApp(): AppApi {
+  if (singleton) return singleton;
+
   const settings = store.getSettings();
   // 始终从主站 .dark class 同步初始主题，不被 localStorage 覆盖
   if (isClient) {
@@ -75,11 +90,17 @@ export function useApp(): {
     { immediate: true },
   );
 
-  // 低性能设备：关闭重特效
+  // 低性能设备：关闭重特效。必须与 lowPerf computed 用同一条件（含 muted），
+  // 否则「静音」时 computed 为 true 而 .low-perf class 不被加上，两边判断不一致
   watch(
-    () => state.settings.lowPerf,
-    (on) => {
-      if (isClient) document.documentElement.classList.toggle("low-perf", !!on);
+    () => [state.settings.lowPerf, state.settings.muted] as const,
+    ([lowPerf, muted]) => {
+      if (isClient) {
+        document.documentElement.classList.toggle(
+          "low-perf",
+          !!lowPerf || !!muted,
+        );
+      }
     },
     { immediate: true },
   );
@@ -94,12 +115,14 @@ export function useApp(): {
   function toggleTheme(): void {
     const next = isNight.value ? "day" : "night";
     state.settings.theme = next;
-    document.documentElement.classList.toggle("dark", next === "night");
-    localStorage.theme = next === "night" ? "dark" : "light";
+    applyThemeToHost(next);
   }
 
   function setTheme(t: "day" | "night"): void {
     state.settings.theme = t;
+    // 与 toggleTheme 一样同步宿主 class/localStorage：只改 state 的话
+    // 设置页的日/夜按钮没有可见效果，刷新后也会被宿主 .dark 覆盖回去
+    applyThemeToHost(t);
   }
   function toggleMuted(): void {
     state.settings.muted = !state.settings.muted;
@@ -124,7 +147,7 @@ export function useApp(): {
     state.settings.privacyAccepted = true;
   }
 
-  return {
+  singleton = {
     state,
     isNight,
     lowPerf,
@@ -139,4 +162,5 @@ export function useApp(): {
     setRateLimit,
     acceptPrivacy,
   };
+  return singleton;
 }

@@ -1,9 +1,9 @@
 /**
  * 链接 `[text](url)` 与维基链接 `[[名称]]` 的延迟转换检测纯函数。
  *
- * 本模块只产出可复用的纯函数与数据结构，供 DocumentEditor 在
- * 「光标离开闭合括号 / 按下回车」等交互节点调用替换，不创建任何
- * ProseMirror Plugin 实例（接线见 Task 6）。
+ * 本模块只产出可复用的纯函数与数据结构，不创建任何 ProseMirror Plugin 实例。
+ * 已由 DocumentEditor 在「文本输入 / 选区变化」时调用，
+ * 与 @tiptap/extension-link 等 InputRule 并存。
  */
 
 /** 待转换候选：`from`/`to` 为文档字符串中的命中区间 */
@@ -71,5 +71,5 @@ export function wikiHref(
   getDocs: () => Array<{ title: string; slug?: string }>,
 ): string {
   const hit = getDocs().find((d) => d.title === label && d.slug);
-  return hit && hit.slug ? `/docs/${hit.slug}` : "";
+  return hit?.slug ? `/docs/${hit.slug}` : "";
 }

@@ -65,7 +65,11 @@
               <div class="item-acts">
                 <a
                   v-if="['pending', 'rejected', 'scheduled'].includes(l.status)"
-                  :href="buildUrl('/treehole/write') + '?letterId=' + l.id"
+                  :href="
+                    buildUrl('/treehole/write') +
+                    '?edit=' +
+                    encodeURIComponent(l.id)
+                  "
                   class="mini"
                   >{{ t("treehole.mine.edit") }}</a
                 >
@@ -167,9 +171,11 @@ const favList = ref([]);
 const drafts = ref([]);
 
 function load() {
-  letters.value = getLetters();
+  const all = getLetters();
+  letters.value = all;
   const favIds = getFavorites();
-  favList.value = getLetters().filter(
+  // 复用同一次读取结果：原实现再 getLetters() 一次会把整份列表从 localStorage 重新解析一遍
+  favList.value = all.filter(
     (l) =>
       favIds.includes(l.id) &&
       l.status === "published" &&
@@ -186,18 +192,18 @@ function refreshFavs() {
   load();
 }
 
+// 状态 → i18n 键用表驱动：链式三元既难读，末尾 else 还会把任何未知状态都标成「私密」。
+// 新增状态时只补表即可，未登记的状态显式回退到「私密」。
+const STATUS_LABEL_KEYS = {
+  pending: "treehole.mine.statusPending",
+  published: "treehole.mine.statusPublished",
+  rejected: "treehole.mine.statusRejected",
+  scheduled: "treehole.mine.statusScheduled",
+  sealed: "treehole.mine.statusSealed",
+};
+
 function statusLabel(s) {
-  return s === "pending"
-    ? t("treehole.mine.statusPending")
-    : s === "published"
-      ? t("treehole.mine.statusPublished")
-      : s === "rejected"
-        ? t("treehole.mine.statusRejected")
-        : s === "scheduled"
-          ? t("treehole.mine.statusScheduled")
-          : s === "sealed"
-            ? t("treehole.mine.statusSealed")
-            : t("treehole.mine.statusPrivate");
+  return t(STATUS_LABEL_KEYS[s] || "treehole.mine.statusPrivate");
 }
 
 function timeText(ts) {

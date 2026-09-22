@@ -604,8 +604,10 @@ const openApplyModal = () => {
 };
 
 const closeApplyModal = () => {
+  // 提交进行中不许关闭：关掉会把标志复位，模态框可再打开并重复提交。
+  // 成功路径请先自行置 isSubmittingApply = false 再调用本函数。
+  if (isSubmittingApply.value) return;
   showApplyModal.value = false;
-  isSubmittingApply.value = false;
   applyForm.nickname =
     applyForm.progress =
     applyForm.group =
@@ -627,7 +629,15 @@ const handleApplySubmit = async (): Promise<void> => {
     const ok = await projectApi.submitApplication({
       title: `${applyForm.group} 项目组申请`,
       summary: `阶段：${applyForm.progress}`,
-      description: `报名成员：${sanitizeInput(applyForm.nickname)}。联系方式：${sanitizeInput(applyForm.contact)}${applyForm.applyIncubator ? "。申请孵化。" : ""}`,
+      // 联系方式只在「申请孵化」时采集并校验（validateApplyField 在非孵化分支直接跳过校验），
+      // 之前无条件写进 description，会把空值/未校验内容带进申请记录
+      description: [
+        `报名成员：${sanitizeInput(applyForm.nickname)}。`,
+        applyForm.applyIncubator && applyForm.contact.trim()
+          ? `联系方式：${sanitizeInput(applyForm.contact)}。`
+          : "",
+        applyForm.applyIncubator ? "申请孵化。" : "",
+      ].join(""),
       memberClaims: [
         {
           displayName: sanitizeInput(applyForm.nickname),
@@ -637,6 +647,8 @@ const handleApplySubmit = async (): Promise<void> => {
     });
     if (!ok) throw new Error(t("projectHub.applyFailed"));
     toast.success(t("projectHub.applySuccess"));
+    // closeApplyModal 在提交中会拒绝关闭，成功时先落标志再关
+    isSubmittingApply.value = false;
     closeApplyModal();
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : t("projectHub.applyFailed");
@@ -666,23 +678,19 @@ const projectErrors = reactive<
 });
 
 const validateProjectField = (field: keyof typeof projectErrors): void => {
+  // 长度上限由输入框的 maxlength（name 20 / description 200）保证，
+  // 这里原来的 >50 / >200 分支永远不可达，已删除
   if (field === "name") {
     const v = projectForm.name.trim();
     projectErrors.name = !v
       ? t("projectHub.errNameRequired")
-      : v.length > 50
-        ? t("projectHub.errNameTooLong")
-        : /[<>/]/.test(v)
-          ? t("projectHub.errNameInvalid")
-          : "";
+      : /[<>/]/.test(v)
+        ? t("projectHub.errNameInvalid")
+        : "";
   }
   if (field === "description") {
     const v = projectForm.description.trim();
-    projectErrors.description = !v
-      ? t("projectHub.errDescRequired")
-      : v.length > 200
-        ? t("projectHub.errDescTooLong")
-        : "";
+    projectErrors.description = !v ? t("projectHub.errDescRequired") : "";
   }
   if (field === "contact") {
     const v = projectForm.contact.trim();
@@ -699,8 +707,9 @@ const openProjectModal = () => {
 };
 
 const closeProjectModal = () => {
+  // 同 closeApplyModal：提交中不许关闭，避免复位标志后重复提交
+  if (isSubmittingProject.value) return;
   showProjectModal.value = false;
-  isSubmittingProject.value = false;
   projectForm.name =
     projectForm.description =
     projectForm.roles =
@@ -716,14 +725,26 @@ const handleProjectSubmit = async (): Promise<void> => {
   if (Object.values(projectErrors).some(Boolean)) return;
   isSubmittingProject.value = true;
   try {
+    // contact/roles 是必填/已采集数据，不能丢：接口没有对应字段，
+    // 按申请模态框的既有做法把它们并入 description 文本
+    const extras = [
+      projectForm.roles.trim()
+        ? `需要角色：${sanitizeInput(projectForm.roles)}`
+        : "",
+      `联系方式：${sanitizeInput(projectForm.contact)}`,
+    ].filter(Boolean);
     const ok = await projectApi.submitApplication({
       title: sanitizeInput(projectForm.name),
       summary: sanitizeInput(projectForm.description),
-      description: sanitizeInput(projectForm.description),
+      description: [sanitizeInput(projectForm.description), ...extras].join(
+        "\n",
+      ),
       memberClaims: [],
     });
     if (!ok) throw new Error(t("projectHub.createFailed"));
     toast.success(t("projectHub.createSuccess"));
+    // closeProjectModal 在提交中会拒绝关闭，成功时先落标志再关
+    isSubmittingProject.value = false;
     closeProjectModal();
     // 发起成功后刷新广场列表
     allProjects.value = await projectApi.listProjects();
@@ -766,15 +787,9 @@ watch(
 </script>
 
 <!-- ============================================================
-  维护喵：比卡(月见八千代) (1175142856@qq.com)
-  最后更新：2026-08-11凌晨四点....请项目组一定不要因为我实在是太菜了而开除我，球球了TAT
-  有问题欢迎随时联系我～ 喵！这是我在本项目组的第一份独立完成工作，
-  尤其感谢deepseek同志kimi同志通义千问同志对我的代码进行的深刻的改正
-  虽然真的是非常小的功能但是考虑到了一些复杂的东西，如果有前端的大活随时找我，后端难之，但也可以）
-  
-  备注：
+  维护备注（请保持与代码现状一致）：
   - 置顶排序逻辑在 filteredProjects 中
   - 联系方式校验仅在申请孵化时触发
-  - 当前使用 mock 数据，接入 API 后替换！辛苦后端同志了。在这里感谢一下
-  - Toast 用 alert 临时替代，后续劳烦统一替换？
+  - 数据已接 projectApi（submitApplication 等），不再是 mock
+  - Toast 使用组件内的自定义 toast（非 alert）
 -->

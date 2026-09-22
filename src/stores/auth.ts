@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { defineStore, getActivePinia } from "pinia";
 import { ref, computed } from "vue";
 import { authApi } from "~/lib/api/modules/auth";
 import { AppError, ErrorCode } from "~/lib/errors/error-codes";
@@ -9,6 +9,9 @@ import type { SessionStatus } from "~/types/auth";
 
 let _sessionClearedBound = false;
 
+/** 会话持久化键：本文件内多处读写，收敛为常量，改名时不会漏改（HTTP 适配器等外部写入方共用同一字面量） */
+const AUTH_STORAGE_KEY = "lkm-auth-store";
+
 export const useAuthStore = defineStore("auth", () => {
   // 首次实例创建时注册「http 会话被清除」同步监听（http 层 401 刷新失败等
   // 静默清空 localStorage 时会广播；此处让内存态复位，避免"假登录"漂移）。
@@ -16,6 +19,9 @@ export const useAuthStore = defineStore("auth", () => {
     _sessionClearedBound = true;
     if (typeof window !== "undefined") {
       window.addEventListener("lkm:auth-cleared", () => {
+        // 事件若在 app 之外触发（测试/HMR/多实例），useAuthStore() 会凭空建一个实例：
+        // 没有活动 Pinia 时跳过
+        if (!getActivePinia()) return;
         useAuthStore().resetState();
       });
     }
@@ -63,8 +69,11 @@ export const useAuthStore = defineStore("auth", () => {
 
   // ── 从 localStorage 恢复到内存 ──
   function restoreFromStorage(): void {
+    // 本函数会被 client:load 组件的 setup 调用，SSR 阶段没有 localStorage：
+    // 不加守卫会在 Node 下抛 ReferenceError
+    if (typeof window === "undefined") return;
     try {
-      const saved = localStorage.getItem("lkm-auth-store");
+      const saved = localStorage.getItem(AUTH_STORAGE_KEY);
       if (saved) {
         const data = JSON.parse(saved);
         if (data.user && data.isLoggedIn) {
@@ -76,7 +85,13 @@ export const useAuthStore = defineStore("auth", () => {
         }
       }
     } catch {
-      localStorage.removeItem("lkm-auth-store");
+      // 解析失败或存储被禁用（隐私模式/沙箱）：清理本身也可能抛 SecurityError，
+      // 不能再让它逃逸出去掩盖原始错误
+      try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -97,7 +112,7 @@ export const useAuthStore = defineStore("auth", () => {
     isLoggedIn.value = false;
     user.value = null;
     clearTokens();
-    localStorage.removeItem("lkm-auth-store");
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     return ok(false);
   }
 
@@ -105,9 +120,14 @@ export const useAuthStore = defineStore("auth", () => {
   // 关键：登录成功的持久化必须发生在 user/isLoggedIn/session 都就绪之后。
   // 各登录接口会在 setTokens 后先 persist 一次（那时 user 尚空），故这里成功后再 persist，
   // 确保 localStorage 写入完整会话，刷新/restoreFromStorage 才能恢复登录态。
-  async function fetchMeAfterLogin(
-    _userId: string,
-  ): Promise<Result<AuthSuccess, AppError>> {
+  async function fetchMeAfterLogin(): Promise<Result<AuthSuccess, AppError>> {
+    // 登录响应既没有 2FA 标记也没有 access_token 时，给出可区分的契约错误，
+    // 而不是让 fetchMe 报笼统的 "no token"（调用方无法判断是契约违约还是会话失效）
+    if (!_token.value) {
+      return err(
+        new AppError(ErrorCode.AUTH_ERROR, "登录响应缺少 access_token"),
+      );
+    }
     const meResult = await fetchMe();
     if (meResult.isOk()) {
       isLoggedIn.value = true;
@@ -118,21 +138,43 @@ export const useAuthStore = defineStore("auth", () => {
     return err(meResult.error);
   }
 
+  /**
+   * 登录接口共用的收尾：写入 token 并持久化，再拉取资料补全会话。
+   * 原先这段在 loginPassword/registerLocal/verifyNormalRegister/loginCode/verifyMagicLink
+   * 各抄一份，容易漏掉 persistToStorage 或 2FA 分支。
+   */
+  function completeLogin(payload: {
+    access_token: string;
+    refresh_token: string;
+  }): Promise<Result<AuthSuccess, AppError>> {
+    if (payload.access_token) {
+      setTokens(payload.access_token, payload.refresh_token);
+      persistToStorage();
+    }
+    return fetchMeAfterLogin();
+  }
+
   // ── 持久化到 localStorage ──
   function persistToStorage(): void {
-    if (_token.value) {
-      localStorage.setItem(
-        "lkm-auth-store",
-        JSON.stringify({
-          user: user.value,
-          isLoggedIn: true,
-          _token: _token.value,
-          _refreshToken: _refreshToken.value,
-          onboardingCompleted: onboardingCompleted.value,
-        }),
-      );
-    } else {
-      localStorage.removeItem("lkm-auth-store");
+    try {
+      if (_token.value) {
+        localStorage.setItem(
+          AUTH_STORAGE_KEY,
+          JSON.stringify({
+            user: user.value,
+            isLoggedIn: true,
+            _token: _token.value,
+            _refreshToken: _refreshToken.value,
+            onboardingCompleted: onboardingCompleted.value,
+          }),
+        );
+      } else {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      }
+    } catch (e) {
+      // 存储不可用（配额用尽/隐私模式/被禁用）不该让已成功的登录冒未捕获异常：
+      // 内存态已就绪，只是无法跨刷新持久化
+      console.warn("[auth] 会话持久化失败", e);
     }
   }
 
@@ -162,7 +204,7 @@ export const useAuthStore = defineStore("auth", () => {
       persistToStorage();
     }
 
-    return fetchMeAfterLogin(data.user_id);
+    return fetchMeAfterLogin();
   }
 
   // ── API: 注册本地账户 ──
@@ -172,11 +214,7 @@ export const useAuthStore = defineStore("auth", () => {
   ): Promise<Result<AuthSuccess, AppError>> {
     const result = await authApi.registerLocal(username, password);
     if (result.isErr()) return err(result.error);
-    if (result.value.access_token) {
-      setTokens(result.value.access_token, result.value.refresh_token);
-      persistToStorage();
-    }
-    return fetchMeAfterLogin(result.value.user_id);
+    return completeLogin(result.value);
   }
 
   // ── API: 注册普通账户（发送验证码） ──
@@ -211,11 +249,7 @@ export const useAuthStore = defineStore("auth", () => {
       type === "phone" ? code : null,
     );
     if (result.isErr()) return err(result.error);
-    if (result.value.access_token) {
-      setTokens(result.value.access_token, result.value.refresh_token);
-      persistToStorage();
-    }
-    return fetchMeAfterLogin(result.value.user_id);
+    return completeLogin(result.value);
   }
 
   // ── API: 短信/邮箱验证码登录（发送验证码） ──
@@ -243,11 +277,7 @@ export const useAuthStore = defineStore("auth", () => {
         requires2FASetup: result.value.setup_required,
       });
     }
-    if (result.value.access_token) {
-      setTokens(result.value.access_token, result.value.refresh_token);
-      persistToStorage();
-    }
-    return fetchMeAfterLogin(result.value.user_id);
+    return completeLogin(result.value);
   }
 
   // ── API: Magic Link 请求 ──
@@ -266,11 +296,7 @@ export const useAuthStore = defineStore("auth", () => {
       session.value = "anonymous";
       return err(result.error);
     }
-    if (result.value.access_token) {
-      setTokens(result.value.access_token, result.value.refresh_token);
-      persistToStorage();
-    }
-    return fetchMeAfterLogin(result.value.user_id);
+    return completeLogin(result.value);
   }
 
   // ── API: 登出 ──
@@ -281,10 +307,13 @@ export const useAuthStore = defineStore("auth", () => {
       // 即使后端登出失败也清理本地状态
     }
     clearTokens();
+    // 2FA 过渡态与引导标记也要清：否则登出后 getPending2FA() 仍能读到上一个会话的 temp_token
+    clearPending2FA();
     isLoggedIn.value = false;
     user.value = null;
+    onboardingCompleted.value = false;
     session.value = "anonymous";
-    localStorage.removeItem("lkm-auth-store");
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   }
 
   // ── 更新用户 ──
@@ -309,8 +338,18 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     isLoggedIn.value = false;
     session.value = "anonymous";
+    onboardingCompleted.value = false;
     clearTokens();
     clearPending2FA();
+    // 同时清掉持久化快照：否则 resetState 之后一刷新，restoreFromStorage 会把
+    // 已经登出的会话重新读回来（与 lkm:auth-cleared 防「假登录」的初衷冲突）
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   return {

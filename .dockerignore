@@ -1,7 +1,14 @@
 # 依赖与构建产物
-node_modules/
+# 无 `**/` 的 pattern 在 docker 里锚定在 context 根，只匹配根目录那一层；
+# 嵌套 node_modules（子包/工作区）与嵌套日志必须显式带 `**/`
+**/node_modules/
 dist/
 .astro/
+*.tsbuildinfo
+.eslintcache
+.turbo/
+.pnpm-store/
+.vitest/
 
 # 版本控制
 .git/
@@ -31,8 +38,24 @@ coverage/
 .codex/
 .codegraph/
 
+# 凭据类文件（可能含 registry token / 私钥；builder 阶段 `COPY . .` 会打进镜像层）
+# 注意：.pnpmrc 是构建必需的 pnpm 配置，不能忽略（Dockerfile 显式 COPY）
+.npmrc
+.pnpmrc.local
+.git-credentials
+.netrc
+*.pem
+*.key
+*.p12
+id_rsa*
+
+# 镜像自身文件：不进 context 可避免「改一行 Dockerfile 就失效整个构建缓存」
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
 # 参考材料与临时文件
 reference/
 tmp/
-*.log
+**/*.log
 .DS_Store

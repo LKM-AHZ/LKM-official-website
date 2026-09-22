@@ -120,13 +120,33 @@ const clockYears = items.map((i) => shortYear(i.year));
     let currentIndex = 0;
     const angleStep = 360 / total;
 
-    const firstCard = track.querySelector('.ct-card') as HTMLElement;
-    const cardHeight = firstCard
-      ? firstCard.getBoundingClientRect().height
-      : (track.parentElement as HTMLElement).clientHeight;
+    // 每步按当前卡片的真实布局位置换算位移：卡片高度随断点 min-height、文案长度、
+    // 字体/图片回流而变，只在 init 时量一次会让轨道与卡片逐级错位
+    //（跨 767px 断点 resize 就会每步差 20px）。
+    function measureStepOffset(): number {
+      const card = track.children[currentIndex] as HTMLElement | undefined;
+      if (card) {
+        // 用与 track 的 rect 差值而非 offsetTop：track 自身会被 translate 变换，
+        // offsetParent 会随之改变，而纯平移不影响二者 rect 之差，结果更稳。
+        return (
+          card.getBoundingClientRect().top -
+          track.getBoundingClientRect().top
+        );
+      }
+      const firstCard = track.querySelector('.ct-card') as HTMLElement | null;
+      return firstCard
+        ? firstCard.getBoundingClientRect().height * currentIndex
+        : 0;
+    }
 
     function update(): void {
-      track.style.transform = `translate3d(0, -${currentIndex * cardHeight}px, 0)`;
+      track.style.transform = `translate3d(0, -${measureStepOffset()}px, 0)`;
+
+      // 非当前卡片只是被视觉裁掉、仍在 tab 序列里：键盘会 Tab 进屏幕外的按钮。
+      // inert 把它们整体移出焦点顺序（并屏蔽点击/读屏），随 currentIndex 一起更新
+      track.querySelectorAll('.ct-card').forEach((card, i) => {
+        (card as HTMLElement).toggleAttribute('inert', i !== currentIndex);
+      });
 
       const pointer = clockCol.querySelector('.clock-pointer') as HTMLElement;
       if (pointer) {

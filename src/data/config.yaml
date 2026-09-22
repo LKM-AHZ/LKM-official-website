@@ -1,13 +1,15 @@
 site:
-  name: 理科迷
+  # 品牌名只在这里定义（&brandName）；metadata.title.default 与 fuwari.site.title 用别名引用，
+  # 改名时不会漏掉 <title>/OG 或页头页脚（两个配置模块读的是同一份解析结果）
+  name: &brandName 理科迷
   site: "https://lkm-ahz.ltd"
   base: "/"
   trailingSlash: false
-  googleSiteVerificationId: null
+  # googleSiteVerificationId: "<your-google-site-verification-token>"  # 省略即不输出验证 meta（schema 只允许 string，写 null 会让 YAML 校验失败）
 
 metadata:
   title:
-    default: 理科迷
+    default: *brandName
     template: "%s — LKM"
   description: "理科迷 (LKM) — 创立于 2014 年的科技爱好者社区。覆盖数学、物理、化学、生物、信息技术等多个学科，由普罗大众组成，让科学回归每一个人。"
   robots:
@@ -71,7 +73,7 @@ ui:
 
 fuwari:
   site:
-    title: 理科迷
+    title: *brandName
     subtitle: 科技爱好者社区
     lang: zh_CN
     themeColor:

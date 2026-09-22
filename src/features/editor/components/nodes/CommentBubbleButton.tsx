@@ -14,8 +14,10 @@ export default function CommentBubbleButton({
   const handleComment = (): void => {
     const { from, to } = editor.state.selection;
     const text = editor.state.doc.textBetween(from, to, " ");
-    if (text.trim()) {
-      onClick(from, to, text);
+    // 传去空白后的文本：原来守卫用 trim 判断、却把原文（含 textBetween 塞的分隔空格）存进批注
+    const trimmed = text.trim();
+    if (trimmed) {
+      onClick(from, to, trimmed);
     }
   };
 
@@ -24,9 +26,11 @@ export default function CommentBubbleButton({
       type="button"
       className="rte-toolbar-btn"
       title={t("editor.addComment")}
+      // 动作挂在 click 上：Enter/Space 只会派发 click，只写 onMouseDown 键盘用户无法加批注。
+      // onMouseDown 仍保留 preventDefault，用于阻止编辑器失焦/选区丢失（它不会拦截 click）。
+      onClick={handleComment}
       onMouseDown={(e) => {
         e.preventDefault();
-        handleComment();
       }}
     >
       <svg

@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useQuestionBankStore } from "../stores/question-bank";
 import { t } from "~/lib/i18n";
 const bank = useQuestionBankStore();
+
+// 数据来自本地 IndexedDB，首帧计数必然是 0：没有 loading/empty 分支的话，
+// 「还在读」和「真的一道题都没有」都会显示成 0，看起来像数据丢了
+const loading = ref(true);
+
 onMounted(async () => {
-  await bank.loadQuestions();
-  await bank.loadFolders();
+  try {
+    await bank.loadQuestions();
+    await bank.loadFolders();
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
@@ -16,7 +25,11 @@ onMounted(async () => {
     </h1>
     <div class="card-base p-6 text-center text-text-muted">
       <div class="text-5xl mb-4">📚</div>
-      <p>
+      <p v-if="loading">{{ t("common.loading") }}</p>
+      <p v-else-if="bank.questions.value.length === 0">
+        {{ t("primitives.empty") }}
+      </p>
+      <p v-else>
         {{
           t("starhope.bank.summary", {
             questions: bank.questions.value.length,

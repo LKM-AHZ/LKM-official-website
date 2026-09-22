@@ -86,7 +86,7 @@ onMounted(async () => {
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <template v-if="loading">
-        <n-card v-for="i in 5" :key="i" class="h-24">
+        <n-card v-for="i in cards.length" :key="i" class="h-24">
           <n-skeleton text :repeat="2" />
         </n-card>
       </template>

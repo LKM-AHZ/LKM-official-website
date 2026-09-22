@@ -11,6 +11,9 @@ const {
   class: className = '',
   type,
   href,
+  // classes 来自共享的 CallToAction 类型（给带子部件的组件用），Button 没有可覆写的子部件：
+  // 从 rest 里摘掉，否则整个对象会被展开到 DOM，渲染出 classes="[object Object]"
+  classes: _classes,
   ...rest
 } = Astro.props;
 
@@ -22,7 +25,8 @@ const variantClass =
     link: 'btn-link',
   }[variant] || 'btn-neutral';
 
-const isSubmit = type === 'button' || type === 'submit' || type === 'reset';
+// type 只可能是 button/submit/reset（见 CallToAction），所以「是否显式给了 type」等价于
+// `type != null`：直接用 `type ?? 'button'` 即可，不必再引入名字误导的 isSubmit 标志
 ---
 
 {
@@ -40,7 +44,7 @@ const isSubmit = type === 'button' || type === 'submit' || type === 'reset';
   ) : (
     <button
       class={twMerge('btn', variantClass, 'pointer-events-auto', className)}
-      {...(isSubmit ? { type } : { type: 'button' })}
+      type={type ?? 'button'}
       {...rest}
     >
       <Fragment set:html={text} />

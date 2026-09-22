@@ -12,5 +12,10 @@ export function exportMdx(
   const root: Root = tiptapToMdast(editorContent);
   const normalized = normalizeMDAST(root);
   const mdx = serializeMDAST(normalized, frontmatter);
-  return { frontmatter, mdx };
+  // 返回浅拷贝并剔除 undefined：yaml.dump 会略过值为 undefined 的键，
+  // 直接把入参按引用递回去会让「返回的 metadata」与实际写进 mdx 的 YAML 不一致（预览对不上文件）
+  const serializedFrontmatter = Object.fromEntries(
+    Object.entries(frontmatter).filter(([, v]) => v !== undefined),
+  );
+  return { frontmatter: serializedFrontmatter, mdx };
 }

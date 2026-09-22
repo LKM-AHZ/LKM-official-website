@@ -11,15 +11,17 @@
     >
       <div class="flex items-center gap-3">
         <span
+          aria-hidden="true"
           class="text-3xl shrink-0 text-primary/70 group-hover:text-primary transition-colors"
         >
           <Icon icon="material-symbols:folder" />
         </span>
-        <h3
+        <!-- button 只允许 phrasing content，且卡片可访问名本就来自文本，故用 span 而非 h3 -->
+        <span
           class="font-semibold text-deep-text group-hover:text-primary transition-colors line-clamp-1 text-sm"
         >
           {{ t(folder.name) }}
-        </h3>
+        </span>
       </div>
       <div class="text-xs text-text-muted/60">
         {{

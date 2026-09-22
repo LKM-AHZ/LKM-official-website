@@ -124,7 +124,10 @@ export const fileLibraryApi = {
     if (!res.ok) {
       throw new Error(`获取下载地址失败 ${res.status}`);
     }
-    const data = (await res.json()) as BackendDownloadUrl;
+    // 后端该端点走 ApiResp 包络（response_model=ApiResp[DownloadUrlInfo]），
+    // 必须取 data，否则 kind/url 恒为 undefined（下载地址失效）
+    const data = (await res.json())["data"] as BackendDownloadUrl | undefined;
+    if (!data?.url) throw new Error("获取下载地址失败：响应格式异常");
     return {
       kind: data.kind,
       url: data.url,
@@ -143,7 +146,9 @@ export const fileLibraryApi = {
     return res.blob();
   },
 
-  getPreviewUrl: (id: string): string => `/api/v1/files/${id}/preview`,
+  // 原 getPreviewUrl 返回裸 URL 供 <img src> 直接用，但 /api/v1/files/* 只认 Bearer 头
+  //（needsAuth 白名单不含该前缀），以 img/iframe 加载必然 401；且全仓库无人调用。
+  // 预览场景请走 getContentBlob + URL.createObjectURL（已鉴权），故删除这个误导性入口。
 
   // ── 上传（Phase 2-B）──
   // 该链路由 /files 相关端点保护，只认 Bearer 头；generic get() 的

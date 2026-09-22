@@ -12,6 +12,7 @@
           path.length === 0,
       }"
       :disabled="path.length === 0"
+      :aria-current="path.length === 0 ? 'page' : undefined"
       @click="emit('navigate', null)"
     >
       {{ t("community.fileLibrary.allCategories") }}
@@ -26,6 +27,9 @@
             : 'text-deep-text hover:text-primary hover:bg-surface-3'
         "
         :disabled="node.id === path[path.length - 1].id"
+        :aria-current="
+          node.id === path[path.length - 1].id ? 'page' : undefined
+        "
         @click="emit('navigate', node.id)"
       >
         {{ t(node.name) }}
@@ -35,7 +39,8 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults } from "vue";
+// withDefaults 是 <script setup> 的编译宏（同 defineProps），不从 vue 运行时导入 ——
+// vue 的运行时入口并不导出它，保留该 import 会让构建报 "does not provide an export named 'withDefaults'"
 import type { FileCategory } from "../data/category-tree";
 import { t } from "~/lib/i18n";
 

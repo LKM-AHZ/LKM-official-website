@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { ReactElement } from "react";
 import { t } from "~/lib/i18n";
 
@@ -21,13 +21,17 @@ const FigureView = memo(function FigureView({
   width,
   align = "center",
 }: FigureViewProps): ReactElement {
+  // src 非空但加载失败（资源被删/外链 404）时也要给占位，否则只剩浏览器的破图图标
+  const [failed, setFailed] = useState(false);
+
   return (
     <figure className={`lkm-figure lkm-figure-${align}`}>
-      {src ? (
+      {src && !failed ? (
         <img
           src={src}
           alt={alt ?? ""}
           style={width ? { width: `${width}px` } : undefined}
+          onError={() => setFailed(true)}
         />
       ) : (
         <span className="lkm-figure-placeholder">

@@ -1,5 +1,6 @@
 import { get, post, put, del, getHttpAccessToken } from "../../http/client";
 import { apiFetch } from "../fetch";
+import { t } from "~/lib/i18n";
 
 // ── 类型 ──
 
@@ -293,24 +294,55 @@ export const authApi = {
   /** 上传头像（multipart file，≤2MB），成功后返回更新后的 avatar 字段。 */
   uploadAvatar: async (file: File): Promise<{ avatar: string | null }> => {
     const token = getHttpAccessToken();
+    // 该端点必须带 Bearer：无 token 时直接失败，避免发一个注定 401 的请求后
+    // 在调用方表现为「上传失败 401」这种难以定位的错误
+    if (!token) throw new Error(t("settings.loginRequired"));
     const fd = new FormData();
     fd.append("file", file);
     const result = await apiFetch("/api/v1/auth/avatar", {
       method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: { Authorization: `Bearer ${token}` },
       body: fd,
     });
     if (result.isErr()) {
-      throw new Error(
-        `头像上传失败 ${result.error.message ?? result.error.name}`,
-      );
+      // AppError.message 由 fetch/client 层用 t(...) 生成，直接透传即可
+      //（原写法 `message ?? name` 既可能出现 undefined 也不是本地化文案）
+      throw new Error(result.error.message);
     }
     const res = result.value;
     if (!res.ok) {
-      throw new Error(`头像上传失败 ${res.status}`);
+      // 尽量取后端 msg/message（@respond 包络），比只有状态码可读
+      let detail = "";
+      try {
+        const raw = (await res.json()) as {
+          msg?: unknown;
+          message?: unknown;
+        } | null;
+        const msg =
+          typeof raw?.msg === "string"
+            ? raw.msg
+            : typeof raw?.message === "string"
+              ? raw.message
+              : "";
+        if (msg) detail = msg.slice(0, 160);
+      } catch {
+        // 非 JSON 错误页：忽略 detail
+      }
+      throw new Error(
+        t("messages.requestFailed", { status: res.status }) +
+          (detail ? `：${detail}` : ""),
+      );
     }
-    const b = (await res.json()) as { data?: { avatar: string | null } };
-    return (b?.data ?? { avatar: null }) as { avatar: string | null };
+    const b = (await res.json()) as { data?: { avatar?: unknown } };
+    // 形状校验：响应畸形时不能退化成 { avatar: null }（那与「头像被清空」无法区分）
+    if (
+      !b?.data ||
+      !("avatar" in b.data) ||
+      (b.data.avatar !== null && typeof b.data.avatar !== "string")
+    ) {
+      throw new Error(t("messages.unknownError"));
+    }
+    return { avatar: b.data.avatar as string | null };
   },
 
   /** 读取头像图片 URL（GET 流式返回，未上传时为 404）。 */

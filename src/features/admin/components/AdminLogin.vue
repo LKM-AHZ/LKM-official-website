@@ -13,6 +13,9 @@ const error = ref("");
 const success = ref(false);
 
 async function handleSubmit() {
+  // 防重入：按钮的 :disabled 要等一次渲染才生效，表单回车提交更是绕过按钮，
+  // 快速双击/连按回车会发出第二个登录请求。
+  if (submitting.value) return;
   error.value = "";
   if (!username.value.trim() || !password.value) {
     error.value = t("admin.login.required");

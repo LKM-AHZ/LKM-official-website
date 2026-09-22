@@ -5,7 +5,11 @@ import { getTagUrl } from '~/lib/utils/url-utils';
 import { ButtonTag } from '~/components/primitives';
 import WidgetLayout from './WidgetLayout.astro';
 
-const tags = await getTagList();
+// 名称只归一化一次：原来 URL 用原始 name、显示与 aria-label 各自 trim，
+// 三处口径可能不一致；顺便丢掉 trim 后为空的标签（否则渲染出无名 chip）
+const tags = (await getTagList())
+  .map((tag) => ({ ...tag, name: tag.name.trim() }))
+  .filter((tag) => tag.name.length > 0);
 
 const COLLAPSED_HEIGHT = '7.5rem';
 
@@ -30,8 +34,8 @@ const style = Astro.props.style;
   <div class="flex gap-2 flex-wrap">
     {
       tags.map((tag) => (
-        <ButtonTag href={getTagUrl(tag.name)} label={`View all posts with the ${tag.name.trim()} tag`}>
-          {tag.name.trim()}
+        <ButtonTag href={getTagUrl(tag.name)} label={`View all posts with the ${tag.name} tag`}>
+          {tag.name}
         </ButtonTag>
       ))
     }

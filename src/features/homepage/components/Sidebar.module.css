@@ -221,13 +221,17 @@
 }
 
 /* 主内容容器偏移，由 html.sidebar-collapsed（BaseLayout 首帧内联脚本在 paint 前设置）驱动，
-   避免 JS 在首帧后改 main 内边距触发 CLS。默认=展开宽度；收起态走 CSS 覆盖。 */
-[data-main-content] {
-  padding-left: 240px;
-}
+   避免 JS 在首帧后改 main 内边距触发 CLS。默认=展开宽度；收起态走 CSS 覆盖。
+   必须限定 min-width：移动端覆盖值（200/50px，见文件顶部的 max-width:767px 块）与这里选择器
+   同权重，而这些规则在源码中更靠后，不限定就会在窄屏也生效，留下 40px/17px 空隙。 */
+@media (min-width: 768px) {
+  [data-main-content] {
+    padding-left: 240px;
+  }
 
-html.sidebar-collapsed [data-main-content] {
-  padding-left: 67px;
+  html.sidebar-collapsed [data-main-content] {
+    padding-left: 67px;
+  }
 }
 
 /* 收起态：居中显示，隐藏文字 */

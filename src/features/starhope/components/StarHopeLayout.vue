@@ -5,6 +5,16 @@ import { t } from "~/lib/i18n";
 
 const { navItems, currentRoute, navigate } = useNavigationStore();
 const { currentUser, logout } = useAuthStore();
+
+// @click 直接绑 logout 会把 MouseEvent 当首参传入、且 Vue 不会 await 它返回的 Promise，
+// 失败时只会留下 unhandled rejection 而界面仍停在已登录态，故包一层并记录错误
+async function handleLogout(): Promise<void> {
+  try {
+    await logout();
+  } catch (err) {
+    console.error("StarHope 退出登录失败", err);
+  }
+}
 </script>
 
 <template>
@@ -39,7 +49,9 @@ const { currentUser, logout } = useAuthStore();
           <div
             class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary"
           >
-            {{ currentUser.username ? currentUser.username.charAt(0) : "?" }}
+            {{
+              currentUser.username ? Array.from(currentUser.username)[0] : "?"
+            }}
           </div>
           <div class="text-sm">
             <div class="font-medium text-deep-text">
@@ -52,7 +64,7 @@ const { currentUser, logout } = useAuthStore();
         </div>
         <button
           type="button"
-          @click="logout"
+          @click="handleLogout"
           class="w-full text-left px-3 py-2 text-xs text-text-muted hover:text-red-500 rounded-lg hover:bg-surface-3 transition-colors block"
         >
           {{ t("starhope.logout") }}

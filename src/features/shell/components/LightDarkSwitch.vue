@@ -14,7 +14,10 @@ const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
 const mode = ref<LIGHT_DARK_MODE>(AUTO_MODE);
 
 onMounted(() => {
-  mode.value = getStoredTheme();
+  // localStorage 里可能是历史/任意值（getStoredTheme 只做了类型断言、没有校验）：
+  // 不在 seq 内时 seq.indexOf 返回 -1，点击切换会静默跳到 LIGHT_MODE 而不是从当前状态轮转
+  const stored = getStoredTheme();
+  mode.value = seq.includes(stored) ? stored : AUTO_MODE;
   const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
   const changeThemeWhenSchemeChanged = () => {
     applyThemeToDocument(mode.value);

@@ -37,7 +37,18 @@ export function useAdminPagination<T>(
     try {
       const res = await adminFetch(buildPath(page, limit));
       const body = await readAdminResp(res);
-      const data = body.data as PaginatedResponse<T>;
+      // code==0 但 data 缺失/形状不对时不能直接断言：否则 undefined.items 会以
+      // 「Cannot read properties of undefined」的形式暴露给后台用户
+      const data = body.data as Partial<PaginatedResponse<T>> | null | undefined;
+      if (
+        !data ||
+        !Array.isArray(data.items) ||
+        typeof data.total !== "number" ||
+        typeof data.page !== "number" ||
+        typeof data.pages !== "number"
+      ) {
+        return err(new AppError(ErrorCode.PARSE_ERROR, t("admin.loadFailed")));
+      }
       return ok({
         items: data.items,
         total: data.total,

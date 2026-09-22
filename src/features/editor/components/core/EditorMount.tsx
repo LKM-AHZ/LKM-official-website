@@ -41,9 +41,35 @@ interface State {
 
 class EditorErrorBoundary extends Component<Props, State> {
   state: State = { retries: 0, error: null, errorVersion: 0 };
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return { error };
+  }
+
+  /** 捕获到错误后排下一次自动重试。首次失败（retries === 0）也要排，
+   * 否则会永远停在「重试中」的转圈提示上，既不会重试也没有手动按钮。 */
+  componentDidCatch(): void {
+    this.scheduleRetry();
+  }
+
+  /** 定时器必须放在 render 之外：render 里起 setTimeout 会在每次重渲染时叠加，
+   * 卸载后也会对已卸载组件 setState。 */
+  scheduleRetry(): void {
+    const { retries } = this.state;
+    if (retries >= MAX_RETRIES) return;
+    if (this.retryTimer) clearTimeout(this.retryTimer);
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null;
+      this.handleRetry();
+    }, RETRY_DELAYS[retries]);
+  }
+
+  componentWillUnmount(): void {
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
   }
 
   handleRetry = (): void => {
@@ -66,10 +92,6 @@ class EditorErrorBoundary extends Component<Props, State> {
 
     if (error) {
       if (retries < MAX_RETRIES) {
-        const delay = RETRY_DELAYS[retries];
-        // 自动重试：首次失败（retries === 0）也必须排定，否则会永远停在
-        // 「重试中」的转圈提示上，既不会重试也没有手动按钮。
-        setTimeout(() => this.handleRetry(), delay);
         if (retries > 0) {
           return (
             <div className="rte-root">

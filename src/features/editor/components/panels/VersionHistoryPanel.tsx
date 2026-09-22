@@ -22,6 +22,13 @@ const VersionHistoryPanel = memo(function VersionHistoryPanel({
   );
   const [confirmRestore, setConfirmRestore] = useState(false);
 
+  // 切换文档或版本列表刷新后，选中的 VersionEntry 可能已过期/属于别的文档，
+  // 而预览与 onRestore 都会用到它，故清掉选择
+  useEffect(() => {
+    setSelectedVersion(null);
+    setConfirmRestore(false);
+  }, [documentId, versions]);
+
   useEffect(() => {
     // 卸载防抖：卸载后不再 setState（避免 setState-on-unmounted 与迟到响应）。
     let cancelled = false;

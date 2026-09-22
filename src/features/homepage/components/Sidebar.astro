@@ -104,9 +104,6 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
     var currentSidebar = function () {
       return document.querySelector("[data-sidebar]");
     };
-    var currentMain = function () {
-      return document.querySelector("[data-main-content]");
-    };
 
     // 折叠状态恢复/同步：仅在切换后对新节点调用（SSR 首帧已由 BaseLayout 内联脚本设定
     // html.sidebar-collapsed，此处将 shell 收起态与文档级标记对齐，不触碰 main 内联 padding，
@@ -130,17 +127,14 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
       sidebar.style.transition = prevTransition;
     }
 
-    // 用户点击折叠按钮：切换展开态并持久化，同步主内容偏移。
+    // 用户点击折叠按钮：切换展开态并持久化（主内容偏移由 CSS 跟随 html.sidebar-collapsed）。
     function setExpanded(expanded) {
       var sidebar = currentSidebar();
       if (!sidebar) return;
-      var mobile = window.matchMedia("(max-width: 767px)").matches;
       sidebar.classList.toggle("collapsed", !expanded);
       document.documentElement.classList.toggle("sidebar-collapsed", !expanded);
-      var main = currentMain();
-      if (main) {
-        main.style.paddingLeft = (expanded ? (mobile ? 200 : 240) : (mobile ? 50 : 67)) + "px";
-      }
+      // 主内容偏移完全由 html.sidebar-collapsed + Sidebar.module.css 驱动（含 767px 断点）：
+      // 这里再写内联 padding-left 会永久压过 CSS，切到另一断点后残留旧值（如移动端仍是 240px）
       try {
         localStorage.setItem("sidebar-expanded", String(expanded));
       } catch {
@@ -165,7 +159,9 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
         var isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
         if (isActive) {
           li.classList.add("active");
-        } else if (!linkUrl.hash) {
+        } else if (linkUrl.hash || currentHash) {
+          // 原本只在「无 hash 链接」时清除高亮，锚点链接一旦不匹配就永远留着 active，
+          // 滚动切段后侧栏会同时显示两个高亮项
           li.classList.remove("active");
         }
       });

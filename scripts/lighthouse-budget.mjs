@@ -10,8 +10,9 @@
  *  - 告警指标（超阈 → ::warning:: 输出，不 exit、不红）：LCP、Perf 得分；
  *    `/editor` 为公认接受项（编辑器固有重量），整页走告警档。
  *
- * 基线 delta（JS 体积）：把基准期的每页 JS 中位写入 scripts/jsbudget-baseline.json（提交 git）。
- * 归因时若某页 jsKb 较基线上涨超过 LIGHTHOUSE_JS_DELTA_PCT → 硬失败（拦回归），下降不管。
+ * 基线 delta（JS 体积）：把基准期的每页 JS 中位写入 scripts/jsbudget-baseline.json（提交 git），
+ * 键名 jsKib，单位 KiB（gz），与 BUDGET.jsKb（env LIGHTHOUSE_JS_KB）同单位。
+ * 归因时若某页 jsKib 较基线上涨超过 LIGHTHOUSE_JS_DELTA_PCT → 硬失败（拦回归），下降不管。
  *
  * 阈值（env 可覆盖）：
  *   LIGHTHOUSE_LCP_MS / LIGHTHOUSE_CLS / LIGHTHOUSE_TBT_MS / LIGHTHOUSE_PERF
@@ -50,27 +51,28 @@ function envNum(name, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-// 预算阈值（env 可覆盖）。hard=false 的指标超阈只告警，不进硬失败。
+// 字节 → KiB（保留 1 位小数）。基线写入与运行时比较必须用同一个换算：
+// 一边 0.1 KiB、一边整数 KiB 会让 delta 出现纯粹由舍入造成的假涨落
+function toKiB(bytes) {
+  return Math.round((bytes / 1024) * 10) / 10;
+}
+
+/** 三态标记：PASS / WARN（仅告警页）/ FAIL —— 避免每个指标都写一遍嵌套三元 */
+function status(ok, warnOnly) {
+  if (ok) return " PASS";
+  return warnOnly ? " WARN" : " FAIL";
+}
+
+// 预算阈值（env 可覆盖）。硬/告警分层在 main 的分支里实现：
+// LCP、Perf 只告警；CLS、TBT、JS 体积（含基线 delta）硬拦。
 const BUDGET = {
-  lcpMs: {
-    value: envNum("LIGHTHOUSE_LCP_MS", 2500),
-    hard: false,
-    label: "LCP(ms)",
-  },
-  cls: { value: envNum("LIGHTHOUSE_CLS", 0.1), hard: true, label: "CLS" },
-  tbtMs: {
-    value: envNum("LIGHTHOUSE_TBT_MS", 200),
-    hard: true,
-    label: "TBT(ms)",
-  },
-  perf: { value: envNum("LIGHTHOUSE_PERF", 60), hard: false, label: "Perf" },
+  lcpMs: { value: envNum("LIGHTHOUSE_LCP_MS", 2500) },
+  cls: { value: envNum("LIGHTHOUSE_CLS", 0.1) },
+  tbtMs: { value: envNum("LIGHTHOUSE_TBT_MS", 200) },
+  perf: { value: envNum("LIGHTHOUSE_PERF", 60) },
   // JS 绝对阈仅防「发布事故级」暴增（默认取大宽松值，覆盖 /editor 固有 2.6M+）；
   // 真正的 per-page JS 回归由基线 delta（JS_DELTA_PCT）承担。
-  jsKb: {
-    value: envNum("LIGHTHOUSE_JS_KB", 3500),
-    hard: true,
-    label: "JS(KiB)",
-  },
+  jsKb: { value: envNum("LIGHTHOUSE_JS_KB", 3500) },
 };
 
 const JS_DELTA_PCT = envNum("LIGHTHOUSE_JS_DELTA_PCT", 8);
@@ -98,10 +100,15 @@ function parseFlags() {
 }
 
 function loadBaseline() {
+  // 文件不存在 = 尚未立基线（正常，静默）；文件在但解析失败 = 门禁会被悄无声息地关掉，
+  // 必须在 CI 日志里显式告警，否则 JS 回归保护会在最需要它的时刻失效
   if (!existsSync(BASELINE_FILE)) return null;
   try {
     return JSON.parse(readFileSync(BASELINE_FILE, "utf-8"));
-  } catch {
+  } catch (err) {
+    process.stdout.write(
+      `::warning::lighthouse-budget 基线文件无法解析，本次 JS delta 门禁已跳过: ${BASELINE_FILE} (${err?.message ?? err})\n`,
+    );
     return null;
   }
 }
@@ -110,10 +117,8 @@ function saveBaseline(entries) {
   const baseline = { generatedAt: new Date().toISOString(), pages: {} };
   for (const { path, m } of entries) {
     baseline.pages[path] = {
-      jsKb:
-        m.totalJsBytes != null
-          ? Math.round((m.totalJsBytes / 1024) * 10) / 10
-          : null,
+      // 单位是 KiB（gz 后的中位值），键名写成 jsKib 以免被读成 Kb/MB
+      jsKib: m.totalJsBytes != null ? toKiB(m.totalJsBytes) : null,
     };
   }
   writeFileSync(
@@ -144,7 +149,7 @@ async function main() {
     const baseline = saveBaseline(results);
     process.stdout.write(`基线已更新 -> ${BASELINE_FILE}\n`);
     for (const [p, v] of Object.entries(baseline.pages)) {
-      process.stdout.write(`  ${p}: jsKb=${v.jsKb ?? "-"}\n`);
+      process.stdout.write(`  ${p}: jsKib=${v.jsKib ?? "-"}\n`);
     }
     return;
   }
@@ -152,6 +157,9 @@ async function main() {
   const baseline = loadBaseline();
 
   let hardErrors = 0;
+  // 指标缺失（Lighthouse 没产出该 audit，多为测量异常）与「真的超阈」必须分开计数：
+  // 否则 triage 时只看得到 `CLS=- FAIL`，把 flaky 运行和真实回归混在一起
+  let measureErrors = 0;
   const warnings = [];
 
   process.stdout.write(
@@ -164,35 +172,42 @@ async function main() {
 
     const lcpVal = m.lcp ?? null;
     const lcpOk = lcpVal != null && lcpVal < BUDGET.lcpMs.value;
-    if (!lcpOk) {
-      if (!warnOnly) warnings.push(`${path} LCP=${lcpVal}ms`);
-    }
-    flags.push(`LCP=${lcpVal ?? "-"}${lcpOk ? " PASS" : " WARN"}`);
+    if (lcpVal == null) measureErrors++;
+    else if (!lcpOk && !warnOnly) warnings.push(`${path} LCP=${lcpVal}ms`);
+    flags.push(
+      `LCP=${lcpVal ?? "-"}${lcpVal == null ? " N/A" : lcpOk ? " PASS" : " WARN"}`,
+    );
 
     const clsVal = m.cls ?? null;
     const clsOk = clsVal != null && clsVal < BUDGET.cls.value;
-    if (!clsOk && !warnOnly) hardErrors++;
+    if (clsVal == null) measureErrors++;
+    else if (!clsOk && !warnOnly) hardErrors++;
     flags.push(
-      `CLS=${clsVal ?? "-"}${clsOk ? " PASS" : warnOnly ? " WARN" : " FAIL"}`,
+      `CLS=${clsVal ?? "-"}${clsVal == null ? " N/A" : status(clsOk, warnOnly)}`,
     );
 
     const tbtVal = m.tbt ?? null;
     const tbtOk = tbtVal != null && tbtVal < BUDGET.tbtMs.value;
-    if (!tbtOk && !warnOnly) hardErrors++;
+    if (tbtVal == null) measureErrors++;
+    else if (!tbtOk && !warnOnly) hardErrors++;
     flags.push(
-      `TBT=${tbtVal ?? "-"}ms${tbtOk ? " PASS" : warnOnly ? " WARN" : " FAIL"}`,
+      `TBT=${tbtVal ?? "-"}ms${tbtVal == null ? " N/A" : status(tbtOk, warnOnly)}`,
     );
 
     const perfVal = m.perfScore ?? null;
     const perfOk = perfVal != null && perfVal >= BUDGET.perf.value;
-    if (!perfOk && !warnOnly) warnings.push(`${path} Perf=${perfVal}`);
-    flags.push(`Perf=${perfVal ?? "-"}${perfOk ? " PASS" : " WARN"}`);
+    if (perfVal == null) measureErrors++;
+    else if (!perfOk && !warnOnly) warnings.push(`${path} Perf=${perfVal}`);
+    flags.push(
+      `Perf=${perfVal ?? "-"}${perfVal == null ? " N/A" : perfOk ? " PASS" : " WARN"}`,
+    );
 
-    // per-page JS 体积（gz），硬阈值 + 基线 delta
-    const jsVal =
-      m.totalJsBytes != null ? Math.round(m.totalJsBytes / 1024) : null;
-    let jsOk = jsVal != null && jsVal < BUDGET.jsKb.value;
-    if (!jsOk) {
+    // per-page JS 体积（gz，KiB），硬阈值 + 基线 delta
+    const jsVal = m.totalJsBytes != null ? toKiB(m.totalJsBytes) : null;
+    const jsOk = jsVal != null && jsVal < BUDGET.jsKb.value;
+    if (jsVal == null) {
+      measureErrors++;
+    } else if (!jsOk) {
       if (warnOnly) {
         warnings.push(`${path} JS=${jsVal}KiB`);
       } else {
@@ -202,13 +217,15 @@ async function main() {
 
     // 基线 delta（仅对硬拦截页；editor 也看 JS 体积回归——编辑器 JS 变大是真回归）
     let deltaWarn = "";
-    if (jsVal != null && baseline?.pages?.[path]?.jsKb != null) {
-      const baseKib = baseline.pages[path].jsKb;
+    let deltaFailed = false;
+    if (jsVal != null && baseline?.pages?.[path]?.jsKib != null) {
+      const baseKib = baseline.pages[path].jsKib;
       if (baseKib > 0) {
         const pct = ((jsVal - baseKib) / baseKib) * 100;
         if (pct > JS_DELTA_PCT) {
           // JS 体积回归：这是最稳定的真实信号，即便 editor 也应硬拦
           hardErrors++;
+          deltaFailed = true;
           deltaWarn = ` ↑${pct.toFixed(0)}%>${JS_DELTA_PCT}%基线(${baseKib}KiB)`;
         } else {
           deltaWarn = ` (基线${baseKib}KiB±${pct.toFixed(0)}%)`;
@@ -218,9 +235,13 @@ async function main() {
       deltaWarn = " (无基线,仅绝对阈)";
     }
 
-    flags.push(
-      `JS=${jsVal ?? "-"}KiB${jsOk ? " PASS" : warnOnly ? " WARN" : " FAIL"}${deltaWarn}`,
-    );
+    // delta 破线是硬拦截（warn-only 页也拦），状态必须显示 FAIL，
+    // 否则 triage 时会看到「PASS/WARN」却拿到 exit 1。
+    let jsFlag;
+    if (deltaFailed) jsFlag = " FAIL";
+    else if (jsVal == null) jsFlag = " N/A";
+    else jsFlag = status(jsOk, warnOnly);
+    flags.push(`JS=${jsVal ?? "-"}KiB${jsFlag}${deltaWarn}`);
 
     process.stdout.write(
       `  [${path}]${warnOnly ? " [warn-only]" : ""} runs=${pageRuns} | ${flags.join(" | ")}\n`,
@@ -234,8 +255,13 @@ async function main() {
 
   if (hardErrors > 0) {
     process.stdout.write(`\n${hardErrors} 项硬预算超限（FAIL，CI 拦截）\n`);
-    process.exit(1);
   }
+  if (measureErrors > 0) {
+    process.stdout.write(
+      `\n${measureErrors} 项指标缺失（Lighthouse 未产出该 audit，属测量异常而非超阈；按失败处理）\n`,
+    );
+  }
+  if (hardErrors > 0 || measureErrors > 0) process.exit(1);
   process.stdout.write(`\n硬预算全部在阈值内（PASS；告警项请留意 LCP/Perf）\n`);
 }
 

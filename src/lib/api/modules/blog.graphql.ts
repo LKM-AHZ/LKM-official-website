@@ -22,6 +22,9 @@ export const BLOG_SERIES_DETAIL = graphql`
       status
       starCount
       isStarred
+      # fileTree 是嵌套结构，GraphQL 选择集必须写死层数：这里固定 6 层（fileTree + 5 层 children），
+      # 更深的目录会返回“type=tree 但没有 children”的空目录节点（静默截断，原来只选 3 层）。
+      # blog.ts 的 mapFileTree 会按 children 递归，往后加深只需在此追加一层 children。
       fileTree {
         name
         type
@@ -31,6 +34,18 @@ export const BLOG_SERIES_DETAIL = graphql`
           children {
             name
             type
+            children {
+              name
+              type
+              children {
+                name
+                type
+                children {
+                  name
+                  type
+                }
+              }
+            }
           }
         }
       }

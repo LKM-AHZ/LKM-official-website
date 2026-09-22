@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import type { ReactElement } from "react";
 import { renderNode } from "../panels/PreviewPanel";
 import type { JSONContent } from "@tiptap/core";
@@ -13,10 +12,9 @@ export default function ExportPdfPage({
   content,
   title,
 }: ExportPdfPageProps): ReactElement {
-  const nodes = useMemo(
-    () => content.map((n, i) => renderNode(n, i)),
-    [content],
-  );
+  // 本组件每次导出只渲染一次，memo 无收益；且若调用方原地改动 content 数组/节点，
+  // memo 的引用比较会命中旧缓存、导出漏掉最新改动。直接算。
+  const nodes = content.map((n, i) => renderNode(n, i));
 
   return (
     <html>
@@ -30,6 +28,10 @@ export default function ExportPdfPage({
           }
           @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            /* 打印分页保真：宽代码块/表格不再被裁切，长块尽量不跨页断开 */
+            pre { white-space: pre-wrap; word-break: break-word; overflow: visible; }
+            pre, table, figure, blockquote { break-inside: avoid; }
+            img { max-height: 90vh; }
           }
           body {
             font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;

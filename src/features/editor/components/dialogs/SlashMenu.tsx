@@ -14,19 +14,20 @@ interface SlashItem {
   label: string;
   description: string;
   icon: string;
-  action: (editor: Editor) => void;
+  /** 立即执行的条目才有；带 submenu / aiAction 的条目走各自分支 */
+  action?: (editor: Editor) => void;
   /** 特殊交互：选中后进入二级面板（例如表格尺寸选择）而非立即执行 */
   submenu?: "table" | "inlineMath" | "blockMath" | "image";
+  /** AI 动作：菜单自身没有 AI 状态，交给宿主（DocumentEditor）执行 */
+  aiAction?: "continue" | "summarize";
 }
 
-// 表格命令被组件内部引用做 submenu 识别；这里单独定义以保证引用稳定
-function tableCommand(editor: Editor): void {
-  editor
-    .chain()
-    .focus()
-    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-    .run();
-}
+/** 菜单最多渲染的条目数（超出部分靠输入 query 过滤，不滚动） */
+const MAX_VISIBLE_ITEMS = 8;
+
+/** 公式二级面板的默认初始 LaTeX：与插入结果共用同一字面量，避免两处分叉 */
+const DEFAULT_INLINE_MATH_LATEX = "x^2";
+const DEFAULT_BLOCK_MATH_LATEX = "\\sum_{i=1}^{n} x_i";
 
 const ITEMS: SlashItem[] = [
   {
@@ -87,46 +88,24 @@ const ITEMS: SlashItem[] = [
     label: t("editor.slash.image"),
     description: t("editor.slash.imageDesc"),
     icon: "🖼",
-    action: () => {
-      // 由 submenu='image' 处理：打开 ImageUrlPopover
-    },
     submenu: "image",
   },
   {
     label: t("editor.slash.table"),
     description: t("editor.slash.tableDesc"),
     icon: "⊞",
-    action: tableCommand,
     submenu: "table",
   },
   {
     label: t("editor.slash.inlineMath"),
     description: t("editor.slash.inlineMathDesc"),
     icon: "𝑓",
-    action: (e) => {
-      const latex = "x^2";
-      e.chain()
-        .focus()
-        .insertContent({
-          type: "text",
-          text: latex,
-          marks: [{ type: "inlineMath", attrs: { latex } }],
-        })
-        .run();
-    },
     submenu: "inlineMath",
   },
   {
     label: t("editor.slash.blockMath"),
     description: t("editor.slash.blockMathDesc"),
     icon: "∑",
-    action: (e) => {
-      const latex = "\\sum_{i=1}^{n} x_i";
-      e.chain()
-        .focus()
-        .insertContent({ type: "blockMath", attrs: { latex } })
-        .run();
-    },
     submenu: "blockMath",
   },
   {
@@ -152,15 +131,13 @@ const ITEMS: SlashItem[] = [
     label: t("editor.slash.aiContinue"),
     description: t("editor.slash.aiContinueDesc"),
     icon: "🤖",
-    action: () => {
-      // AI panel is opened via DocumentEditor state
-    },
+    aiAction: "continue",
   },
   {
     label: t("editor.slash.aiSummarize"),
     description: t("editor.slash.aiSummarizeDesc"),
     icon: "📝",
-    action: () => {},
+    aiAction: "summarize",
   },
 ];
 
@@ -170,6 +147,8 @@ interface SlashMenuProps {
   position: { top: number; left: number } | null;
   onClose: () => void;
   onSelect: () => void;
+  /** AI 条目由宿主执行（菜单自身无 AI 状态），缺省时条目选中后仅关闭菜单 */
+  onAiRequest?: (intent: "continue" | "summarize") => void;
 }
 
 const SlashMenu = memo(function SlashMenu({
@@ -178,6 +157,7 @@ const SlashMenu = memo(function SlashMenu({
   position,
   onClose,
   onSelect,
+  onAiRequest,
 }: SlashMenuProps) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [tableMode, setTableMode] = useState(false);
@@ -204,7 +184,14 @@ const SlashMenu = memo(function SlashMenu({
       const currentFiltered = filteredRef.current;
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIdx((i) => Math.min(i + 1, currentFiltered.length - 1));
+        // 上界取「实际渲染出来的行数」：列表只渲染前 MAX_VISIBLE_ITEMS 条，
+        // 按 currentFiltered.length 会让选中项跑到看不见的位置上
+        setSelectedIdx((i) =>
+          Math.min(
+            i + 1,
+            Math.min(currentFiltered.length, MAX_VISIBLE_ITEMS) - 1,
+          ),
+        );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setSelectedIdx((i) => Math.max(i - 1, 0));
@@ -215,13 +202,18 @@ const SlashMenu = memo(function SlashMenu({
           if (sub === "table") {
             setTableMode(true);
           } else if (sub === "inlineMath") {
-            setMathMode({ isBlock: false, initialLatex: "x^2" });
+            setMathMode({ isBlock: false, initialLatex: DEFAULT_INLINE_MATH_LATEX });
           } else if (sub === "blockMath") {
-            setMathMode({ isBlock: true, initialLatex: "\\sum_{i=1}^{n} x_i" });
+            setMathMode({ isBlock: true, initialLatex: DEFAULT_BLOCK_MATH_LATEX });
           } else if (sub === "image") {
             setImageMode(true);
           } else {
-            currentFiltered[selectedIdx].action(editor);
+            const item = currentFiltered[selectedIdx];
+            if (item.aiAction) {
+              onAiRequest?.(item.aiAction);
+            } else {
+              item.action?.(editor);
+            }
             onSelect();
           }
         }
@@ -234,9 +226,12 @@ const SlashMenu = memo(function SlashMenu({
 
   useEffect(() => {
     if (!position) return;
+    // 二级面板（表格/公式/图片）打开时不要挂全局键盘监听：面板输入框里的
+    // Enter/方向键会被这里一并处理，可能在模态层下面执行菜单动作或提前 onClose
+    if (tableMode || mathMode || imageMode) return;
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown, position]);
+  }, [handleKeyDown, position, tableMode, mathMode, imageMode]);
 
   useEffect(() => {
     setSelectedIdx(0);
@@ -325,7 +320,7 @@ const SlashMenu = memo(function SlashMenu({
       style={{ top: position.top, left: position.left }}
     >
       <div role="listbox" className="p-1">
-        {filtered.slice(0, 8).map((item, idx) => (
+        {filtered.slice(0, MAX_VISIBLE_ITEMS).map((item, idx) => (
           <button
             key={item.label}
             type="button"
@@ -338,16 +333,22 @@ const SlashMenu = memo(function SlashMenu({
               if (sub === "table") {
                 setTableMode(true);
               } else if (sub === "inlineMath") {
-                setMathMode({ isBlock: false, initialLatex: "x^2" });
+                setMathMode({
+                  isBlock: false,
+                  initialLatex: DEFAULT_INLINE_MATH_LATEX,
+                });
               } else if (sub === "blockMath") {
                 setMathMode({
                   isBlock: true,
-                  initialLatex: "\\sum_{i=1}^{n} x_i",
+                  initialLatex: DEFAULT_BLOCK_MATH_LATEX,
                 });
               } else if (sub === "image") {
                 setImageMode(true);
+              } else if (item.aiAction) {
+                onAiRequest?.(item.aiAction);
+                onSelect();
               } else {
-                item.action(editor);
+                item.action?.(editor);
                 onSelect();
               }
             }}

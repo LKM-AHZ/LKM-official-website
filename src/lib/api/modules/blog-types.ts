@@ -9,8 +9,10 @@ export interface BlogSeriesInfo {
   cover_url: string | null;
   repo_name: string;
   status: "active" | "archived";
-  created_at: string;
-  updated_at: string;
+  // GraphQL 的 GraphBlogSeries/GraphSeriesComment 并不暴露这两个时间字段
+  //（blog.ts 的映射因此填的是空串），声明为可选以反映真实载荷
+  created_at?: string;
+  updated_at?: string;
   star_count: number;
   is_starred: boolean;
 }
@@ -38,11 +40,14 @@ export interface BlogCommentInfo {
   parent_id: string | null;
   created_at: string;
   updated_at: string;
+  // 与 ArticleCommentInfo 及后端模型保持一致：app/modules/blog/schemas.py:83
+  // 声明 `profile: ProfileInfo | None = None`，GraphQL 侧同样是可空（graphql.py:128），
+  // 故这里不能声明为非空，否则 comment.profile.nickname 会在运行时抛错
   profile: {
-    nickname: string;
+    nickname: string | null;
     avatar: string | null;
     role: string;
-  };
+  } | null;
   replies: BlogCommentInfo[];
 }
 
@@ -91,19 +96,19 @@ export interface ListData<T> {
   items: T[];
 }
 
+// 与模块内其它后端载荷类型统一用 snake_case（原为 camelCase 别名，与本文件其余
+// 类型不一致；该类型当前无任何消费方，仅被 blog.ts 再导出）
 export interface BlogArticle {
-  seriesId: string;
-  seriesTitle: string;
-  seriesDescription: string | null;
-  seriesCover: string | null;
+  series_id: string;
+  series_title: string;
+  series_description: string | null;
+  series_cover: string | null;
   filepath: string;
   filename: string;
 }
 
-export interface BlogCommentCreate {
-  content: string;
-  parent_id?: string | null;
-}
+/** 系列评论创建入参 —— 与文章评论同一契约（后端同为 {content, parent_id}） */
+export type BlogCommentCreate = ArticleCommentCreate;
 
 export interface BlogArticleInfo {
   slug: string;

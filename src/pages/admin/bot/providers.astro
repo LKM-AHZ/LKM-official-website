@@ -5,5 +5,8 @@ import { t } from '~/lib/i18n';
 ---
 
 <AdminLayout flush>
+  {/* flush 布局不渲染任何标题容器，而 iframe 的 title 只是可访问名、不构成文档标题层级：
+      补一个仅读屏可见的 h1，否则这一页没有任何 <h1>，AT 用户拿不到页面上下文 */}
+  <h1 class="sr-only">{t('page.admin.bot.providers.title')}</h1>
   <BotFrame hashRoute="/providers" title={t('page.admin.bot.providers.title')} />
 </AdminLayout>

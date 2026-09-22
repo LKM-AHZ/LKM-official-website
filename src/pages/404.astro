@@ -8,7 +8,9 @@ const title = t('page.notFound.title');
 ---
 
 <Layout metadata={{ title }}>
-  <main class="flex items-center h-full p-16">
+  {/* 父级 <body>（BaseLayout）没有确定高度，h-full 会被算成 auto、items-center 也就居不了中；
+     改用视口高度兜底 */}
+  <main class="flex items-center min-h-dvh p-16">
     <div class="container flex flex-col items-center justify-center px-5 mx-auto my-8">
       <div class="max-w-md text-center">
         <h1 class="mb-8 font-bold text-9xl">

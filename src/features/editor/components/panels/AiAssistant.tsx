@@ -39,6 +39,8 @@ export default function AiAssistant({
   const [showSettings, setShowSettings] = useState(false);
   const [apiEndpoint, setApiEndpoint] = useState("");
   const [apiKey, setApiKey] = useState("");
+  // 发起请求时的选区区间：替换结果时按它定位，不能用点击那一刻的选区（用户可能已点别处）
+  const requestRangeRef = useRef<{ from: number; to: number } | null>(null);
 
   // Abort controller ref for in-flight requests – aborted on unmount
   const abortRef = useRef<AbortController | null>(null);
@@ -60,14 +62,13 @@ export default function AiAssistant({
     setLoading(true);
     setError("");
 
-    // Validate endpoint before calling the store (which will also validate)
-    if (apiEndpoint) {
-      const validation = validateAiEndpoint(apiEndpoint);
-      if (validation.isErr()) {
-        setError(validation.error);
-        setLoading(false);
-        return;
-      }
+    // 无条件校验 endpoint：空值同样要给出「API 地址必填」这类明确提示，
+    // 不能跳过校验带着空配置发请求、最后只拿到 store 的笼统错误
+    const validation = validateAiEndpoint(apiEndpoint);
+    if (validation.isErr()) {
+      setError(validation.error);
+      setLoading(false);
+      return;
     }
 
     const context =
@@ -84,26 +85,38 @@ export default function AiAssistant({
       return;
     }
 
+    // 记下本次请求对应的选区（"替换"要用它，而不是点击替换那一刻的选区）
+    requestRangeRef.current = {
+      from: editor.state.selection.from,
+      to: editor.state.selection.to,
+    };
+
     // Abort any previous request
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const res = await requestAiCompletion(
-      { prompt: customPrompt, context, operation },
-      { signal: controller.signal },
-    );
+    try {
+      const res = await requestAiCompletion(
+        { prompt: customPrompt, context, operation },
+        { signal: controller.signal },
+      );
 
-    if (!controller.signal.aborted) {
-      if (res.isOk()) {
-        setResult(res.value);
-      } else {
-        setError(res.error);
+      if (!controller.signal.aborted) {
+        if (res.isOk()) {
+          setResult(res.value);
+        } else {
+          setError(res.error);
+        }
+      }
+    } finally {
+      // 只有发起它的那次请求仍是最新时才复位：被新请求取代的旧请求也会 resolve，
+      // 若不加判断会清掉新请求的 controller（无法再中止）并提前关掉 loading。
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        setLoading(false);
       }
     }
-
-    abortRef.current = null;
-    setLoading(false);
   }, [customPrompt, selectedText, operation, editor, apiEndpoint]);
 
   const handleInsert = (): void => {
@@ -114,10 +127,26 @@ export default function AiAssistant({
   };
 
   const handleReplace = (): void => {
-    if (result) {
-      editor.chain().focus().deleteSelection().insertContent(result).run();
-      setResult("");
+    if (!result) return;
+    // 用发起请求时记下的区间，而不是点击替换那一刻的选区：
+    // 等待期间用户可能点了别处，deleteSelection 会删掉无关内容
+    const range = requestRangeRef.current;
+    const size = editor.state.doc.content.size;
+    const from = range ? Math.min(range.from, size) : 0;
+    const to = range ? Math.min(range.to, size) : 0;
+    if (from < to) {
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .deleteSelection()
+        .insertContent(result)
+        .run();
+    } else {
+      // 结果基于文档兜底上下文（发起时没有选区）：插到当前光标处，不删任何内容
+      editor.chain().focus().insertContent(result).run();
     }
+    setResult("");
   };
 
   const handleSaveSettings = (): void => {

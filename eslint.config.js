@@ -6,6 +6,17 @@ import tseslint from "typescript-eslint";
 import typescriptParser from "@typescript-eslint/parser";
 import vueParser from "vue-eslint-parser";
 
+// Vue / JS·JSX·Astro / TS 三处共用同一套 no-unused-vars 选项：抽成常量，避免只改一处导致
+// 不同文件类型的告警口径悄悄分叉
+const unusedVarsRule = [
+  "error",
+  {
+    argsIgnorePattern: "^_",
+    varsIgnorePattern: "^_",
+    destructuredArrayIgnorePattern: "^_",
+  },
+];
+
 export default [
   js.configs.recommended,
   ...eslintPluginAstro.configs["flat/recommended"],
@@ -14,12 +25,24 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
+      },
+    },
+  },
+  {
+    // Node globals 只给 Node 侧入口（构建/检查脚本与根配置）。
+    // 全文件无差别注入会让客户端代码里的 process/Buffer 逃过 no-undef。
+    // （TS/TSX 不受影响：typescript-eslint 的 eslint-recommended 已关掉 no-undef）
+    files: ["scripts/**", "*.config.{js,mjs,cjs,ts}"],
+    languageOptions: {
+      globals: {
         ...globals.node,
       },
     },
   },
   {
-    files: ["**/*.astro"],
+    // `**/*.astro/**` 是 astro-eslint-parser 为 <script> 生成的虚拟文件，
+    // 只写 `**/*.astro` 覆盖不到它们。
+    files: ["**/*.astro", "**/*.astro/**"],
     languageOptions: {
       parser: astroEslintParser,
       parserOptions: {
@@ -44,28 +67,17 @@ export default [
     },
     rules: {
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          destructuredArrayIgnorePattern: "^_",
-        },
-      ],
+      "@typescript-eslint/no-unused-vars": unusedVarsRule,
     },
   },
   {
     files: ["**/*.{js,jsx,astro}"],
     rules: {
+      // 必须关掉基础规则：js.configs.recommended 已打开它，
+      // 不关会与下面的 @typescript-eslint/no-unused-vars 同一变量报两次。
+      "no-unused-vars": "off",
       "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          destructuredArrayIgnorePattern: "^_",
-        },
-      ],
+      "@typescript-eslint/no-unused-vars": unusedVarsRule,
     },
   },
   {
@@ -78,14 +90,7 @@ export default [
     rules: {
       // 注意：必须禁用基础规则，因为它可能报告错误的错误
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          destructuredArrayIgnorePattern: "^_",
-        },
-      ],
+      "@typescript-eslint/no-unused-vars": unusedVarsRule,
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/triple-slash-reference": "off",
     },
@@ -139,12 +144,26 @@ export default [
     },
   },
   {
-    files: ["src/**/*.{ts,tsx,vue,astro}"],
+    files: [
+      "src/**/*.{ts,tsx,vue,astro,js,jsx,mjs,cjs}",
+      // Astro 的 <script> 是虚拟文件（X.astro/0_0.js），不含 .astro 后缀，需显式匹配
+      "src/**/*.astro/**",
+    ],
     rules: {
       "no-restricted-globals": [
         "error",
         {
           name: "fetch",
+          message:
+            "请使用 ~/lib/http/client (axios) 或 ~/lib/api 的 apiFetch wrapper，不要直接调用 fetch。",
+        },
+      ],
+      // no-restricted-globals 只报裸 fetch(...)，window.fetch / globalThis.fetch 会绕过
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "MemberExpression[object.name=/^(window|globalThis)$/][property.name='fetch']",
           message:
             "请使用 ~/lib/http/client (axios) 或 ~/lib/api 的 apiFetch wrapper，不要直接调用 fetch。",
         },

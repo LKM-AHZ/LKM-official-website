@@ -90,8 +90,8 @@ export default function PublishDialog({
           <button
             type="button"
             className="rte-btn rte-btn--primary rte-btn--sm"
-            disabled={!title.trim()}
-            onClick={() => onConfirm(title.trim(), slug)}
+            disabled={!title.trim() || !slug.trim()}
+            onClick={() => onConfirm(title.trim(), slug.trim())}
           >
             {t("editor.confirmPublish")}
           </button>

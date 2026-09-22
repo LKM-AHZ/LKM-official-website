@@ -15,7 +15,10 @@ function renderHtmlNode(node: JSONContent): string {
   const type = node.type ?? "";
   const text = node.text ?? "";
   const content = node.content;
-  const attrs = (node.attrs ?? {}) as Record<string, string | number>;
+  // TipTap 属性是 Record<string, any>：可能是布尔/数组/嵌套对象，断言成 string|number
+  // 会掩盖这一点（后续 String()/模板插值会输出 "[object Object]"）。这里如实标成 unknown，
+  // 各使用点再用 Number()/String()/safeUrl() 显式归一化。
+  const attrs = (node.attrs ?? {}) as Record<string, unknown>;
 
   switch (type) {
     case "paragraph":
@@ -99,9 +102,14 @@ function renderChildren(content: JSONContent[] | undefined): string | null {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return (
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      // 单引号也转义：当前属性都用双引号，但这是通用 helper，
+      // 将来任何改成单引号的属性都会因此变成注入点
+      .replace(/'/g, "&#39;")
+  );
 }

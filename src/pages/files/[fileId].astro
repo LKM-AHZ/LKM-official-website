@@ -4,10 +4,15 @@ import { communitySidebarLinks } from '~/features/shell-community/data/community
 import { Icon } from 'astro-icon/components';
 import { fileLibraryApi } from '~/lib/api';
 import { getPermalink } from '~/lib/utils/permalinks';
-import { t } from '~/lib/i18n';
+import { t, getLocale } from '~/lib/i18n';
 
-const { fileId } = Astro.params;
-const file = await fileLibraryApi.getFile(fileId || '');
+// 归一化一次并显式判空：别用 `fileId || ''` 把「参数缺失」悄悄变成空字符串再去查库
+const fileId = Astro.params.fileId?.trim() ?? '';
+if (!fileId) {
+  return Astro.redirect(getPermalink('/files'));
+}
+
+const file = await fileLibraryApi.getFile(fileId);
 
 if (!file) {
   return Astro.redirect(getPermalink('/files'));
@@ -19,8 +24,14 @@ function formatSize(bytes: number): string {
   return `${bytes} B`;
 }
 
+const locale = getLocale();
+
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+  const d = new Date(dateStr);
+  // 时间戳缺失/非法时不要渲染 "Invalid Date"：直接显示占位
+  if (Number.isNaN(d.getTime())) return '—';
+  // 语言跟随当前 locale（原来写死 zh-CN，英文站点也会出中文日期）
+  return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function fileIcon(mime: string): string {
@@ -47,6 +58,9 @@ function statusBadge(status: string): { text: string; cls: string } {
       return { text: status, cls: '' };
   }
 }
+
+// 只算一次：原来模板里 cls/text 各调一次 statusBadge()，既重复执行又可能两处不一致
+const badge = statusBadge(file.status);
 
 const metadata = { title: `${file.originalName} —— LKM` };
 ---
@@ -108,9 +122,7 @@ const metadata = { title: `${file.originalName} —— LKM` };
       </div>
       <div class="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-surface-3">
         <span class="text-sm text-text-muted/60">{t('page.communityDetail.files.status')}</span>
-        <span class="text-xs px-2.5 py-1 rounded-full font-medium {statusBadge(file.status).cls}"
-          >{statusBadge(file.status).text}</span
-        >
+        <span class="text-xs px-2.5 py-1 rounded-full font-medium {badge.cls}">{badge.text}</span>
         <span class="text-sm text-text-muted/60"
           >{t('page.communityDetail.files.category', { name: file.categoryName })}</span
         >
@@ -129,12 +141,17 @@ const metadata = { title: `${file.originalName} —— LKM` };
           </div>
         )
       }
-      <div class="flex gap-3 mt-4">
-        <button class="btn-primary px-6 py-2.5 rounded-lg text-sm font-semibold inline-flex items-center gap-2">
-          <Icon name="tabler:download" class="w-4 h-4" />
-          {t('page.communityDetail.files.download')}
-        </button>
-      </div>
+      {
+        /* 只有审核通过的文件才提供下载入口（pending/rejected 的内容不该从详情页拿走） */
+        file.status === 'approved' && (
+          <div class="flex gap-3 mt-4">
+            <button class="btn-primary px-6 py-2.5 rounded-lg text-sm font-semibold inline-flex items-center gap-2">
+              <Icon name="tabler:download" class="w-4 h-4" />
+              {t('page.communityDetail.files.download')}
+            </button>
+          </div>
+        )
+      }
     </div>
 
     <!-- 版权免责 -->

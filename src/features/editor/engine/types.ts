@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 
 export type SaveStatus = "saved" | "unsaved" | "saving" | "error" | "conflict";
 export type EditorMode = "richtext" | "source" | "preview";
-export type FrontmatterValues = Record<string, unknown>;
 
 export interface ToolbarItem {
   key: string;
@@ -28,8 +27,6 @@ export interface DocumentMeta {
 export interface DocumentData extends DocumentMeta {
   contentMdx: string;
   editorJson: Record<string, unknown> | null;
-  /** 发布时生成的永久链接片段 `/docs/<slug>`，用于 wiki 双链解析 */
-  slug?: string;
   createdAt: string;
   updatedAt: string;
 }

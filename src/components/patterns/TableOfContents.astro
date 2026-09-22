@@ -14,7 +14,10 @@ const filteredHeadings = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
 
 {
   filteredHeadings.length > 0 && (
-    <nav class="toc-container sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto hidden xl:block w-64 p-4 border-l border-surface-3">
+    <nav
+      aria-label={t('primitives.tableOfContents')}
+      class="toc-container sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto hidden xl:block w-64 p-4 border-l border-surface-3"
+    >
       <h3 class="text-[12px] font-semibold uppercase tracking-wider text-text-muted mb-3">
         {t('primitives.tableOfContents')}
       </h3>
@@ -37,15 +40,22 @@ const filteredHeadings = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
 
 <script>
   // 页面滚动时自动高亮当前标题
+  let tocObserver: IntersectionObserver | null = null;
+
   function initTOC(): void {
+    // astro:page-load 在首次加载也会触发，加上脚本自身的首次调用，
+    // 不先断开就会在同一页叠出多个 observer；swup 换页后旧 observer
+    // 还会继续持有已从文档移除的节点。
+    tocObserver?.disconnect();
+
     const observerOptions = {
       root: null,
       rootMargin: '-100px 0px -70% 0px', // 触发高亮的视窗核心区域
       threshold: 0,
     };
 
-    void document.querySelectorAll('[data-toc-link]') as NodeListOf<HTMLElement> | undefined;
-    const headings = document.querySelectorAll('article h2, article h3');
+    // 观察器必须覆盖目录里渲染的全部层级（filteredHeadings 含 h1），否则 h1 项永远不会高亮
+    const headings = document.querySelectorAll('article h1, article h2, article h3');
 
     let activeLink: Element | null = null;
 
@@ -66,8 +76,9 @@ const filteredHeadings = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
                 '-ml-[17px]',
                 'pl-[15px]'
               );
+              activeLink.removeAttribute('aria-current');
             }
-            // 添加新高亮
+            // 添加新高亮（视觉之外同步 aria-current，读屏用户才知道当前读到哪一节）
             correspondingLink.classList.add(
               'text-primary',
               'font-semibold',
@@ -76,12 +87,18 @@ const filteredHeadings = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
               '-ml-[17px]',
               'pl-[15px]'
             );
+            correspondingLink.setAttribute('aria-current', 'location');
             activeLink = correspondingLink;
 
-            // 滚动居中：将当前高亮的目录项滚动到 TOC 容器的可视中心
-            const tocContainer = document.querySelector('.toc-container');
-            if (tocContainer && correspondingLink instanceof HTMLElement) {
-              const linkOffsetTop = correspondingLink.offsetTop;
+            // 滚动居中：将当前高亮的目录项滚动到 TOC 容器的可视中心。
+            // 容器用 closest 从当前链接向上找（同页可能有多个 nav，全局 querySelector 会拿错）；
+            // 偏移用 rect 差值 + scrollTop 算，不依赖 offsetParent 恰好是该容器。
+            const tocContainer = correspondingLink.closest('.toc-container');
+            if (tocContainer instanceof HTMLElement && correspondingLink instanceof HTMLElement) {
+              const linkOffsetTop =
+                correspondingLink.getBoundingClientRect().top -
+                tocContainer.getBoundingClientRect().top +
+                tocContainer.scrollTop;
               const linkHeight = correspondingLink.offsetHeight;
               const containerHeight = tocContainer.clientHeight;
               const scrollTarget = linkOffsetTop - containerHeight / 2 + linkHeight / 2;
@@ -96,6 +113,7 @@ const filteredHeadings = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
     }, observerOptions);
 
     headings.forEach((heading) => observer.observe(heading));
+    tocObserver = observer;
   }
 
   // 首次加载直接初始化；Swup 导航后由 astro:page-load 重新初始化

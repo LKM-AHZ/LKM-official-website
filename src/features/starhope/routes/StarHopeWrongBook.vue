@@ -6,7 +6,13 @@ import { t } from "~/lib/i18n";
 const practice = usePracticeStore();
 const wrongQuestions = ref<Question[]>([]);
 onMounted(async () => {
-  wrongQuestions.value = await practice.loadWrongQuestions();
+  // IndexedDB 读取失败时（隐私模式/配额/被占用）不能让 promise 悬空，
+  // 否则整个页面只剩未处理的 rejection 且永远停在全空态
+  try {
+    wrongQuestions.value = await practice.loadWrongQuestions();
+  } catch (e) {
+    console.error("[starhope] 加载错题失败", e);
+  }
 });
 </script>
 

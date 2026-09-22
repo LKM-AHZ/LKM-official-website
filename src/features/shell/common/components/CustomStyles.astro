@@ -1,26 +1,13 @@
 ---
-// 'DM Sans'
-// Nunito
-// Dosis
-// Outfit
-// Roboto
-// Literata
-// 'IBM Plex Sans'
-// Karla
-// Poppins
-// 'Fira Sans'
-// 'Libre Franklin'
-// Inconsolata
-// Raleway
-// Oswald
-// 'Space Grotesk'
-// Urbanist
+// 注意：本组件只负责全局样式覆盖，不加载任何字体。
+// （这里曾列着一串被注释掉的字体名，既无运行时也无构建期作用，只会让人误以为字体在此配置；
+//   字体在布局/全局样式里注册。）
 ---
 
 <style is:inline>
   :root {
     ::selection {
-      background-color: lavender;
+      background-color: var(--selection-bg, lavender);
     }
   }
 </style>

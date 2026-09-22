@@ -89,6 +89,14 @@
       >
         {{ t("auth.twoFactor.verify") }}
       </button>
+      <!-- 非管理员在此步没有其它出口，必须给一个回退，否则用户进了恢复码模式就出不去 -->
+      <button
+        type="button"
+        class="btn btn-ghost w-full btn-sm"
+        @click="step = 'verify'"
+      >
+        {{ t("common.back") }}
+      </button>
       <!-- 管理员级别不得绕过校验：这里只做提示，绝不 emit success（是否放行由上游权限决定） -->
       <p
         v-if="props.level === 'admin'"

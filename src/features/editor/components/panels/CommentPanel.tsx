@@ -31,11 +31,14 @@ const CommentPanel = memo(function CommentPanel({
 
   const handleAddReply = (threadId: string): void => {
     const text = replyInput[threadId]?.trim();
-    if (text) {
-      adapter.addReply?.(documentId, threadId, text);
+    if (!text) return;
+    // 主题已不存在时（例如另一个标签页删掉了）addReply 返回 null：这时不能清空草稿，
+    // 否则用户刚写的回复会凭空消失；刷新后 UI 会反映主题已消失的真实状态
+    const reply = adapter.addReply?.(documentId, threadId, text);
+    if (reply) {
       setReplyInput((prev) => ({ ...prev, [threadId]: "" }));
-      refresh();
     }
+    refresh();
   };
 
   const handleResolve = (threadId: string): void => {
@@ -128,7 +131,12 @@ const CommentPanel = memo(function CommentPanel({
                       }))
                     }
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") handleAddReply(thread.id);
+                      // 输入法确认候选词的 Enter 也会冒泡到这里：不判 isComposing
+                      // 会把还没确认的半截文本当成回复发出去
+                      if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                        e.preventDefault();
+                        handleAddReply(thread.id);
+                      }
                     }}
                   />
                   <button

@@ -17,10 +17,6 @@ export interface DlqMessageInfo {
   payload: unknown;
 }
 
-function parse<T>(data: unknown): T {
-  return data as unknown as T;
-}
-
 async function getJson(url: string): Promise<unknown> {
   const res = await adminFetch(url);
   const body = await readAdminResp(res);
@@ -36,7 +32,12 @@ async function sendJson(url: string, method: string): Promise<unknown> {
 export const dlqApi = {
   list: (status: DlqStatus = "pending") =>
     getJson(`/api/v1/admin/dlq?status=${encodeURIComponent(status)}`).then(
-      (d) => parse<{ items: DlqMessageInfo[] }>(d).items,
+      // 包络缺 data/items（空体、非 JSON、后端异常）时，原来是裸断言后直接取 .items，
+      // 会抛 TypeError 或返回 undefined；这里退化成空列表
+      (d) => {
+        const items = (d as { items?: DlqMessageInfo[] } | null)?.items;
+        return Array.isArray(items) ? items : [];
+      },
     ),
 
   requeue: (id: string) => sendJson(`/api/v1/admin/dlq/${id}/requeue`, "POST"),

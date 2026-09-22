@@ -35,5 +35,6 @@ export interface MetaDataOpenGraph {
 export interface MetaDataTwitter {
   handle?: string;
   site?: string;
-  cardType?: string;
+  // 收窄到 Twitter 官方的四种 card：写错的值在编译期就报错，而非静默落到运行时
+  cardType?: "summary" | "summary_large_image" | "player" | "app";
 }

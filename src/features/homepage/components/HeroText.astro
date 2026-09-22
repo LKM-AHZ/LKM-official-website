@@ -22,7 +22,9 @@ const {
 ---
 
 <section class="relative md:-mt-[76px] not-prose">
-  <div class="absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+  <!-- 原先这里还有一个 `absolute inset-0 pointer-events-none` 的空 div：无内容、无背景、
+       无 CSS 依赖（全仓 grep 无引用），纯死标记，已删除。下面的 pt-[76px] 间隔层保留——
+       它承担的是版面高度，删掉会让 hero 内容整体上移 -->
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6">
     <div class="pt-0 md:pt-[76px] pointer-events-none"></div>
     <div class="py-16 md:py-[80px]">

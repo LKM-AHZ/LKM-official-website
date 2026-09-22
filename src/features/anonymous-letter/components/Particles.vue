@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useApp } from "../stores/app";
 
 const { state, lowPerf } = useApp();
@@ -35,8 +35,12 @@ const SYMBOLS = ["✨", "🌸", "🫧", "⭐", "🌿", "💫", "🍃", "🕯️"
 const particles = ref([]);
 const stars = ref([]);
 
+const MOBILE_MAX_WIDTH = 768;
+let isMobileLayout = false;
+
 function makeParticles() {
-  const isMobile = window.innerWidth < 768;
+  const isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
+  isMobileLayout = isMobile;
   const count = isMobile ? 14 : 26;
   const arr = [];
   for (let i = 0; i < count; i++) {
@@ -74,7 +78,22 @@ function makeParticles() {
   stars.value = sarr;
 }
 
-onMounted(makeParticles);
+// 只在跨越移动端断点时重建：否则旋转屏幕/拖窗口后会一直用挂载时的数量（桌面 26/34 留在手机上）。
+// 不按每个 resize 像素重建，避免粒子随机位置反复跳变。
+function onViewportChange() {
+  if ((window.innerWidth < MOBILE_MAX_WIDTH) !== isMobileLayout) makeParticles();
+}
+
+onMounted(() => {
+  makeParticles();
+  window.addEventListener("resize", onViewportChange);
+  window.addEventListener("orientationchange", onViewportChange);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", onViewportChange);
+  window.removeEventListener("orientationchange", onViewportChange);
+});
 </script>
 
 <style scoped>

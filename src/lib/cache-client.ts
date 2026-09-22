@@ -15,6 +15,19 @@ const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 分钟
 
 const store = new Map<string, CacheEntry<unknown>>();
 
+// 缓存条目上限。过期的条目只在「再次读到同一个 key」时才被清理，
+// 因此永不复读的 key（分页/筛选/带 token 的 URL）会一直占内存到页面生命周期结束。
+const MAX_ENTRIES = 200;
+
+/** 超出上限时按插入序淘汰最旧的条目（Map 迭代顺序即插入顺序） */
+function evictOldest(): void {
+  if (store.size <= MAX_ENTRIES) return;
+  for (const key of store.keys()) {
+    store.delete(key);
+    if (store.size <= MAX_ENTRIES) break;
+  }
+}
+
 function now(): number {
   return Date.now();
 }
@@ -30,6 +43,9 @@ export function cacheGet<T>(key: string): T | null {
   return entry.data as T;
 }
 
+/** 在途请求表：key → 尚未 settle 的请求，供并发去重 */
+const inflight = new Map<string, Promise<{ data: unknown; error: string | null }>>();
+
 /** 写入缓存 */
 export function cacheSet<T>(
   key: string,
@@ -37,6 +53,7 @@ export function cacheSet<T>(
   ttlMs: number = DEFAULT_TTL_MS,
 ): void {
   store.set(key, { data, expiresAt: now() + ttlMs });
+  evictOldest();
 }
 
 /** 删除缓存 */
@@ -87,12 +104,29 @@ export async function fetchWithCache<T>(
     }
   };
 
+  // 并发去重：同一 key 的多个并发调用共享同一个在途请求，避免重复打后端
+  const fetchOnce = (): Promise<{ data: T | null; error: string | null }> => {
+    const existing = inflight.get(cacheKey);
+    if (existing) {
+      return existing as Promise<{ data: T | null; error: string | null }>;
+    }
+    const pending = doFetch().finally(() => inflight.delete(cacheKey));
+    inflight.set(
+      cacheKey,
+      pending as Promise<{ data: unknown; error: string | null }>,
+    );
+    return pending;
+  };
+
   if (cached) {
-    // 后台静默更新（不 await），下次访问拿到热数据
-    doFetch().catch(() => {});
+    // 后台静默更新（不 await），下次访问拿到热数据。doFetch 内部已 try/catch、不会抛，
+    // 所以这里只能靠返回值判断：失败时至少留一条日志，否则会一直静默供旧数据
+    void fetchOnce().then((r) => {
+      if (r.error) console.warn("[cache] 后台刷新失败:", r.error);
+    });
     return { data: cached, fromCache: true, error: null };
   }
 
-  const result = await doFetch();
+  const result = await fetchOnce();
   return { ...result, fromCache: false };
 }

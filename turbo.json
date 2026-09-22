@@ -4,8 +4,7 @@
     "package.json",
     "pnpm-workspace.yaml",
     "turbo.json",
-    "astro.config.ts",
-    "eslint.config.js"
+    "astro.config.ts"
   ],
   "tasks": {
     "check:astro": {
@@ -15,12 +14,12 @@
     },
     "check:eslint": {
       "cache": true,
-      "inputs": ["src/**", "scripts/**", "packages/**", "eslint.config.js"],
+      "inputs": ["src/**", "scripts/**", "eslint.config.js"],
       "outputs": []
     },
     "check:prettier": {
       "cache": true,
-      "inputs": ["src/**", "scripts/**", "packages/**", "*.{json,md}"],
+      "inputs": ["src/**", "scripts/**", "**/*.{json,md}", ".prettierignore"],
       "outputs": []
     },
     "check:jscpd": {
@@ -36,7 +35,8 @@
     "build": {
       "cache": true,
       "inputs": ["src/**", "public/**", "astro.config.ts", "scripts/**"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": ["PUBLIC_*", "NODE_ENV"]
     }
   }
 }

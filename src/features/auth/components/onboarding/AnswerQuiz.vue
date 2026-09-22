@@ -39,7 +39,7 @@
           :class="!selectedField ? 'opacity-50 cursor-not-allowed' : ''"
           @click="startQuiz"
         >
-          {{ t("onboarding.quiz.start", { count: questions.length }) }}
+          {{ t("onboarding.quiz.start", { count: fieldPoolSize }) }}
         </button>
       </div>
     </div>
@@ -191,7 +191,6 @@ import { t, type TranslationKey } from "~/lib/i18n";
 interface QuizQuestion {
   id: string;
   field: string;
-  fieldLabel: string;
   stem: string;
   options: string[];
   answer: number;
@@ -201,7 +200,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "p1",
     field: "physics",
-    fieldLabel: "onboarding.tags.physics",
     stem: "onboarding.quizData.p1.stem",
     options: [
       "onboarding.quizData.p1.options.0",
@@ -214,7 +212,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "p2",
     field: "physics",
-    fieldLabel: "onboarding.tags.physics",
     stem: "onboarding.quizData.p2.stem",
     options: [
       "onboarding.quizData.p2.options.0",
@@ -227,7 +224,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "p3",
     field: "physics",
-    fieldLabel: "onboarding.tags.physics",
     stem: "onboarding.quizData.p3.stem",
     options: [
       "onboarding.quizData.p3.options.0",
@@ -240,7 +236,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "p4",
     field: "physics",
-    fieldLabel: "onboarding.tags.physics",
     stem: "onboarding.quizData.p4.stem",
     options: [
       "onboarding.quizData.p4.options.0",
@@ -253,7 +248,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "p5",
     field: "physics",
-    fieldLabel: "onboarding.tags.physics",
     stem: "onboarding.quizData.p5.stem",
     options: [
       "onboarding.quizData.p5.options.0",
@@ -266,7 +260,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "m1",
     field: "math",
-    fieldLabel: "onboarding.tags.math",
     stem: "onboarding.quizData.m1.stem",
     options: [
       "onboarding.quizData.m1.options.0",
@@ -279,7 +272,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "m2",
     field: "math",
-    fieldLabel: "onboarding.tags.math",
     stem: "onboarding.quizData.m2.stem",
     options: [
       "onboarding.quizData.m2.options.0",
@@ -292,7 +284,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "m3",
     field: "math",
-    fieldLabel: "onboarding.tags.math",
     stem: "onboarding.quizData.m3.stem",
     options: [
       "onboarding.quizData.m3.options.0",
@@ -305,7 +296,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "m4",
     field: "math",
-    fieldLabel: "onboarding.tags.math",
     stem: "onboarding.quizData.m4.stem",
     options: [
       "onboarding.quizData.m4.options.0",
@@ -318,7 +308,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "m5",
     field: "math",
-    fieldLabel: "onboarding.tags.math",
     stem: "onboarding.quizData.m5.stem",
     options: [
       "onboarding.quizData.m5.options.0",
@@ -331,7 +320,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "c1",
     field: "chemistry",
-    fieldLabel: "onboarding.tags.chemistry",
     stem: "onboarding.quizData.c1.stem",
     options: [
       "onboarding.quizData.c1.options.0",
@@ -344,7 +332,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "c2",
     field: "chemistry",
-    fieldLabel: "onboarding.tags.chemistry",
     stem: "onboarding.quizData.c2.stem",
     options: [
       "onboarding.quizData.c2.options.0",
@@ -357,7 +344,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "c3",
     field: "chemistry",
-    fieldLabel: "onboarding.tags.chemistry",
     stem: "onboarding.quizData.c3.stem",
     options: [
       "onboarding.quizData.c3.options.0",
@@ -370,7 +356,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "c4",
     field: "chemistry",
-    fieldLabel: "onboarding.tags.chemistry",
     stem: "onboarding.quizData.c4.stem",
     options: [
       "onboarding.quizData.c4.options.0",
@@ -383,7 +368,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "c5",
     field: "chemistry",
-    fieldLabel: "onboarding.tags.chemistry",
     stem: "onboarding.quizData.c5.stem",
     options: [
       "onboarding.quizData.c5.options.0",
@@ -396,7 +380,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "b1",
     field: "biology",
-    fieldLabel: "onboarding.tags.biology",
     stem: "onboarding.quizData.b1.stem",
     options: [
       "onboarding.quizData.b1.options.0",
@@ -409,7 +392,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "b2",
     field: "biology",
-    fieldLabel: "onboarding.tags.biology",
     stem: "onboarding.quizData.b2.stem",
     options: [
       "onboarding.quizData.b2.options.0",
@@ -422,7 +404,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "b3",
     field: "biology",
-    fieldLabel: "onboarding.tags.biology",
     stem: "onboarding.quizData.b3.stem",
     options: [
       "onboarding.quizData.b3.options.0",
@@ -435,7 +416,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "b4",
     field: "biology",
-    fieldLabel: "onboarding.tags.biology",
     stem: "onboarding.quizData.b4.stem",
     options: [
       "onboarding.quizData.b4.options.0",
@@ -448,7 +428,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "b5",
     field: "biology",
-    fieldLabel: "onboarding.tags.biology",
     stem: "onboarding.quizData.b5.stem",
     options: [
       "onboarding.quizData.b5.options.0",
@@ -461,7 +440,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "cs1",
     field: "cs",
-    fieldLabel: "onboarding.tags.cs",
     stem: "onboarding.quizData.cs1.stem",
     options: [
       "onboarding.quizData.cs1.options.0",
@@ -474,7 +452,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "cs2",
     field: "cs",
-    fieldLabel: "onboarding.tags.cs",
     stem: "onboarding.quizData.cs2.stem",
     options: [
       "onboarding.quizData.cs2.options.0",
@@ -487,7 +464,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "cs3",
     field: "cs",
-    fieldLabel: "onboarding.tags.cs",
     stem: "onboarding.quizData.cs3.stem",
     options: [
       "onboarding.quizData.cs3.options.0",
@@ -500,7 +476,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "cs4",
     field: "cs",
-    fieldLabel: "onboarding.tags.cs",
     stem: "onboarding.quizData.cs4.stem",
     options: [
       "onboarding.quizData.cs4.options.0",
@@ -513,7 +488,6 @@ const quizQuestions: QuizQuestion[] = [
   {
     id: "cs5",
     field: "cs",
-    fieldLabel: "onboarding.tags.cs",
     stem: "onboarding.quizData.cs5.stem",
     options: [
       "onboarding.quizData.cs5.options.0",
@@ -543,6 +517,16 @@ const currentIndex = ref(0);
 const answers = ref<(number | undefined)[]>([]);
 const questions = ref<QuizQuestion[]>([]);
 
+// 按钮上的题量取自「当前方向实际会抽到的题数」：questions 要点了开始才有值，
+// 直接用 questions.length 永远显示 0
+const fieldPoolSize = computed(() => {
+  if (!selectedField.value) return 0;
+  return Math.min(
+    quizQuestions.filter((q) => q.field === selectedField.value).length,
+    5,
+  );
+});
+
 const allAnswered = computed(() => answers.value.every((a) => a !== undefined));
 const correctCount = computed(() =>
   answers.value.reduce(
@@ -550,8 +534,12 @@ const correctCount = computed(() =>
     0,
   ),
 );
+// 未开始时 questions 为空：0/0 = NaN，而 NaN >= 0.6 为 false，
+// getData() 会把 passed: NaN 一路序列化给后端。显式短路空题库。
 const passed = computed(
-  () => correctCount.value / questions.value.length >= 0.6,
+  () =>
+    questions.value.length > 0 &&
+    correctCount.value / questions.value.length >= 0.6,
 );
 
 function startQuiz() {

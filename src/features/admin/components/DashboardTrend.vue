@@ -38,8 +38,12 @@ const chart = shallowRef<ReturnType<typeof echarts.init> | null>(null);
 const error = ref("");
 const loading = ref(true);
 
+// 卸载后请求才返回时不能再建图表：onBeforeUnmount 已经 dispose，
+// 这里再 init 会在已脱离文档的元素上留下一个永不释放的 ECharts 实例
+let disposed = false;
+
 function render(opt: EChartsCoreOption) {
-  if (!el.value) return;
+  if (disposed || !el.value) return;
   if (!chart.value) chart.value = echarts.init(el.value);
   chart.value.setOption(opt);
 }
@@ -48,6 +52,7 @@ onMounted(async () => {
   try {
     const res = await adminFetch("/api/v1/admin/stats/trend?days=14");
     const body = await readAdminResp(res);
+    if (disposed) return;
     // 无数据时 items 为空仍渲染空折线，不报错
     const items = ((body.data as { items?: TrendItem[] }).items ??
       []) as TrendItem[];
@@ -77,13 +82,15 @@ onMounted(async () => {
       ],
     });
   } catch (e) {
-    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
+    if (!disposed)
+      error.value = e instanceof Error ? e.message : t("admin.loadFailed");
   } finally {
-    loading.value = false;
+    if (!disposed) loading.value = false;
   }
 });
 
 onBeforeUnmount(() => {
+  disposed = true;
   chart.value?.dispose();
   chart.value = null;
 });

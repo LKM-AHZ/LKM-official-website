@@ -3,7 +3,8 @@ import Layout from '~/layouts/PageLayout.astro';
 import { TimelineFeed } from '~/features/timeline';
 import { t } from '~/lib/i18n';
 
-const metadata = { title: t('page.timeline.metaTitle') };
+// 词典里没有 page.timeline.metaTitle（会渲染成 key 字面量），时间线文案在 page.official.timeline 下
+const metadata = { title: t('page.official.timeline.metaTitle') };
 ---
 
 <Layout metadata={metadata}>

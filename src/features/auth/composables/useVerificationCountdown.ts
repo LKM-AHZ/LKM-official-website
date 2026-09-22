@@ -1,4 +1,4 @@
-import { reactive, onBeforeUnmount } from "vue";
+import { reactive, getCurrentScope, onScopeDispose } from "vue";
 
 interface VerificationCountdownState {
   countdown: number;
@@ -34,19 +34,22 @@ export function useVerificationCountdown(
 
   function start(): void {
     stop();
-    state.countdown = seconds;
-    state.running = true;
+    state.countdown = Math.max(0, seconds);
+    // 倒计时为 0/负数时不进入 running：否则按钮会先被禁用整整一秒，直到首个 tick 才复位
+    state.running = state.countdown > 0;
+    if (!state.running) return;
+    // 用绝对截止时间推算剩余秒数：按 tick 次数递减的话，后台标签页被节流或事件循环被阻塞时
+    // tick 会被延迟/丢弃，用户实际等待会明显长于 seconds
+    const endAt = Date.now() + state.countdown * 1000;
     timer = setInterval(() => {
-      if (state.countdown <= 1) {
-        state.countdown = 0;
-        stop();
-      } else {
-        state.countdown -= 1;
-      }
+      state.countdown = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+      if (state.countdown === 0) stop();
     }, 1000);
   }
 
-  onBeforeUnmount(stop);
+  // 组件外用（单测 / 纯模块 / effectScope）时没有活动实例，onBeforeUnmount 会打警告且清理不生效；
+  // onScopeDispose 在组件和 effectScope 下都能挂上
+  if (getCurrentScope()) onScopeDispose(stop);
 
   return state;
 }

@@ -20,15 +20,23 @@ const error = ref("");
 const message = ref("");
 const actingId = ref<string | null>(null);
 
+// 请求序号：快速切换状态时较早的慢响应可能后到，只让最新一次请求的结果落地
+let loadSeq = 0;
+
 async function load(): Promise<void> {
+  const seq = ++loadSeq;
+  const requested = status.value;
   loading.value = true;
   error.value = "";
   try {
-    rows.value = await dlqApi.list(status.value);
+    const data = await dlqApi.list(requested);
+    if (seq !== loadSeq) return;
+    rows.value = data;
   } catch (e) {
+    if (seq !== loadSeq) return;
     error.value = e instanceof Error ? e.message : t("admin.loadFailed");
   } finally {
-    loading.value = false;
+    if (seq === loadSeq) loading.value = false;
   }
 }
 
@@ -71,7 +79,11 @@ function payloadText(p: unknown): string {
   try {
     return JSON.stringify(p ?? null, null, 2);
   } catch {
-    return String(p);
+    // 循环引用/BigInt/toJSON 抛错时 String(p) 只会给出 "[object Object]"，
+    // 恰是管理员最需要看原始内容的场景；对象退化为键清单，其余退化为 String(p)。
+    return p !== null && typeof p === "object"
+      ? `[无法序列化] keys: ${Object.keys(p).join(", ")}`
+      : String(p);
   }
 }
 

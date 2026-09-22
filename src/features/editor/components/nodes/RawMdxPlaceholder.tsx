@@ -10,6 +10,9 @@ interface RawMdxPlaceholderProps {
   getPos: () => number | undefined;
 }
 
+// 预览只截前 N 个字符（复制按钮给的是完整源码），抽成常量避免两处 200 各自漂移
+const MAX_PREVIEW_LENGTH = 200;
+
 const RawMdxPlaceholder = memo(function RawMdxPlaceholder({
   node,
   editor,
@@ -19,7 +22,9 @@ const RawMdxPlaceholder = memo(function RawMdxPlaceholder({
   const source = (node.attrs.source as string) ?? "";
   const sourceKind = (node.attrs.sourceKind as string) ?? "flow";
   const truncatedSource =
-    source.length > 200 ? source.slice(0, 200) + "…" : source;
+    source.length > MAX_PREVIEW_LENGTH
+      ? source.slice(0, MAX_PREVIEW_LENGTH) + "…"
+      : source;
 
   const handleDelete = (): void => {
     const pos = getPos();

@@ -23,7 +23,8 @@ const props = defineProps<{
 }>();
 
 const fetchedArticles = ref<ServerArticle[]>([]);
-const loading = ref(true);
+// 服务端已传入数据时不应先进 loading：否则首帧渲染占位、onMounted 才切到正文，白白丢掉 SSR 内容并闪一下
+const loading = ref(!props.articles);
 
 // 受控：有 props 直接渲染；无 props 走本地 fetch
 const articles = computed<ServerArticle[]>(
@@ -76,7 +77,9 @@ onMounted(async () => {
 
 <template>
   <div v-if="loading" class="text-center py-4 text-text-muted">
-    {{ t("common.loading") }}
+    <!-- 插槽兜底：消费方 BlogLatestPosts.astro 传了自定义 loading 文案，原先模板没有 slot
+         会被静默丢弃（不传时才用 common.loading） -->
+    <slot>{{ t("common.loading") }}</slot>
   </div>
   <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <a

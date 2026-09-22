@@ -129,7 +129,13 @@ function handleClickOutside(e: MouseEvent) {
 
 async function handleLogout() {
   isOpen.value = false;
-  await store.logout();
+  // store.logout 内部已吞掉接口失败，但 localStorage 受限等其它异常仍可能抛出：
+  // 从事件处理器里逃逸就是 unhandled rejection，这里兜住并保持 UI 一致
+  try {
+    await store.logout();
+  } catch (err) {
+    console.error("登出失败", err);
+  }
 }
 
 onMounted(() => {

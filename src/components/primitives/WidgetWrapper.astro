@@ -1,5 +1,4 @@
 ---
-import type { HTMLTag } from 'astro/types';
 import type { Widget } from '~/types/core';
 import { twMerge } from 'tailwind-merge';
 
@@ -7,7 +6,9 @@ export interface Props extends Widget {
   containerClass?: string;
   width?: 'wide' | 'narrow';
   spacing?: 'default' | 'compact';
-  ['as']?: HTMLTag;
+  // 收窄到容器类标签：整张 HTMLTag 联合允许 as="li"/"tr" 这类必须处在特定父元素里的标签，
+  // 会渲染出结构非法的标记，类型层面挡掉更省事（当前调用方都没用到 as）
+  ['as']?: 'section' | 'div' | 'article' | 'aside' | 'main';
 }
 
 const {

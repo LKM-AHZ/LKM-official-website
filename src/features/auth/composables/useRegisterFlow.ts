@@ -50,7 +50,9 @@ const PHONE_RE = /^1[3-9]\d{9}$/;
  * - POST /api/v1/auth/register        → 需在后端对 username / contact 做二次净化
  * - POST /api/v1/auth/register/verify → 需在后端对 code 做格式校验
  */
-const sanitizeInput = (value: string): string => value.replace(/<[^>]*>/g, "");
+// 原先这里有个 sanitizeInput（去掉 <...> 标签）。核实为死防御：username/contact 在
+// handleSubmit 里已用 /[<>/]/ 直接拒绝（109/129 行），code 也只接受 ^\d+$，正则永远匹配不到；
+// 而正则剥标签既清不干净又会静默改写入参。真正的信任边界是后端校验（见下方注释），故删除。
 
 /**
  * 注册流程 Composable。（喵，注册逻辑！）
@@ -64,6 +66,8 @@ export function useRegisterFlow(
 ): RegisterFlow {
   const store = useAuthStore();
   const { redirect = null, onSuccess } = options;
+  /** 验证码重发倒计时秒数：reset() 需要还原到同一个初始值 */
+  const COUNTDOWN_SECONDS = 60;
 
   // ── State ──（喵，状态管理不能乱！）
   const type = ref<RegisterType>("normal");
@@ -77,7 +81,7 @@ export function useRegisterFlow(
   const stage = ref<RegisterStage>("form");
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const countdown = useVerificationCountdown(60);
+  const countdown = useVerificationCountdown(COUNTDOWN_SECONDS);
   const countdownRunning = toRef(countdown, "running");
 
   // 项目当前无真实可访问的 terms 页面（src/pages 下无 terms.*），故不提供该勾选，
@@ -92,7 +96,16 @@ export function useRegisterFlow(
   function succeed(): void {
     error.value = null;
     const dst = resolveSafeRedirect(redirect) || "/";
-    if (typeof onSuccess === "function") onSuccess(dst);
+    // onSuccess 通常是路由跳转：它在 submit()/submitCode() 的 try 内被调用，
+    // 抛错会从没有 catch 的 try/finally 逃出去，把流程留在「stage 已 done、
+    // 用户却看不到成功也没看到报错」的不一致状态。回调失败不该回滚注册结果，兜住即可
+    if (typeof onSuccess === "function") {
+      try {
+        onSuccess(dst);
+      } catch (e) {
+        console.warn("[register] onSuccess 回调失败:", e);
+      }
+    }
   }
 
   // ── 提交注册（喵，重头戏来了！） ──
@@ -139,7 +152,7 @@ export function useRegisterFlow(
       if (type.value === "local") {
         // 本地注册：使用用户输入的密码，无随机生成
         const r = await store.registerLocal(
-          sanitizeInput(trimmedUsername),
+          trimmedUsername,
           password.value,
         );
         if (r.isErr()) return fail(r.error.message);
@@ -149,12 +162,12 @@ export function useRegisterFlow(
       }
 
       // 普通账户：发送验证码，进入 verify 步（喵，等验证码来敲门～）
-      const email = useEmail.value ? sanitizeInput(contact.value.trim()) : null;
+      const email = useEmail.value ? contact.value.trim() : null;
       const phone = !useEmail.value
-        ? sanitizeInput(contact.value.trim())
+        ? contact.value.trim()
         : null;
       const r = await store.registerNormal(
-        sanitizeInput(trimmedUsername),
+        trimmedUsername,
         password.value,
         email ?? undefined,
         phone ?? undefined,
@@ -187,7 +200,7 @@ export function useRegisterFlow(
     try {
       const r = await store.verifyNormalRegister(
         txnId.value,
-        sanitizeInput(code.value),
+        code.value,
         useEmail.value ? "email" : "phone",
       );
       if (r.isErr()) return fail(r.error.message);
@@ -201,6 +214,9 @@ export function useRegisterFlow(
   // ── 重置（喵，回到起点重新来过～） ──
   function reset(): void {
     stage.value = "form";
+    // type/useEmail 也要回初始值：否则第二次注册会沿用上一次的账户类型与联系方式形态
+    type.value = "normal";
+    useEmail.value = true;
     username.value = "";
     password.value = "";
     confirm.value = "";
@@ -213,7 +229,9 @@ export function useRegisterFlow(
     if (typeof countdown.stop === "function") {
       countdown.stop();
     }
-    countdownRunning.value = false;
+    // stop() 已把 running 置 false，不再手动重复赋值（同一标志两个 owner 迟早分叉）；
+    // 剩余秒数也回到初始值，避免下次进入时残留上次的读数
+    countdown.countdown = COUNTDOWN_SECONDS;
   }
 
   // reactive 包裹使 ref 解包（与 useLoginFlow 一致），模板里即值类型，消除误报

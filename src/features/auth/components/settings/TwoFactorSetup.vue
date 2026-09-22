@@ -33,7 +33,7 @@
           v-else-if="enabled"
           type="button"
           class="btn btn-ghost btn-xs text-error"
-          @click="disableDialogOpen = true"
+          @click="openDisableDialog"
         >
           {{ t("settings.2fa.disable") }}
         </button>
@@ -73,7 +73,7 @@
           <button
             type="submit"
             class="btn btn-primary btn-sm"
-            :disabled="code.length < 6"
+            :disabled="code.length < 6 || verifying"
           >
             <span
               v-if="verifying"
@@ -105,7 +105,7 @@
         <button
           type="button"
           class="btn btn-ghost btn-xs"
-          @click="recoveryCodes = []"
+          @click="acknowledgeRecoveryCodes"
         >
           {{ t("settings.2fa.hideRecoveryCodes") }}
         </button>
@@ -119,7 +119,12 @@
     </div>
 
     <!-- 关闭 2FA 需输入 TOTP 或恢复码 -->
-    <form v-if="disableDialogOpen" class="p-3 bg-page-bg rounded-lg space-y-2">
+    <!-- @submit.prevent：两个输入框里回车会触发原生表单提交（整页跳转并丢掉对话框状态） -->
+    <form
+      v-if="disableDialogOpen"
+      class="p-3 bg-page-bg rounded-lg space-y-2"
+      @submit.prevent="doDisable"
+    >
       <p class="text-xs text-text-muted">{{ t("settings.2fa.disableHint") }}</p>
       <input
         v-if="!disableUsingRecovery"
@@ -164,7 +169,7 @@
           type="button"
           class="btn btn-ghost btn-xs"
           :disabled="verifyingDisable"
-          @click="disableDialogOpen = false"
+          @click="closeDisableDialog"
         >
           {{ t("common.cancel") }}
         </button>
@@ -181,8 +186,10 @@ import { t } from "~/lib/i18n";
 import type { User } from "~/types/auth";
 import AuthStatus from "../shared/AuthStatus.vue";
 
+// 不带 payload：调用方（SettingsPage）只据此刷新提示，
+// 之前 emit("update", {} as User) 是拿空对象硬充 User，类型上骗人
 const emit = defineEmits<{
-  (e: "update", user: User): void;
+  (e: "update"): void;
 }>();
 
 defineProps<{
@@ -202,6 +209,17 @@ const disableCode = ref("");
 const disableRecoveryCode = ref("");
 const disableUsingRecovery = ref(false);
 const verifyingDisable = ref(false);
+
+// 关闭/重开禁用对话框都要清掉上一次的错误：否则 «@click="disableDialogOpen = false"»
+// 会把它原样留到下一次打开（同一 error 也被启用面板复用）
+function openDisableDialog(): void {
+  error.value = "";
+  disableDialogOpen.value = true;
+}
+function closeDisableDialog(): void {
+  disableDialogOpen.value = false;
+  error.value = "";
+}
 const disableCodeValid = computed(() =>
   disableUsingRecovery.value
     ? /^[0-9a-zA-Z]{20}$/.test(disableRecoveryCode.value.trim())
@@ -264,10 +282,24 @@ async function confirmEnable() {
     enabled.value = true;
     enabling.value = false;
     recoveryCodes.value = r.value.recovery_codes ?? [];
-    // 提示用户保存恢复码（后端要求确认已保存；此处保留 UI 状态由用户点击隐藏）
-    emit("update", {} as User);
+    emit("update");
   } finally {
     verifying.value = false;
+  }
+}
+
+/**
+ * 用户确认已保存恢复码：后端需要这次确认（POST /2fa/setup/confirm）才算真正完成启用，
+ * 此前前端从未调用 confirm2FA，若后端记录未确认态则 2FA 会停在半启用。
+ */
+async function acknowledgeRecoveryCodes(): Promise<void> {
+  try {
+    const r = await authApi.confirm2FA();
+    if (r.isErr()) error.value = r.error.message;
+  } catch (e) {
+    console.warn("[TwoFactorSetup] 确认恢复码失败:", e);
+  } finally {
+    recoveryCodes.value = [];
   }
 }
 
@@ -279,8 +311,10 @@ async function doDisable() {
   }
   verifyingDisable.value = true;
   try {
+    // 未用到的那个字段传 undefined（与 verify2FA 的调用方式一致）：
+    // 传空串会被后端的 6 位 TOTP 校验拒绝
     const r = await authApi.disable2FA(
-      disableUsingRecovery.value ? "" : disableCode.value,
+      disableUsingRecovery.value ? undefined : disableCode.value,
       disableUsingRecovery.value ? disableRecoveryCode.value : undefined,
     );
     if (r.isErr()) {
@@ -293,7 +327,7 @@ async function doDisable() {
     disableCode.value = "";
     disableRecoveryCode.value = "";
     disableUsingRecovery.value = false;
-    emit("update", {} as User);
+    emit("update");
   } finally {
     verifyingDisable.value = false;
   }

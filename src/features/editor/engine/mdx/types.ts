@@ -1,10 +1,15 @@
+import type { Root } from "mdast";
+
+/** 解析/导出两侧共用的 frontmatter 形状，避免两处各写一份而悄悄分叉 */
+export type Frontmatter = Record<string, unknown>;
+
 export interface ParsedMdx {
-  frontmatter: Record<string, unknown>;
-  root: import("mdast").Root;
+  frontmatter: Frontmatter;
+  root: Root;
 }
 
 export interface MdxExport {
-  frontmatter: Record<string, unknown>;
+  frontmatter: Frontmatter;
   mdx: string;
 }
 

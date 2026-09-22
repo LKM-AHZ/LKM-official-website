@@ -18,7 +18,7 @@ const metadata: MetaData = {
 <Layout metadata={metadata}>
   <section class="px-4 md:px-6 py-16 md:py-20 lg:py-24 mx-auto max-w-4xl">
     <h1 class="font-semibold font-heading text-[40px] md:text-[56px] leading-[1.07] tracking-[-0.005em] text-deep-text">
-      {frontmatter.title}
+      {frontmatter?.title ?? ''}
     </h1>
     <div
       class="mx-auto prose prose-base max-w-4xl prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-primary prose-img:rounded-md prose-img:shadow-lg mt-8"

@@ -9,16 +9,22 @@ interface Props {
   align?: 'left' | 'center' | 'right';
 }
 
-const { src, alt = '', caption, width, align = 'center' } = Astro.props as Props;
+// alt 缺省时退回 caption：空 alt 会把有信息量的内容图标记成装饰图，
+// 直接从无障碍树里摘掉；两者都没有才是真的没描述可给
+const { src, caption, alt = caption ?? '', width, align = 'center' } = Astro.props as Props;
 
-const alignClasses: Record<string, string> = {
+// 用 Props 的联合类型做键：MDX/内容侧传进来非法 align（如 "justify"）时，
+// 查找结果 undefined 会让 class:list 注入空项，故下面显式回退到 center
+const alignClasses: Record<NonNullable<Props['align']>, string> = {
   left: 'text-left',
   center: 'text-center',
   right: 'text-right',
 };
 ---
 
-<figure class:list={['my-6', alignClasses[align], 'not-prose']}>
+<figure
+  class:list={['my-6', alignClasses[align] ?? alignClasses.center, 'not-prose']}
+>
   {
     src ? (
       <img

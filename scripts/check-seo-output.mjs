@@ -10,12 +10,23 @@ import { withPreview } from "./lib/start-preview.mjs";
 const DIST = resolve(import.meta.dirname, "..", "dist", "client");
 
 function contains(pattern, content) {
-  if (pattern instanceof RegExp) return pattern.test(content);
+  if (pattern instanceof RegExp) {
+    // 带 g/y 标志的正则 test() 会推进 lastIndex，复用同一个正则时第二次起会漏检
+    pattern.lastIndex = 0;
+    return pattern.test(content);
+  }
   return content.includes(pattern);
 }
 
 async function checkPage(base, path, checks) {
-  const res = await fetch(base + path);
+  let res;
+  try {
+    res = await fetch(base + path);
+  } catch (err) {
+    // 网络抖动不应该让整个检查中断、丢掉后续页面
+    console.error(`  FAIL ${path}: 请求失败 (${err?.message ?? err})`);
+    return 1;
+  }
   if (res.status >= 400) {
     console.error(`  FAIL ${path}: HTTP ${res.status}`);
     return 1;
@@ -32,8 +43,10 @@ async function checkPage(base, path, checks) {
 }
 
 async function main() {
-  if (!existsSync(resolve(import.meta.dirname, "..", "dist"))) {
-    console.error("ERROR: dist/ 目录不存在，请先运行 pnpm build");
+  // 只存在 dist/ 而缺 dist/client（或反之）时，后面的 fetch/sitemap 读取会报出无关错误，
+  // 这里直接检查真正被消费的那份产物
+  if (!existsSync(DIST)) {
+    console.error(`ERROR: ${DIST} 不存在，请先运行 pnpm build`);
     process.exit(1);
   }
 
@@ -47,15 +60,22 @@ async function main() {
       "<main>": /<main[^>]*>/,
     });
 
-    // robots.txt
-    const robotsRes = await fetch(base + "/robots.txt");
-    const robotsContent = robotsRes.ok ? await robotsRes.text() : "";
-    if (
-      !robotsContent.includes("Sitemap") &&
-      !robotsContent.includes("sitemap")
-    ) {
-      console.error("  FAIL: robots.txt 缺失或缺少 Sitemap 声明");
+    // robots.txt：区分「取不到（网络/非 2xx）」与「取到了但没有 Sitemap 声明」，
+    // 否则 HTTP 状态被吞掉，排查时分不清是路由 404 还是内容缺指令
+    const robotsRes = await fetch(base + "/robots.txt").catch(() => null);
+    if (!robotsRes?.ok) {
+      console.error(
+        `  FAIL: robots.txt 无法访问 (HTTP ${robotsRes?.status ?? "无响应"})`,
+      );
       errors++;
+    } else {
+      const robotsContent = await robotsRes.text();
+      // 大小写不敏感地匹配「指令行」而不是裸 includes("sitemap")——后者会把注释或 URL 里的
+      // sitemap 字样也算通过（robots 指令名大小写不敏感，SITEMAP: 同样合法）
+      if (!/^\s*sitemap\s*:/im.test(robotsContent)) {
+        console.error("  FAIL: robots.txt 缺少 Sitemap 声明");
+        errors++;
+      }
     }
 
     // sitemap 静态产物
@@ -68,7 +88,13 @@ async function main() {
       const urls = [...sitemapRaw.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
         (m) => m[1],
       );
-      console.log(`  Sitemap 包含 ${urls.length} 个条目`);
+      // 空 sitemap（或 build 配置坏掉）不能算通过，否则这一步是静默空转
+      if (urls.length === 0) {
+        console.error("  FAIL: sitemap-index.xml 中解析不到任何 <loc> 条目");
+        errors++;
+      } else {
+        console.log(`  Sitemap 包含 ${urls.length} 个条目`);
+      }
     }
   });
 

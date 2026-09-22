@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import type { ReactElement } from "react";
+import type { ReactElement, SyntheticEvent } from "react";
 import type { Editor } from "@tiptap/core";
+import { getMarkRange } from "@tiptap/core";
 import { t } from "~/lib/i18n";
 
 interface LinkEditPopoverProps {
@@ -17,13 +18,32 @@ export default function LinkEditPopover({
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (editor) {
+    if (!editor) return;
+    const syncFromEditor = (): void => {
       const attrs = editor.getAttributes("link");
       setHref(attrs.href ?? "");
       const { from, to } = editor.state.selection;
       const selectedText = editor.state.doc.textBetween(from, to, " ");
-      setText((selectedText || attrs.href) ?? "");
-    }
+      // 光标折叠在已有链接内时 selectedText 为空：此时必须取链接自身的显示文本。
+      // 退回 href 会把地址当显示文本预填，提交时又因「文本已变」走替换分支，
+      // 用 URL 覆盖掉链接原本的可读文字。
+      // getMarkRange 第二个参数要 MarkType（不是 "link" 字符串）
+      const linkType = editor.schema.marks.link;
+      const linkRange = linkType
+        ? getMarkRange(editor.state.doc.resolve(from), linkType)
+        : undefined;
+      const linkText = linkRange
+        ? editor.state.doc.textBetween(linkRange.from, linkRange.to, " ")
+        : "";
+      setText(selectedText || linkText || "");
+    };
+    // 挂载时同步一次，并跟随选区变化重同步：只依赖 [editor] 的话，弹窗常驻期间把光标移到
+    // 另一个链接上，输入框仍是旧值，确认时会把较新的链接覆盖掉
+    syncFromEditor();
+    editor.on("selectionUpdate", syncFromEditor);
+    return () => {
+      editor.off("selectionUpdate", syncFromEditor);
+    };
   }, [editor]);
 
   useEffect(() => {
@@ -40,7 +60,7 @@ export default function LinkEditPopover({
   }, [onClose]);
 
   const handleSubmit = (
-    e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>,
+    e: SyntheticEvent<HTMLFormElement, SubmitEvent>,
   ): void => {
     e.preventDefault();
     const trimmedHref = href.trim();
@@ -109,6 +129,9 @@ export default function LinkEditPopover({
           <button
             type="submit"
             className="rte-btn rte-btn--primary rte-btn--sm"
+            // 地址为空时 handleSubmit 会静默 return，用户看不出为什么没反应；
+            // 直接禁用提交，让「必须先填地址」这件事在按钮上就可见
+            disabled={!href.trim()}
           >
             {t("editor.confirm")}
           </button>

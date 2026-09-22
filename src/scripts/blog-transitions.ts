@@ -7,10 +7,16 @@
  * - TOC 隐藏/显示
  */
 
-import { BANNER_HEIGHT, BANNER_HEIGHT_EXTEND } from "~/lib/constants/constants";
 import { pathsEqual, url } from "~/lib/utils/url-utils";
+// 与 blog-init 共用滚动阈值/高度算法（两个脚本都由 BlogLayout 加载，ESM 解析为同一模块实例）
+import {
+  applyBannerHeightExtend,
+  getScrollTop,
+  navbarHideThreshold,
+} from "./blog-init";
 
-const bannerEnabled = !!document.getElementById("banner-wrapper");
+/** 过渡收尾延时：page-height-extend 与 TOC 的复位都等这么久 */
+const TRANSITION_SETTLE_MS = 200;
 
 function updateBannerClass(pathname: string): void {
   const body = document.body;
@@ -26,42 +32,48 @@ function resetContentDelay(): void {
 }
 
 function handleNavbarOnNavigation(): void {
-  if (!bannerEnabled) return;
-  const threshold = window.innerHeight * (BANNER_HEIGHT / 100) - 72 - 16;
+  // banner-wrapper 在导航后会换成新节点，模块级快照会一直拿到旧文档里的元素
+  if (!document.getElementById("banner-wrapper")) return;
   const navbar = document.getElementById("navbar-wrapper");
   if (!navbar || !document.body.classList.contains("lg:is-home")) return;
-  if (
-    document.body.scrollTop >= threshold ||
-    document.documentElement.scrollTop >= threshold
-  ) {
+  // 与 blog-init#handleScroll 共用同一阈值实现，避免同一页面两套阈值
+  if (getScrollTop() >= navbarHideThreshold()) {
     navbar.classList.add("navbar-hidden");
   }
 }
 
 // --- Show/hide page-height-extend ---
+let pageHeightExtendTimer: ReturnType<typeof setTimeout> | undefined;
+
 function showPageHeightExtend(): void {
   const heightExtend = document.getElementById("page-height-extend");
   if (heightExtend) heightExtend.classList.remove("hidden");
 }
 
 function hidePageHeightExtend(): void {
-  setTimeout(() => {
+  // 必须清掉上一次的定时器：200ms 内又发起一次导航时，旧回调会把 hidden 加回
+  // 正在过渡的页面上，破坏防滚动跳跃
+  clearTimeout(pageHeightExtendTimer);
+  pageHeightExtendTimer = setTimeout(() => {
     const heightExtend = document.getElementById("page-height-extend");
     if (heightExtend) heightExtend.classList.add("hidden");
-  }, 200);
+  }, TRANSITION_SETTLE_MS);
 }
 
 // --- TOC visibility during transition ---
+let tocTimer: ReturnType<typeof setTimeout> | undefined;
+
 function hideTOCBeforeTransition(): void {
   const toc = document.getElementById("toc-wrapper");
   if (toc) toc.classList.add("toc-not-ready");
 }
 
 function showTOCAfterTransition(): void {
-  setTimeout(() => {
+  clearTimeout(tocTimer);
+  tocTimer = setTimeout(() => {
     const toc = document.getElementById("toc-wrapper");
     if (toc) toc.classList.remove("toc-not-ready");
-  }, 200);
+  }, TRANSITION_SETTLE_MS);
 }
 
 // --- Astro View Transitions lifecycle（由 @swup/astro 派发） ---
@@ -79,13 +91,5 @@ document.addEventListener("astro:after-swap", () => {
   showTOCAfterTransition();
 });
 
-// Resize handler for banner height (non-transition specific)
-function handleResize(): void {
-  let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-  offset = offset - (offset % 4);
-  document.documentElement.style.setProperty(
-    "--banner-height-extend",
-    `${offset}px`,
-  );
-}
-window.addEventListener("resize", handleResize);
+// Resize handler for banner height (non-transition specific) —— 复用 blog-init 的实现
+window.addEventListener("resize", applyBannerHeightExtend);

@@ -34,21 +34,27 @@ try {
       }
     }
     rootBoards = boards
-      .filter((b) => b.parent_id == null)
-      .map((p) => ({
-        slug: p.slug,
-        title: p.title,
-        description: p.description || '',
-        icon: 'tabler:building-community',
-        isParent: true,
-        childCount: (parentById.get(p.id) ?? []).length,
-      }));
+      // 只列公开板块：后端 list_boards 不过滤可见性（service.py:765 list_ordered 全量返回），
+      // 而 is_public=false 表示私有板块（发帖需 normal 以上认证成员），
+      // 不过滤会把私有板块连同其受限内容一起暴露在公开广场
+      .filter((b) => b.parent_id == null && b.is_public)
+      .map((p) => {
+        const childCount = (parentById.get(p.id) ?? []).length;
+        return {
+          slug: p.slug,
+          title: p.title,
+          description: p.description || '',
+          icon: 'tabler:building-community',
+          // 由真实子板块数推导，原先恒为 true 会让无子板块的根板块也显示「0 成员」角标
+          isParent: childCount > 0,
+          childCount,
+        };
+      });
   }
 } catch {
   // 后端不可用时回退静态 mock
 }
-// 原文 } catch (_e) { 现已修正   清汉 2026/8/30
- 
+
 if (rootBoards.length === 0) {
   rootBoards = getRootCategories().map((c) => ({
     slug: c.slug,
@@ -59,6 +65,10 @@ if (rootBoards.length === 0) {
     childCount: getChildCategories(c.id).length,
   }));
 }
+
+// slug 来自后端，空 slug 会生成 /forum 自链接、带 #/?/空格的 slug 会拼出坏 URL：
+// 空的一律不渲染（两个分支都要挡，故放在合并后）
+rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
 
 ---
 
@@ -75,8 +85,9 @@ if (rootBoards.length === 0) {
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* 板块 slug 必须按路径段编码：空格/#/? 原样拼进 href 会截断或拼坏 URL（详情页会解码回来） */}
       {rootBoards.map((b) => (
-        <a href={getPermalink(`/forum/${b.slug}`)} class="profile-card group">
+        <a href={getPermalink(`/forum/${encodeURIComponent(b.slug)}`)} class="profile-card group">
           <div class="profile-inner p-4 flex flex-col gap-2 h-full">
             <div class="flex items-center gap-2">
               <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">

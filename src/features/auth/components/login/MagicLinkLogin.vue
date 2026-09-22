@@ -28,14 +28,14 @@
             <button
               type="button"
               class="btn btn-ghost btn-xs"
-              @click="stage = 'expired'"
+              @click="goToStage('expired')"
             >
               {{ t("auth.login.simulateExpired") }}
             </button>
             <button
               type="button"
               class="btn btn-ghost btn-xs"
-              @click="stage = 'used'"
+              @click="goToStage('used')"
             >
               {{ t("auth.login.simulateUsed") }}
             </button>
@@ -107,6 +107,13 @@ const loading = ref(false);
 function handleSend(e: Event) {
   e.preventDefault();
   stage.value = "sent";
+}
+
+// 模拟按钮的显式状态迁移：模板里裸改 stage 会把状态机写进视图、还能绕过在途请求，
+// 收口到这里后将来要加冷却/重试上限/清错都有唯一落点
+function goToStage(next: Stage) {
+  loading.value = false;
+  stage.value = next;
 }
 
 async function handleSimulateClick() {

@@ -3,15 +3,26 @@
 import { onMounted } from "vue";
 import { useAdminPagination } from "~/lib/http/useAdminPagination";
 import { t } from "~/lib/i18n";
+import type { ContentItem } from "~/lib/api/modules/content";
 
-interface AdminPostRow {
-  id: string;
-  title: string;
-  author_name: string;
-  board_id: string;
-  view_count: number;
-  comment_count: number;
-  created_at: string;
+// 复用后端返回结构的权威类型：本地再写一份会在 API 形状变化时静默漂移
+type AdminPostRow = Pick<
+  ContentItem,
+  | "id"
+  | "title"
+  | "author_name"
+  | "board_id"
+  | "view_count"
+  | "comment_count"
+  | "created_at"
+>;
+
+/** 按本地时区渲染日期：直接 slice(0,10) 取的是 UTC 日期，东八区晚间会显示成前一天 */
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 const { items, total, page, totalPages, loading, error, refresh, goTo } =
@@ -84,7 +95,7 @@ onMounted(() => void refresh());
               {{ p.comment_count }}
             </td>
             <td class="px-4 py-3 text-text-muted">
-              {{ p.created_at ? p.created_at.slice(0, 10) : "—" }}
+              {{ fmtDate(p.created_at) }}
             </td>
           </tr>
           <tr v-if="!loading && rows.length === 0">

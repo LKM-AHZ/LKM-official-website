@@ -62,7 +62,7 @@ rest.loading ??= 'lazy';
 rest.decoding ??= 'async';
 
 // --- 解析 src（处理 `~/assets/...` 路径） ----------------------------
-const resolved = await findImage(src as never);
+const resolved = await findImage(src);
 
 const isCdnUrl =
   typeof resolved === 'string' &&
@@ -87,14 +87,23 @@ const aspectRatio = w && h ? w / h : undefined;
 
 // --- 布局 → 内联样式映射 -----------------------------------------
 const px = (v?: number) => (v == null ? undefined : `${v}px`);
-const declarations: Array<[string, string | undefined]> = [
-  ['object-fit', 'cover'],
-  ['object-position', 'center'],
-];
+// object-fit 只在真正可能裁剪的布局上写死：cover/fullWidth 的盒子比例由调用方给的 height 决定，
+// 与原图比例未必一致。fixed 仍需 cover（头像场景），但不再追加 object-position——那会与上面的
+// center 形成重复声明，还会把裁剪锚点从中心挪到左上。constrained/responsive 的盒子比例由
+// width/height 或 aspect-ratio 保证与原图一致，无需强制 object-fit（写死反而会压过调用方的 object-* 类）。
+const declarations: Array<[string, string | undefined]> =
+  layout === 'cover' || layout === 'fullWidth'
+    ? [
+        ['object-fit', 'cover'],
+        ['object-position', 'center'],
+      ]
+    : layout === 'fixed'
+      ? [['object-fit', 'cover']]
+      : [];
 
 switch (layout) {
   case 'fixed':
-    declarations.push(['width', px(w)], ['height', px(h)], ['object-position', 'top left']);
+    declarations.push(['width', px(w)], ['height', px(h)]);
     break;
   case 'constrained':
     declarations.push(
@@ -131,6 +140,8 @@ const buildCdnUrl = (variantWidth?: number, variantHeight?: number): string | un
     url: resolved as string,
     width: variantWidth,
     height: variantHeight,
+    // format 也要带给 CDN：否则 CDN 源会静默忽略调用方要的 webp/avif，只有本地 astro:assets 那支生效
+    format,
     fallback: 'astro',
   })?.toString();
 
@@ -150,38 +161,58 @@ const expandWidths = (raw?: number[]): number[] | undefined => {
 const heightFromWidth = (variantWidth: number): number | undefined =>
   aspectRatio ? Math.round(variantWidth / aspectRatio) : undefined;
 
+// srcset 用的是宽度描述符，缺 sizes 时浏览器按 100vw 估算 → 每个视口都挑最大候选，
+// 断点等于白做。按布局给出实际显示宽度：fixed 就是像素宽，constrained 受 max-width 限制，其余铺满。
+const sizes =
+  rest.sizes ??
+  (layout === 'fixed' && w
+    ? `${w}px`
+    : layout === 'constrained' && w
+      ? `(max-width: ${w}px) 100vw, ${w}px`
+      : '100vw');
+
 const cdnSrc = isCdnUrl ? buildCdnUrl(w, h) : undefined;
 const cdnWidths = isCdnUrl ? expandWidths(widths) : undefined;
 const cdnSrcSet =
   isCdnUrl && cdnWidths?.length
-    ? cdnWidths.map((bw) => `${buildCdnUrl(bw, heightFromWidth(bw))} ${bw}w`).join(', ')
+    ? cdnWidths
+        // buildCdnUrl 可能返回 undefined（transformUrl 失败），不过滤会写出
+        // "undefined 640w" 这种无效候选，浏览器选中后直接加载失败
+        .map((bw) => {
+          const url = buildCdnUrl(bw, heightFromWidth(bw));
+          return url ? `${url} ${bw}w` : '';
+        })
+        .filter(Boolean)
+        .join(', ')
     : undefined;
 ---
 
 {
   isCdnUrl ? (
     <img
+      {...rest}
       src={cdnSrc}
       srcset={cdnSrcSet}
+      sizes={sizes}
       width={w}
       height={h}
       alt={alt}
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
-      {...rest}
       style={finalStyle}
     />
   ) : (
     resolved && (
       <AstroImage
+        {...rest}
         src={resolved as ImageMetadata}
         width={w as number}
         height={h as number}
         alt={alt}
-        width-s={widths as number[]}
+        widths={widths as number[]}
         format={format}
+        sizes={sizes}
         style={finalStyle}
-        {...rest}
       />
     )
   )

@@ -72,8 +72,19 @@ export const BlockMath = Node.create({
         find: /^\$\$([\s\S]*?)\$\$$/,
         handler: ({ state, range, match }) => {
           const latex = (match[1] ?? "").trim();
+          // 空公式（$$$$ / $$   $$）无意义：不转换，保持纯文本，
+          // 否则会生成空 latex 的 blockMath 节点，在文档模型里也留下空公式
+          if (!latex) {
+            return null;
+          }
           // 键入后光标必落在该段内，用它取段边界最可靠。
           const $cursor = state.selection.$from;
+          // depth 为 0（顶层 NodeSelection/AllSelection）或所处节点不是文本块时，
+          // before/after 会抛 RangeError，也可能解析出 [0, docSize] 把整篇替换掉，
+          // 必须在取位置之前就放行
+          if ($cursor.depth === 0 || !$cursor.parent.isTextblock) {
+            return null;
+          }
           const paragraphStart = $cursor.before($cursor.depth);
           // 触发约束：$$ 必须处于该段内容起点（Obsidian 独占语义）。
           // 返回 null =「未命中」→ run 不 dispatch，落到 PM 默认文本插入。

@@ -1,4 +1,7 @@
 ---
-return Astro.redirect('/forum');
----
+import { getPermalink } from '~/lib/utils/permalinks';
 
+// 用 getPermalink 而非字面量：子路径部署（PUBLIC_BASE_PATH）时 base 必须带上
+const forumPath = getPermalink('/forum');
+return Astro.redirect(forumPath);
+---

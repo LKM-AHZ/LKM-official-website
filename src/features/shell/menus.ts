@@ -10,6 +10,16 @@ export const officialDefaultNavItems: string[] = [
   "nav.resources",
 ];
 
+// nav.community 与 nav.resources 共用的四个子项（名称/地址完全一致）。
+// 抽成常量复用：否则新增站点时容易只改一处，两个菜单就悄悄漂移了。
+const forumItem: NavBarLink = { name: "nav.forum", url: "/forum" };
+const fileLibraryItem: NavBarLink = { name: "nav.fileLibrary", url: "/files" };
+const qaItem: NavBarLink = { name: "nav.qa", url: "/qa" };
+const competitionItem: NavBarLink = {
+  name: "nav.competition",
+  url: "/competition",
+};
+
 /**
  * 全站统一导航菜单池（原 config.yaml fuwari.navbar 与 fuwari.navbarCommunity 合并）。
  * 页面用 navItems 白名单（name，即 i18n key）从该池中挑选要显示的一级菜单。
@@ -31,22 +41,17 @@ export const allMenuItems: NavBarLink[] = [
   {
     name: "nav.community",
     url: "/forum",
-    children: [
-      { name: "nav.forum", url: "/forum" },
-      { name: "nav.fileLibrary", url: "/files" },
-      { name: "nav.qa", url: "/qa" },
-      { name: "nav.competition", url: "/competition" },
-    ],
+    children: [forumItem, fileLibraryItem, qaItem, competitionItem],
   },
   {
     name: "nav.resources",
     url: "/forum",
     children: [
-      { name: "nav.forum", url: "/forum" },
-      { name: "nav.fileLibrary", url: "/files" },
-      { name: "nav.qa", url: "/qa" },
+      forumItem,
+      fileLibraryItem,
+      qaItem,
       { name: "nav.projects", url: "/projects" },
-      { name: "nav.competition", url: "/competition" },
+      competitionItem,
       { name: "nav.moreApps", url: "/apps" },
     ],
   },

@@ -38,6 +38,16 @@
             })
           }}
         </p>
+        <!-- 模态下成功态原先是「死胡同」：没有显式出口，用户得自己找关闭按钮/点遮罩。
+             给一个明确的继续按钮关掉模态（页面模式无需：本来就在页面上） -->
+        <button
+          v-if="mode === 'modal'"
+          type="button"
+          class="btn btn-primary w-full active:scale-[0.98] transition-transform"
+          @click="closeAuthModal"
+        >
+          {{ t("common.continue") }}
+        </button>
       </div>
 
       <!-- 未登录：登录方式切换等 -->
@@ -47,7 +57,7 @@
           v-if="flow.mode === 'password' || flow.mode === 'code'"
           :options="segmentedOptions"
           :model-value="flow.mode"
-          @update:model-value="flow.mode = $event as LoginMode"
+          @update:model-value="switchMode"
           class="mb-6"
         />
 
@@ -117,11 +127,7 @@
             v-model="flow.account"
           />
           <div>
-            <VerificationCodeField
-              id="login-code"
-              v-model="flow.code"
-              :error="flow.error ?? undefined"
-            />
+            <VerificationCodeField id="login-code" v-model="flow.code" />
           </div>
           <button
             type="button"
@@ -139,7 +145,7 @@
           <button
             type="submit"
             class="btn btn-primary w-full active:scale-[0.98] transition-transform"
-            :disabled="flow.loading || flow.code.length < 6"
+            :disabled="flow.loading || flow.code.length < CODE_LENGTH"
           >
             <span
               v-if="flow.loading"
@@ -253,11 +259,7 @@
           class="space-y-4"
           @submit.prevent="flow.submit2FA(flow.code)"
         >
-          <VerificationCodeField
-            id="login-2fa"
-            v-model="flow.code"
-            :error="flow.error ?? undefined"
-          />
+          <VerificationCodeField id="login-2fa" v-model="flow.code" />
           <button
             type="submit"
             class="btn btn-primary w-full active:scale-[0.98] transition-transform"
@@ -280,7 +282,7 @@
 
         <!-- 强制 2FA 设置态（管理员等 setup_required 场景） -->
         <div v-else-if="flow.mode === '2fa_setup'" class="space-y-4">
-          <AuthStatus v-if="flow.error" type="error" :message="flow.error" />
+          <!-- 错误只在上方统一的 AuthStatus 里渲染一次，避免同一 message 出现两遍（读屏会念两次） -->
           <!-- 完成设置：展示恢复码，用户确认保存后进入成功态 -->
           <template v-if="flow.setup_recovery_ready">
             <p class="text-sm text-text-muted text-center">
@@ -319,11 +321,7 @@
             <p v-else class="text-sm text-text-muted text-center">
               {{ t("settings.2fa.scanHint") }}
             </p>
-            <VerificationCodeField
-              id="login-2fa-setup"
-              v-model="flow.code"
-              :error="flow.error ?? undefined"
-            />
+            <VerificationCodeField id="login-2fa-setup" v-model="flow.code" />
             <button
               type="submit"
               class="btn btn-primary w-full active:scale-[0.98] transition-transform"
@@ -345,8 +343,12 @@
           </form>
         </div>
 
-        <!-- 底部注册入口 -->
-        <p class="mt-6 text-center text-[13px] text-text-muted">
+        <!-- 底部注册入口：只在入口模式显示。2FA/2fa_setup/github/passkey/magic
+             这些进行中的流程里点它会关掉模态并以 register 重开，丢掉在途的 temp_token -->
+        <p
+          v-if="flow.mode === 'password' || flow.mode === 'code'"
+          class="mt-6 text-center text-[13px] text-text-muted"
+        >
           {{ t("auth.login.noAccount") }}
           <button
             type="button"
@@ -362,6 +364,7 @@
 </template>
 
 <script setup lang="ts">
+import { onUnmounted } from "vue";
 import {
   useLoginFlow,
   type LoginMode,
@@ -386,17 +389,46 @@ const flow = useLoginFlow({
   },
 });
 
+// 登录方式切换必须走这里：直接写 flow.mode 会把上一种方式的残留（错误/成功提示、
+// 已输入的验证码）带进新模式。切换组件理论上只 emit 自己的 key，但不做校验的 as 断言
+// 能写进任意值，落进没有 v-if 分支的值时卡片会整块空白
+const ENTRY_MODES = ["password", "code"] as const;
+function switchMode(mode: string): void {
+  if (!(ENTRY_MODES as readonly string[]).includes(mode)) return;
+  if (mode === flow.mode) return;
+  flow.error = null;
+  flow.successMessage = "";
+  flow.code = "";
+  flow.mode = mode as LoginMode;
+}
+
 const segmentedOptions = [
   { key: "password", label: t("auth.login.passwordLogin") },
   { key: "code", label: t("auth.login.codeLogin") },
 ];
 
-function switchToRegister() {
+// 验证码位数：与 VerificationCodeField 内部的 numCells(6) 以及 useLoginFlow 的 ^\d{6}$ 是同一个约定。
+// 三处要同时改（共享常量应落到 composable / 共享组件里，二者都不在本单元文件清单内）
+const CODE_LENGTH = 6;
+
+let switchTimer: ReturnType<typeof setTimeout> | undefined;
+
+function closeAuthModal() {
   window.dispatchEvent(new CustomEvent("close-auth-modal"));
-  setTimeout(() => {
+}
+
+function switchToRegister() {
+  closeAuthModal();
+  // 换视图必须等旧模态关闭流程走完再开新的，所以用定时器；定时器要在卸载时清掉，
+  // 否则组件已销毁仍会弹出「幽灵」注册模态
+  clearTimeout(switchTimer);
+  switchTimer = setTimeout(() => {
     window.dispatchEvent(
       new CustomEvent("open-auth-modal", { detail: { view: "register" } }),
     );
+    switchTimer = undefined;
   }, 150);
 }
+
+onUnmounted(() => clearTimeout(switchTimer));
 </script>

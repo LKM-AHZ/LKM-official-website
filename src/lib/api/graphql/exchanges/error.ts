@@ -1,54 +1,8 @@
 import { mapExchange } from "@urql/core";
 import type { Operation } from "@urql/core";
-import {
-  getHttpRefreshToken,
-  setHttpTokens,
-  clearHttpSession,
-} from "~/lib/http/client";
+import { clearHttpSession, refreshSession } from "~/lib/http/client";
 // 循环依赖安全：graphqlClient 仅在异步刷新回调内访问，模块求值阶段不触碰
 import { graphqlClient } from "../client";
-
-// --- 401 刷新辅助函数 ---
-
-/** 尝试刷新 token，成功返回 true */
-async function tryRefreshToken(): Promise<boolean> {
-  const rt = getHttpRefreshToken();
-  if (!rt) return false;
-  try {
-    const base = typeof window === "undefined" ? process.env.API_URL || "" : "";
-    // eslint-disable-next-line no-restricted-globals
-    const res = await fetch(`${base}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: rt }),
-    });
-    if (!res.ok) return false;
-    const json = await res.json();
-    const data = (
-      json as { data?: { access_token: string; refresh_token: string } }
-    ).data;
-    if (!data?.access_token) return false;
-    // 统一通过 HTTP 会话适配器写入，与 axios 刷新路径共享同一状态源
-    setHttpTokens(data.access_token, data.refresh_token);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// --- 并发刷新控制 ---
-let isRefreshing = false;
-let refreshPromise: Promise<boolean> | null = null;
-
-async function refreshOnce(): Promise<boolean> {
-  if (isRefreshing && refreshPromise) return refreshPromise;
-  isRefreshing = true;
-  refreshPromise = tryRefreshToken().finally(() => {
-    isRefreshing = false;
-    refreshPromise = null;
-  });
-  return refreshPromise;
-}
 
 function isUnauthorized(error: unknown): boolean {
   const netErr = error as { networkError?: { status?: number } };
@@ -68,15 +22,25 @@ export const errorExchange = mapExchange({
     if (isUnauthorized(error)) {
       const retried =
         (operation.context as Record<string, unknown>)._retry === true;
-      refreshOnce().then((ok) => {
-        if (ok) {
-          if (retried) return; // 已重试过仍 401，不再循环
+      if (retried) {
+        // 已重试过仍 401：刷新后的令牌同样无效，直接清会话并留诊断。
+        // 原实现只在刷新成功分支里看 _retry，导致这里还要多刷一轮且失败被静默吞掉。
+        console.warn("[GraphQL] 重试后仍 401，清空会话");
+        clearHttpSession();
+        return;
+      }
+      // 复用 HTTP 客户端的单飞刷新：两条 401 路径共用同一把锁与同一份结果判定
+      refreshSession().then((outcome) => {
+        if (outcome === "ok") {
           graphqlClient.reexecuteOperation({
             ...operation,
             context: { ...operation.context, _retry: true },
           } as Operation);
-        } else {
+        } else if (outcome === "invalid") {
           clearHttpSession();
+        } else {
+          // 暂时性失败（网络/5xx）：保留会话，避免一次抖动即登出
+          console.warn("[GraphQL] token 刷新暂时失败，保留会话待重试");
         }
       });
       return; // 已处理，跳过后续 console.warn

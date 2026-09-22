@@ -2,6 +2,15 @@ import { defineConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 
+// 两个 project 的排除项曾各写一份，改一处漏一处就会让某个 project 静默开始收集构建产物
+const baseExclude = [
+  "dist/**",
+  ".astro/**",
+  "coverage/**",
+  "node_modules/**",
+  "**/node_modules/**",
+];
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -21,14 +30,8 @@ export default defineConfig({
         test: {
           name: "node",
           include: ["src/**/*.test.ts"],
-          exclude: [
-            "dist/**",
-            ".astro/**",
-            "coverage/**",
-            "node_modules/**",
-            "**/node_modules/**",
-            "src/features/auth/**",
-          ],
+          // 排除 auth 目录：那边由下面的 happy-dom project 跑
+          exclude: [...baseExclude, "src/features/auth/**"],
           environment: "node",
         },
       },
@@ -38,13 +41,7 @@ export default defineConfig({
         test: {
           name: "auth",
           include: ["src/features/auth/**/*.test.ts"],
-          exclude: [
-            "dist/**",
-            ".astro/**",
-            "coverage/**",
-            "node_modules/**",
-            "**/node_modules/**",
-          ],
+          exclude: [...baseExclude],
           environment: "happy-dom",
           setupFiles: ["src/features/auth/__tests__/setup.ts"],
         },

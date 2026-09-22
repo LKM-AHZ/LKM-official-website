@@ -103,7 +103,9 @@
             <textarea
               v-model="text"
               :placeholder="t('treehole.messages.replyPlaceholder')"
-              @keyup.enter.exact="send"
+              @keyup.enter.exact="onEnter"
+              @compositionstart="composing = true"
+              @compositionend="composing = false"
               rows="1"
             ></textarea>
             <button class="btn-grad" :disabled="!text.trim()" @click="send">
@@ -169,10 +171,19 @@ function selectConv(c) {
   activeId.value = c.id;
 }
 
+// 中文输入法用 Enter 上屏候选词时也会触发 keyup.enter：不判断 composition 会提前/重复发送
+const composing = ref(false);
+
+function onEnter() {
+  if (composing.value) return;
+  send();
+}
+
 function send() {
   if (!text.value.trim() || !active.value) return;
   const msg = {
-    id: "m_" + Date.now() + Math.floor(Math.random() * 100),
+    // 同毫秒内连发两条会撞 id（Date.now + 两位随机数的空间太小），重复 id 会破坏查找/编辑/撤回
+    id: `m_${crypto.randomUUID()}`,
     from: "me",
     text: text.value.trim(),
     at: Date.now(),

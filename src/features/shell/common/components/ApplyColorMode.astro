@@ -13,14 +13,29 @@ import { UI } from '~/lib/config';
     }
   }
 
+  // 隐私模式 / 沙箱 iframe 下访问 localStorage 会抛 SecurityError：
+  // 不兜住会中断整段 prepaint 脚本，主题与锚点行为一起失效
+  function getStoredTheme() {
+    try {
+      return localStorage.theme;
+    } catch {
+      return null;
+    }
+  }
+
   // 页面绘制前设置初始主题，避免 FOUC
   if (defaultTheme && defaultTheme.endsWith(':only')) {
-    applyTheme(defaultTheme.replace(':only', ''));
-  } else if (localStorage.theme === 'dark') {
+    // 只切掉结尾的 ':only'：replace 会删掉所有出现位置，且值恰好为 ':only' 时
+    // 会得到空串——applyTheme('') 会被静默当成亮色，既不是报错也不是回退
+    const forced = defaultTheme.slice(0, -':only'.length);
+    if (forced) applyTheme(forced);
+  } else if (getStoredTheme() === 'dark') {
     applyTheme('dark');
-  } else if (localStorage.theme === 'light') {
+  } else if (getStoredTheme() === 'light') {
     applyTheme('light');
   } else {
-    applyTheme(defaultTheme);
+    // 'system' 必须映射成 applyTheme 的 'auto'（走 prefers-color-scheme），
+    // 否则会落进 `theme === 'dark'` 判断，被静默当成浅色
+    applyTheme(defaultTheme === 'system' ? 'auto' : defaultTheme);
   }
 </script>

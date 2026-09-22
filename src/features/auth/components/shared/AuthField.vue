@@ -4,10 +4,12 @@
       <span class="label-text font-medium">{{ label }}</span>
     </label>
     <div class="relative">
+      <!-- 不暴露 name/required/disabled：本组件只负责取值与展示，
+           必填校验/提交/禁用态都由父级表单与 flow 状态机驱动（见 LoginPage/RegisterPage） -->
       <input
         :id="fieldId"
         :type="showPassword ? 'text' : type"
-        class="input input-bordered w-full pr-10"
+        class="input input-bordered w-full pr-12"
         :class="{ 'input-error': error }"
         :value="(modelValue as string | undefined) ?? ''"
         :autocomplete="autocomplete"
@@ -23,7 +25,7 @@
       <button
         v-if="type === 'password'"
         type="button"
-        class="absolute right-2 inset-y-0 flex items-center px-2 text-text-muted"
+        class="absolute right-2 inset-y-0 flex items-center px-2 rounded text-text-muted focus-visible:outline-2 focus-visible:outline-offset-2"
         @click="showPassword = !showPassword"
         :aria-label="
           showPassword
@@ -50,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useId } from "vue";
+import { computed, ref, useId, watch } from "vue";
 import { t } from "~/lib/i18n";
 
 const props = withDefaults(
@@ -74,4 +76,13 @@ const fieldId = computed(() => props.id ?? `auth-field-${uid}`);
 
 const emit = defineEmits<(e: "update:modelValue", v: string) => void>();
 const showPassword = ref(false);
+
+// type 变化时必须收起明文：同一实例（复用/切换认证方式）下残留的展开态会让新变回的
+// password 输入框一渲染就是明文
+watch(
+  () => props.type,
+  () => {
+    showPassword.value = false;
+  },
+);
 </script>

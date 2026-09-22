@@ -61,12 +61,14 @@ const className = Astro.props.class;
 
       if (this.dataset.isCollapsed !== 'true') return;
 
-      const id = this.dataset.id;
-      const btn = this.querySelector('.expand-btn');
-      const wrapper = this.querySelector(`#${id}`);
-      btn!.addEventListener('click', () => {
-        wrapper!.classList.remove('collapsed');
-        btn!.classList.add('hidden');
+      // 用结构选择器而非 `#${id}`：id 含 CSS 特殊字符时 querySelector 会抛 SyntaxError，
+      // 且 :scope > 限定直接子节点，避免命中插槽内容里同名的节点。
+      const btn = this.querySelector<HTMLElement>(':scope > .expand-btn');
+      const wrapper = this.querySelector<HTMLElement>(':scope > .collapse-wrapper');
+      if (!btn || !wrapper) return;
+      btn.addEventListener('click', () => {
+        wrapper.classList.remove('collapsed');
+        btn.classList.add('hidden');
       });
     }
   }

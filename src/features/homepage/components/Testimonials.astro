@@ -24,7 +24,7 @@ const {
       testimonials &&
         testimonials.map(({ title, testimonial, name, job, image }) => (
           <div class="flex h-auto ">
-            <div class="flex flex-col p-4 md:p-6 rounded-[12px] bg-page-bg border border-surface-3 card-hover">
+            <figure class="flex flex-col p-4 md:p-6 rounded-[12px] bg-page-bg border border-surface-3 card-hover">
               {title && <h2 class="text-[17px] font-semibold leading-6 pb-3 text-deep-text">{title}</h2>}
               {testimonial && (
                 <blockquote class="flex-auto">
@@ -34,7 +34,7 @@ const {
 
               <hr class="border-surface-3 my-4" />
 
-              <div class="flex items-center">
+              <figcaption class="flex items-center">
                 {image && (
                   <div class="h-10 w-10 rounded-full border border-surface-3 overflow-hidden">
                     {typeof image === 'string' ? (
@@ -56,8 +56,8 @@ const {
                   {name && <p class="text-[17px] font-semibold text-deep-text">{name}</p>}
                   {job && <p class="text-[12px] text-text-muted">{job}</p>}
                 </div>
-              </div>
-            </div>
+              </figcaption>
+            </figure>
           </div>
         ))
     }

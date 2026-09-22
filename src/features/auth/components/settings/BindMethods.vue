@@ -2,6 +2,14 @@
   <div class="space-y-4">
     <h3 class="text-lg font-semibold">{{ t("settings.bind.title") }}</h3>
 
+    <!-- 绑定态读取失败：必须显式告知，否则 has2FA 会留在 false，解绑的二次验证门槛形同虚设 -->
+    <AuthStatus
+      v-if="loadError"
+      type="error"
+      :message="loadError"
+      class="text-xs"
+    />
+
     <!-- 邮箱 -->
     <div
       class="flex items-center justify-between p-3 bg-page-bg rounded-lg gap-3"
@@ -275,7 +283,7 @@
           <button
             type="submit"
             class="btn btn-error btn-sm"
-            :disabled="has2FA && !unbindCodeValid"
+            :disabled="!settingsLoaded || (has2FA && !unbindCodeValid)"
           >
             {{ t("settings.bind.confirmUnbind") }}
           </button>
@@ -313,16 +321,29 @@ const props = defineProps<{
 }>();
 
 type BindType = "email" | "phone";
+/** 绑定/解绑共用的错误键：闭集合，避免 errors.emia 这类笔误静默新建 key */
+type BindKey = BindType | "github";
 type StepState = "idle" | "request" | "confirm";
 
 // 绑定态从 GET /auth/settings 拉取；未加载出结果时回退到 props.user 近似值。
 const boundEmail = ref((props.user as { email?: string | null }).email ?? "");
 const boundPhone = ref((props.user as { phone?: string | null }).phone ?? "");
 const boundGithub = ref(!!(props.user as { github?: boolean }).github);
+
+/** 把组件内已更新的绑定态合并回 user 再 emit：直接回传 props.user 会让父级拿到它本来就持有的
+ *  那个对象，看不到新绑定（父级只在 mount 时 load 一次，user 就此长期陈旧）。 */
+function emitUpdated(): void {
+  emit("update", {
+    ...props.user,
+    email: boundEmail.value || null,
+    phone: boundPhone.value || null,
+    github: boundGithub.value,
+  } as User);
+}
 const has2FA = ref(false);
 
 // 解绑用的第二因素输入（2FA 已开启时要求）：TOTP 或恢复码
-const unbinding = ref<false | "email" | "phone" | "github">(false);
+const unbinding = ref<BindKey | false>(false);
 const unbindCode = ref("");
 const unbindRecoveryCode = ref("");
 const unbindUsingRecovery = ref(false);
@@ -352,18 +373,25 @@ const submitting = reactive<Record<BindType, boolean>>({
   email: false,
   phone: false,
 });
-const errors = reactive<Record<string, string>>({
+const errors = reactive<Record<BindKey, string>>({
   email: "",
   phone: "",
   github: "",
 });
 const email = ref("");
 const phone = ref("");
+// github 绑定要整页跳转，之前 busy.github 恒为 false：按钮不会禁用、loading 是死代码，
+// 连点会重复请求 githubBindRedirect 并重复触发 location.assign
+const githubSubmitting = ref(false);
 const busy = computed(() => ({
   email: submitting.email,
   phone: submitting.phone,
-  github: false,
+  github: githubSubmitting.value,
 }));
+
+// 绑定态（含 has2FA）是否已从后端读到；读失败时不能拿默认值当真相
+const settingsLoaded = ref(false);
+const loadError = ref("");
 
 function beginBind(type: BindType) {
   errors[type] = "";
@@ -427,7 +455,7 @@ async function onSubmit(type: BindType) {
     if (type === "email") boundEmail.value = contact;
     else boundPhone.value = contact;
     pending[type] = "idle";
-    emit("update", props.user);
+    emitUpdated();
   } finally {
     submitting[type] = false;
   }
@@ -436,6 +464,7 @@ async function onSubmit(type: BindType) {
 // GitHub 绑定：拿后端授权 URL 并整页跳转（后端绑定回调也会 302 回前端）。
 async function startGithubBind() {
   errors.github = "";
+  githubSubmitting.value = true;
   try {
     const r = await authApi.githubBindRedirect();
     if (r.isErr()) {
@@ -445,26 +474,33 @@ async function startGithubBind() {
     window.location.assign(r.value.url);
   } catch {
     errors.github = t("settings.bind.githubFail");
+  } finally {
+    githubSubmitting.value = false;
   }
 }
 
 // 加载真实绑定态
 async function load() {
   const r = await authApi.getSettings();
-  if (r.isOk()) {
-    boundEmail.value = r.value.email ?? "";
-    boundPhone.value = r.value.phone ?? "";
-    boundGithub.value = !!r.value.github;
-    has2FA.value = !!r.value.has_2fa;
+  if (r.isErr()) {
+    // 失败分支不能静默：has2FA 留在 false 会绕过解绑的二次验证，徽标也是错的
+    settingsLoaded.value = false;
+    loadError.value = r.error.message;
+    return;
   }
+  boundEmail.value = r.value.email ?? "";
+  boundPhone.value = r.value.phone ?? "";
+  boundGithub.value = !!r.value.github;
+  has2FA.value = !!r.value.has_2fa;
+  settingsLoaded.value = true;
+  loadError.value = "";
 }
 
 // 解绑：若 2FA 已开启则需输入 TOTP 码
 async function doUnbind() {
   const type = unbinding.value;
   if (!type) return;
-  const key =
-    type === "email" ? "email" : type === "phone" ? "phone" : "github";
+  const key: BindKey = type;
   errors[key] = "";
   try {
     if (has2FA.value && !unbindCodeValid.value) {
@@ -493,7 +529,7 @@ async function doUnbind() {
     unbindCode.value = "";
     unbindRecoveryCode.value = "";
     unbindUsingRecovery.value = false;
-    emit("update", props.user);
+    emitUpdated();
   } catch {
     errors[key] = t("settings.bind.unbindFail");
   }

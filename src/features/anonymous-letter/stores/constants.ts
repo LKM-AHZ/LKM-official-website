@@ -88,7 +88,11 @@ export const CATEGORIES: CategoryInfo[] = [
 ];
 
 export function getCategory(key: string): CategoryInfo {
-  return CATEGORIES.find((c) => c.key === key) || CATEGORIES[0];
+  const hit = CATEGORIES.find((c) => c.key === key);
+  // 未知 key（历史/损坏数据）回退首项是刻意的展示兜底，但要留下信号：
+  // 完全静默会让人误以为数据本身就是 confess，排查时没有任何线索
+  if (!hit) console.warn(`[treehole] 未知分类 key: ${key}`);
+  return hit || CATEGORIES[0];
 }
 
 // 内容标签（可多选，区别于“心情”，用于人群/主题归类，如学术）
@@ -254,7 +258,10 @@ export const PAPERS: PaperInfo[] = [
   },
 ];
 export function getPaper(key: string): PaperInfo {
-  return PAPERS.find((p) => p.key === key) || PAPERS[0];
+  const hit = PAPERS.find((p) => p.key === key);
+  // 同 getCategory：回退可以，静默不行
+  if (!hit) console.warn(`[treehole] 未知信纸 key: ${key}`);
+  return hit || PAPERS[0];
 }
 
 // 字体大小三档
@@ -284,12 +291,13 @@ export const DAILY_QUOTES = [
 ];
 // 按「日期」确定性选取每日治愈文案：SSR 与客户端水合在同一天必然选同句，避免
 // hydration text mismatch（原来用 Math.random()，SSR/客户端两次取值会不一致）。
-// 保留「每日一句」语义，跨天自动轮换。
+// 必须全部用 UTC 日历日：Date.UTC 配本地 getter 会让服务器（UTC）与客户端（如 UTC+8）
+// 在跨日窗口算出不同的 dayOfYear，又回到水合不一致。保留「每日一句」语义，跨天自动轮换。
 export function randomQuote(): string {
   const today = new Date();
   const dayOfYear = Math.floor(
-    (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
-      Date.UTC(today.getFullYear(), 0, 0)) /
+    (Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) -
+      Date.UTC(today.getUTCFullYear(), 0, 0)) /
       86400000,
   );
   return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];

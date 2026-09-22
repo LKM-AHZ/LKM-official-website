@@ -5,6 +5,19 @@ import { NodeViewWrapper } from "@tiptap/react";
 import { t } from "~/lib/i18n";
 import FigureView from "../shared/FigureView";
 
+/** 图片宽度上限（px）：超过版心的值没有意义，夹住以免写出异常属性 */
+const MAX_FIGURE_WIDTH = 2000;
+
+/**
+ * 输入侧只接受有限正数并夹到上限。原写法 `Number(x) || undefined` 会把合法的 0 当成空、
+ * 又放行负数/Infinity，最终渲染出 `width: NaNpx`/负数这类非法 CSS（浏览器静默丢弃）。
+ */
+function toFigureSize(raw: string): number | undefined {
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return undefined;
+  return Math.min(Math.round(n), MAX_FIGURE_WIDTH);
+}
+
 interface FigureNodeViewProps {
   node: Node;
   editor: Editor;
@@ -103,9 +116,7 @@ const FigureNodeView = memo(function FigureNodeView({
                 value={width ?? ""}
                 placeholder={t("editor.figure.auto")}
                 onChange={(e) =>
-                  updateAttributes({
-                    width: Number(e.target.value) || undefined,
-                  })
+                  updateAttributes({ width: toFigureSize(e.target.value) })
                 }
               />
             </div>

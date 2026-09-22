@@ -6,7 +6,8 @@ name: Lighthouse Performance Budget
 #  - CI 环境无真实后端（API_URL 为空），页面的 SSR 会降级渲染，指标可能低于生产；
 #    因此本 job 定位为「性能预算的门槛 + 基线记录」，阈值通过环境变量可调：
 #      LIGHTHOUSE_LCP_MS / LIGHTHOUSE_CLS / LIGHTHOUSE_TBT_MS / LIGHTHOUSE_PERF
-#  - 脚本输出 PASS/FAIL 并以退出码判定，超阈即 CI 失败（可用 continue-on-error 临时放行）。
+#  - 脚本输出 PASS/FAIL 并以退出码判定；本 job 暂不阻断 CI（CI 无后端、指标偏低），
+#    但超限会被下方独立 step 显式标注，不会被静默吞掉。
 #  - 先用宽松阈值立基线，本地/后端就绪后逐步收紧（见 docs 模块 0 计划）。
 
 on:
@@ -15,11 +16,21 @@ on:
   pull_request:
     branches: [main]
 
+# push 与 PR 同时触发，连续推送会并起多份「安装+构建+3×Lighthouse」互相抢 CPU，
+# 反而把 TBT/LCP 中位拉高（本 job 正是要滤掉这种噪声）；与 actions.yaml 保持同样的收敛策略
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 只跑本地构建 + Lighthouse，无需写权限；显式收窄 GITHUB_TOKEN 作用域
+permissions:
+  contents: read
+
 jobs:
   lighthouse:
     name: Lighthouse CWV budgets
     runs-on: ubuntu-latest
-    continue-on-error: true
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -36,6 +47,10 @@ jobs:
       #   · JS 基线（scripts/jsbudget-baseline.json，提交 git）防体积回归；大幅增长才拦。
       # 无后端降级下 LCP/TBT 绝对值偏高，以下 TBT 硬阈取 CI 中位可过的合理值。
       - name: Run Lighthouse budgets (layered)
+        id: budget
+        # 非阻断放在 step 级（而非 job 级），这样失败仍会以 annotation 暴露出来；
+        # job 级 continue-on-error 会把退出码整个吞掉，CI 全绿但没人知道超限了。
+        continue-on-error: true
         env:
           LIGHTHOUSE_LCP_MS: '4000'
           LIGHTHOUSE_CLS: '0.15'
@@ -46,3 +61,6 @@ jobs:
           LIGHTHOUSE_JS_KB: '3500'
           LIGHTHOUSE_JS_DELTA_PCT: '8'
         run: pnpm run lighthouse:budget --runs=3
+      - name: 标注预算超限
+        if: steps.budget.outcome == 'failure'
+        run: echo "::error::Lighthouse 预算超限（当前为告警模式，不阻断 CI），详见上一 step 日志"

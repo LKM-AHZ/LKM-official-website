@@ -5,5 +5,7 @@ import { t } from '~/lib/i18n';
 ---
 
 <AdminLayout flush>
+  {/* 与 providers.astro 同一处缺口（8 个 bot 包装页都没有标题元素），一并补上仅读屏可见的 h1 */}
+  <h1 class="sr-only">{t('page.admin.bot.config.title')}</h1>
   <BotFrame hashRoute="/config" title={t('page.admin.bot.config.title')} />
 </AdminLayout>

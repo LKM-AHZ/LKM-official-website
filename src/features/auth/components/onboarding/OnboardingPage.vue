@@ -60,6 +60,7 @@
             :is="currentConfig.component"
             :key="flow.step"
             :ref="setStepRef"
+            v-bind="stepProps"
           />
         </Transition>
 
@@ -86,7 +87,7 @@
               {{ t("onboarding.skipAll") }}
             </button>
             <button
-              v-if="currentConfig.number < 4"
+              v-if="!isLastStep"
               type="button"
               class="btn-primary px-6 py-2 rounded-lg text-sm font-semibold"
               :disabled="!canProceed || flow.loading"
@@ -125,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 import AuthCard from "../shared/AuthCard.vue";
@@ -149,6 +150,8 @@ interface StepConfig {
   required: boolean;
   skippable: boolean;
   buttonText?: string;
+  /** 该步骤组件支持从 flow.dataByStep 回填已提交数据（声明 initial prop） */
+  hydrates?: boolean;
 }
 
 const props = defineProps<{ redirect?: string | null }>();
@@ -158,6 +161,7 @@ const steps: StepConfig[] = [
     number: 1,
     label: t("onboarding.identityTitle"),
     component: IdentityTags,
+    hydrates: true,
     optional: true,
     required: false,
     skippable: true,
@@ -188,6 +192,8 @@ const steps: StepConfig[] = [
     optional: false,
     required: false,
     skippable: false,
+    // 该步会收集 displayName/bio/intro：来回切步会被重建，需要把已提交数据回灌
+    hydrates: true,
   },
 ];
 
@@ -209,6 +215,25 @@ function setStepRef(el: Record<string, unknown> | null): void {
 
 const currentConfig = computed(
   () => steps.find((s) => s.number === flow.step) ?? steps[0],
+);
+
+// 最后一步不要写死 4：步骤增删/换序时，「下一步」与「完成」两个按钮的分支会跟着漂
+const lastStepNumber = steps[steps.length - 1].number;
+const isLastStep = computed(() => flow.step >= lastStepNumber);
+
+/** 仅向声明 hydrates 的步骤传 initial，避免把该属性漏到其它步骤组件的根 DOM 上 */
+const stepProps = computed(() => {
+  const cfg = currentConfig.value;
+  return cfg.hydrates ? { initial: flow.dataByStep[cfg.number] } : {};
+});
+
+// 切换步骤即清空注册表：Transition mode="out-in" 下新组件要等 180ms 才挂载，
+// 期间 canProceed/collectData 会读到上一步已卸载实例的陈旧数据。
+watch(
+  () => flow.step,
+  () => {
+    stepRefs.value = {};
+  },
 );
 
 const stepNote = computed(() => {
@@ -236,15 +261,15 @@ async function collectData(): Promise<Record<string, unknown>> {
 }
 
 async function next(): Promise<void> {
-  if (flow.step < 4) {
+  if (!isLastStep.value) {
     const data = await collectData();
     const ok = await flow.saveStep(flow.step, data);
     if (!ok) return;
     flow.goNext();
     return;
   }
-  // 最后一步：先一并持久化第 4 步资料，成功后才完成跳转（失败停留并显示错误）
-  const ok = await flow.saveStep(4, await collectData());
+  // 最后一步：先一并持久化本步资料，成功后才完成跳转（失败停留并显示错误）
+  const ok = await flow.saveStep(flow.step, await collectData());
   if (!ok) return;
   flow.markDone();
 }
@@ -254,12 +279,28 @@ function prev(): void {
 }
 
 async function skip(): Promise<void> {
-  await flow.skipAll();
+  try {
+    await flow.skipAll();
+  } catch {
+    // skipAll 若以 rejection 形式失败（网络等），不接住会变成未处理拒绝且 flow.error 仍为空，
+    // 用户点了「跳过」却毫无反馈；这里补一条通用错误（模板已渲染 flow.error）
+    flow.error.value = t("messages.operationFailed");
+  }
 }
 
 onMounted(async () => {
-  // 已完成用户（存量 localStorage 兜底）不重走
-  if (localStorage.getItem("lkm-onboarding-done") === "true") {
+  // 已完成用户（存量 localStorage 兜底）不重走。
+  // 该 key 目前没有任何写入点，属历史遗留兜底；storage 被禁用时（Safari 隐私模式/沙箱）
+  // getItem 会抛 SecurityError，不接住会中断 onMounted，连 flow.load() 都不会执行
+  // 两条路径都显式赋值（catch 也赋 false）：预置初值会被判为无用赋值（no-useless-assignment）
+  let doneFlag: boolean;
+  try {
+    doneFlag = localStorage.getItem("lkm-onboarding-done") === "true";
+  } catch {
+    // storage 被禁用（隐私模式/沙箱）：按未完成处理
+    doneFlag = false;
+  }
+  if (doneFlag) {
     navigate(resolveSafeRedirect(props.redirect ?? null));
     return;
   }

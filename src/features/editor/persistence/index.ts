@@ -7,61 +7,88 @@ import type {
   CommentReply,
   CommentThread,
 } from "../engine/types";
+// 导入名加 FromStore 后缀：适配器对象的属性名与这些导入同名，同名会遮蔽、极易改错实现
 import {
   getDocument,
-  listDocuments,
+  listDocuments as listDocumentsFromStore,
   updateDocument,
   upsertDocument,
-  deleteDocument,
+  deleteDocument as deleteDocumentFromStore,
 } from "./document-store";
 
 // Re-export for direct consumer use (e.g. admin pages)
-export { listDocuments, deleteDocument };
+export {
+  listDocumentsFromStore as listDocuments,
+  deleteDocumentFromStore as deleteDocument,
+};
 export type { DocumentData } from "../engine/types";
-import { saveBackup, getBackups } from "./backup-store";
-import { saveVersion, getVersions } from "./version-store";
+import {
+  saveBackup as saveBackupToStore,
+  getBackups as getBackupsFromStore,
+} from "./backup-store";
+import {
+  saveVersion as saveVersionToStore,
+  getVersions as getVersionsFromStore,
+} from "./version-store";
 import {
   getThreads,
-  addThread,
-  addReply,
-  resolveThread,
-  reopenThread,
-  deleteThread,
+  addThread as addThreadToStore,
+  addReply as addReplyToStore,
+  resolveThread as resolveThreadInStore,
+  reopenThread as reopenThreadInStore,
+  deleteThread as deleteThreadFromStore,
 } from "./comment-store";
 
 export function createLocalPersistence(): PersistenceAdapter {
   return {
     loadDocument: (id: string) => getDocument(id),
 
+    // 契约是返回 boolean：store 内部大多已 catch，但接口不保证，
+    // 未预期的异常若以 reject 冒出去，调用方只等 boolean，就变成未处理拒绝
     saveDocument: async (doc: DocumentData): Promise<boolean> => {
-      const existing = getDocument(doc.id);
-      if (existing) {
-        const result = updateDocument(doc.id, doc);
+      try {
+        const existing = getDocument(doc.id);
+        if (existing) {
+          const result = updateDocument(doc.id, doc);
+          return result.isOk();
+        }
+        // 文档不存在时必须按调用方给的 id 落库（含正文/编辑器 JSON/版本），
+        // 否则调用方 id 被丢弃、正文全丢，却仍返回 true 让上层以为保存成功。
+        const result = upsertDocument(doc);
         return result.isOk();
+      } catch (e) {
+        console.warn("[persistence] saveDocument 失败:", e);
+        return false;
       }
-      // 文档不存在时必须按调用方给的 id 落库（含正文/编辑器 JSON/版本），
-      // 否则调用方 id 被丢弃、正文全丢，却仍返回 true 让上层以为保存成功。
-      const result = upsertDocument(doc);
-      return result.isOk();
     },
 
     deleteDocument: async (id: string): Promise<boolean> => {
-      const result = deleteDocument(id);
-      return result.isOk();
+      try {
+        const result = deleteDocumentFromStore(id);
+        return result.isOk();
+      } catch (e) {
+        console.warn("[persistence] deleteDocument 失败:", e);
+        return false;
+      }
     },
 
-    listDocuments: (): DocumentSummary[] => listDocuments(),
+    listDocuments: (): DocumentSummary[] => listDocumentsFromStore(),
 
     saveVersion: async (
       docId: string,
       doc: DocumentData,
       message?: string,
     ): Promise<boolean> => {
-      const result = saveVersion(docId, doc, message);
-      return result.isOk();
+      try {
+        const result = saveVersionToStore(docId, doc, message);
+        return result.isOk();
+      } catch (e) {
+        console.warn("[persistence] saveVersion 失败:", e);
+        return false;
+      }
     },
 
-    getVersions: (docId: string): VersionEntry[] => getVersions(docId),
+    getVersions: (docId: string): VersionEntry[] => getVersionsFromStore(docId),
 
     createBackup: async (
       docId: string,
@@ -74,21 +101,31 @@ export function createLocalPersistence(): PersistenceAdapter {
         version: number;
       },
     ): Promise<boolean> => {
-      const result = await saveBackup(docId, {
-        docId,
-        title: data.title,
-        contentMdx: data.contentMdx,
-        editorJson: data.editorJson,
-        status: data.status,
-        version: data.version,
-        timestamp: new Date().toISOString(),
-      } as Parameters<typeof saveBackup>[1]);
-      return result.isOk();
+      try {
+        const result = await saveBackupToStore(docId, {
+          docId,
+          title: data.title,
+          contentMdx: data.contentMdx,
+          editorJson: data.editorJson,
+          status: data.status,
+          version: data.version,
+          timestamp: new Date().toISOString(),
+        } as Parameters<typeof saveBackupToStore>[1]);
+        return result.isOk();
+      } catch (e) {
+        console.warn("[persistence] createBackup 失败:", e);
+        return false;
+      }
     },
 
     getBackups: async (): Promise<BackupEntry[]> => {
-      const result = await getBackups();
-      return result.isOk() ? result.value : [];
+      try {
+        const result = await getBackupsFromStore();
+        return result.isOk() ? result.value : [];
+      } catch (e) {
+        console.warn("[persistence] getBackups 失败:", e);
+        return [];
+      }
     },
 
     getComments: (docId: string): CommentThread[] => getThreads(docId),
@@ -97,20 +134,20 @@ export function createLocalPersistence(): PersistenceAdapter {
       range: { from: number; to: number },
       text: string,
       initialComment?: string,
-    ): CommentThread => addThread(docId, range, text, initialComment),
+    ): CommentThread => addThreadToStore(docId, range, text, initialComment),
     addReply: (
       docId: string,
       threadId: string,
       text: string,
-    ): CommentReply | null => addReply(docId, threadId, text),
+    ): CommentReply | null => addReplyToStore(docId, threadId, text),
     resolveThread: (docId: string, threadId: string): void => {
-      resolveThread(docId, threadId);
+      resolveThreadInStore(docId, threadId);
     },
     reopenThread: (docId: string, threadId: string): void => {
-      reopenThread(docId, threadId);
+      reopenThreadInStore(docId, threadId);
     },
     deleteThread: (docId: string, threadId: string): void => {
-      deleteThread(docId, threadId);
+      deleteThreadFromStore(docId, threadId);
     },
   };
 }

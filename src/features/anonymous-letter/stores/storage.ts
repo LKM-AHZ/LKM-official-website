@@ -128,7 +128,13 @@ function read<T>(key: string, fallback: T): T {
 
 function write<T>(key: string, value: T): void {
   if (!hasLocalStorage) return;
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    // 配额超限（涂鸦 dataURL、通知日志）或值不可序列化（循环引用）时，
+    // 抛出会打断调用方后续逻辑，与 read() 一样降级为告警
+    console.warn("[storage] 写入 key 失败:", key, err);
+  }
 }
 
 // 深拷贝，避免引用污染
@@ -137,55 +143,100 @@ export function clone<T>(obj: T): T {
 }
 
 // ---------- 轻量本地加密 (AES-GCM via Web Crypto) ----------
+// 密钥派生用 PBKDF2-SHA256 + 每份载荷独立随机 salt。此前直接把 padPass 的结果当密钥：
+// 超长口令被静默截断（不同长口令撞成同一把密钥）、短口令用固定公开常量补位，密钥熵极低。
+// 新载荷格式 enc2:salt:iv:ct；解密仍兼容历史 enc: 载荷（旧 padPass 直填密钥）。
+const PBKDF2_ITERATIONS = 210_000;
+
+async function deriveKey(
+  pass: string,
+  salt: Uint8Array,
+  usage: KeyUsage,
+): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(pass),
+    "PBKDF2",
+    false,
+    ["deriveKey"],
+  );
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      // 传底层 ArrayBuffer：Uint8Array<ArrayBufferLike> 不在 lib.dom 的 BufferSource 里
+      salt: salt.buffer as ArrayBuffer,
+      iterations: PBKDF2_ITERATIONS,
+      hash: "SHA-256",
+    },
+    base,
+    { name: "AES-GCM", length: 256 },
+    false,
+    [usage],
+  );
+}
 export async function encryptText(text: string, pass: string): Promise<string> {
   try {
     const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(padPass(pass)),
-      { name: "AES-GCM" },
-      false,
-      ["encrypt"],
-    );
+    const salt = crypto.getRandomValues(new Uint8Array(16));
     const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(pass, salt, "encrypt");
     const ct = await crypto.subtle.encrypt(
       { name: "AES-GCM", iv },
       key,
       enc.encode(text),
     );
     return (
-      "enc:" +
+      "enc2:" +
+      b64(arrayBufferToBase64(salt.buffer as ArrayBuffer)) +
+      ":" +
       b64(arrayBufferToBase64(iv.buffer as ArrayBuffer)) +
       ":" +
       b64(arrayBufferToBase64(ct))
     );
   } catch (err) {
-    console.warn("[storage] 加密失败，返回明文:", err);
-    return text;
+    // 不能像以前那样返回明文：调用方会把它当密文存进 storage，
+    // 之后再也分不出到底有没有加密过，只会静默泄露内容
+    console.warn("[storage] 加密失败:", err);
+    throw err;
   }
 }
 export async function decryptText(
   payload: string,
   pass: string,
-): Promise<string> {
+): Promise<string | null> {
   try {
-    if (!payload || !payload.startsWith("enc:")) return payload;
-    const [, ivB64, ctB64] = payload.split(":");
+    if (!payload) return payload;
     const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(padPass(pass)),
-      { name: "AES-GCM" },
-      false,
-      ["decrypt"],
-    );
-    const iv = new Uint8Array(base64ToArrayBuffer(unb64(ivB64)));
-    const ct = new Uint8Array(base64ToArrayBuffer(unb64(ctB64)));
-    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-    return new TextDecoder().decode(pt);
+    if (payload.startsWith("enc2:")) {
+      const [, saltB64, ivB64, ctB64] = payload.split(":");
+      const salt = new Uint8Array(base64ToArrayBuffer(unb64(saltB64)));
+      const iv = new Uint8Array(base64ToArrayBuffer(unb64(ivB64)));
+      const ct = new Uint8Array(base64ToArrayBuffer(unb64(ctB64)));
+      const key = await deriveKey(pass, salt, "decrypt");
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+      return new TextDecoder().decode(pt);
+    }
+    if (payload.startsWith("enc:")) {
+      const [, ivB64, ctB64] = payload.split(":");
+      const key = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(padPass(pass)),
+        { name: "AES-GCM" },
+        false,
+        ["decrypt"],
+      );
+      const iv = new Uint8Array(base64ToArrayBuffer(unb64(ivB64)));
+      const ct = new Uint8Array(base64ToArrayBuffer(unb64(ctB64)));
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+      return new TextDecoder().decode(pt);
+    }
+    // 非密文（历史明文）原样返回
+    return payload;
   } catch (err) {
+    // 解密失败返回 null 而不是本地化文案：文案会被当成真实内容继续存/显示
     console.warn("[storage] 解密失败:", err);
-    return t("treeholeData.messages.decryptFail");
+    return null;
   }
 }
 function padPass(p: string): string {
@@ -284,9 +335,13 @@ export function toggleFavorite(id: string): boolean {
 }
 export function getFavGroups(): FavGroup[] {
   const groups = read<FavGroup[]>(KEYS.favGroups, []);
-  if (!groups.length)
-    return [{ id: "default", name: "默认收藏", ids: getFavorites() }];
-  return groups;
+  // default 组是 getFavorites() 的派生视图（写入路径刻意不落库），必须每次都补回：
+  // 原先只在「存储为空」时补，用户一旦建了自定义分组，默认收藏组就整个消失、
+  // 里面的收藏项无处显示，与 toggleFavorite 维护的列表也对不上
+  return [
+    { id: "default", name: "默认收藏", ids: getFavorites() },
+    ...groups.filter((g) => g.id !== "default"),
+  ];
 }
 export function saveFavGroups(groups: FavGroup[]): void {
   write(KEYS.favGroups, groups);
@@ -416,7 +471,9 @@ export function getInbox(): unknown[] {
 export function pushInbox(item: unknown): void {
   const list = getInbox();
   list.unshift(item);
-  write(KEYS.inbox, list);
+  // 队列长度封顶，与 pushNotify(50)/saveSketch(30) 对齐：离线优先应用里无界增长迟早撑到
+  // localStorage QuotaExceededError
+  write(KEYS.inbox, list.slice(0, 50));
 }
 export function clearInbox(): void {
   write(KEYS.inbox, []);
@@ -480,11 +537,11 @@ export function canPost(): boolean {
   const log = getPostLog();
   const now = Date.now();
   const window = 60 * 1000;
-  const recent = log.filter((t) => now - t < window);
+  const recent = log.filter((ts) => now - ts < window);
   return recent.length < limit;
 }
 export function logPost(): void {
-  const log = getPostLog().filter((t) => Date.now() - t < 60 * 60 * 1000);
+  const log = getPostLog().filter((ts) => Date.now() - ts < 60 * 60 * 1000);
   log.push(Date.now());
   write(KEYS.postLog, log);
 }
@@ -611,11 +668,52 @@ export function exportAll(): string {
   };
   return JSON.stringify(backup, null, 2);
 }
+/** 各 key 期望的容器类型：除 settings 为对象外其余都是数组。 */
+const ARRAY_KEYS = new Set([
+  "letters",
+  "replies",
+  "favorites",
+  "favGroups",
+  "drafts",
+  "blocked",
+  "reported",
+  "postLog",
+  "inbox",
+  "bottles",
+  "wishes",
+  "moodLog",
+  "notify",
+  "sketches",
+]);
+
 export function importAll(json: string): boolean {
-  const data =
-    typeof json === "string"
-      ? (JSON.parse(json) as Record<string, unknown>)
-      : json;
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(json) as Record<string, unknown>;
+  } catch (err) {
+    console.warn("[storage] 导入备份解析失败:", err);
+    return false;
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    console.warn("[storage] 导入备份不是对象:", typeof data);
+    return false;
+  }
+
+  // 备份可能损坏或被篡改：先逐个校验形状再落库，
+  // 否则一个坏文件会被原样写进全部 storage key，把本地数据整体冲掉。
+  // null 视为「该键无数据」（exportAll 用 read(..., null) 作兜底），跳过而非报错。
+  for (const k of Object.keys(KEYS)) {
+    const v = data[k];
+    if (v === undefined || v === null) continue;
+    const ok = ARRAY_KEYS.has(k)
+      ? Array.isArray(v)
+      : typeof v === "object" && !Array.isArray(v);
+    if (!ok) {
+      console.warn("[storage] 导入备份字段形状不符:", k);
+      return false;
+    }
+  }
+
   Object.keys(KEYS).forEach((k) => {
     if (data[k] !== undefined) write(KEYS[k], data[k]);
   });

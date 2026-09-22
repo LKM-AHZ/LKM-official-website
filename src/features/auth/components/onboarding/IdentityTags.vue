@@ -92,6 +92,17 @@ interface TagOption {
   icon?: string;
 }
 
+interface IdentityInitial {
+  grade?: string;
+  majors?: string[];
+  interests?: string[];
+}
+
+// 回填已提交的选择：步骤组件在每次切换时都会被重新挂载（key=flow.step），
+// 若不从父级传入上次的数据，用户点「上一步」回来时选择会被清空，
+// 再点「下一步」就会用空数组覆盖后端已保存的内容。
+const props = defineProps<{ initial?: IdentityInitial | null }>();
+
 const gradeOptions: TagOption[] = [
   { value: "junior_high", labelKey: "onboarding.tags.juniorHigh" },
   { value: "senior_high", labelKey: "onboarding.tags.seniorHigh" },
@@ -169,9 +180,13 @@ const interestOptions: TagOption[] = [
   { value: "chess", labelKey: "onboarding.tags.chess" },
 ];
 
-const selectedGrade = ref("");
-const selectedMajors = ref<string[]>([]);
-const selectedInterests = ref<string[]>([]);
+const selectedGrade = ref(props.initial?.grade ?? "");
+const selectedMajors = ref<string[]>(
+  Array.isArray(props.initial?.majors) ? [...props.initial.majors] : [],
+);
+const selectedInterests = ref<string[]>(
+  Array.isArray(props.initial?.interests) ? [...props.initial.interests] : [],
+);
 
 function toggleMajor(value: string) {
   const idx = selectedMajors.value.indexOf(value);
@@ -193,7 +208,9 @@ function toggleInterest(value: string) {
 
 defineExpose({
   getData: () => ({
-    grade: selectedGrade.value,
+    // 未选年级时给 null 而不是空串：空串与「显式清空」无法区分，父级/后端就分不出
+    // 「跳过」和「选了又取消」（第 1 步是 optional，空值会被直接 saveStep 上报）
+    grade: selectedGrade.value || null,
     majors: [...selectedMajors.value],
     interests: [...selectedInterests.value],
   }),

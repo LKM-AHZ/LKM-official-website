@@ -21,7 +21,6 @@ export interface LoginFlow {
   account: string;
   password: string;
   code: string;
-  txnId: string;
   tempToken: string;
   magicSent: boolean;
   loading: boolean;
@@ -73,14 +72,13 @@ function getApiBase(): string {
  */
 export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
   const store = useAuthStore();
-  const { onSuccess } = options;
+  const { onSuccess, redirect = null } = options;
 
   // ── State ──
   const mode = ref<LoginMode>("password");
   const account = ref("");
   const password = ref("");
   const code = ref("");
-  const txnId = ref("");
   const tempToken = ref("");
   const magicSent = ref(false);
   const loading = ref(false);
@@ -113,11 +111,51 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
     error.value = errorMessageByCode(e);
   }
 
+  /**
+   * store/网络层抛错（非 Result 返回）时的兜底：只有 try/finally 的话异常会
+   * 以未处理拒绝逃出去，error 仍是空，用户看不到任何失败原因。
+   */
+  function failWith(e: unknown, fallbackMsg: string): void {
+    if (e instanceof AppError) {
+      setError(e);
+      return;
+    }
+    setError(
+      new AppError(
+        ErrorCode.NETWORK_ERROR,
+        e instanceof Error && e.message ? e.message : fallbackMsg,
+      ),
+    );
+  }
+
   function succeed(): void {
     error.value = null;
     successMessage.value = t("messages.auth.loginSuccess");
     loggedIn.value = true;
-    if (typeof onSuccess === "function") onSuccess("");
+    // redirect 之前只声明不读，成功一律回调空串；改为把调用方给的目标透给 onSuccess
+    if (typeof onSuccess === "function") onSuccess(redirect ?? "");
+  }
+
+  /**
+   * 登录返回 2FA 要求时的统一处理（密码登录与验证码登录两条入口共用，避免两处漂移）：
+   * 取回 store 暂存的 temp_token、切换模式，需要初始化时走 init2FASetup。
+   * 返回 true 表示已进入 2FA 流程，调用方应直接返回。
+   */
+  async function handle2FARequirement(
+    res: { requires2FA?: boolean; requires2FASetup?: boolean },
+    setupHint?: string,
+  ): Promise<boolean> {
+    if (!res.requires2FA && !res.requires2FASetup) return false;
+    // store 已在进入 2FA 时暂存 temp_token，取回填入 flow
+    tempToken.value = store.getPending2FA() ?? "";
+    if (res.requires2FASetup) {
+      mode.value = "2fa_setup";
+      if (setupHint) successMessage.value = setupHint;
+      await init2FASetup();
+    } else {
+      mode.value = "2fa";
+    }
+    return true;
   }
 
   // ── 密码登录 ──
@@ -130,19 +168,11 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
         setError(r.error);
         return;
       }
-      if (r.value.requires2FA || r.value.requires2FASetup) {
-        // store 已在进入 2FA 时暂存 temp_token，取回填入 flow
-        tempToken.value = store.getPending2FA() ?? "";
-        if (r.value.requires2FASetup) {
-          mode.value = "2fa_setup";
-          successMessage.value = t("messages.auth.passkeyFirstTime2fa");
-          await init2FASetup();
-        } else {
-          mode.value = "2fa";
-        }
+      if (await handle2FARequirement(r.value, t("messages.auth.passkeyFirstTime2fa")))
         return;
-      }
       succeed();
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -161,6 +191,8 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
       codeSent.value = true;
       countdown.start();
       successMessage.value = t("messages.auth.codeSent");
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -176,17 +208,10 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
         setError(r.error);
         return;
       }
-      if (r.value.requires2FA || r.value.requires2FASetup) {
-        tempToken.value = store.getPending2FA() ?? "";
-        if (r.value.requires2FASetup) {
-          mode.value = "2fa_setup";
-          await init2FASetup();
-        } else {
-          mode.value = "2fa";
-        }
-        return;
-      }
+      if (await handle2FARequirement(r.value)) return;
       succeed();
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -227,6 +252,8 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
       }
       magicSent.value = true;
       successMessage.value = t("messages.auth.magicLinkSent");
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -243,6 +270,8 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
         return;
       }
       succeed();
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -270,9 +299,15 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
       }
       const data = complete.value;
       if (data.requires_2fa || data.setup_required) {
-        mode.value = "2fa";
         store.holdPending2FA(data.temp_token ?? null);
         tempToken.value = data.temp_token ?? "";
+        if (data.setup_required) {
+          // 强制设置：必须进入设置流程，否则用户拿不到二维码/密钥（与 submitPassword/submitCode 一致）
+          mode.value = "2fa_setup";
+          await init2FASetup();
+        } else {
+          mode.value = "2fa";
+        }
         return;
       }
       await applyTokenData(data);
@@ -321,15 +356,20 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
         return;
       }
       const data = r.value;
-      if (data.access_token) {
-        store.setTokens(data.access_token, data.refresh_token ?? "");
-        await store.fetchMe();
-        store.persistToStorage();
-        store.clearPending2FA();
+      // 2FA 设置流程（purpose=recovery / admin setup）可能不立即发会话 token：
+      // 没有 token 就不能标记已登录、更不能触发 onSuccess 跳转，只提示「本步完成」，
+      // 由上层 UI 继续引导（与 complete2FASetup 的处理保持一致）
+      if (!data.access_token) {
+        successMessage.value = t("auth.twoFactor.verifyPassed");
+        return;
       }
-      // 2FA 设置流程（purpose=recovery / admin setup）可能不立即发会话 token，
-      // 由上层 UI 另行引导；此处视为步骤完成。
+      store.setTokens(data.access_token, data.refresh_token ?? "");
+      await store.fetchMe();
+      store.persistToStorage();
+      store.clearPending2FA();
       succeed();
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -340,6 +380,8 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
   /** 拉取 otpauth 二维码与密钥（用登录临时令牌调 /2fa/setup/temp）。 */
   async function init2FASetup(): Promise<void> {
     setup_qr_url.value = "";
+    // secret 也要清：流程重启时旧密钥残留会让用户扫到过期二维码
+    setup_secret.value = "";
     setup_recovery_codes.value = [];
     setup_recovery_ready.value = false;
     error.value = null;
@@ -356,6 +398,8 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
       } catch {
         setup_qr_url.value = "";
       }
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -380,11 +424,15 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
       if (data.access_token) {
         store.setTokens(data.access_token, data.refresh_token ?? "");
         await store.fetchMe();
+        // 与 submit2FA/applyTokenData 一致：不落盘的话强制 2FA 会话刷新页面即丢失
+        store.persistToStorage();
         store.clearPending2FA();
       }
       setup_recovery_codes.value = data.recovery_codes ?? [];
       setup_recovery_ready.value = true;
       // 强制设置：先展示恢复码，用户确认保存后再完成登录（避免错过恢复码）
+    } catch (e) {
+      failWith(e, t("messages.operationFailed"));
     } finally {
       loading.value = false;
     }
@@ -412,7 +460,6 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
     account.value = "";
     password.value = "";
     code.value = "";
-    txnId.value = "";
     tempToken.value = "";
     magicSent.value = false;
     codeSent.value = false;
@@ -434,7 +481,6 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
     account,
     password,
     code,
-    txnId,
     tempToken,
     magicSent,
     loading,

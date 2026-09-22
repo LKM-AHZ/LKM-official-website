@@ -52,10 +52,22 @@ export default function InlineInput({
         className="rte-input w-40"
         value={value}
         placeholder={placeholder}
+        // placeholder 不足以保证可访问名，补显式 aria-label
+        aria-label={placeholder ?? t("editor.confirm")}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") handleSubmit();
-          if (e.key === "Escape") onCancel();
+          // 输入框在 ProseMirror 树内：不拦截的话回车/esc 会继续冒泡到编辑器
+          //（插入节点、退出其它 UI），所以消费这两个键时要阻断默认与冒泡
+          if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSubmit();
+          }
+          if (e.key === "Escape") {
+            e.preventDefault();
+            e.stopPropagation();
+            onCancel();
+          }
         }}
       />
       <button

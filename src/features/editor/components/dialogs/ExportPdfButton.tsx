@@ -15,18 +15,52 @@ export function handleExportPdf(editor: Editor): void {
     return;
   }
 
-  printWindow.document.documentElement.innerHTML = `<head><meta charset="utf-8"><title>${t("editor.exportPdfTitle")}</title></head><body><div id="pdf-root"></div></body>`;
+  // 不用 documentElement.innerHTML 覆盖：window.open 的空白页本身已有合法的 head/body，
+  // 整体覆盖既丢结构又引入未转义的模板拼接。标题/meta/容器一律用 DOM API 建。
+  const popupDoc = printWindow.document;
+  popupDoc.title = t("editor.exportPdfTitle");
+  const meta = popupDoc.createElement("meta");
+  meta.setAttribute("charset", "utf-8");
+  popupDoc.head.appendChild(meta);
+  const rootEl = popupDoc.createElement("div");
+  rootEl.id = "pdf-root";
+  popupDoc.body.appendChild(rootEl);
 
-  setTimeout(() => {
-    const rootEl = printWindow.document.getElementById("pdf-root");
-    if (rootEl) {
-      const root = createRoot(rootEl);
-      root.render(createElement(ExportPdfPage, { content }));
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
-    }
-  }, 300);
+  const root = createRoot(rootEl);
+  root.render(createElement(ExportPdfPage, { content }));
+  // 用「等容器真正被填充 + 等字体/图片就绪」替代原先固定的 300/500ms 等待
+  // （React 19 的 root.render 已不再支持完成回调），否则慢设备或大文档会在
+  // React 提交之前、图片未加载时打印出空白/半截 PDF。
+  void waitForContent(rootEl).then(() =>
+    waitForAssets(popupDoc).then(() => {
+      printWindow.focus();
+      printWindow.print();
+    }),
+  );
+}
+
+/** 等 React 把内容挂进容器；5s 上限，超时也继续打印，避免彻底出不了 PDF。 */
+async function waitForContent(rootEl: HTMLElement): Promise<void> {
+  const deadline = Date.now() + 5000;
+  while (rootEl.childElementCount === 0 && Date.now() < deadline) {
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+  }
+}
+
+/** 等弹窗文档的字体与图片就绪（失败/缺资源都立刻 resolve，不阻塞打印）。 */
+async function waitForAssets(doc: Document): Promise<void> {
+  const images = Array.from(doc.images).map(
+    (img) =>
+      new Promise<void>((resolve) => {
+        if (img.complete) {
+          resolve();
+          return;
+        }
+        img.addEventListener("load", () => resolve(), { once: true });
+        img.addEventListener("error", () => resolve(), { once: true });
+      }),
+  );
+  await Promise.all([doc.fonts?.ready ?? Promise.resolve(), ...images]);
 }
 
 interface ExportPdfButtonProps {

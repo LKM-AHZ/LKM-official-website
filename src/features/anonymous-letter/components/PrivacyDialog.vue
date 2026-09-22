@@ -48,8 +48,9 @@
 <script setup lang="ts">
 import { useApp } from "../stores/app";
 import { t } from "~/lib/i18n";
-const _props = defineProps({ modelValue: Boolean });
-const emit = defineEmits(["update:modelValue"]);
+// 类型化声明：v-model 的取值与 emit 载荷都交给 vue-tsc 校验（原先的数组式 emits 不受检）
+defineProps<{ modelValue?: boolean }>();
+const emit = defineEmits<{ "update:modelValue": [value: boolean] }>();
 const { acceptPrivacy } = useApp();
 
 function accept() {

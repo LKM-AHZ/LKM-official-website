@@ -6,8 +6,8 @@
  *
  * 用法：
  *   node scripts/measure-cwv.mjs
- *   node scripts/measure-cwv.mjs --urls=/blog,/editor
- *   node scripts/measure-cwv.mjs --urls=/blog --runs=3
+ *   node scripts/measure-cwv.mjs --urls=/treehole,/editor
+ *   node scripts/measure-cwv.mjs --urls=/treehole --runs=3
  *   node scripts/measure-cwv.mjs --json          # 输出 JSON（供 CI/脚本消费）
  *
  * 指标说明：
@@ -19,8 +19,10 @@ import { parseArgs } from "node:util";
 import { withPreview } from "./lib/start-preview.mjs";
 import { measureLighthouse, medianMetrics } from "./lib/lighthouse-run.mjs";
 
-// 计划定义的关键路径页（index / 博客 / 编辑器 / 树洞 / 论坛）
-// 注：树洞真实路由为 /treehole
+// 默认测量的关键路径页：首页 / 编辑器 / 树洞。
+// 注：/blog 旧路由已删除，/forum 不在默认集内，需要时用 --urls=/forum 指定。
+// 关键页集合各脚本按用途各自维护（check-links 只验内链、lighthouse-budget 只跑预算页），
+// 没有可直接共用的单一列表。
 const DEFAULT_PATHS = ["/", "/editor", "/treehole"];
 
 function parseFlags() {
@@ -49,7 +51,11 @@ function rowFor(m) {
     TTI_ms: m.tti,
     SI_ms: m.si,
     Perf_score: m.perfScore,
-    JS_KiB: m.totalJsBytes != null ? Math.round(m.totalJsBytes / 1024) : null,
+    // medianMetrics 只产出有限数值或 null，用 Number.isFinite 比宽松的 != null 更直白
+    // （也顺带把 NaN 归到「无值」而不是算出 NaN）
+    JS_KiB: Number.isFinite(m.totalJsBytes)
+      ? Math.round(m.totalJsBytes / 1024)
+      : null,
   };
 }
 
@@ -60,13 +66,28 @@ async function main() {
     const out = [];
     for (const p of paths) {
       const url = `${base}${p.startsWith("/") ? p : `/${p}`}`;
-      process.stdout.write(`  测量 ${url} (runs=${runs}) ...\n`);
-      const { runs: raw } = await measureLighthouse(url, { runs });
-      const med = medianMetrics(raw);
-      out.push({ path: p, ...rowFor(med) });
+      // 进度写 stderr：--json 模式下 stdout 必须是纯 JSON，否则消费方 parse 失败
+      process.stderr.write(`  测量 ${url} (runs=${runs}) ...\n`);
+      // 单页失败（Lighthouse 报错 / Chrome 起不来 / 页面崩溃）不能中断整轮：
+      // 已测到的那几页要能出表，失败页单独记 error
+      try {
+        const { runs: raw } = await measureLighthouse(url, { runs });
+        const med = medianMetrics(raw);
+        out.push({ path: p, ...rowFor(med) });
+      } catch (err) {
+        const message = String(err?.message ?? err);
+        process.stderr.write(`  ${url} 测量失败: ${message}\n`);
+        out.push({ path: p, error: message });
+      }
     }
     return out;
   });
+
+  // 一页都没测到（例如 Chrome 缺失）时不能静默产出全 "-" 的表当成成功
+  if (all.every((r) => r.error)) {
+    process.stderr.write("所有页面测量失败，无可用指标\n");
+    process.exit(1);
+  }
 
   if (json) {
     process.stdout.write(`${JSON.stringify(all, null, 2)}\n`);

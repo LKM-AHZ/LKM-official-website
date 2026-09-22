@@ -16,7 +16,14 @@ export const POST_PERMALINK_PATTERN = trimSlash(
 );
 
 export const getCanonical = (path = ""): string | URL => {
-  const url = String(new URL(path, SITE.site));
+  let url: string;
+  try {
+    url = String(new URL(path, SITE.site));
+  } catch {
+    // 畸形 path 或 SITE.site 为空/非法时 new URL 会抛 TypeError。
+    // 本函数在关键渲染路径上（Metadata.astro 直接取用），不接住会整页渲染失败。
+    return String(path);
+  }
   if (SITE.trailingSlash == false && path && url.endsWith("/")) {
     return url.slice(0, -1);
   } else if (SITE.trailingSlash == true && path && !url.endsWith("/")) {
@@ -45,6 +52,8 @@ export const cleanSlug = (text = ""): string =>
   trimSlash(text)
     .split("/")
     .map((slug) => slugify(slug))
+    // 连续斜杠或纯符号段 slugify 后会变成空串，不过滤就会出现 "a//b"、"/" 这类畸形 permalink
+    .filter((slug) => !!slug)
     .join("/");
 
 type MenuHref = { type?: BuildPermalinkOptions["type"]; url?: string };

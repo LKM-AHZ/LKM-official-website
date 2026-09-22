@@ -56,7 +56,7 @@ export const communitySidebarLinks: CommunitySidebarLink[] = [
 export const userSidebarLinks: CommunitySidebarLink[] = [
   {
     text: "nav.profile",
-    href: getPermalink("/profile"),
+    href: getPermalink("/account"),
     icon: "material-symbols:person-outline",
   },
   {

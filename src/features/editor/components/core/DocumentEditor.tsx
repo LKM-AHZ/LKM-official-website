@@ -355,9 +355,16 @@ export default function DocumentEditor({
           .setTextSelection(Math.max(0, cand.from + cand.label.length))
           .run();
       } else {
-        // wiki 的 href 需实时查已发布索引（slug 贯通后不再 cast）
-        const docList = await Promise.resolve(adapter.listDocuments());
-        const docs = docList.map((d) => ({ title: d.title, slug: d.slug }));
+        // wiki 的 href 需实时查已发布索引（slug 贯通后不再 cast）。
+        // 索引读取失败不能把整个转换打断：本函数由 update 事件监听器 await，
+        // rejection 没有接管方，退回候选自带的 href 继续转换
+        let docs: { title: string; slug?: string }[] = [];
+        try {
+          const docList = await Promise.resolve(adapter.listDocuments());
+          docs = docList.map((d) => ({ title: d.title, slug: d.slug }));
+        } catch (err) {
+          console.warn("[DocumentEditor] 读取文档索引失败，回退 href:", err);
+        }
         const href = wikiHref(cand.label, () => docs) || cand.href;
         editor
           .chain()
@@ -625,6 +632,9 @@ export default function DocumentEditor({
       editor
         .chain()
         .focus()
+        // 标记必须落在与线程相同的区间上：只标记当前选区会让落库的 range
+        // 与高亮位置不一致，后续点击高亮/恢复会定位到别的文本
+        .setTextSelection({ from, to })
         .setMark("commentMark", { threadId, resolved: "false" })
         .run();
       adapter.addThread(docId, { from, to }, text);
@@ -753,9 +763,14 @@ export default function DocumentEditor({
           );
           if (saved.isErr()) {
             console.warn("[DocumentEditor] 发布前保存失败:", saved.error);
-            window.alert(t("editor.mdxParseError"));
+            // 这里是写 series 仓库失败，不是 MDX 解析失败：报 mdxParseError 会误导用户去改正文
+            window.alert(saved.error.message || t("editor.mdxParseError"));
             return;
           }
+          // 文件已在 series 内落盘，把 docId 固定成这个 filepath（git-persistence 的 docId 即 filepath），
+          // 否则后续 autosave/再次发布仍按 docId==="new" 从标题重新派生 slug，
+          // 标题或 slug 一变就会写出第二个文件
+          setDocId(filepath);
         }
 
         const result = await blogApi.publishSeriesFile(seriesId, filepath, {
@@ -963,6 +978,9 @@ export default function DocumentEditor({
                 position={slashPos}
                 onClose={() => setSlashOpen(false)}
                 onSelect={() => setSlashOpen(false)}
+                // AI 条目原先只有空 action：选中后菜单关闭但什么都没发生。
+                // 这里接上 AI 面板（AiAssistant 暂不支持按操作预设，故 intent 不向下传）
+                onAiRequest={() => setAiPanelOpen(true)}
               />
             )}
             <EditorContent editor={editor} />
@@ -1080,27 +1098,29 @@ export default function DocumentEditor({
               return;
             }
             // 选图是异步的，期间用户/光标可能位移，不能用探测时存死的绝对区间。
-            // 依据原始 `![[文件名]]` 串在「当前文档全文」中重新定位（从原 from 向后找），
-            // 找不到则回退到存储区间（若该区间当前仍是 `![[...]]` 文本）。
+            // 依据原始 `![[文件名]]` 串在文档中重新定位：必须逐个文本节点取绝对位置，
+            // doc.textBetween 拼出的全文在块之间没有分隔符，其字符偏移与 pos 会错位，
+            // 直接拿偏移当 pos 传给 setTextSelection 会在多块文档里替换到错误位置。
             void (async () => {
-              const fullText = editor.state.doc.textBetween(
+              const hits: number[] = [];
+              editor.state.doc.nodesBetween(
                 0,
                 editor.state.doc.content.size,
+                (node, pos) => {
+                  if (!node.isText) return true;
+                  const idx = (node.text ?? "").indexOf(pending.syntax);
+                  if (idx >= 0) hits.push(pos + idx);
+                  return true;
+                },
               );
-              const probeFrom = Math.min(
-                Math.max(pending.from, 0),
-                fullText.length,
-              );
-              let index = fullText.indexOf(pending.syntax, probeFrom);
-              if (index === -1) {
-                // 兜底：从更前的位置向后找一次（光标向前移过的情况）
-                index = fullText.indexOf(pending.syntax);
-              }
+              // 优先取原位之后的第一处（光标向前移过的情况），否则回退到最前一处
+              const hit =
+                hits.find((p) => p >= pending.from) ?? hits[0] ?? null;
               let from = pending.from;
               let to = pending.to;
-              if (index !== -1) {
-                from = index;
-                to = index + pending.syntax.length;
+              if (hit !== null) {
+                from = hit;
+                to = hit + pending.syntax.length;
               }
               if (from < 0 || to > editor.state.doc.content.size || from >= to)
                 return;

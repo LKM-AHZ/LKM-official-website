@@ -72,24 +72,36 @@ async function save(): Promise<void> {
     action: action.value,
     weight: weight.value,
   };
-  const result = await mfa.run(async () =>
-    editing.value
-      ? moderationApi.updateRule(editing.value.id, input)
-      : moderationApi.createRule(input),
-  );
-  if (result === null) return;
-  formOpen.value = false;
-  message.value = t("admin.saved");
-  await load();
+  try {
+    const result = await mfa.run(async () =>
+      editing.value
+        ? moderationApi.updateRule(editing.value.id, input)
+        : moderationApi.createRule(input),
+    );
+    if (result === null) return; // 用户取消 2FA
+    formOpen.value = false;
+    message.value = t("admin.saved");
+    await load();
+  } catch (e) {
+    // mfa.run 会把非 AdminMFARequiredError 的异常抛出来（校验失败/409/网络错误），
+    // 不接住就是未处理的 rejection，且界面毫无反馈
+    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
+  }
 }
 
 async function removeRule(id: string): Promise<void> {
   deletingId.value = id;
-  const result = await mfa.run(async () => moderationApi.deleteRule(id));
-  deletingId.value = null;
-  if (result === null) return;
-  message.value = t("admin.deleted");
-  await load();
+  try {
+    const result = await mfa.run(async () => moderationApi.deleteRule(id));
+    if (result === null) return; // 用户取消 2FA
+    message.value = t("admin.deleted");
+    await load();
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : t("admin.loadFailed");
+  } finally {
+    // 失败时也必须复位，否则该行删除按钮会一直处于禁用态直到刷新页面
+    deletingId.value = null;
+  }
 }
 
 async function testRules(): Promise<void> {

@@ -302,6 +302,20 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
   const [imageOpen, setImageOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const mobileBarRef = useRef<HTMLDivElement>(null);
+  const moreBtnRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  // 本组件被 memo 包裹且 editor 引用稳定，选区/内容变化不会触发重渲染，
+  // isActive 会停留在挂载或上次点击时的状态。订阅 editor 事务并用 tick 参与 memo 依赖，
+  // 按钮高亮与移动端自动滚动才能跟随光标。
+  const [renderTick, setRenderTick] = useState(0);
+  useEffect(() => {
+    const rerender = (): void => setRenderTick((n) => n + 1);
+    editor.on("transaction", rerender);
+    return () => {
+      editor.off("transaction", rerender);
+    };
+  }, [editor]);
 
   const dispatchAction = useCallback(
     (item: ToolbarItemDef) => {
@@ -320,19 +334,42 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
       } else {
         item.action(editor);
       }
+      // 移动端「更多」菜单：执行完动作要收起，否则弹层一直盖住正文
+      setMoreOpen(false);
     },
     [editor],
   );
 
-  // 移动端：当前激活按钮变化时自动滚动到可视区域（rAF 防抖）
+  // 「更多」菜单的收起：点击触发器/菜单以外的区域或按 Escape 都要关
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onPointerDown = (e: MouseEvent): void => {
+      const target = e.target as Node;
+      // 触发器与菜单是两个容器（见下方布局注释），都算「内部」
+      if (
+        moreBtnRef.current?.contains(target) ||
+        moreMenuRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setMoreOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") setMoreOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [moreOpen]);
+
+  // 移动端：当前激活按钮变化时自动滚动到可视区域（rAF + 卸载时取消上一次）
   useEffect(() => {
     const bar = mobileBarRef.current;
     if (!bar || window.innerWidth >= 768) return;
-    let raf: number | null = null;
-    let pending = false;
     const scrollActive = (): void => {
-      if (!pending) return;
-      pending = false;
       const activeBtn = bar.querySelector(".is-active") as HTMLElement | null;
       if (activeBtn) {
         activeBtn.scrollIntoView({
@@ -342,11 +379,8 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
         });
       }
     };
-    pending = true;
-    raf = requestAnimationFrame(scrollActive);
-    return () => {
-      if (raf !== null) cancelAnimationFrame(raf);
-    };
+    const raf = requestAnimationFrame(scrollActive);
+    return () => cancelAnimationFrame(raf);
   }, [editor.state.selection]);
 
   const desktopContent = useMemo(
@@ -372,7 +406,7 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
           </div>
         );
       }),
-    [editor, dispatchAction],
+    [editor, dispatchAction, renderTick],
   );
 
   const mobileContent = useMemo(
@@ -398,7 +432,7 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
           </div>
         );
       }),
-    [editor, dispatchAction],
+    [editor, dispatchAction, renderTick],
   );
 
   const moreItems = useMemo(
@@ -422,11 +456,11 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
           </div>
         </div>
       )),
-    [editor, dispatchAction],
+    [editor, dispatchAction, renderTick],
   );
 
   return (
-    <div className="rte-toolbar">
+    <div className="rte-toolbar relative">
       <div className="hidden md:flex flex-wrap items-center gap-x-1 gap-y-0.5 p-2">
         {desktopContent}
       </div>
@@ -436,21 +470,29 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
         className="flex md:hidden items-center gap-x-0.5 p-1.5 overflow-x-auto scrollbar-none"
       >
         {mobileContent}
-        <div className="relative shrink-0">
+        <div ref={moreBtnRef} className="relative shrink-0">
           <button
             type="button"
             className={`rte-btn rte-btn--ghost rte-btn--sm gap-1 ${moreOpen ? "is-active" : ""}`}
+            aria-label={t("common.more")}
+            aria-haspopup="true"
+            aria-expanded={moreOpen}
             onClick={() => setMoreOpen(!moreOpen)}
           >
             {icon16("lucide:ellipsis")}
           </button>
-          {moreOpen && (
-            <div className="absolute top-full right-0 mt-1 z-40 bg-page-bg border border-surface-3 rounded-lg shadow-lg p-2 min-w-[200px] rte-dropdown">
-              {moreItems}
-            </div>
-          )}
         </div>
       </div>
+      {/* 「更多」菜单必须是滚动容器的兄弟节点：父级 overflow-x-auto 会把 overflow-y 也算成
+          auto，菜单留在里面会被裁剪/跟着横滚，浮不到工具栏下方 */}
+      {moreOpen && (
+        <div
+          ref={moreMenuRef}
+          className="absolute top-full right-2 mt-1 z-40 bg-page-bg border border-surface-3 rounded-lg shadow-lg p-2 min-w-[200px] rte-dropdown md:hidden"
+        >
+          {moreItems}
+        </div>
+      )}
       {mathDraft && (
         <MathEditor
           initialLatex={mathDraft.initialLatex}

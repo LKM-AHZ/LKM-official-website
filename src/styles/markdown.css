@@ -11,8 +11,12 @@
     h4,
     h5,
     h6 {
+      /* 锚点跳转时给 sticky header 留出偏移，否则标题会落在固定头下面 */
+      scroll-margin-top: 5rem;
+
       .anchor {
-        @apply transition -m-0.5 ml-[0.2ch] p-0.5 select-none opacity-0 no-underline;
+        /* focus-visible 也要显示：否则键盘 Tab 会停在看不见的链接上 */
+        @apply transition -m-0.5 ml-[0.2ch] p-0.5 select-none opacity-0 no-underline focus-visible:opacity-100;
 
         .anchor-icon {
           margin-left: 0.45ch !important;
@@ -32,7 +36,9 @@
         underline decoration-[var(--link-underline)] decoration-1 decoration-dashed underline-offset-4;
       box-decoration-break: clone;
       -webkit-box-decoration-break: clone;
-      display: inline-block;
+      /* 不加 display:inline-block：那会把整条链接变成原子行内盒，长链接不再换行，
+         hover 时新增的 border-bottom 还会撑高行盒让下方内容跳动；
+         box-decoration-break: clone 已能让虚线下划线按行片段渲染 */
 
       &:hover,
       &:active {
@@ -46,16 +52,9 @@
     code {
       @apply bg-[var(--inline-code-bg)] text-[var(--inline-code-color)] px-1 py-0.5 rounded-md overflow-hidden;
 
-      font-family:
-        "JetBrains Mono Variable",
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        Liberation Mono,
-        Courier New,
-        monospace;
+      /* 与 tailwind 的 --font-mono 同源（原写的 "JetBrains Mono Variable" 从未注册，
+         实际族名是 "JetBrains Mono"） */
+      font-family: var(--font-mono);
       &:before {
         content: none;
       }
@@ -84,15 +83,18 @@
     .expressive-code .copy {
       opacity: 0;
       transition: opacity 0.2s ease;
+      /* 键盘 Tab 到复制按钮时也要可见 */
+      &:focus-within {
+        opacity: 1;
+      }
     }
 
     /* EC code block header */
     .expressive-code figcaption.header {
       background: oklch(0.15 0.02 var(--hue)) !important;
       color: oklch(0.95 0.01 var(--hue));
-      font-family:
-        "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco,
-        Consolas, "Liberation Mono", "Courier New", monospace;
+      /* 与 tailwind 的 --font-mono 同源（原栈首项 "JetBrains Mono Variable" 从未注册） */
+      font-family: var(--font-mono);
       font-size: 0.8125rem;
       font-weight: 500;
       padding: 0.45rem 1rem;
@@ -118,12 +120,11 @@
         2.7rem 0 0 oklch(0.62 0.18 145);
     }
 
-    /* Dark mode header */
-    @media (prefers-color-scheme: dark) {
-      .expressive-code figcaption.header {
-        background: oklch(0.14 0.01 var(--hue)) !important;
-        color: oklch(0.88 0.01 var(--hue));
-      }
+    /* 深色主题 header：项目用 .dark 类切换（tailwind.css 的 @custom-variant dark），
+       用 prefers-color-scheme 会让应用内主题开关对代码块标题栏无效 */
+    .dark & .expressive-code figcaption.header {
+      background: oklch(0.14 0.01 var(--hue)) !important;
+      color: oklch(0.88 0.01 var(--hue));
     }
 
     ul,

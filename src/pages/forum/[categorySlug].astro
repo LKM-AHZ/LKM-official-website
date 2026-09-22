@@ -12,7 +12,13 @@ const { categorySlug } = Astro.params;
 
 // 板块详情：从后端解析真实板块（按 slug），并拉取其统一内容（讨论/官方/专栏/博客）
 const boardsRes = await contentApi.listBoards();
-let boards: BoardItem[] = boardsRes.isOk() ? (boardsRes.value?.items ?? []) : [];
+if (boardsRes.isErr()) {
+  // 后端/传输失败不能伪装成「板块不存在」而被重定向回 /forum：
+  // 先记日志，再以 500 暴露，避免宕机与空数据无法区分
+  console.error("[forum/[categorySlug]] listBoards 失败:", boardsRes.error);
+  throw new Error(String(boardsRes.error));
+}
+const boards: BoardItem[] = boardsRes.value?.items ?? [];
 const board = boards.find((b) => b.slug === categorySlug);
 
 if (!board) {
@@ -25,20 +31,26 @@ const boardIds = board.parent_id == null
   ? [board.id, ...children.map((c) => c.id)]
   : [board.id];
 
-// 拉统一内容（这里全量拉第一页，后续可加内容体裁 Tab 分类）
-let allItems: ContentItem[] = [];
-for (const bid of boardIds) {
-  const res = await contentApi.listItems({ board_id: bid, limit: 50 });
-  if (res.isOk()) {
-    allItems = allItems.concat(res.value.items ?? []);
-  }
-}
+// 拉统一内容（这里全量拉第一页，后续可加内容体裁 Tab 分类）。
+// 用 Promise.all 并发：串行 await 会让 SSR 延迟随子板块数量线性增长
+const itemResults = await Promise.all(
+  boardIds.map((bid) => contentApi.listItems({ board_id: bid, limit: 50 })),
+);
+const allItems: ContentItem[] = itemResults.flatMap((res) =>
+  res.isOk() ? (res.value.items ?? []) : [],
+);
 
-// 排序：置顶优先，其次按创建时间降序
+/** 时间戳：缺失/非法一律回退 0，避免比较器返回 NaN 导致排序不确定 */
+const toTs = (value: unknown): number => {
+  const ts = typeof value === "string" ? Date.parse(value) : NaN;
+  return Number.isFinite(ts) ? ts : 0;
+};
+
+// 排序：置顶优先，其次按创建时间降序（比较器不得返回 NaN）
 allItems.sort((a, b) => {
   if (a.is_pinned && !b.is_pinned) return -1;
   if (!a.is_pinned && b.is_pinned) return 1;
-  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  return toTs(b.created_at) - toTs(a.created_at);
 });
 
 const boardTitle = board.title;
@@ -53,7 +65,8 @@ const hotItems = allItems
     if ((a.is_pinned || a.is_featured) !== (b.is_pinned || b.is_featured)) {
       return a.is_pinned || a.is_featured ? -1 : 1;
     }
-    return b.view_count - a.view_count;
+    // 浏览数可能缺失：直接相减会得到 NaN 让排序结果依赖引擎实现
+    return (b.view_count ?? 0) - (a.view_count ?? 0);
   })
   .slice(0, 6);
 

@@ -35,22 +35,21 @@ pnpm dev
 
 ## 常用命令
 
-| 命令                 | 用途                                        |
-| -------------------- | ------------------------------------------- |
-| `pnpm dev`           | 启动开发服务器                              |
-| `pnpm dev:clean`     | 清理 Vite 缓存后启动                        |
-| `pnpm build`         | 生成图标与 i18n 数据、构建 SSR 产物并预压缩 |
-| `pnpm preview`       | 本地预览构建结果                            |
-| `pnpm check`         | Astro、ESLint、Prettier、重复代码检查       |
-| `pnpm fix`           | 自动修复 ESLint 与 Prettier                 |
-| `pnpm test`          | Vitest 单元测试                             |
-| `pnpm test:security` | 安全测试项目                                |
-| `pnpm test:auth`     | 认证模块测试                                |
-| `pnpm test:smoke`    | Playwright 路由冒烟测试                     |
-| `pnpm test:a11y`     | Playwright 无障碍测试                       |
-| `pnpm check:seo`     | 构建产物 SEO 检查                           |
-| `pnpm check:links`   | 内部链接检查                                |
-| `pnpm check:budget`  | Bundle 预算检查                             |
+| 命令                | 用途                                        |
+| ------------------- | ------------------------------------------- |
+| `pnpm dev`          | 启动开发服务器                              |
+| `pnpm dev:clean`    | 清理 Vite 缓存后启动                        |
+| `pnpm build`        | 生成图标与 i18n 数据、构建 SSR 产物并预压缩 |
+| `pnpm preview`      | 本地预览构建结果                            |
+| `pnpm check`        | Astro、ESLint、Prettier、重复代码检查       |
+| `pnpm fix`          | 自动修复 ESLint 与 Prettier                 |
+| `pnpm test`         | Vitest 单元测试                             |
+| `pnpm test:auth`    | 认证模块测试                                |
+| `pnpm test:smoke`   | Playwright 路由冒烟测试                     |
+| `pnpm test:a11y`    | Playwright 无障碍测试                       |
+| `pnpm check:seo`    | 构建产物 SEO 检查                           |
+| `pnpm check:links`  | 内部链接检查                                |
+| `pnpm check:budget` | Bundle 预算检查                             |
 
 ## 当前路由
 

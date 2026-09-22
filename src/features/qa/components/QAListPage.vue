@@ -43,13 +43,13 @@
             <span
               class="text-xs px-1.5 py-0.5 rounded-full font-medium"
               :class="
-                q.status !== 'open'
+                q.status === 'accepted'
                   ? 'bg-green-100 dark:bg-green-950/30 text-green-500'
                   : 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-500'
               "
             >
               {{
-                q.status !== "open"
+                q.status === "accepted"
                   ? t("page.qa.resolved")
                   : t("page.qa.unresolved")
               }}
@@ -118,9 +118,12 @@ const tabs = [
   { key: "volunteer" as const, label: "page.qa.tabVolunteer" },
 ];
 
+// 首页固定取 50 条；列表目前没有分页 UI，超出的问题暂时看不到（要支持时按 total/hasMore 加「加载更多」）
+const PAGE_SIZE = 50;
+
 async function load() {
   loading.value = true;
-  questions.value = await qaApi.listQuestions(activeTab.value, 1, 50);
+  questions.value = await qaApi.listQuestions(activeTab.value, 1, PAGE_SIZE);
   loading.value = false;
 }
 

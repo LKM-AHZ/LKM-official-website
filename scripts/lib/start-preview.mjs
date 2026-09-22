@@ -4,7 +4,7 @@
  * 因此 SEO / 链接检查脚本通过本 helper 走 HTTP。
  *
  * 使用随机空闲端口避免连续调用（脚本串行/CI 并行）时的端口冲突，
- * 并以独立进程组启动/终止，确保 preview 及其子进程被完全清理。
+ * 并在结束时向 preview 子进程发信号清理。
  */
 import { spawn } from "node:child_process";
 import net from "node:net";
@@ -31,7 +31,11 @@ function getFreePort() {
 
 async function isReady(url) {
   try {
-    const res = await fetch(url);
+    // 必须带超时：TCP 已建立但对端不响应时，无超时的 fetch 会悬挂，
+    // 让 60s 的就绪等待实际无限延长
+    const res = await fetch(url, { signal: AbortSignal.timeout(5_000) });
+    // 这里刻意保留 <500 的宽松判定：站点可能配置了 base 子路径（PUBLIC_BASE_PATH），
+    // 此时根路径 / 返回 404，若收紧到 2xx/3xx 会把正常服务判成「未就绪」
     return res.status < 500;
   } catch {
     return false;
@@ -39,15 +43,13 @@ async function isReady(url) {
 }
 
 function killTree(child) {
-  try {
-    if (child.pid) process.kill(-child.pid, "SIGTERM");
-  } catch {
-    // 进程组可能已退出
-  }
+  // child 是 detached:false 启动的、与父进程同属一个进程组，
+  // 因此 process.kill(-pid) 只会拿到 ESRCH（被静默吞掉），
+  // 若恰好存在同号的无关进程组反而会误杀，故只终止 child 本身。
   try {
     child.kill("SIGTERM");
   } catch {
-    // ignore
+    // 进程可能已退出
   }
   child.stdout?.destroy();
   child.stderr?.destroy();
@@ -56,6 +58,8 @@ function killTree(child) {
 /**
  * 在 preview 服务存活期间执行 callback。
  * @param {(base: string) => Promise<void>} callback
+ * @param {number} [preferredPort] 指定端口；该端口上若已有可响应的服务则直接复用，
+ *   否则在此端口上启动新实例（不传则随机取一个空闲端口）
  */
 export async function withPreview(callback, preferredPort) {
   const port = preferredPort ?? (await getFreePort());
@@ -84,7 +88,9 @@ export async function withPreview(callback, preferredPort) {
     "entry.mjs",
   );
   const child = spawn(process.execPath, [entry], {
-    stdio: ["ignore", "pipe", "pipe"],
+    // stdout 必须丢弃：旧实现 pipe 但无人读取，standalone 服务日志一旦写满
+    // 管道缓冲区（~64KiB）子进程就会卡在写 stdout 上，表现为「服务起不来」
+    stdio: ["ignore", "ignore", "pipe"],
     detached: false,
     env: { ...process.env, PORT: String(port), HOST: "127.0.0.1" },
   });
@@ -92,13 +98,19 @@ export async function withPreview(callback, preferredPort) {
   const deadline = Date.now() + READY_TIMEOUT_MS;
   let ready = false;
   let stderrBuf = "";
+  let spawnError = null;
   child.stderr?.on("data", (d) => {
     stderrBuf += String(d);
     if (stderrBuf.length > 4000) stderrBuf = stderrBuf.slice(-4000);
   });
+  // spawn 失败（entry 不存在/EACCES）时 child.pid 为 undefined 且 exitCode 永远是 null，
+  // 不监听 error 就会白等满 60s 并报出误导性的「未就绪」。
+  child.on("error", (err) => {
+    spawnError = err;
+  });
 
   while (Date.now() < deadline) {
-    if (child.exitCode !== null) break;
+    if (spawnError || child.exitCode !== null) break;
     if (await isReady(base)) {
       ready = true;
       break;
@@ -108,6 +120,9 @@ export async function withPreview(callback, preferredPort) {
 
   if (!ready) {
     killTree(child);
+    if (spawnError) {
+      throw new Error(`Astro preview 启动失败: ${spawnError.message}`);
+    }
     throw new Error(
       `Astro preview 未就绪（端口 ${port}）: ${stderrBuf.trim().split("\n").pop()}`,
     );

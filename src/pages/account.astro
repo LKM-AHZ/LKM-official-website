@@ -7,5 +7,9 @@ const metadata = { title: t('page.accountTitle') };
 ---
 
 <PageLayout metadata={metadata}>
-  <div style="min-height: 400px"><SettingsPage client:load /></div>
+  <!-- client:only：站点是 output:"server"，但 Pinia 的初始状态是 anonymous、
+       要等 onMounted 才 restoreAndValidate。用 client:load 会让服务端先渲染出
+       「需要登录」面板，已登录用户每次进入都会看到它闪一下。
+       min-height 占位保留，避免水合前后高度跳变。 -->
+  <div class="min-h-[400px]"><SettingsPage client:only="vue" /></div>
 </PageLayout>

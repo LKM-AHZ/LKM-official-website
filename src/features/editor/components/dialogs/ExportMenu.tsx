@@ -15,15 +15,24 @@ export default function ExportMenu({ editor }: ExportMenuProps): ReactElement {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // 点击外部关闭菜单
+  // 点击外部关闭菜单；Esc 也要能关闭，否则键盘用户只能靠点别处退出
   useEffect(() => {
     const handler = (e: MouseEvent): void => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    if (open) {
+      document.addEventListener("mousedown", handler);
+      document.addEventListener("keydown", onKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [open]);
 
   return (
@@ -33,6 +42,8 @@ export default function ExportMenu({ editor }: ExportMenuProps): ReactElement {
         className={`rte-btn rte-btn--ghost rte-btn--xs gap-1 ${open ? "is-active" : ""}`}
         onClick={() => setOpen(!open)}
         title={t("editor.export")}
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +108,7 @@ export default function ExportMenu({ editor }: ExportMenuProps): ReactElement {
             type="button"
             className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded hover:bg-surface-3/50 transition-colors"
             onClick={() => {
-              handleExportDocx(editor);
+              void handleExportDocx(editor);
               setOpen(false);
             }}
           >

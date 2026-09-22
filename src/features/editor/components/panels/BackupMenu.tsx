@@ -1,10 +1,47 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { ReactElement } from "react";
-import type { PersistenceAdapter, BackupEntry } from "../../engine/types";
+import type {
+  PersistenceAdapter,
+  BackupEntry,
+  DocumentData,
+  DocumentSummary,
+} from "../../engine/types";
 import { t } from "~/lib/i18n";
 
 interface BackupMenuProps {
   adapter: PersistenceAdapter;
+}
+
+interface ImportedDoc {
+  docId: string;
+  /** 兼容只带 id 的旧版导出 */
+  id?: string;
+  title: string;
+  contentMdx: string;
+  editorJson: unknown;
+  status: string;
+  version: number;
+  timestamp: string;
+}
+
+const IMPORT_STATUS = new Set(["draft", "published", "archived"]);
+
+/**
+ * 校验单条导入记录。备份文件可能损坏或被手工改过，形状不符的条目
+ * 会被原样写进持久层并喂给编辑器（status/version 下面都是硬 cast），
+ * 因此整份文件先逐条校验、有一条不合法就拒绝导入。
+ */
+function isImportableDoc(d: unknown): d is ImportedDoc {
+  if (!d || typeof d !== "object") return false;
+  const o = d as Record<string, unknown>;
+  const id = o.docId ?? o.id;
+  if (typeof id !== "string" || !id) return false;
+  if (typeof o.title !== "string") return false;
+  if (typeof o.contentMdx !== "string") return false;
+  if (o.status !== undefined && !IMPORT_STATUS.has(String(o.status)))
+    return false;
+  if (o.version !== undefined && typeof o.version !== "number") return false;
+  return true;
 }
 
 export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
@@ -31,23 +68,25 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
       alert(t("editor.backup.noDocsToExport"));
       return;
     }
-    const fullDocs = [];
-    for (const meta of docs) {
-      const doc = await Promise.resolve(adapter.loadDocument(meta.id));
-      fullDocs.push(
-        doc || {
-          id: meta.id,
-          title: meta.title,
-          contentMdx: "",
-          editorJson: null,
-          status: meta.status,
-          version: meta.version,
-          lastModified: meta.lastModified,
-          createdAt: "",
-          updatedAt: "",
-        },
-      );
-    }
+    // 标注类型避免退化成 any[]；各文档相互独立，并行加载而不是逐个 await
+    const fullDocs: DocumentData[] = await Promise.all(
+      docs.map(async (meta) => {
+        const doc = await Promise.resolve(adapter.loadDocument(meta.id));
+        return (
+          doc || {
+            id: meta.id,
+            title: meta.title,
+            contentMdx: "",
+            editorJson: null,
+            status: meta.status,
+            version: meta.version,
+            lastModified: meta.lastModified,
+            createdAt: "",
+            updatedAt: "",
+          }
+        );
+      }),
+    );
     // 导出必须写出 docId：导入侧读的就是 doc.docId，剥掉 id 又不起别名会让
     // 再导入时 id 变成 undefined，静默生成一批不可见的重复文档
     const json = JSON.stringify(
@@ -74,22 +113,22 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      // 清空 value：否则导入失败/取消后再选同一个文件不会触发 change
+      e.target.value = "";
       const reader = new FileReader();
+      // 读取失败（文件损坏/被移动）要有反馈，不能静默什么都不发生
+      reader.onerror = (): void => {
+        alert(t("editor.backup.formatError"));
+      };
       reader.onload = async () => {
-        let data: Array<{
-          docId: string;
-          /** 兼容只带 id 的旧版导出 */
-          id?: string;
-          title: string;
-          contentMdx: string;
-          editorJson: unknown;
-          status: string;
-          version: number;
-          timestamp: string;
-        }>;
+        let data: ImportedDoc[];
         try {
           const parsed = JSON.parse(reader.result as string);
           if (!Array.isArray(parsed)) {
+            alert(t("editor.backup.invalidJsonFormat"));
+            return;
+          }
+          if (!parsed.every(isImportableDoc)) {
             alert(t("editor.backup.invalidJsonFormat"));
             return;
           }
@@ -109,7 +148,14 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
           alert(t("editor.backup.invalidJsonNoDocs"));
           return;
         }
-        const existing = await Promise.resolve(adapter.listDocuments());
+        // listDocuments 可能 reject：onload 是 async 回调，漏出去会变成未处理的 rejection
+        let existing: DocumentSummary[];
+        try {
+          existing = await Promise.resolve(adapter.listDocuments());
+        } catch {
+          alert(t("editor.backup.formatError"));
+          return;
+        }
         if (existing.length > 0) {
           if (
             !confirm(
@@ -123,32 +169,48 @@ export default function BackupMenu({ adapter }: BackupMenuProps): ReactElement {
           }
         }
         let imported = 0;
-        for (const doc of data) {
-          const docId = doc.docId || doc.id;
-          if (!docId) continue;
-          await adapter.saveDocument({
-            id: docId,
-            title: doc.title,
-            contentMdx: doc.contentMdx,
-            editorJson: doc.editorJson as Record<string, unknown>,
-            status:
-              (doc.status as "draft" | "published" | "archived") || "draft",
-            version: doc.version || 1,
-            lastModified: doc.timestamp || new Date().toISOString(),
-            createdAt: doc.timestamp || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-          await Promise.resolve(
-            adapter.createBackup(docId, {
-              docId,
+        try {
+          for (const doc of data) {
+            const docId = doc.docId || doc.id;
+            if (!docId) continue;
+            // saveDocument/createBackup 失败时返回 false（本地适配器不 reject），
+            // 不看返回值会把「只写进去一部分」当成导入成功并刷新页面
+            const saved = await adapter.saveDocument({
+              id: docId,
               title: doc.title,
               contentMdx: doc.contentMdx,
-              editorJson: doc.editorJson,
-              status: doc.status,
-              version: doc.version,
+              editorJson: doc.editorJson as Record<string, unknown>,
+              status:
+                (doc.status as "draft" | "published" | "archived") || "draft",
+              version: doc.version || 1,
+              lastModified: doc.timestamp || new Date().toISOString(),
+              createdAt: doc.timestamp || new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+            if (saved === false) throw new Error(`saveDocument 失败: ${docId}`);
+            const backed = await Promise.resolve(
+              adapter.createBackup(docId, {
+                docId,
+                title: doc.title,
+                contentMdx: doc.contentMdx,
+                editorJson: doc.editorJson,
+                status: doc.status,
+                version: doc.version,
+              }),
+            );
+            if (backed === false) throw new Error(`createBackup 失败: ${docId}`);
+            imported += 1;
+          }
+        } catch (err) {
+          alert(
+            t("editor.persistence.importJsonFailed", {
+              message:
+                err instanceof Error
+                  ? err.message
+                  : t("editor.backup.formatError"),
             }),
           );
-          imported += 1;
+          return;
         }
         alert(t("editor.backup.importSuccess", { count: imported }));
         window.location.reload();

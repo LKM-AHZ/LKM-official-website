@@ -33,3 +33,7 @@ export { apiFetch } from "./fetch";
 
 // Blog 类型
 export type * from "./modules/blog-types";
+
+// 模块契约类型（所有 API 返回 Result<T, AppError>），消费方不必再深链到 errors 目录
+export type { AppError } from "../errors/error-codes";
+export type { Result } from "../errors/result";

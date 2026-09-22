@@ -531,9 +531,9 @@ export const forumCategories: ForumCategory[] = [
     todayPostCount: 5,
   },
   {
-    id: "group-Senior high-school",
+    id: "group-senior-high",
     name: "forumData.categories.groupSeniorHighSchool.name",
-    slug: "group-Senior high-school",
+    slug: "group-senior-high",
     parentId: "group",
     description: "forumData.categories.groupSeniorHighSchool.description",
     icon: "tabler:world",
@@ -578,7 +578,17 @@ export function getChildCategories(parentId: string): ForumCategory[] {
   return forumCategories.filter((c) => c.parentId === parentId);
 }
 
+// slug → 分类的一次性索引：原实现每次调用都线性扫描，且正确性隐式依赖 slug 唯一
+// （类型系统并不保证）。重复 slug 在开发期提示，避免「永远查不到某分类」这类静默问题。
+const CATEGORY_BY_SLUG = new Map<string, ForumCategory>();
+for (const c of forumCategories) {
+  if (CATEGORY_BY_SLUG.has(c.slug) && import.meta.env.DEV) {
+    console.warn(`[forum] 分类 slug 重复：${c.slug}（查找只会命中先出现的那个）`);
+  }
+  CATEGORY_BY_SLUG.set(c.slug, c);
+}
+
 /** 根据 slug 查找分类 */
 export function getCategoryBySlug(slug: string): ForumCategory | undefined {
-  return forumCategories.find((c) => c.slug === slug);
+  return CATEGORY_BY_SLUG.get(slug);
 }

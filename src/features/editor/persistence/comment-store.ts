@@ -5,10 +5,26 @@ function getKey(docId: string): string {
   return `lkm-editor-comments-${docId}`;
 }
 
+function isThread(item: unknown): item is CommentThread {
+  if (!item || typeof item !== "object") return false;
+  const thread = item as { id?: unknown; comments?: unknown; range?: unknown };
+  return (
+    typeof thread.id === "string" &&
+    Array.isArray(thread.comments) &&
+    !!thread.range &&
+    typeof thread.range === "object"
+  );
+}
+
 function read(docId: string): CommentThread[] {
   try {
     const raw = localStorage.getItem(getKey(docId));
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    // 只挡住 JSON.parse 不够：损坏/被手改/旧 schema 的载荷会让调用方在读回的对象上
+    // 直接 threads.push(...) / thread.comments.push(...) 抛未捕获的 TypeError
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isThread);
   } catch (err) {
     console.warn("[comment-store] 读取评论失败:", err);
     return [];

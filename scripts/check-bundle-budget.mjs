@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
  * JS Bundle Budget 检查
- * 按计划定义：首页 180 KiB, 博客 160 KiB, 编辑器 450 KiB, 其他 220 KiB, 单 chunk 180 KiB
- * 检查 dist/_astro/ 下最大的几个 JS gz 文件。
+ *
+ * 唯一硬门禁：dist/client/_astro 下全部 JS 的 gz 总量 2000 KiB（超限 exit 1）。
+ * 单 chunk 180 KiB 只是参考线（打 WARN、不阻断，超大 chunk 交架构优化处理）。
+ * 历史计划里的按页预算（首页 180 / 博客 160 / 编辑器 450 / 其他 220）本脚本并未实现，
+ * 不要误以为它们在这里生效。
+ * 检查 dist/client/_astro/ 下的 .js.gz。
  */
 import { readdirSync, statSync, existsSync } from "node:fs";
 import { resolve, relative } from "node:path";
 
 const DIST = resolve(import.meta.dirname, "..", "dist", "client");
 
-const MAX_CHUNK_KIB = 180;
-const MAX_TOTAL_KIB = 2000;
+const MAX_CHUNK_KIB = 180; // 单 chunk 参考线（仅 WARN）
+const MAX_TOTAL_KIB = 2000; // gz 总量硬门禁
 
 function walkDir(dir, pattern) {
   const results = [];
@@ -27,13 +31,13 @@ function walkDir(dir, pattern) {
 
 function main() {
   if (!existsSync(DIST)) {
-    console.error("ERROR: dist/ 目录不存在");
+    console.error(`ERROR: 构建产物目录不存在: ${DIST}（先跑 pnpm run build）`);
     process.exit(1);
   }
 
   const astroDir = resolve(DIST, "_astro");
   if (!existsSync(astroDir)) {
-    console.log("PASS: 无 _astro 目录");
+    console.log(`PASS: 无 _astro 目录（${astroDir}）`);
     process.exit(0);
   }
 
@@ -44,7 +48,7 @@ function main() {
   }
 
   const sizes = jsGzFiles.map((f) => ({
-    name: relative(astroDir, f).replace(/\\/g, "/").replace(".gz", ""),
+    name: relative(astroDir, f).replace(/\\/g, "/").replace(/\.gz$/, ""),
     size: statSync(f).size,
   }));
 
@@ -58,12 +62,19 @@ function main() {
     `  单个 chunk 上限: ${MAX_CHUNK_KIB} KiB  |  总量上限: ${MAX_TOTAL_KIB} KiB\n`,
   );
 
+  // 明细只打前 10 个，但超线统计必须覆盖全部 chunk，否则第 11 大的超限 chunk 会被漏报
+  const overChunks = sizes.filter((f) => f.size > MAX_CHUNK_KIB * 1024);
   for (const { name, size } of sizes.slice(0, 10)) {
     const kib = (size / 1024).toFixed(1);
     const over = size > MAX_CHUNK_KIB * 1024;
     const mark = over ? "WARN" : " OK ";
     // 超大 chunk 不在预算检查阶段阻断，由阶段4架构优化处理
     console.log(`  ${mark}  ${kib.padStart(7)} KiB  ${name}`);
+  }
+  if (overChunks.length > 0) {
+    console.log(
+      `  （共 ${overChunks.length} 个 chunk 超过 ${MAX_CHUNK_KIB} KiB 参考线，仅提示不阻断）`,
+    );
   }
 
   const totalKib = (totalSize / 1024).toFixed(1);

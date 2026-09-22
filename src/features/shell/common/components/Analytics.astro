@@ -1,21 +1,21 @@
 ---
 import { ANALYTICS } from '~/lib/config';
 
+// 原先按 ANALYTICS.vendors.googleAnalytics.partytown 决定 script type="text/partytown"，
+// 但该字段在 site.ts 的 SharedAnalyticsConfig 里从不赋值、项目也没有 @astrojs/partytown 依赖：
+// 恒为 false 的死分支，一旦被误设为 true 反而会让 GA 脚本以 text/partytown 类型静默不执行，故移除。
 const id = ANALYTICS?.vendors?.googleAnalytics?.id ? String(ANALYTICS.vendors.googleAnalytics.id) : '';
-const partytown = !!(ANALYTICS?.vendors?.googleAnalytics as Record<string, unknown> | undefined)?.partytown;
-const scriptType = partytown ? 'text/partytown' : undefined;
 ---
 
-{id && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${id}`} type={scriptType} />}
+{id && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${id}`} />}
 
-<script is:inline id="ga-init" data-id={id} type={id ? scriptType : undefined}>
-  if (document.getElementById('ga-init').dataset.id) {
-    const d = document.getElementById('ga-init').dataset.id;
+{id && (
+  <script is:inline define:vars={{ gaId: id }}>
     window.dataLayer = window.dataLayer || [];
     window.gtag = function (...args) {
-      dataLayer.push(args);
+      window.dataLayer.push(args);
     };
     window.gtag('js', new Date());
-    window.gtag('config', d);
-  }
-</script>
+    window.gtag('config', gaId);
+  </script>
+)}

@@ -52,26 +52,62 @@ function loadDotEnvIntoProcess(): void {
     if (!trimmed || trimmed.startsWith("#")) continue;
     const eq = trimmed.indexOf("=");
     if (eq === -1) continue;
-    const key = trimmed.slice(0, eq).trim();
+    const key = trimmed
+      .slice(0, eq)
+      .trim()
+      .replace(/^export\s+/, "");
     let value = trimmed.slice(eq + 1).trim();
     if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
+      // 长度 >= 2 才算成对引号：单字符 `KEY="` 不能当成引号包裹后切成空串
+      value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'")))
     ) {
+      // 引号内是字面量，不剥离注释
       value = value.slice(1, -1);
+    } else {
+      // 未加引号时 ` #` 起为行内注释（与 dotenv 一致），
+      // 否则 `API_URL=http://x # 说明` 会把注释并进值里，且出错时极难排查
+      const commentAt = value.search(/\s#/);
+      if (commentAt !== -1) value = value.slice(0, commentAt).trim();
     }
     process.env[key] ??= value;
   }
 }
 loadDotEnvIntoProcess();
 
+// config.yaml 在本文件与 virtual-config 插件里共读同一份，这里缓存 + 统一入口，
+// 避免两处各自解析导致漂移。路径用 import.meta.url 定位：相对 process.cwd() 读取时，
+// 从其它工作目录（IDE 任务、脚本先 cd 过）启动会直接 ENOENT。
+let configYamlCache: Record<string, unknown> | null = null;
 function loadConfigYaml(): Record<string, unknown> {
-  const raw = fs.readFileSync("src/data/config.yaml", "utf-8");
-  return yaml.load(raw) as Record<string, unknown>;
+  if (configYamlCache) return configYamlCache;
+  const raw = fs.readFileSync(
+    new URL("./src/data/config.yaml", import.meta.url),
+    "utf-8",
+  );
+  const parsed = yaml.load(raw);
+  if (parsed === null || typeof parsed !== "object") {
+    throw new Error(
+      "src/data/config.yaml 内容为空或不是 YAML 对象，无法读取 site/base",
+    );
+  }
+  configYamlCache = parsed as Record<string, unknown>;
+  return configYamlCache;
 }
 const configYaml = loadConfigYaml();
-const siteConfig = (configYaml as Record<string, Record<string, unknown>>)
-  .site as Record<string, string>;
+// 缺 site 段时显式报错，否则后面会在 Astro 内部抛 "Cannot read properties of undefined"
+if (typeof configYaml.site !== "object" || configYaml.site === null) {
+  throw new Error("src/data/config.yaml 缺少 site 段（site/base 从这里读取）");
+}
+const siteConfig = configYaml.site as Record<string, string>;
+// 站点 URL 缺失时给明确报错：否则 Astro 只抛 "Invalid URL"，定位不到是配置没填
+const siteUrl = process.env.PUBLIC_SITE_URL || siteConfig.site;
+if (!siteUrl) {
+  throw new Error(
+    "站点 URL 未配置：请设置 PUBLIC_SITE_URL 或 src/data/config.yaml 的 site.site",
+  );
+}
 
 export default defineConfig({
   devToolbar: {
@@ -81,7 +117,7 @@ export default defineConfig({
   // 用 `||` 而非 `??`：`.env` 写成 `PUBLIC_SITE_URL=`（空串）是"留空用默认"的常见写法，
   // 而 `??` 只在 null/undefined 时兜底、空串会赢 → Astro 直接报 "Invalid URL"，
   // `astro check` 连源码都不扫就退出（`.env.example` 正是这么写的，故必须容错空串）。
-  site: process.env.PUBLIC_SITE_URL || (siteConfig.site as string),
+  site: siteUrl,
   // 环境变量可覆盖 base（如部署在子路径下）；默认读取 config.yaml
   base: process.env.PUBLIC_BASE_PATH || (siteConfig.base as string) || "/",
 
@@ -255,7 +291,11 @@ export default defineConfig({
 
   vite: {
     server: {
-      allowedHosts: ["124.220.55.235"],
+      // 允许访问 dev server 的主机名（各机器不同，用逗号分隔覆盖，默认值仅为既有部署保留）
+      allowedHosts: (process.env.DEV_ALLOWED_HOSTS ?? "124.220.55.235")
+        .split(",")
+        .map((host) => host.trim())
+        .filter(Boolean),
       proxy: process.env.API_URL
         ? {
             // 即转发 HTTP 也转发 WS upgrade：前端 WebSocket(/api/v1/ws/events)
@@ -284,21 +324,23 @@ export default defineConfig({
         },
         load(id) {
           if (id === "\0virtual:config") {
-            const raw = fs.readFileSync("src/data/config.yaml", "utf-8");
-            const parsed = yaml.load(raw);
-            return `export default ${JSON.stringify(parsed)};`;
+            // 复用同一份缓存读取，避免与文件顶部各解析一次而漂移
+            return `export default ${JSON.stringify(loadConfigYaml())};`;
           }
         },
       },
       {
         name: "exclude-yaml",
+        // resolveId 返回 false 在 Rollup 里表示「该模块按 external 处理」而不是「未解析」，
+        // 那样下面的 load 永远不会执行，yaml 会被 dev/SSR 按原文件解析而报错。
+        // 改为解析到一个空的虚拟模块，才真正达到「屏蔽 yaml 导入」的目的。
         resolveId(id) {
           if (id.endsWith(".yaml") || id.endsWith(".yml")) {
-            return false;
+            return "\0empty-yaml";
           }
         },
         load(id) {
-          if (id.endsWith(".yaml") || id.endsWith(".yml")) {
+          if (id === "\0empty-yaml") {
             return "export default {}";
           }
         },
@@ -312,21 +354,20 @@ export default defineConfig({
         },
       },
     ],
-    ssr: {
-      noExternal: [],
-    },
     build: {
       // editor-tiptap/editor-codemirror 为编辑器专属懒加载 chunk（模块2 强分离产物，
       // 仅编辑器页加载，不进公共池；minified 原始 ~507KiB 但 gz 传输 178/145KiB，
-      // 均在 check-bundle-budget 的 180KiB 门禁内）。调高默认 500 阈值消除纯字节噪音，
-      // 真实体积仍由 scripts/check-bundle-budget.mjs 把关。
+      // 在 check-bundle-budget 的 180KiB 单 chunk 参考线内）。调高默认 500 阈值消除纯字节噪音，
+      // 总量（硬门禁）仍由 scripts/check-bundle-budget.mjs 把关。
       chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
           manualChunks(id) {
+            // 按「包目录」匹配（两侧带斜杠）：前缀匹配会把 react-icons、@tanstack/react-* 之类也算进
+            // vendor-react、把 vue-router 算进 vendor-vue，破坏本意的缓存隔离并撑大这两个 chunk
             if (
-              id.includes("node_modules/react") ||
-              id.includes("node_modules/react-dom")
+              id.includes("/node_modules/react/") ||
+              id.includes("/node_modules/react-dom/")
             ) {
               return "vendor-react";
             }
@@ -343,8 +384,8 @@ export default defineConfig({
               return "vendor-katex";
             }
             if (
-              id.includes("node_modules/vue") ||
-              id.includes("node_modules/@iconify/vue")
+              id.includes("/node_modules/vue/") ||
+              id.includes("/node_modules/@iconify/vue/")
             ) {
               return "vendor-vue";
             }

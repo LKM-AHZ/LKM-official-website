@@ -1,11 +1,35 @@
 ---
+import PageLayout from '~/layouts/PageLayout.astro';
 import ExamInterface from '~/features/competition/components/ExamInterface.vue';
+import { mockCompetitions } from '~/features/competition/data/mock-competitions';
+import { t } from '~/lib/i18n';
 
 // server 模式：params 从 URL 直接解析，无需 getStaticPaths
-// 考试接口由 Vue 组件 client:load 处理（SSR 预渲染 + 立即水合）
-const { id: _id } = Astro.params;
+const { id } = Astro.params;
+const comp = mockCompetitions.find((c) => c.id === id);
+
+// 未知竞赛 id 不能照样渲染试卷（否则软 404 + 绕过存在性校验），与详情页一致地给 notFound 分支
+if (!comp) {
+  Astro.response.status = 404;
+}
+
+const metadata = {
+  title: comp ? `${t(comp.title)} —— LKM` : t('page.communityDetail.competition.metaTitle'),
+};
 ---
 
-<div class="max-w-7xl mx-auto px-4 py-8">
-  <div style="min-height: 400px"><ExamInterface client:load /></div>
-</div>
+{/* 必须有布局：全局样式表（tailwind.css + 主题变量）由 BaseLayout 引入，
+    否则 ExamInterface 里的 bg-card-bg/text-deep-text 等工具类全部失效 */}
+<PageLayout metadata={metadata} showFooter={false}>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    {
+      comp ? (
+        <div style="min-height: 400px">
+          <ExamInterface client:load />
+        </div>
+      ) : (
+        <p>{t('page.communityDetail.competition.notFound')}</p>
+      )
+    }
+  </div>
+</PageLayout>

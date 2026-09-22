@@ -8,7 +8,7 @@ const loginUrl = getAuthPath("login?redirect=/starhope");
   <div class="min-h-screen flex items-center justify-center bg-page-bg">
     <div class="w-full max-w-md px-4">
       <div class="card-base p-8 text-center">
-        <div class="text-5xl mb-4">🔐</div>
+        <div class="text-5xl mb-4" aria-hidden="true">🔐</div>
         <h1 class="text-2xl font-bold text-deep-text mb-2">
           {{ t("starhope.loginRequired.title") }}
         </h1>

@@ -164,7 +164,9 @@ function toQueryParams(params: Record<string, unknown>): string {
 }
 
 function isTimeoutError(e: unknown): boolean {
-  return e instanceof DOMException && e.name === "AbortError";
+  // 用 name 判定而非 `instanceof DOMException`：DOMException 在部分运行时/旧 Node/polyfill 下
+  // 可能未定义，那样会在 catch 里抛 ReferenceError，把网络失败变成异常逃出 Result 契约。
+  return e instanceof Error && e.name === "AbortError";
 }
 
 function isRefreshRequest(url: string): boolean {
@@ -199,10 +201,11 @@ async function rawRequest<T>(
   }`;
 
   const timeout = config.timeout ?? DEFAULT_TIMEOUT_MS;
-  const controller =
+  const initialController =
     typeof AbortController !== "undefined" ? new AbortController() : null;
-  const timeoutId = controller
-    ? setTimeout(() => controller.abort(), timeout)
+  let controller: AbortController | null = initialController;
+  let timeoutId = initialController
+    ? setTimeout(() => initialController.abort(), timeout)
     : undefined;
 
   const headers: Record<string, string> = {
@@ -247,21 +250,37 @@ async function rawRequest<T>(
     if (timeoutId !== undefined) clearTimeout(timeoutId);
   };
 
+  /**
+   * 重放前换一套全新的 controller + 计时器：等待刷新期间旧计时器可能已经到点把
+   * controller abort 掉，沿用旧 signal 会让重放请求立刻以「超时」失败。
+   */
+  const rearmForReplay = (): void => {
+    cleanup();
+    if (typeof AbortController === "undefined") return;
+    const next = new AbortController();
+    controller = next;
+    timeoutId = setTimeout(() => next.abort(), timeout);
+  };
+
   try {
     let response = await doFetch(token);
 
     // 401 → 先判是否为「危险操作需 2FA step-up」：会话有效仅缺 2FA 信任时，
     // 不刷新、不清会话，抛 MFARequiredError 由调用方弹 TOTP 验证后再重放。
     if (response.status === 401 && token && (await isMfaRequired(response))) {
+      cleanup(); // 提前返回也必须释放计时器，否则 SSR 下会一直挂着一个待触发的 timer
       return err(new MFARequiredError());
     }
     // 否则进入「单飞」刷新（刷新端点自身 401 说明刷新令牌失效，直接清会话）。其余情况刷新成功则带新 token 重放一次。
-    if (response.status === 401 && token) {
+    // 必须以 needsAuth(url) 为前提：无需认证的端点（如 /api/v1/auth/login 密码错误）返回 401 时，
+    // 若恰好存有旧 token，会白刷新一次并用重放结果替换原始 401 响应。
+    if (response.status === 401 && token && needsAuth(url)) {
       if (isRefreshRequest(url)) {
         getAdapter().clear();
-      } else {
-        const refreshed = await refreshAccessToken();
+      } else if ((await refreshSession()) === "ok") {
+        const refreshed = getAdapter().getAccessToken();
         if (refreshed) {
+          rearmForReplay();
           response = await doFetch(refreshed);
         }
       }
@@ -311,11 +330,15 @@ async function toResult<T>(response: Response): Promise<Result<T, AppError>> {
     data = null;
   }
 
-  // unpack {code, msg, data} → 返回内层 data（契约与旧 axios request 一致）
+  // unpack {code, msg, data} → 返回内层 data（契约与旧 axios request 一致）。
+  // 必须同时要求 code 是数字且等于成功码 0：后端 err.py 的 @respond 只在成功时返回
+  // CommonErr.OK(0)，失败一律走非 2xx；仅凭「有 code 和 data 两个键」就拆包，
+  // 会把恰好含 code/data 字段的业务对象误拆。
   if (
     data &&
     typeof data === "object" &&
-    "code" in (data as object) &&
+    typeof (data as { code?: unknown }).code === "number" &&
+    (data as { code: number }).code === 0 &&
     "data" in (data as object)
   ) {
     return ok((data as { data: T }).data);
@@ -324,19 +347,28 @@ async function toResult<T>(response: Response): Promise<Result<T, AppError>> {
 }
 
 /**
- * 并发 401 单飞刷新：一次刷新进行中，其余 401 等待同一结果。
- * 成功返回新 access_token，失败返回 null（并清会话）。
+ * 刷新结果：
+ *  - ok：已写入新 token
+ *  - invalid：刷新令牌确已失效（4xx 明示拒绝）→ 可清会话
+ *  - transient：暂时失败（网络/超时/5xx/响应畸形）→ 保留会话，避免一次抖动即登出
  */
-let refreshing: Promise<string | null> | null = null;
+export type RefreshOutcome = "ok" | "invalid" | "transient";
 
-function refreshAccessToken(): Promise<string | null> {
+/**
+ * 并发 401 单飞刷新：一次刷新进行中，其余等待同一结果。
+ * 导出供 GraphQL 的 errorExchange 复用 —— HTTP 与 GraphQL 两条 401 路径必须共用同一把锁，
+ * 否则同一会话的两个 401 会各自刷新，在 refresh token 轮换下必有一个被拒、会话被清。
+ */
+let refreshing: Promise<RefreshOutcome> | null = null;
+
+export function refreshSession(): Promise<RefreshOutcome> {
   if (refreshing) return refreshing;
 
-  refreshing = (async (): Promise<string | null> => {
+  refreshing = (async (): Promise<RefreshOutcome> => {
     const refreshToken = getAdapter().getRefreshToken();
     if (!refreshToken) {
       getAdapter().clear();
-      return null;
+      return "invalid";
     }
     try {
       const base = getApiBase();
@@ -350,24 +382,30 @@ function refreshAccessToken(): Promise<string | null> {
           body: JSON.stringify({ refresh_token: refreshToken }),
         },
       );
-      if (!res.ok) {
+      // 只有明示拒绝才算 invalid；408/429 等其它 4xx 与 5xx 都是暂时性失败，
+      // 不能据此把用户登出
+      if (res.status === 400 || res.status === 401 || res.status === 403) {
         getAdapter().clear();
-        return null;
+        return "invalid";
       }
-      const body = (await res.json()) as {
-        data?: { access_token: string; refresh_token: string };
-      };
+      if (!res.ok) return "transient";
+
+      let body: { data?: { access_token?: string; refresh_token?: string } };
+      try {
+        body = (await res.json()) as typeof body;
+      } catch {
+        return "transient";
+      }
       const accessToken = body?.data?.access_token;
       const newRefreshToken = body?.data?.refresh_token;
       if (!accessToken) {
         getAdapter().clear();
-        return null;
+        return "invalid";
       }
       getAdapter().setTokens(accessToken, newRefreshToken ?? refreshToken);
-      return accessToken;
+      return "ok";
     } catch {
-      getAdapter().clear();
-      return null;
+      return "transient";
     }
   })();
 

@@ -55,7 +55,10 @@ export function serializeJsxElement(
       type: "root",
       children: [node],
     } as unknown as Root) as string;
-  } catch {
+  } catch (err) {
+    // 兜底会丢属性与嵌套子节点（有损）：把降级原因打出来，否则未知节点类型导致的
+    // 往返数据丢失完全无从排查
+    console.warn("[serialize-mdx] remark-mdx 序列化失败，改用文本兜底:", err);
     return mdastToJsxFallback(node);
   }
 }
@@ -68,14 +71,37 @@ function mdastToJsxFallback(node: any): string {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .filter((a: any) => a.type === "mdxJsxAttribute")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .map((a: any) => `${a.name}="${String(a.value ?? "")}"`)
+    .map((a: any) => {
+      // 无值属性（disabled）要输出裸名，否则会写成 disabled=""
+      if (a.value === null || a.value === undefined) return a.name;
+      // 表达式属性 {count={1}}：a.value 是 AST 对象，直接 String() 会得到 "[object Object]"
+      if (typeof a.value === "object") {
+        return `${a.name}={${String(a.value.value ?? "")}}`;
+      }
+      return `${a.name}="${String(a.value)}"`;
+    })
     .join(" ");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const children = (node.children ?? []) as any[];
   const inner =
     children
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((c: any) => (c.type === "text" ? (c.value ?? "") : ""))
+      .map((c: any) => {
+        if (c.type === "text") return c.value ?? "";
+        // 这个兜底存在的意义就是「别丢内容」，嵌套元素不能替换成空串：
+        // JSX 子节点递归序列化，其余节点退回通用 stringify
+        if (c.type === "mdxJsxFlowElement" || c.type === "mdxJsxTextElement") {
+          return serializeJsxElement(c);
+        }
+        try {
+          return serializer.stringify({
+            type: "root",
+            children: [c],
+          } as unknown as Root) as string;
+        } catch {
+          return "";
+        }
+      })
       .join("") || "";
   const open = `<${name}${attrs ? " " + attrs : ""}>`;
   const close = `</${name}>`;

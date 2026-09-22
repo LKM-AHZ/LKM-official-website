@@ -18,7 +18,7 @@ for (const heading of headings) {
 const className = Astro.props.class;
 const isPostsRoute = Astro.url.pathname.startsWith(url('/posts/'));
 
-const removeTailingHash = (text: string) => {
+const removeTrailingHash = (text: string) => {
   let lastIndexOfHash = text.lastIndexOf('#');
   if (lastIndexOfHash !== text.length - 1) {
     return text;
@@ -27,7 +27,16 @@ const removeTailingHash = (text: string) => {
   return text.substring(0, lastIndexOfHash);
 };
 
-let heading1Count = 1;
+// 顶层标题的显示编号在 frontmatter 算好：模板里做 `heading1Count++` 是渲染期副作用，
+// 计数取到 0 时还会被原样渲染成 "0"，也让编号依赖遍历顺序而难以推理
+let topLevelCount = 0;
+const numberedHeadings = headings
+  .filter((heading) => heading.depth < minDepth + maxLevel)
+  .map((heading) => ({
+    ...heading,
+    number:
+      heading.depth === minDepth ? String(++topLevelCount) : '',
+  }));
 
 const maxLevel = siteConfig.toc.depth;
 ---
@@ -35,9 +44,7 @@ const maxLevel = siteConfig.toc.depth;
 {
   isPostsRoute && (
     <table-of-contents class:list={[className, 'group']}>
-      {headings
-        .filter((heading) => heading.depth < minDepth + maxLevel)
-        .map((heading) => (
+      {numberedHeadings.map((heading) => (
           <a
             href={`#${heading.slug}`}
             class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl
@@ -54,7 +61,7 @@ const maxLevel = siteConfig.toc.depth;
                 },
               ]}
             >
-              {heading.depth == minDepth && heading1Count++}
+              {heading.number}
               {heading.depth == minDepth + 1 && (
                 <div class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]" />
               )}
@@ -71,7 +78,7 @@ const maxLevel = siteConfig.toc.depth;
                 },
               ]}
             >
-              {removeTailingHash(heading.text)}
+              {removeTrailingHash(heading.text)}
             </div>
           </a>
         ))}
@@ -186,8 +193,14 @@ const maxLevel = siteConfig.toc.depth;
       if (!this.sections.length) return;
 
       for (let i = 0; i < this.sections.length; i++) {
-        const offsetTop = this.sections[i].getBoundingClientRect().top;
-        const offsetBottom = this.sections[i].getBoundingClientRect().bottom;
+        // sections 是 new Array(len) 预分配的稀疏数组：锚点对应的元素在文档里
+        // 不存在时该槽位是 hole（init() 只在 heading/section 都为 HTMLElement 时填充），
+        // 这里按下标遍历会取到 undefined 而抛 TypeError，连累后续所有滚动处理。
+        const section = this.sections[i];
+        if (!section) continue;
+
+        const offsetTop = section.getBoundingClientRect().top;
+        const offsetBottom = section.getBoundingClientRect().bottom;
 
         if (
           this.isInRange(offsetTop, 0, window.innerHeight) ||

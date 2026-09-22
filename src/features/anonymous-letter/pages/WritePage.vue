@@ -58,8 +58,11 @@
             <div class="tb-right">
               <span
                 class="char-counter"
-                :class="{ warn: charCount > 900, danger: charCount > 1000 }"
-                >{{ charCount }}/1000</span
+                :class="{
+                  warn: charCount > MAX_CONTENT_LEN * 0.9,
+                  danger: charCount > MAX_CONTENT_LEN,
+                }"
+                >{{ charCount }}/{{ MAX_CONTENT_LEN }}</span
               >
             </div>
           </div>
@@ -89,11 +92,10 @@
             <textarea
               ref="textareaRef"
               class="editor-textarea"
-              :class="'fs-' + fontSize"
               :style="{ fontSize: fsValue }"
               v-model="content"
               :placeholder="t('treehole.write.contentPlaceholder')"
-              maxlength="1000"
+              :maxlength="MAX_CONTENT_LEN"
               @input="onContentInput"
             ></textarea>
           </div>
@@ -363,6 +365,8 @@ import { t } from "~/lib/i18n";
 const app = useApp();
 
 const textareaRef = ref(null);
+/** 正文字数上限（template 的 maxlength、计数器与提交校验共用同一来源） */
+const MAX_CONTENT_LEN = 1000;
 
 // ---------- 表单状态 ----------
 const form = reactive({
@@ -419,7 +423,11 @@ function setFontSize(s) {
 }
 
 function insertEmoji(e) {
+  // maxlength 只约束 textarea 的用户输入：emoji 也是正文，必须同样受上限约束并过一遍敏感词归一，
+  // 否则能绕过字数限制（validate 里的兜底提示只是掩盖漂移，不该作为唯一防线）
+  if (content.value.length + e.length > MAX_CONTENT_LEN) return;
   content.value += e;
+  onContentInput();
   emojiOpen.value = false;
   nextTick(() => textareaRef.value?.focus());
 }
@@ -433,7 +441,9 @@ function onContentInput() {
   const lower = content.value.toLowerCase();
   for (const w of SENSITIVE_WORDS) {
     if (lower.includes(w.toLowerCase())) {
-      content.value = content.value.replace(new RegExp(w, "gi"), "***");
+      // 词表里一旦出现 + ( [ 等正则元字符，未转义会在 @input 里抛 SyntaxError（打断输入）或误匹配
+      const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      content.value = content.value.replace(new RegExp(escaped, "gi"), "***");
     }
   }
 }
@@ -485,7 +495,7 @@ function validate() {
     alert(t("treehole.write.emptyAlert"));
     return false;
   }
-  if (charCount.value > 1000) {
+  if (charCount.value > MAX_CONTENT_LEN) {
     alert(t("treehole.write.lengthAlert"));
     return false;
   }
@@ -502,17 +512,21 @@ function validate() {
   return true;
 }
 
+/** datetime-local 串转毫秒；非法值返回 undefined（NaN 经 JSON 序列化成 null，
+    会让 publishScheduled 的 scheduledAt 判空直接跳过，信件永远停在 scheduled） */
+function toTimestamp(value) {
+  const ts = new Date(value).getTime();
+  return Number.isFinite(ts) ? ts : undefined;
+}
+
 // ---------- 构建信件对象 ----------
 function buildLetter() {
   const now = Date.now();
+  // 封存不产生独立状态：信件先公开，sealExpired() 在 sealUntil 到点后自行置为 "sealed"
   const status =
-    scheduleEnabled.value && form.scheduledAt
-      ? "scheduled"
-      : sealEnabled.value && form.sealUntil
-        ? "published"
-        : "published";
+    scheduleEnabled.value && form.scheduledAt ? "scheduled" : "published";
 
-  return {
+  const letter = {
     id: editId.value || "L_" + now + "_" + Math.floor(Math.random() * 10000),
     content: content.value.trim(),
     category: form.category,
@@ -526,20 +540,27 @@ function buildLetter() {
     paper: form.paper,
     scheduledAt:
       scheduleEnabled.value && form.scheduledAt
-        ? new Date(form.scheduledAt).getTime()
+        ? toTimestamp(form.scheduledAt)
         : undefined,
     scheduledPrivacy: scheduleEnabled.value ? form.privacy : undefined,
     sealUntil:
       sealEnabled.value && form.sealUntil
-        ? new Date(form.sealUntil).getTime()
+        ? toTimestamp(form.sealUntil)
         : undefined,
     status,
-    publishedAt: status === "published" ? now : undefined,
-    createdAt: editId.value ? undefined : now,
     updatedAt: now,
-    likes: 0,
-    favorites: 0,
   };
+
+  // 首次创建时间/发布时间/互动计数只在新建时写入：updateLetter 是浅合并，
+  // 显式的 undefined 经 JSON 序列化会把原字段整个删掉（编辑即丢失 createdAt），
+  // 恒为 0 的计数则会把已有 likes/favorites 清零；编辑时省略这些键即保留原值。
+  if (!editId.value) {
+    letter.createdAt = now;
+    letter.publishedAt = status === "published" ? now : undefined;
+    letter.likes = 0;
+    letter.favorites = 0;
+  }
+  return letter;
 }
 
 // ---------- 提交 ----------

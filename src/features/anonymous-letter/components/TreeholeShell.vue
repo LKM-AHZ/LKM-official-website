@@ -254,22 +254,15 @@ let synced = false;
 
 function forceSync() {
   if (synced) return;
-  // 同步主题
-  const htmlDark = document.documentElement.classList.contains("dark");
-  const expectedDark =
-    localStorage.theme === "dark" ||
-    (!localStorage.theme &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
   // 同步色相
   const hue = localStorage.getItem("hue");
   if (hue) document.documentElement.style.setProperty("--hue", hue);
-  // 主题不匹配则 reload
-  if (htmlDark !== expectedDark) {
-    location.reload();
-    return;
-  }
+  // 以实际落地的 .dark class 为唯一事实来源同步主题。
+  // 原实现按 localStorage.theme/matchMedia 推导 expectedDark 并在不一致时 location.reload()，
+  // 但 synced 是组件内变量、刷新后归零：只要推导结果与最终 class 持续不符（例如主题由主站其它来源决定
+  // 或由异步脚本后置清除），就会无限重载使页面不可用。这也与 stores/app.ts「主题跟随主站 .dark class」的约定一致。
   synced = true;
-  app.setTheme(htmlDark ? "night" : "day");
+  app.setTheme(document.documentElement.classList.contains("dark") ? "night" : "day");
 }
 
 onMounted(forceSync);

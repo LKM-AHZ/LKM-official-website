@@ -43,8 +43,8 @@ export function getEditorExtensions(placeholder?: string): AnyExtension[] {
       },
     }),
     Underline,
-    TaskList.configure({}),
-    TaskItem.configure({}),
+    TaskList,
+    TaskItem,
     CustomImage,
     Table.configure({
       resizable: true,

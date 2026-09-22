@@ -384,20 +384,21 @@ body {
   }
 }
 
-/* 高对比度模式 */
+/* 高对比度模式。
+   这里刻意不再在 html 上加 filter：filter 会让根元素成为 fixed 后代的包含块，
+   .corner-deco / .bg-flow 这些 position:fixed 装饰会从「视口定位」退化成「文档定位」
+   （右下角装饰跑到文档末尾、跟着页面滚）。对比度完全靠下面的 !important token 覆盖实现 */
 html.high-contrast {
   --text-main: #1a1410 !important;
   --text-sub: #5a4d44 !important;
   --card-bg: #ffffff !important;
   --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
   --glow: rgba(0, 0, 0, 0.2) !important;
-  filter: contrast(1.12) saturate(0.92);
 }
 :root.dark.high-contrast {
   --text-main: #ffffff !important;
   --text-sub: #c9c2e8 !important;
   --card-bg: #181726 !important;
-  filter: contrast(1.12) saturate(1.05);
 }
 
 /* 低性能模式 */
@@ -414,4 +415,24 @@ html.low-perf .bg-flow {
 }
 html.low-perf .particles {
   display: none;
+}
+/* 加载指示是必要反馈：低性能模式只放慢，不能停 */
+html.low-perf .spinner {
+  animation: spinGlow 1.4s linear infinite !important;
+}
+
+/* 动效偏好：关掉非必要的循环/位移动画与过渡；同样保留加载指示 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .spinner {
+    animation-duration: 1.4s !important;
+    animation-iteration-count: infinite !important;
+  }
 }

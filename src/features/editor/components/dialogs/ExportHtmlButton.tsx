@@ -45,10 +45,24 @@ export function handleExportHtml(editor: Editor): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "document.html";
-    a.click();
-    URL.revokeObjectURL(url);
+    // 不再固定写 document.html：用本地化名称，多份导出至少能区分语言与用途
+    a.download = `${t("editor.exportDocument")}.html`;
+    // 需挂到文档里再点击，Firefox 等对游离节点不会触发下载
+    document.body.appendChild(a);
+    try {
+      a.click();
+    } finally {
+      a.remove();
+      // 延迟释放：Safari/Firefox 在 click 之后仍需该 URL 才能启动下载，立即 revoke 会中断；
+      // 放在 finally 里保证即使 click 抛错也不泄漏 blob URL。
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
   } catch (err) {
-    alert(t("editor.exportFailed", { message: (err as Error).message }));
+    // 非 Error 的 rejection（字符串/undefined/裸对象）会让文案变成 "导出失败: undefined"
+    const message =
+      err instanceof Error && err.message
+        ? err.message
+        : t("messages.unknownError");
+    alert(t("editor.exportFailed", { message }));
   }
 }

@@ -69,7 +69,7 @@ function formatDate(dateStr: string): string {
           <span>{{ formatDate(question.createdAt) }}</span>
           <span>·</span>
           <span>{{
-            t("page.qa.answers", { count: question.answerCount })
+            t("page.qa.answers", { count: question.answers.length })
           }}</span>
         </div>
         <div

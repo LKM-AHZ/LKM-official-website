@@ -22,7 +22,10 @@ const {
 {
   !(UI.theme && UI.theme.endsWith(':only')) && (
     <button type="button" class={className} aria-label={label} data-aw-toggle-color-scheme>
-      <Icon name={iconName} class={iconClass} />
+      {/* 本项目 astro-icon 以内联 <path> 渲染（未启用 sprite），BasicScripts 里按 <use> 换图标的
+          逻辑取不到节点，图标永远停在太阳。改为两枚图标由 CSS 按 .dark 切换，SSR 首帧即正确。 */}
+      <Icon name={iconName} class={`${iconClass} dark:hidden`} />
+      <Icon name="tabler:moon" class={`hidden dark:block ${iconClass}`} />
     </button>
   )
 }

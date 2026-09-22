@@ -44,7 +44,9 @@ const SaveStatusIndicator = memo(function SaveStatusIndicator({
   charCount,
   wordCount,
 }: SaveStatusIndicatorProps) {
-  const config = STATUS_CONFIG[status];
+  // status 若是契约外的值（后端/引擎数据），STATUS_CONFIG[status] 会是 undefined，
+  // 读 config.className 会当场抛错把整个工具栏带崩，这里回退到 unsaved
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.unsaved;
 
   return (
     <div className="flex items-center gap-2 text-xs px-1">

@@ -10,7 +10,9 @@ export interface MockNotification {
   createdAt: string;
 }
 
-export const mockNotifications: MockNotification[] = [
+// 冻结：模块级数组是共享可变状态，任何消费方原地改动都会泄漏给所有 import。
+// 现有消费方（NotificationBell）用的是 map 生成新数组再赋值，故冻结不影响它。
+export const mockNotifications: MockNotification[] = Object.freeze([
   {
     id: "n1",
     type: "reply",
@@ -71,4 +73,4 @@ export const mockNotifications: MockNotification[] = [
     isRead: true,
     createdAt: "2026-07-25T08:00:00Z",
   },
-];
+]) as MockNotification[];

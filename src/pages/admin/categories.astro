@@ -17,14 +17,30 @@ import { t } from '~/lib/i18n';
           <div class="flex items-center justify-between px-5 py-3 bg-surface-3/30 border-b border-surface-3">
             <div class="flex items-center gap-2">
               <Icon name={root.icon} class="w-5 h-5 text-primary" />
-              <span class="font-semibold text-deep-text">{root.name}</span>
+              {/* 数据层存的是 i18n key（见 features/forum/data/categories.ts 头注释），必须 t() 后显示 */}
+              <span class="font-semibold text-deep-text">{t(root.name)}</span>
               <span class="text-xs text-text-muted/60">
                 {t('page.admin.categories.memberStats', { members: root.memberCount, posts: root.postCount })}
               </span>
             </div>
             <div class="flex gap-1">
-              <button class="text-xs text-primary hover:underline">{t('page.admin.categories.edit')}</button>
-              <button class="text-xs text-red-500 hover:underline">{t('page.admin.categories.delete')}</button>
+              {/* 列表里每行的按钮文案相同，读屏只能靠 aria-label 区分操作对象 */}
+              <button
+                type="button"
+                class="text-xs text-primary hover:underline"
+                aria-label={`${t('page.admin.categories.edit')} ${t(root.name)}`}
+                >{t('page.admin.categories.edit')}</button
+              >
+              {/* 与子分类行同一不变式：有成员/帖子时只允许停用，避免删掉仍被引用的分类 */}
+              <button
+                type="button"
+                class="text-xs text-red-500 hover:underline"
+                aria-label={`${root.memberCount > 0 || root.postCount > 0 ? t('page.admin.categories.disable') : t('page.admin.categories.delete')} ${t(root.name)}`}
+              >
+                {root.memberCount > 0 || root.postCount > 0
+                  ? t('page.admin.categories.disable')
+                  : t('page.admin.categories.delete')}
+              </button>
             </div>
           </div>
           <div class="divide-y divide-surface-3">
@@ -32,14 +48,23 @@ import { t } from '~/lib/i18n';
               <div class="flex items-center justify-between px-5 py-2.5">
                 <div class="flex items-center gap-2 text-sm">
                   <Icon name={child.icon} class="w-4 h-4 text-text-muted" />
-                  <span class="text-deep-text">{child.name}</span>
+                  <span class="text-deep-text">{t(child.name)}</span>
                   <span class="text-xs text-text-muted/60">
                     {t('page.admin.categories.memberStats', { members: child.memberCount, posts: child.postCount })}
                   </span>
                 </div>
                 <div class="flex gap-1">
-                  <button class="text-xs text-primary hover:underline">{t('page.admin.categories.edit')}</button>
-                  <button class="text-xs text-text-muted hover:underline">
+                  <button
+                    type="button"
+                    class="text-xs text-primary hover:underline"
+                    aria-label={`${t('page.admin.categories.edit')} ${t(child.name)}`}
+                    >{t('page.admin.categories.edit')}</button
+                  >
+                  <button
+                    type="button"
+                    class="text-xs text-text-muted hover:underline"
+                    aria-label={`${child.memberCount > 0 ? t('page.admin.categories.disable') : t('page.admin.categories.delete')} ${t(child.name)}`}
+                  >
                     {child.memberCount > 0 ? t('page.admin.categories.disable') : t('page.admin.categories.delete')}
                   </button>
                 </div>

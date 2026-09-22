@@ -28,7 +28,10 @@
           type="button"
           class="btn btn-sm"
           :class="flow.contact === 'email' ? 'btn-primary' : 'btn-ghost'"
-          @click="flow.contact = 'email'"
+          @click="
+            flow.contact = 'email';
+            flow.account = '';
+          "
         >
           {{ t("recovery.useEmail") }}
         </button>
@@ -36,7 +39,10 @@
           type="button"
           class="btn btn-sm"
           :class="flow.contact === 'phone' ? 'btn-primary' : 'btn-ghost'"
-          @click="flow.contact = 'phone'"
+          @click="
+            flow.contact = 'phone';
+            flow.account = '';
+          "
         >
           {{ t("recovery.usePhone") }}
         </button>
@@ -100,8 +106,12 @@
       </button>
     </form>
 
-    <!-- Step 2.5: 2FA (MFA 场景) -->
-    <div v-else-if="flow.stage === '2fa'" class="space-y-4">
+    <!-- Step 2.5: 2FA (MFA 场景)。用 form 包裹，回车提交与其它步骤一致 -->
+    <form
+      v-else-if="flow.stage === '2fa'"
+      class="space-y-4"
+      @submit.prevent="flow.submit2FA(totpCode)"
+    >
       <p class="text-sm text-text-muted text-center">
         {{ t("recovery.twoFactorHint") }}
       </p>
@@ -113,10 +123,9 @@
         v-model="totpCode"
       />
       <button
-        type="button"
+        type="submit"
         class="btn btn-primary w-full active:scale-[0.98] transition-transform"
         :disabled="flow.loading || totpCode.length < 6"
-        @click="flow.submit2FA(totpCode)"
       >
         <span
           v-if="flow.loading"
@@ -131,7 +140,7 @@
       >
         {{ t("recovery.restart") }}
       </button>
-    </div>
+    </form>
 
     <!-- Step 3: reset password -->
     <form
@@ -207,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRecoveryFlow } from "~/features/auth/composables/useRecoveryFlow";
 import { t } from "~/lib/i18n";
 import AuthField from "../shared/AuthField.vue";
@@ -215,13 +224,22 @@ import AuthStatus from "../shared/AuthStatus.vue";
 
 const emit = defineEmits<{ (e: "login"): void }>();
 
-const flow = useRecoveryFlow({
-  onSuccess: () => {
-    emit("login");
-  },
-});
+// 不注册 onSuccess：useRecoveryFlow 在置 stage='done' 后立即回调 onSuccess，
+// 若在这里 emit('login')，完成页会被 parent 的切换逻辑立刻覆盖而永远看不到，
+// 且 login 会从「自动回调」和「完成页按钮」两条路径重复发出。
+// 现在统一由完成页的按钮触发 emit('login')。
+const flow = useRecoveryFlow();
 
 const totpCode = ref("");
+
+// totpCode 在 flow 之外，flow.reset()（2FA 步的「重新开始」按钮等）不会清它：
+// 重进 2FA 步会带着上一次的一次性码，既困惑也可能被再次提交。stage 一变就清空
+watch(
+  () => flow.stage,
+  () => {
+    totpCode.value = "";
+  },
+);
 
 defineExpose({ flow });
 </script>

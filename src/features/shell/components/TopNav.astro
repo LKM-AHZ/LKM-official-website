@@ -25,6 +25,7 @@ const { tabs = [], currentPath = '' } = Astro.props;
             return (
               <a
                 href={href}
+                aria-current={isActive ? 'page' : undefined}
                 class:list={[
                   'whitespace-nowrap px-4 py-3 text-[14px] font-normal border-b-2 transition-colors duration-150',
                   isActive

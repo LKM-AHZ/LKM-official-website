@@ -24,7 +24,8 @@ const groups = ref<{ title: string; rows: Row[] }[]>([
 const loading = ref(true);
 
 async function fetchUsers() {
-  const res = await adminFetch("/api/v1/admin/users?size=5");
+  // 后端 PaginateDep 只认 page/limit（app/core/common.py），size 会被忽略而返回默认 20 条
+  const res = await adminFetch("/api/v1/admin/users?page=1&limit=5");
   const body = await readAdminResp(res);
   return (
     body.data as { items: Array<{ username: string; created_at?: string }> }
@@ -36,12 +37,20 @@ async function fetchUsers() {
   }));
 }
 
+/** 取列表接口的 items 数组；形状不符直接抛错，交给 assignGroup 记日志、而不是静默当「无数据」。 */
+function requireItems<T>(data: unknown, endpoint: string): T[] {
+  const items = (data as { items?: unknown } | null)?.items;
+  if (!Array.isArray(items)) throw new Error(`${endpoint} 返回缺少 items 数组，无法解析活动列表`);
+  return items as T[];
+}
+
 async function fetchPosts() {
   const res = await adminFetch("/api/v1/admin/content/items?page=1&limit=5");
   const body = await readAdminResp(res);
-  return (
-    body.data as { items: Array<{ title: string; created_at?: string }> }
-  ).items.map((p) => ({
+  return requireItems<{ title: string; created_at?: string }>(
+    body.data,
+    "/admin/content/items",
+  ).map((p) => ({
     key: `p${p.title}`,
     label: p.title,
     time: p.created_at,
@@ -52,9 +61,10 @@ async function fetchPosts() {
 async function fetchReports() {
   const res = await adminFetch("/api/v1/admin/reports");
   const body = await readAdminResp(res);
-  return (
-    body.data as { items: Array<{ target_title: string; created_at?: string }> }
-  ).items.map((r) => ({
+  return requireItems<{ target_title: string; created_at?: string }>(
+    body.data,
+    "/admin/reports",
+  ).map((r) => ({
     key: `r${r.target_title}`,
     label: r.target_title,
     time: r.created_at,

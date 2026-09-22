@@ -1,67 +1,26 @@
-import type { AppError } from "~/lib/errors";
-import type { Result } from "~/lib/errors/result";
+import type { ProfileInfo, UserInfo } from "~/lib/api/modules/auth";
 
-// ── 真实用户类型（对齐后端 UserInfo + profile） ──
+// ── 真实用户类型（由 API 层类型派生） ──
+// UserInfo/ProfileInfo 已声明全部字段，这里只做「组合 + 收窄」，
+// 避免同一实体维护两份定义后静默漂移（account_level 曾是 string vs 字面量联合）。
 
-export interface User {
-  id: string;
-  username: string;
-  account_level: "local" | "normal" | "admin";
-  email?: string | null;
-  phone?: string | null;
-  nickname?: string | null;
-  avatar?: string | null;
-  role?: string;
-  bio?: string | null;
-  major?: string | null;
-  grade?: string | null;
-  interests?: string[];
-  ideals?: string | null;
-  points?: number;
-  follower_count?: number;
-  following_count?: number;
-  post_count?: number;
-  project_count?: number;
-  column_article_count?: number;
-  has_column_access?: boolean;
-  title?: string;
-  contact_links?: import("~/lib/api/modules/auth").ContactLink[];
-}
+export type AccountLevel = "local" | "normal" | "admin";
 
-export type AccountLevel = User["account_level"];
+export type User = UserInfo &
+  Partial<ProfileInfo> & {
+    account_level: AccountLevel;
+    email?: string | null;
+    phone?: string | null;
+  };
+
 export type LoginMethod =
   "password" | "sms" | "github" | "magic-link" | "passkey";
-export type AuthFlow =
-  "idle" | "logging_in" | "2fa_required" | "2fa_setup_required" | "logged_in";
 export type SessionStatus = "anonymous" | "restoring" | "authenticated";
 
-export interface TempSession {
-  userId: string;
-  method: LoginMethod;
-  isRecovery?: boolean;
-}
-
-export interface AuthState {
-  isLoggedIn: boolean;
-  user: User | null;
-  flow: AuthFlow;
-  tempSession: TempSession | null;
-  loginMethod: LoginMethod | null;
-  session: SessionStatus;
-  lockedUntil?: number | null;
-}
-
-export interface AuthSuccess {
-  requires2FA?: boolean;
-  requires2FASetup?: boolean;
-}
-
+/** 注册表单提交载荷：后端 registerLocal / registerNormal 都强制要求密码。 */
 export interface RegisterData {
   username: string;
-  password?: string;
+  password: string;
   email?: string;
   phone?: string;
 }
-
-export type LoginResult = Result<AuthSuccess, AppError>;
-export type RegisterResult = Result<void, AppError>;

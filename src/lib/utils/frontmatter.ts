@@ -22,6 +22,9 @@ export const responsiveTablesRehypePlugin: RehypePlugin = () => {
 
       if (child.type === "element" && child.tagName === "table") {
         tree.children[i] = {
+          // 保留原节点的 position/data 等元数据：源码映射、错误定位与
+          // Astro 的图片/标题后处理都依赖它们，手搓新节点会把这些信息丢掉
+          ...child,
           type: "element",
           tagName: "div",
           properties: {
@@ -29,8 +32,8 @@ export const responsiveTablesRehypePlugin: RehypePlugin = () => {
           },
           children: [child],
         };
-
-        i++;
+        // 不要额外 i++：包装后的 div 已就位，跳过一位会漏处理紧跟表格的那个兄弟
+        // （相邻两个表格时第二个不会被包装）
       }
     }
   };

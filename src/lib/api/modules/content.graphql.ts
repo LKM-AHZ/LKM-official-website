@@ -24,6 +24,11 @@ export const BOARDS = graphql`
   }
 `;
 
+// ContentItem 的公共字段集：三处查询共用一份，后端改字段名只需改这一行
+// （urql 的 gql 支持在模板里插值普通字符串）
+const CONTENT_ITEM_FIELDS =
+  "id contentType boardId authorId authorName publisher department columnId columnTitle qaQuestionId slug title excerpt summary cover keywords content tags status isPinned isFeatured viewCount likeCount commentCount bookmarkCount forwardCount readingTime createdAt publishedAt";
+
 export const CONTENT_ITEMS = graphql`
   query ContentItems(
     $page: Int!
@@ -38,35 +43,7 @@ export const CONTENT_ITEMS = graphql`
       contentType: $contentType
     ) {
       items {
-        id
-        contentType
-        boardId
-        authorId
-        authorName
-        publisher
-        department
-        columnId
-        columnTitle
-        qaQuestionId
-        slug
-        title
-        excerpt
-        summary
-        cover
-        keywords
-        content
-        tags
-        status
-        isPinned
-        isFeatured
-        viewCount
-        likeCount
-        commentCount
-        bookmarkCount
-        forwardCount
-        readingTime
-        createdAt
-        publishedAt
+      ${CONTENT_ITEM_FIELDS}
       }
       total
       page
@@ -78,35 +55,7 @@ export const CONTENT_ITEMS = graphql`
 export const CONTENT_ITEM = graphql`
   query ContentItem($id: ID!) {
     contentItem(id: $id) {
-      id
-      contentType
-      boardId
-      authorId
-      authorName
-      publisher
-      department
-      columnId
-      columnTitle
-      qaQuestionId
-      slug
-      title
-      excerpt
-      summary
-      cover
-      keywords
-      content
-      tags
-      status
-      isPinned
-      isFeatured
-      viewCount
-      likeCount
-      commentCount
-      bookmarkCount
-      forwardCount
-      readingTime
-      createdAt
-      publishedAt
+      ${CONTENT_ITEM_FIELDS}
     }
   }
 `;
@@ -114,35 +63,7 @@ export const CONTENT_ITEM = graphql`
 export const CONTENT_ITEM_BY_SLUG = graphql`
   query ContentItemBySlug($slug: String!) {
     contentItemBySlug(slug: $slug) {
-      id
-      contentType
-      boardId
-      authorId
-      authorName
-      publisher
-      department
-      columnId
-      columnTitle
-      qaQuestionId
-      slug
-      title
-      excerpt
-      summary
-      cover
-      keywords
-      content
-      tags
-      status
-      isPinned
-      isFeatured
-      viewCount
-      likeCount
-      commentCount
-      bookmarkCount
-      forwardCount
-      readingTime
-      createdAt
-      publishedAt
+      ${CONTENT_ITEM_FIELDS}
     }
   }
 `;

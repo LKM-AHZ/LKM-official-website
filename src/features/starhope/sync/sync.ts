@@ -91,15 +91,27 @@ async function doFlush(): Promise<void> {
     if (entityOps.length === 0) continue;
 
     const table = db[TABLE_BY_ENTITY[entity]] as unknown as {
-      get(id: string): Promise<Record<string, unknown> | undefined>;
+      bulkGet(ids: string[]): Promise<(Record<string, unknown> | undefined)[]>;
     };
+    // 缺 payload 的 upsert 先收集 id 再一次性 bulkGet：逐个 await table.get 会变成
+    // N 次串行 IndexedDB 往返，批量一大就明显拖慢 flush
+    const missingIds = entityOps
+      .filter((op) => op.op !== "delete" && op.payload == null)
+      .map((op) => op.entityId);
+    const fetched = missingIds.length ? await table.bulkGet(missingIds) : [];
+    const rowById = new Map<string, Record<string, unknown>>();
+    missingIds.forEach((id, i) => {
+      const row = fetched[i];
+      if (row) rowById.set(id, row);
+    });
+
     const upserts: Record<string, unknown>[] = [];
     const deletes: { id: string; deleted_at: string }[] = [];
     for (const op of entityOps) {
       if (op.op === "delete") {
         deletes.push({ id: op.entityId, deleted_at: op.updatedAt });
       } else {
-        const row = op.payload ?? (await table.get(op.entityId));
+        const row = op.payload ?? rowById.get(op.entityId);
         if (row) upserts.push(toSnake(row));
       }
     }
@@ -107,7 +119,9 @@ async function doFlush(): Promise<void> {
     const result = await starhopeApi.push(entity, upserts, deletes);
     if (result.isErr()) continue; // 保留下次重试
     await db.syncOps.bulkDelete(entityOps.map((o) => o.id!));
-    setLastSync(entity, result.value.server_time);
+    // 这里刻意不推进 pull 游标。推送返回的 server_time 只说明「我方操作已落库」，
+    // 该时刻之前其他端的远端改动并未被拉取；若用它当 since，下次 pull 会跳过这段区间造成丢更新。
+    // 游标只由 pullAll 在合并成功后推进。代价是下轮会重拉一遍自己推送的数据（merge 幂等，无副作用）。
   }
 }
 

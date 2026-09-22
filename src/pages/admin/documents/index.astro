@@ -52,10 +52,34 @@ const metadata = {
   }
 
   const DOCS_KEY = 'lkm-admin-documents';
+  const STATUSES: readonly DocumentMeta['status'][] = ['draft', 'published', 'archived'];
+
+  /**
+   * localStorage 内容可被手改/旧版本写脏：只接受形状正确的条目并归一化字段，
+   * 否则 docs.filter / d.title.toLowerCase() / statusLabels 都会拿到脏值而抛错或注入标记。
+   */
+  function normalizeDoc(raw: unknown): DocumentMeta | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const d = raw as Record<string, unknown>;
+    if (typeof d.id !== 'string' || !d.id) return null;
+    if (typeof d.title !== 'string') return null;
+    const status = STATUSES.includes(d.status as DocumentMeta['status'])
+      ? (d.status as DocumentMeta['status'])
+      : 'draft';
+    return {
+      id: d.id,
+      title: d.title,
+      lastModified: typeof d.lastModified === 'string' ? d.lastModified : '',
+      status,
+      version: typeof d.version === 'number' ? d.version : 1,
+    };
+  }
 
   function listDocuments(): DocumentMeta[] {
     try {
-      return JSON.parse(localStorage.getItem(DOCS_KEY) ?? '[]');
+      const raw = JSON.parse(localStorage.getItem(DOCS_KEY) ?? '[]');
+      if (!Array.isArray(raw)) return [];
+      return raw.map(normalizeDoc).filter((d): d is DocumentMeta => d !== null);
     } catch {
       return [];
     }
@@ -63,7 +87,14 @@ const metadata = {
 
   function deleteDocument(id: string): void {
     const docs = listDocuments().filter((d) => d.id !== id);
-    localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
+    try {
+      localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
+    } catch (err) {
+      // 存储被禁用（SecurityError）或超额（QuotaExceededError）时写入会抛：
+      // 不接住会让 handleDelete 中断、列表不刷新且确认框反复弹出
+      console.error('[admin/documents] 保存文档列表失败', err);
+      return;
+    }
   }
 
   function renderList(): void {
@@ -103,7 +134,7 @@ const metadata = {
       .map(
         (doc) => `
       <div class="flex items-center justify-between p-4 border-b border-surface-3 last:border-b-0 hover:bg-page-bg transition-colors group">
-        <a href="${buildUrl('/editor')}?id=${doc.id}" class="flex-1 min-w-0">
+        <a href="${buildUrl('/editor')}?id=${encodeURIComponent(doc.id)}" class="flex-1 min-w-0">
           <h3 class="font-medium truncate">${escapeHtml(doc.title)}</h3>
           <p class="text-xs text-deep-text/50 mt-1">
             ${new Date(doc.lastModified).toLocaleString('zh-CN')} ·
@@ -132,10 +163,15 @@ const metadata = {
       .join('');
   }
 
+  /** 这个模板同时把值放进文本节点和属性：引号也必须转义，
+      否则被篡改的 title 可从 `data-doc-title="…"` 里逃逸注入属性 */
   function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   // 模板里的 oninput/onchange 在全局作用域求值，模块作用域的函数必须显式挂到 window

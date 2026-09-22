@@ -1,6 +1,7 @@
 /**
- * Navbar scripts (extracted from FuwariNavbar.astro inline scripts)
+ * 占位模块：这里没有任何导出、也没有实现任何逻辑，不要试图从它 import 工具函数。
  *
- * Includes: mobile menu toggle, pagefind search loading, scroll-based styling.
- * Canonical source remains the inline scripts in FuwariNavbar.astro.
+ * 导航栏的移动端菜单开合、pagefind 搜索加载、滚动样式等逻辑目前**唯一实现**在
+ * FuwariNavbar.astro 的内联脚本里；本文件只是当初抽取工作的预留位置。
+ * 若要真正抽出，请一次性迁移并把内联脚本删掉，避免两份实现并存、互相漂移。
  */

@@ -5,6 +5,7 @@ import Sidebar from '~/features/homepage/components/Sidebar.astro';
 import type { MetaData } from '~/types/core';
 
 export interface SidebarLink {
+  /** i18n key（不是展示文案）：Sidebar 内部会 `t(text)` 再渲染，传字面文本会显示原文/漏翻 */
   text: string;
   href: string;
   icon?: string;
@@ -18,7 +19,14 @@ export interface Props {
 }
 
 const DEFAULT_ICON = 'tabler:link';
-const { metadata, sidebarLinks = [], currentPath = '', navItems } = Astro.props;
+const {
+  metadata,
+  sidebarLinks = [],
+  // 默认取当前路径：留空会让 SSR 首帧所有链接都不高亮（active 只能等客户端脚本跑完才出现）。
+  // 与 Sidebar 客户端脚本一样去掉尾部斜杠，保证 SSR 与客户端判定一致。
+  currentPath = Astro.url.pathname.replace(/\/$/, ''),
+  navItems,
+} = Astro.props;
 ---
 
 <CommunityLayout metadata={metadata} navItems={navItems}>
@@ -27,7 +35,11 @@ const { metadata, sidebarLinks = [], currentPath = '', navItems } = Astro.props;
     sidebarLinks.length > 0 && (
       <Sidebar
         slot="sidebar"
-        groups={sidebarLinks.map(({ icon, ...rest }) => ({ ...rest, icon: icon ?? DEFAULT_ICON }))}
+        groups={sidebarLinks.map(({ icon, ...rest }) => ({
+          ...rest,
+          // 用真值判断而非 ??：数据里写成空串时 ?? 会放行，渲染出一个空图标
+          icon: icon?.trim() || DEFAULT_ICON,
+        }))}
         currentPath={currentPath}
       />
     )

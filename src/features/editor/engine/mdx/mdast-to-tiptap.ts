@@ -10,21 +10,28 @@ interface MarkContext {
   attrs?: Record<string, unknown>;
 }
 
+// MDAST 标记类型 → Tiptap 标记类型（未列出的原样透传，见 marksToTiptap）
+const MARK_TYPE_MAP: Record<string, string> = {
+  strong: "bold",
+  emphasis: "italic",
+  delete: "strike",
+  inlineCode: "code",
+  link: "link",
+};
+
+// 把 mdast 祖先链转成 MarkContext（link 要带上 href 属性）；三处内联分支共用，
+// 避免 link 属性（如将来加 title）要改三遍
+function buildMarks(ancestors: any[]): MarkContext[] {
+  return ancestors.map((a) => ({
+    type: a.type as MarkContext["type"],
+    attrs: a.type === "link" ? { href: (a as any).url } : undefined,
+  }));
+}
+
 function marksToTiptap(marks: MarkContext[]): JSONContent["marks"] {
   if (marks.length === 0) return undefined;
   return marks.map((m) => {
-    const markType =
-      m.type === "strong"
-        ? "bold"
-        : m.type === "emphasis"
-          ? "italic"
-          : m.type === "delete"
-            ? "strike"
-            : m.type === "inlineCode"
-              ? "code"
-              : m.type === "link"
-                ? "link"
-                : m.type;
+    const markType = MARK_TYPE_MAP[m.type] ?? m.type;
     return { type: markType, ...(m.attrs ? { attrs: m.attrs } : {}) };
   });
 }
@@ -41,12 +48,7 @@ function convertInlineChildren(
         result.push({
           type: "text",
           text: child.value as string,
-          marks: marksToTiptap(
-            ancestors.map((a) => ({
-              type: a.type as MarkContext["type"],
-              attrs: a.type === "link" ? { href: (a as any).url } : undefined,
-            })),
-          ),
+          marks: marksToTiptap(buildMarks(ancestors)),
         });
         break;
       case "inlineCode":
@@ -54,12 +56,7 @@ function convertInlineChildren(
           type: "text",
           text: child.value as string,
           marks: [
-            ...(marksToTiptap(
-              ancestors.map((a) => ({
-                type: a.type as MarkContext["type"],
-                attrs: a.type === "link" ? { href: (a as any).url } : undefined,
-              })),
-            ) ?? []),
+            ...(marksToTiptap(buildMarks(ancestors)) ?? []),
             { type: "code" },
           ],
         });
@@ -76,14 +73,17 @@ function convertInlineChildren(
         );
         break;
       case "image": {
+        // image 是块级节点（CustomImage 未开 inline:true），放进 paragraph.content 会被
+        // schema 丢弃。内联位置的图片退化成原始 Markdown 文本：内容不丢且能原样往返。
         const img = child as {
           url: string;
           alt?: string;
           title?: string | null;
         };
+        const title = img.title ? ` "${img.title}"` : "";
         result.push({
-          type: "image",
-          attrs: { src: img.url, alt: img.alt ?? "", title: img.title ?? "" },
+          type: "text",
+          text: `![${img.alt ?? ""}](${img.url}${title})`,
         });
         break;
       }
@@ -96,19 +96,30 @@ function convertInlineChildren(
           type: "text",
           text: value,
           marks: [
-            ...(marksToTiptap(
-              ancestors.map((a) => ({
-                type: a.type as MarkContext["type"],
-                attrs: a.type === "link" ? { href: (a as any).url } : undefined,
-              })),
-            ) ?? []),
+            ...(marksToTiptap(buildMarks(ancestors)) ?? []),
             { type: "inlineMath", attrs: { latex: value } },
           ],
         });
         break;
       }
-      default:
-        result.push({ type: "text", text: mdastToString(child) });
+      case "break":
+        // 硬换行在 Tiptap 里是 hardBreak 节点；走 mdastToString 会得到空串，
+        // 空 text 节点是非法内容
+        result.push({ type: "hardBreak" });
+        break;
+      case "html":
+        // 行内 HTML（如 <br/>）保留原始文本，不经过 mdastToString 丢标签
+        result.push({ type: "text", text: (child.value as string) ?? "" });
+        break;
+      case "mdxJsxTextElement":
+        // 行内 JSX 用原始源码片段承载，保留标签名/属性/表达式
+        result.push({ type: "text", text: serializeJsxElement(child) });
+        break;
+      default: {
+        const text = mdastToString(child);
+        // 未知无文本节点（如 footnoteReference）转出空串会产生非法空 text，直接跳过
+        if (text) result.push({ type: "text", text });
+      }
     }
   }
 
@@ -166,12 +177,19 @@ function convertTable(node: Table): JSONContent {
   return { type: "table", content: tableContent };
 }
 
-function convertListItem(item: any): JSONContent {
-  if (item.checked !== null && item.checked !== undefined) {
+function convertListItem(item: any, forceTask = false): JSONContent {
+  const checked = item.checked !== null && item.checked !== undefined;
+  if (checked || forceTask) {
+    const content = convertBlockChildren(item.children);
     return {
       type: "taskItem",
       attrs: { checked: Boolean(item.checked) },
-      content: convertBlockChildren(item.children),
+      // TaskItem 的 content 契约是 "paragraph block*"：首子必须是段落，
+      // 否则以嵌套列表/代码块/标题开头的任务项会被 ProseMirror 静默丢弃
+      content:
+        content.length > 0 && content[0]?.type === "paragraph"
+          ? content
+          : [{ type: "paragraph" }, ...content],
     };
   }
   return {
@@ -181,9 +199,16 @@ function convertListItem(item: any): JSONContent {
 }
 
 function convertList(node: List): JSONContent {
-  const items = (node.children as any[]).map(convertListItem);
+  const rawItems = node.children as any[];
   // GFM 任务列表 `- [x] 项` 的 listItem 带 checked，容器应为 taskList（与 Tiptap TaskList 一致）
-  const isTaskList = items.some((i) => i.type === "taskItem");
+  //
+  // 混合列表（部分条目带 checked）在 Tiptap 里没有合法表示：TaskList 只接受 taskItem、
+  // BulletList/OrderedList 只接受 listItem，任选其一都会产出被 ProseMirror 静默丢弃的非法
+  // 文档。故按「有任一任务项」整表归一：全部转 taskItem，其余条目 checked=false。
+  const isTaskList = rawItems.some(
+    (i) => i.checked !== null && i.checked !== undefined,
+  );
+  const items = rawItems.map((item) => convertListItem(item, isTaskList));
   if (isTaskList) {
     return { type: "taskList", content: items };
   }
@@ -311,10 +336,14 @@ function convertBlockChildren(children: any[]): JSONContent[] {
         const el = child as { name?: string };
         const name = el.name ?? "";
         if (name === "Callout" || name === "Figure") {
-          // 内联 Callout/Figure 不常见，作为 rawMdx 处理
+          // 内联 Callout/Figure 不是可承载子内容的节点，但与块级分支同一原则：
+          // 保留完整 JSX 源码（mdastToString 只留内文、会丢标签），往返不丢内容
           result.push({
             type: "rawMdx",
-            attrs: { source: mdastToString(child), sourceKind: "text" },
+            attrs: {
+              source: serializeJsxElement(el as unknown as any),
+              sourceKind: "text",
+            },
           });
         } else {
           result.push({

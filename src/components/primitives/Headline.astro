@@ -2,12 +2,13 @@
 import type { Headline as Props } from '~/types/core';
 import { twMerge } from 'tailwind-merge';
 
-const {
-  title = await Astro.slots.render('title'),
-  subtitle = await Astro.slots.render('subtitle'),
-  tagline,
-  classes = {},
-} = Astro.props;
+const { title, subtitle, tagline, classes = {} } = Astro.props;
+
+// 优先级显式化：非空 prop > 同名具名 slot > 空（对应元素不渲染）。
+// 不用解构默认值——那只在 prop 严格为 undefined 时回落，而调用方常把 Astro.slots.render 的
+// 空串直接传进来，会把 prop 与 slot 两个来源一起吃掉。
+const resolvedTitle = title || (await Astro.slots.render('title'));
+const resolvedSubtitle = subtitle || (await Astro.slots.render('subtitle'));
 
 const {
   container: containerClass = 'max-w-3xl',
@@ -17,12 +18,16 @@ const {
 ---
 
 {
-  (title || subtitle || tagline) && (
+  (resolvedTitle || resolvedSubtitle || tagline) && (
     <div class={twMerge('mb-8 md:mx-auto md:mb-12 text-center', containerClass)}>
       {tagline && <p class="text-sm text-primary font-semibold tracking-wide uppercase mb-2" set:html={tagline} />}
-      {title && <h2 class={twMerge('font-semibold leading-tight font-heading', titleClass)} set:html={title} />}
+      {resolvedTitle && (
+        <h2 class={twMerge('font-semibold leading-tight font-heading', titleClass)} set:html={resolvedTitle} />
+      )}
 
-      {subtitle && <p class={twMerge('mt-3 text-[17px] text-text-muted', subtitleClass)} set:html={subtitle} />}
+      {resolvedSubtitle && (
+        <p class={twMerge('mt-3 text-[17px] text-text-muted', subtitleClass)} set:html={resolvedSubtitle} />
+      )}
     </div>
   )
 }

@@ -4,7 +4,7 @@
 //     自动弹 StepUp2FADialog，用户输 TOTP 换取带信任的新 token 后重放原 action。
 //   - 弹窗状态收敛在 dialog reactive 对象，由 StepUp2FADialog 绑定渲染。
 
-import { reactive } from "vue";
+import { getCurrentScope, onScopeDispose, reactive } from "vue";
 import { authApi } from "~/lib/api/modules/auth";
 import { useAuthStore } from "~/stores/auth";
 import { setHttpTokens } from "~/lib/http/client";
@@ -61,6 +61,14 @@ export function useStepUp2FA(message?: string): UseStepUp2FA {
     resolver = null;
   }
 
+  // 组件在弹窗打开期间卸载时，必须释放待决 Promise：否则调用方 run() 会永远挂起
+  //（finish 只由 onCancel/onCode 触发）。getCurrentScope 守卫避免在非 setup 上下文调用时告警。
+  if (getCurrentScope()) {
+    onScopeDispose(() => {
+      if (resolver) finish(false);
+    });
+  }
+
   function onCancel(): void {
     finish(false);
   }
@@ -84,11 +92,15 @@ export function useStepUp2FA(message?: string): UseStepUp2FA {
       }
       // 换发成功：写回 http 适配器 + 认证 store，获得 1h 信任
       const data = r.value;
-      if (data.access_token && data.refresh_token) {
-        setHttpTokens(data.access_token, data.refresh_token);
-        auth.setTokens(data.access_token, data.refresh_token);
-        auth.persistToStorage();
+      if (!data.access_token || !data.refresh_token) {
+        // 缺 token 时不能算成功：重放动作会带着旧 token 再失败一次，
+        // 而那时弹窗已关闭，用户看不到任何原因。保留弹窗让用户可重试。
+        dialog.error = t("messages.operationFailed");
+        return;
       }
+      setHttpTokens(data.access_token, data.refresh_token);
+      auth.setTokens(data.access_token, data.refresh_token);
+      auth.persistToStorage();
       finish(true);
     } finally {
       dialog.submitting = false;

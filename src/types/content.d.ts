@@ -4,6 +4,7 @@
 export type ContentType =
   "discussion" | "article" | "column_post" | "blog_post" | "qa";
 
+
 /** 板块（boards 是统一分类轴，支持父/子层级嵌套展示） */
 export interface BoardItem {
   id: string;
@@ -28,11 +29,14 @@ export interface ContentItem {
   publisher: string | null;
   department: string | null;
   column_id: string | null;
-  column_title: string;
+  // 非专栏内容（discussion/qa/article）没有专栏，column_title 与 column_id 同为可空
+  column_title: string | null;
   qa_question_id: string | null;
   slug: string | null;
   title: string;
+  /** 列表/卡片用的短摘要（后端必给，可能为空串）。列表优先用它 */
   excerpt: string;
+  /** 详情页用的富摘要，可为空；excerpt 为空时才回退到 summary */
   summary: string | null;
   cover: string | null;
   keywords: string[];

@@ -39,9 +39,8 @@ const columnsClass =
         ? 'sm:grid-cols-2'
         : '';
 
-function iconClass(defaultIconClass: string) {
-  return isInline ? 'flex-shrink-0 mt-0.5 mr-2 rtl:mr-0 rtl:ml-2 w-5 h-5 text-primary' : defaultIconClass;
-}
+// 只有 inline 变体会用到这组图标类（调用点只传空串），故不再保留 dead 参数与分支
+const inlineIconClass = 'flex-shrink-0 mt-0.5 mr-2 rtl:mr-0 rtl:ml-2 w-5 h-5 text-primary';
 
 function itemContainerClass() {
   return isInline
@@ -90,7 +89,7 @@ function itemContainerClass() {
               {(icon || defaultIcon) && (
                 <div class="flex justify-center">
                   {isInline ? (
-                    <Icon name={icon || defaultIcon} class={iconClass('')} />
+                    <Icon name={icon || defaultIcon} class={inlineIconClass} />
                   ) : /^tabler:/.test(icon || defaultIcon || '') ? (
                     <Icon name={icon || defaultIcon} class="mb-6 w-12 h-12 text-primary" />
                   ) : (

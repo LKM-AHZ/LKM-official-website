@@ -14,7 +14,17 @@ const {
 } = Astro.props;
 ---
 
-<WidgetWrapper id={id} isDark={isDark} containerClass={`max-w-7xl mx-auto ${classes?.container ?? ''}`} bg={bg}>
+<!-- 宽度/居中/内边距由 WidgetWrapper 负责（它按 width 生成 max-w-*，并已带 mx-auto/px-*）；
+     这里再写死 max-w-7xl 会在 twMerge 里压掉调用方想要的 narrow 宽度。
+     Widget.classes 的值类型允许嵌套对象，故先确认是字符串再透传 -->
+<WidgetWrapper
+  id={id}
+  isDark={isDark}
+  containerClass={typeof classes?.container === "string"
+    ? classes.container
+    : undefined}
+  bg={bg}
+>
   <Headline title={title} subtitle={subtitle} tagline={tagline} classes={classes?.headline as Record<string, string>} />
 
   <slot />

@@ -13,6 +13,10 @@ export function setupKeyboardAutoScroll(
   let rafId: number | null = null;
 
   if (vv) {
+    const resetPadding = (): void => {
+      editorEl.style.paddingBottom = "";
+    };
+
     const handleResize = (): void => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
@@ -20,13 +24,14 @@ export function setupKeyboardAutoScroll(
         if (heightDiff > 150) {
           // 键盘弹出：增加底部 padding 并滚动到焦点元素
           editorEl.style.paddingBottom = `${heightDiff}px`;
-          const activeEl = document.activeElement as HTMLElement;
-          if (activeEl && editorEl.contains(activeEl)) {
+          // activeElement 可能是 body/document 这类非 HTMLElement 节点，别断言成元素
+          const activeEl = document.activeElement as HTMLElement | null;
+          if (activeEl instanceof HTMLElement && editorEl.contains(activeEl)) {
             activeEl.scrollIntoView({ block: "center", behavior: "smooth" });
           }
         } else {
           // 键盘收起
-          editorEl.style.paddingBottom = "";
+          resetPadding();
         }
       });
     };
@@ -34,18 +39,23 @@ export function setupKeyboardAutoScroll(
     vv.addEventListener("resize", handleResize);
     return () => {
       vv.removeEventListener("resize", handleResize);
-      editorEl.style.paddingBottom = "";
+      resetPadding();
       if (rafId) cancelAnimationFrame(rafId);
     };
   }
 
   // Fallback: focus-based detection (old browsers without visualViewport)
+  let focusScrollTimer: ReturnType<typeof setTimeout> | null = null;
+
   const handleFocusIn = (e: FocusEvent): void => {
     const target = e.target as HTMLElement;
     if (!editorEl.contains(target)) return;
 
+    // 记录定时器：否则失焦/卸载都无法取消，回调可能在组件销毁后继续改 padding
+    if (focusScrollTimer) clearTimeout(focusScrollTimer);
     // Wait for keyboard animation to start
-    setTimeout(() => {
+    focusScrollTimer = setTimeout(() => {
+      focusScrollTimer = null;
       const rect = target.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       // If target is near the bottom half, scroll it up
@@ -56,7 +66,14 @@ export function setupKeyboardAutoScroll(
     }, 300);
   };
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: FocusEvent): void => {
+    // focusout 会冒泡：焦点只是在编辑器内部两个字段之间移动时不应清 padding，
+    // 否则 300ms 后又被 focusin 加回来，画面会抖一下
+    if (e.relatedTarget && editorEl.contains(e.relatedTarget as Node)) return;
+    if (focusScrollTimer) {
+      clearTimeout(focusScrollTimer);
+      focusScrollTimer = null;
+    }
     editorEl.style.paddingBottom = "";
   };
 
@@ -66,6 +83,7 @@ export function setupKeyboardAutoScroll(
   return () => {
     editorEl.removeEventListener("focusin", handleFocusIn);
     editorEl.removeEventListener("focusout", handleBlur);
+    if (focusScrollTimer) clearTimeout(focusScrollTimer);
     editorEl.style.paddingBottom = "";
   };
 }
@@ -92,6 +110,26 @@ export function setupTouchGestures(
   let touchTarget: HTMLElement | null = null;
   let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 
+  const cancelLongPress = (): void => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  /** 手指移动超过阈值即取消长按（留出抖动余量，避免轻微移动就判失败） */
+  const MOVE_CANCEL_PX = 10;
+  const onTouchMove = (e: TouchEvent): void => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    if (
+      Math.abs(touch.clientX - touchStartX) > MOVE_CANCEL_PX ||
+      Math.abs(touch.clientY - touchStartY) > MOVE_CANCEL_PX
+    ) {
+      cancelLongPress();
+    }
+  };
+
   const onTouchStart = (e: TouchEvent): void => {
     const touch = e.touches[0];
     touchStartX = touch.clientX;
@@ -99,18 +137,18 @@ export function setupTouchGestures(
     touchStartTime = Date.now();
     touchTarget = e.target as HTMLElement;
 
+    // 上一次长按未结束就再次按下：先清掉旧计时器，否则会重复触发
+    cancelLongPress();
     if (handlers.onLongPress) {
       longPressTimer = setTimeout(() => {
+        longPressTimer = null;
         if (touchTarget) handlers.onLongPress?.(touchTarget);
       }, 600);
     }
   };
 
   const onTouchEnd = (e: TouchEvent): void => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
+    cancelLongPress();
 
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartX;
@@ -129,10 +167,15 @@ export function setupTouchGestures(
 
   container.addEventListener("touchstart", onTouchStart);
   container.addEventListener("touchend", onTouchEnd);
+  // 滚动/拖动/被系统打断时取消长按，否则滑动列表也会触发 onLongPress
+  container.addEventListener("touchmove", onTouchMove);
+  container.addEventListener("touchcancel", cancelLongPress);
 
   return () => {
     container.removeEventListener("touchstart", onTouchStart);
     container.removeEventListener("touchend", onTouchEnd);
-    if (longPressTimer) clearTimeout(longPressTimer);
+    container.removeEventListener("touchmove", onTouchMove);
+    container.removeEventListener("touchcancel", cancelLongPress);
+    cancelLongPress();
   };
 }

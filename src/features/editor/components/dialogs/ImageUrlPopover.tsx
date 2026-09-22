@@ -13,15 +13,27 @@ export default function ImageUrlPopover({
 }: ImageUrlPopoverProps): ReactElement {
   const [src, setSrc] = useState("");
   const [alt, setAlt] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (
     e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>,
   ): void => {
     e.preventDefault();
     const trimmed = src.trim();
-    if (trimmed) {
-      onInsert(trimmed, alt.trim());
+    if (!trimmed) return;
+    // 地址来自用户输入/文档内容，且提交后直接写进文档：放行 javascript:/data:text/html
+    // 之类协议会被渲染成可执行 URL，故按白名单校验（http(s)、站内 / 绝对路径、data:image/）
+    if (!/^(https?:|\/|data:image\/)/i.test(trimmed)) {
+      setError(
+        t("editor.validation.disallowedProtocol", {
+          nodeType: "image",
+          url: trimmed,
+        }),
+      );
+      return;
     }
+    setError("");
+    onInsert(trimmed, alt.trim());
   };
 
   return (
@@ -38,10 +50,14 @@ export default function ImageUrlPopover({
             type="url"
             className="rte-input"
             value={src}
-            onChange={(e) => setSrc(e.target.value)}
+            onChange={(e) => {
+              setSrc(e.target.value);
+              setError("");
+            }}
             placeholder="https://..."
             autoFocus
           />
+          {error && <p className="text-xs text-error">{error}</p>}
           <label className="text-sm font-medium text-deep-text/70 block mb-1">
             {t("editor.altText")}
           </label>

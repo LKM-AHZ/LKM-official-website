@@ -12,10 +12,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# 这些 job 只 checkout + 本地构建/测试，不需要写权限；显式收窄 GITHUB_TOKEN 作用域
+permissions:
+  contents: read
+
 jobs:
   # ── 前端构建 ──
   build:
     runs-on: ubuntu-latest
+    # 无上限时 install/build 卡住会占满 runner 直到 GitHub 6 小时默认上限
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -26,12 +32,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: |
           pnpm run build
-          ls -la
+          # 断言构建产物真的存在：原先的 ls -la 什么都验证不了，构建坏了这一步照样绿
+          test -f dist/server/entry.mjs
+      # 把 dist 传给下面的产物检查 job：它此前重新 install+build 一遍，
+      # 是 CI 里最贵的一段重复开销（dist 约 14MB，传输远便宜于重跑构建）
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
 
   # ── 产物检查（SEO / 内部链接 / Bundle 预算） ──
   artifacts:
     runs-on: ubuntu-latest
     needs: build
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -40,7 +55,10 @@ jobs:
           node-version: 24
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
       - run: pnpm run check:seo
       - run: pnpm run check:links
       - run: pnpm run check:budget
@@ -48,6 +66,7 @@ jobs:
   # ── 前端检查（类型 + ESLint + Prettier） ──
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -61,6 +80,7 @@ jobs:
   # ── 前端单元测试（Vitest） ──
   test-frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

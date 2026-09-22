@@ -40,10 +40,27 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-/** 自闭合 Callout：`<Callout  attrs  />`（attrs 内不再含 `>`） */
-const CALLOUT_SELF = /<Callout\s+([^>]*?)\/>/g;
-/** 自闭合 Figure：`<Figure  attrs  />` */
-const FIGURE_SELF = /<Figure\s+([^>]*?)\/>/g;
+/**
+ * 属性串片段：引号内的 `>` 属于属性值（编辑器直接插值用户输入的 title/caption，
+ * 如 `title="5 > 3"`），不能当成标签结束；引号外的 `>` 仍终止匹配，避免吞掉后续正文。
+ */
+const ATTR_CHUNK = String.raw`(?:[^>"']|"[^"]*"|'[^']*')*?`;
+/** 自闭合 Callout：`<Callout attrs />`（无属性写成 `<Callout />` 同样命中） */
+const CALLOUT_SELF = new RegExp(
+  String.raw`<Callout(?:\s+(${ATTR_CHUNK}))?\s*\/>`,
+  "g",
+);
+/** 自闭合 Figure：`<Figure attrs />` */
+const FIGURE_SELF = new RegExp(
+  String.raw`<Figure(?:\s+(${ATTR_CHUNK}))?\s*\/>`,
+  "g",
+);
+
+/**
+ * 代码区域（围栏代码块 / 行内代码）：里面的 `<Callout/>` 是示例文本，改写后会被
+ * markdown 当作真 HTML 解析，导致示例内容变形或消失，故跳过。
+ */
+const CODE_REGION = /(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)/g;
 
 /**
  * 把 content 中 `<Callout ... />` / `<Figure ... />` 转为 .lkm-* HTML。
@@ -52,7 +69,18 @@ const FIGURE_SELF = /<Figure\s+([^>]*?)\/>/g;
  */
 export function preprocessEditorMdx(md) {
   return md
-    .replace(CALLOUT_SELF, (_match, attrsStr) => {
+    .split(CODE_REGION)
+    .map((segment, index) =>
+      // 捕获组 split 后，代码区域落在奇数下标
+      index % 2 === 1 ? segment : transformTags(segment),
+    )
+    .join("");
+}
+
+/** 只改写正文片段（代码区域之外的 `<Callout ... />` / `<Figure ... />`） */
+function transformTags(md) {
+  return md
+    .replace(CALLOUT_SELF, (_match, attrsStr = "") => {
       // type 同时用作 CSS 类后缀与文案查表键：收敛到白名单，未知值一律按 info 处理
       const rawType = parseAttr(attrsStr, "type");
       const type = Object.prototype.hasOwnProperty.call(CALLOUT_LABELS, rawType)
@@ -69,7 +97,7 @@ export function preprocessEditorMdx(md) {
         `</div>`
       );
     })
-    .replace(FIGURE_SELF, (_match, attrsStr) => {
+    .replace(FIGURE_SELF, (_match, attrsStr = "") => {
       const rawAlign = parseAttr(attrsStr, "align");
       const align = FIGURE_ALIGNS.includes(rawAlign) ? rawAlign : "center";
       const src = parseAttr(attrsStr, "src");
@@ -95,10 +123,15 @@ export function preprocessEditorMdx(md) {
  * @returns {string} 属性值（不存在返回 ''）
  */
 function parseAttr(attrsStr, name) {
-  const re = new RegExp(`\\b${name}=("([^"]*)"|'([^']*)')`);
+  // 属性名要求前面是串首或空白：`\b` 会把 `data-type="x"` 里的 type 也匹配上。
+  // 值支持 "x" / 'x' / {400}（JSX 表达式，编辑器对数字属性会这么写）/ 裸值（width=400）
+  const re = new RegExp(
+    `(?:^|\\s)${name}=(?:"([^"]*)"|'([^']*)'|\\{(\\d+(?:\\.\\d+)?)\\}|([^\\s"'>]+))`,
+  );
   const m = re.exec(attrsStr);
   if (!m) return "";
-  return m[2] ?? m[3] ?? "";
+  // 引号三种取值方式 + {数值} + 裸值，按组序取第一个命中的
+  return m[1] ?? m[2] ?? m[3] ?? m[4] ?? "";
 }
 
 export default preprocessEditorMdx;

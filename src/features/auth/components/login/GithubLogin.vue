@@ -11,9 +11,6 @@
       </svg>
       {{ t("auth.login.githubComingSoon") }}
     </button>
-    <div v-if="cancelled" class="alert alert-warning text-sm">
-      {{ t("auth.login.githubCancelled") }}
-    </div>
   </div>
 </template>
 

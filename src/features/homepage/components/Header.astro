@@ -4,10 +4,10 @@ import { t } from '~/lib/i18n';
 import Logo from '~/features/shell/components/Logo.astro';
 import ToggleTheme from '~/features/shell/common/components/ToggleTheme.astro';
 import ToggleMenu from '~/features/shell/common/components/ToggleMenu.astro';
+import MobileNavPanel from '~/features/shell/components/MobileNavPanel.astro';
 
-import { getHomePermalink } from '~/lib/utils/permalinks';
+import { getAsset, getHomePermalink } from '~/lib/utils/permalinks';
 import { trimSlash } from '~/lib/utils/paths';
-import { getAsset } from '~/lib/utils/permalinks';
 
 interface Link {
   text?: string;
@@ -41,6 +41,24 @@ const {
 } = Astro.props;
 
 const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
+
+// 从 MenuLink[] 转换为 MobileNavPanel 需要的格式。
+// ToggleMenu 派发 mobile-nav:toggle 的目标 id 是 'mobile-nav-header'，
+// 必须在本组件内渲染对应的面板，否则移动端汉堡按钮点下去没有任何反应。
+function toMobileLinks(
+  items: Array<MenuLink>
+): Array<{ name: string; url: string; children?: Array<{ name: string; url: string }> }> {
+  return items.map(({ text, href, links }) => ({
+    name: text || '',
+    url: href || '#',
+    children: links?.map(({ text: childText, href: childHref }) => ({
+      name: childText || '',
+      url: childHref || '#',
+    })),
+  }));
+}
+
+const mobileLinks = toMobileLinks(links);
 ---
 
 <header
@@ -162,3 +180,5 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
     </div>
   </div>
 </header>
+
+<MobileNavPanel id="mobile-nav-header" title={t('nav.navigation')} links={mobileLinks} />

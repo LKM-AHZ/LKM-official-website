@@ -78,6 +78,9 @@ const attempts = ref(0);
 let timer: ReturnType<typeof setInterval> | undefined;
 
 function handleSendCode() {
+  // 重复点「发送验证码」时先清掉在跑的计时器：否则多个 interval 叠加会让倒计时
+  // 成倍递减并泄漏 timer（按钮在 codeSent 但倒计时为 0 时仍可点，这条路径可达）
+  if (timer) clearInterval(timer);
   codeSent.value = true;
   attempts.value = 0;
   countdown.value = 60;
@@ -99,6 +102,11 @@ async function handleSubmit() {
   if (attempts.value >= 3) {
     codeError.value = t("auth.login.tooManyAttempts");
     codeSent.value = false;
+    // 作废本次验证码后必须停掉倒计时：否则「码已作废」与「倒计时仍在跑」两种状态并存，
+    // 重发按钮的可用性判断（countdown > 0）与实际状态也对不上
+    if (timer) clearInterval(timer);
+    timer = undefined;
+    countdown.value = 0;
     code.value = "";
     attempts.value = 0;
     return;
@@ -107,7 +115,9 @@ async function handleSubmit() {
   codeError.value = "";
   attempts.value++;
   emit("login", "sms", {
-    phoneOrEmail: props.identifiedAccount.username,
+    // 提交 UI 上展示的那个标识（手机号/邮箱），username 与展示值可能不同；
+    // 两个都没有时才退回 username
+    phoneOrEmail: target.value.trim() || props.identifiedAccount.username,
     code: code.value,
   });
   loading.value = false;

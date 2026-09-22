@@ -649,16 +649,13 @@
     height: 380px;
   }
 
+  /* 合成一条规则：原先分成两条同名规则，后者靠顺序覆盖 padding-right，改一处就容易踩坑 */
   .ct-card {
     min-height: 380px;
-    padding: 0;
-  }
-
-  .ct-card {
+    padding: 0 0.5rem 0 0;
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
-    padding-right: 0.5rem;
   }
 
   .ct-arrows-desktop {
@@ -815,9 +812,9 @@
     @apply bg-[var(--secondary)] text-[var(--on-secondary)]
            hover:brightness-110 active:brightness-90;
   }
-  /* 中性灰按钮（Button.astro 的 variant="secondary"/默认兜底），文字恒为白色 */
+  /* 中性灰按钮（Button.astro 的 variant="secondary"/默认兜底） */
   .btn-neutral {
-    @apply bg-[var(--neutral)] text-white
+    @apply bg-[var(--neutral)] text-[var(--neutral-content)]
            hover:brightness-110 active:brightness-90;
   }
   /* 文字链按钮（Button.astro 的 variant="link"） */

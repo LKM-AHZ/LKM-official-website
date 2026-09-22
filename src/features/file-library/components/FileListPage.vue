@@ -140,7 +140,7 @@
               <div
                 class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-text-muted/60"
               >
-                <span>{{ t(file.uploaderName) }}</span>
+                <span>{{ file.uploaderName }}</span>
                 <span>{{ formatSize(file.size) }}</span>
                 <span>{{
                   t("community.fileLibrary.downloadCount", {
@@ -187,7 +187,7 @@
                   />
                   {{
                     downloading.has(file.id)
-                      ? t("community.fileLibrary.statusPending")
+                      ? t("common.loading")
                       : "下载"
                   }}
                 </button>
@@ -221,7 +221,7 @@
             </div>
           </div>
           <div class="text-xs text-text-muted/60 space-y-1 flex-1">
-            <div>{{ t(file.uploaderName) }} · {{ formatSize(file.size) }}</div>
+            <div>{{ file.uploaderName }} · {{ formatSize(file.size) }}</div>
             <div>
               {{
                 t("community.fileLibrary.downloadCount", {
@@ -269,7 +269,7 @@
       <div
         v-if="showUpload"
         class="fixed inset-0 bg-black/40 dark:bg-black/70 z-[150] flex items-center justify-center"
-        @click.self="showUpload = false"
+        @click.self="closeUpload"
       >
         <div class="bg-card-bg rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
           <h3 class="text-lg font-semibold text-deep-text mb-4">
@@ -281,6 +281,7 @@
               class="border-2 border-dashed border-surface-3 rounded-xl p-6 text-center hover:border-primary/40 transition-colors cursor-pointer block"
             >
               <input
+                ref="fileInputEl"
                 type="file"
                 class="hidden"
                 :disabled="uploading"
@@ -333,7 +334,7 @@
           <div class="flex gap-2 justify-end mt-4">
             <button
               class="btn-ghost px-4 py-2 rounded-lg text-sm"
-              @click="showUpload = false"
+              @click="closeUpload"
             >
               {{ t("community.fileLibrary.cancel") }}
             </button>
@@ -356,7 +357,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
 import { fileLibraryApi } from "~/lib/api";
 import type { FileEntry } from "~/lib/api/modules/file-library";
@@ -388,18 +389,38 @@ const uploadDesc = ref("");
 // 上传态：所选文件 + 上传中标志（用于禁用/提示）
 const selectedFile = ref<File | null>(null);
 const uploading = ref(false);
+// 文件 input 的模板引用：关闭弹窗时要把 DOM 里的选择也清掉，否则再选同一个文件不会触发 change
+const fileInputEl = ref<HTMLInputElement | null>(null);
 
 // 文件全量数据：由后端 API 拉取（mock 已移入后端 seed）
 const files = ref<FileEntry[]>([]);
 
 // 拉取列表（上传成功后也走它刷新）
+//
+// getFiles 默认只取第 1 页 20 条，而本页的搜索、筛选、文件夹计数都对 files 全量在
+// 前端计算，只取首屏会让超过 20 个文件后的统计与搜索结果静默缺失。
+// 后端 PaginateDep 的 limit 上限是 100（Query(le=100)），传更大值会被拒，故按 100 翻页取全。
+const FILE_PAGE_SIZE = 100;
+const MAX_FILE_PAGES = 50; // 兜底上限，避免后端异常时无限翻页
+
 async function loadFiles() {
-  files.value = await fileLibraryApi.getFiles();
+  const all: FileEntry[] = [];
+  for (let page = 1; page <= MAX_FILE_PAGES; page++) {
+    const batch = await fileLibraryApi.getFiles(page, FILE_PAGE_SIZE);
+    all.push(...batch);
+    if (batch.length < FILE_PAGE_SIZE) break;
+  }
+  files.value = all;
 }
 
 onMounted(async () => {
   mounted.value = true;
   await loadFiles();
+});
+
+onBeforeUnmount(() => {
+  // 卸载后定时器再动 blob URL 已无意义，清掉避免悬空回调
+  if (previewRevokeTimer !== null) window.clearTimeout(previewRevokeTimer);
 });
 
 // 顶部常驻搜索栏
@@ -506,6 +527,15 @@ function onFileChange(e: Event) {
   selectedFile.value = input.files?.[0] ?? null;
 }
 
+// 关闭上传弹窗：连同捕获的表单状态（所选文件 / 说明 / input 里的选择）一起清掉。
+// 原来只把 showUpload 置 false，重开弹窗会带着上次的文件与说明，存在误提交。
+function closeUpload() {
+  showUpload.value = false;
+  selectedFile.value = null;
+  uploadDesc.value = "";
+  if (fileInputEl.value) fileInputEl.value.value = "";
+}
+
 // 真提交：uploadInit 判定 direct（S3 预签名直传，登记改由事件通知驱动 → 轮询确认）
 // 或 sync（Local multipart 回退），成功后关弹窗并刷新列表。错误沿用组件现有 alert/console 风格。
 async function doUpload() {
@@ -547,8 +577,7 @@ async function doUpload() {
         alert("文件已上传，正在确认中，请稍后在列表确认状态");
       }
     }
-    showUpload.value = false;
-    selectedFile.value = null;
+    closeUpload();
     await loadFiles();
   } catch (e) {
     console.error("上传失败", e);
@@ -562,6 +591,8 @@ async function doUpload() {
 const downloading = ref<Set<string>>(new Set());
 // 预览中文件 id 集合（防重复触发）
 const previewing = ref<Set<string>>(new Set());
+// 预览标签的 blob 清理定时器句柄（卸载时统一清掉）
+let previewRevokeTimer: number | null = null;
 
 // 下载：approved 文件按后端给出的 kind 分叉。
 // presigned → S3 直连跳转；backend → 鉴权拉 blob 后走合成 <a download>。
@@ -582,7 +613,9 @@ async function downloadFile(file: FileEntry) {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // 点击后立即 revoke 会让 Firefox/Safari 尚未开始读取 blob 的下载被中断（静默失败），
+      // 故延后释放
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   } catch (e) {
     // 失败提示：组件无 toast 体系，沿用 alert 原语 + console
@@ -599,14 +632,28 @@ async function downloadFile(file: FileEntry) {
 async function previewFile(file: FileEntry) {
   if (previewing.has(file.id)) return;
   previewing.add(file.id);
+  // 必须在 await 之前**同步**开窗：await 之后不再算用户手势，弹窗拦截器会直接拦掉，
+  // 原实现表现为「点了预览没反应」
+  const win = window.open("", "_blank");
   try {
     const blob = await fileLibraryApi.getContentBlob(file.id);
     const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, "_blank");
-    // 新标签加载是异步的，立即 revoke 可能使部分浏览器加载中断；
-    // 用延时兜底清理，避免永久泄漏。
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    if (!win) {
+      // 被拦截/弹窗被禁用：释放 blob 并留日志（本文件暂缺对应 i18n key，故不弹提示）
+      URL.revokeObjectURL(blobUrl);
+      console.error("预览被浏览器弹窗拦截器阻止，请允许本站弹窗后重试");
+      return;
+    }
+    win.location.href = blobUrl;
+    // 新标签加载是异步的，立即 revoke 可能使部分浏览器加载中断；用延时兜底清理，
+    // 并记录句柄以便卸载时清掉
+    if (previewRevokeTimer !== null) window.clearTimeout(previewRevokeTimer);
+    previewRevokeTimer = window.setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+      previewRevokeTimer = null;
+    }, 60000);
   } catch (e) {
+    if (win) win.close();
     console.error("文件预览失败", e);
     alert("文件预览失败，请稍后重试");
   } finally {

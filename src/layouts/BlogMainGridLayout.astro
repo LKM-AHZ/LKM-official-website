@@ -26,7 +26,11 @@ interface Props {
 }
 
 const { title, banner, description, lang, setOGTypeArticle, headings = [], username, navItems } = Astro.props;
-const hasBannerCredit = siteConfig.banner.enable && siteConfig.banner.credit.enable;
+// 必须同时要求 credit.url 非空：否则会渲染出 href="" + target="_blank" 的空链接
+const hasBannerCredit =
+  siteConfig.banner.enable &&
+  siteConfig.banner.credit.enable &&
+  !!siteConfig.banner.credit.url;
 const hasBannerLink = !!siteConfig.banner.credit.url;
 
 const mainPanelTop = siteConfig.banner.enable
@@ -35,6 +39,14 @@ const mainPanelTop = siteConfig.banner.enable
 
 // 博客网格顶栏：从统一菜单池用 navItems 白名单挑选（桌面 SiteNavbar），并向底层 BlogLayout 透传（移动端）
 const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
+
+// filterNavbarByNames 对未命中的名字是静默丢弃的：白名单写错（或传 []）会得到一个
+// 没有任何链接的导航栏，且不报错。开发期显式告警，避免上线后才发现。
+if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
+  console.warn(
+    `[BlogMainGridLayout] navItems 全部未匹配到菜单项（导航栏为空）: ${navItems.join(', ')}`,
+  );
+}
 ---
 
 <Layout

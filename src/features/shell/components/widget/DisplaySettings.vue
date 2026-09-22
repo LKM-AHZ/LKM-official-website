@@ -15,7 +15,8 @@ onMounted(() => {
 });
 
 function resetHue() {
-  hue.value = getDefaultHue();
+  // 复用已加载的 defaultHue：再读一次 getDefaultHue() 可能与用于按钮可见性比较的值不一致
+  hue.value = defaultHue.value;
 }
 
 watch(hue, (val) => {
@@ -36,7 +37,7 @@ watch(hue, (val) => {
       >
         {{ t("theme.color") }}
         <button
-          aria-label="Reset to Default"
+          :aria-label="t('theme.resetToDefault')"
           class="btn-regular w-7 h-7 rounded-md active:scale-90 will-change-transform"
           :class="{ 'opacity-0 pointer-events-none': hue === defaultHue }"
           @click="resetHue"

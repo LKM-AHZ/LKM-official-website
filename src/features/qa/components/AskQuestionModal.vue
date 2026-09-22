@@ -296,6 +296,9 @@ const errors = reactive<Record<FieldKey, string>>({
 });
 
 const imageUrls = reactive<Record<string, string>>({});
+// IndexedDB 读取是异步的：中途若发生重置/重新打开，本轮结果必须丢弃，
+// 否则会把已清空的条目又写回 imageUrls。声明须在下面的 immediate watch 之前（会被 resetForm 用到）
+let refreshToken = 0;
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
 const confirmOpen = ref(false);
@@ -306,6 +309,16 @@ let toastTimer: ReturnType<typeof setTimeout> | null = null;
 const totalBounty = computed<number>(() =>
   computeTotalBounty(formModel.bountyPeople, formModel.bountyPerPerson),
 );
+
+// 打开前的 body overflow 先存下来：直接置 "" 会连带解掉同页其它浮层的滚动锁
+let prevBodyOverflow = "";
+let bodyLocked = false;
+
+function unlockBody(): void {
+  if (!bodyLocked) return;
+  document.body.style.overflow = prevBodyOverflow;
+  bodyLocked = false;
+}
 
 watch(
   () => props.show,
@@ -319,12 +332,19 @@ watch(
       } else {
         resetForm();
       }
+      if (!bodyLocked) {
+        prevBodyOverflow = document.body.style.overflow;
+        bodyLocked = true;
+      }
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "";
+      unlockBody();
       confirmOpen.value = false;
     }
   },
+  // immediate：mounted 时 props.show 已经是 true 的情况（Teleport 只由 mounted 控制），
+  // 不加就永远不会加载草稿、也不会锁 body 滚动
+  { immediate: true },
 );
 
 onMounted(() => {
@@ -333,7 +353,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   document.removeEventListener("keydown", onKeydown);
-  document.body.style.overflow = "";
+  unlockBody();
   if (toastTimer) clearTimeout(toastTimer);
 });
 
@@ -347,6 +367,8 @@ function onKeydown(e: KeyboardEvent): void {
 }
 
 function resetForm(): void {
+  // 让进行中的 refreshImageUrls 作废，避免它把旧条目写回已清空的表单
+  refreshToken++;
   formModel.title = "";
   formModel.situation = "";
   formModel.detail = "";
@@ -452,6 +474,11 @@ async function addFiles(files: File[]): Promise<void> {
       continue;
     }
     await addImageFile(file);
+    // await 期间可能有并发的 addFiles（粘贴 + 拖拽）已经加过图，必须复查上限
+    if (formModel.images.length >= MAX_IMAGES) {
+      showToast(t("page.qa.maxImagesToast", { count: MAX_IMAGES }));
+      break;
+    }
   }
 }
 
@@ -462,21 +489,45 @@ function validateImageFile(file: File): string | null {
 }
 
 async function addImageFile(file: File): Promise<void> {
-  const ref = await saveImageBlob(file);
-  formModel.images.push(ref);
-  imageUrls[ref] = await resolveImageSrc(ref);
+  try {
+    const ref = await saveImageBlob(file);
+    const url = await resolveImageSrc(ref);
+    if (!url) {
+      // blob 已不存在（被清理或并发删除）：不入列表，避免渲染出一个空图框
+      await deleteImageBlobs([ref]).catch(() => {});
+      showToast(t("common.loadFailed"));
+      return;
+    }
+    imageUrls[ref] = url;
+    formModel.images.push(ref);
+  } catch (e) {
+    console.warn("[AskQuestionModal] 保存图片失败:", e);
+    showToast(t("common.loadFailed"));
+  }
 }
 
 async function removeImage(ref: string): Promise<void> {
   formModel.images = formModel.images.filter((item) => item !== ref);
   delete imageUrls[ref];
-  await deleteImageBlobs([ref]);
+  try {
+    await deleteImageBlobs([ref]);
+  } catch (e) {
+    console.warn("[AskQuestionModal] 删除图片失败:", e);
+  }
 }
 
 async function refreshImageUrls(): Promise<void> {
+  const token = ++refreshToken;
   Object.keys(imageUrls).forEach((key) => delete imageUrls[key]);
   for (const ref of formModel.images) {
-    imageUrls[ref] = await resolveImageSrc(ref);
+    let url = "";
+    try {
+      url = await resolveImageSrc(ref);
+    } catch (e) {
+      console.warn("[AskQuestionModal] 读取图片失败:", e);
+    }
+    if (token !== refreshToken) return;
+    if (url) imageUrls[ref] = url;
   }
 }
 
@@ -488,24 +539,31 @@ function handleSaveDraft(): void {
 async function handlePublish(): Promise<void> {
   if (!validate()) return;
   const refs = [...formModel.images];
-  const created = await qaApi.createQuestion({
-    title: formModel.title,
-    situation: formModel.situation,
-    content: formModel.detail,
-    category: props.category ?? "help",
-    bountyPeople: formModel.bountyPeople ?? 1,
-    bountyPerPerson: formModel.bountyPerPerson ?? 0,
-  });
-  clearDraft();
-  resetForm();
-  if (created) {
-    showToast(t("page.qa.publishedToast"));
-    emit("published");
-    emit("update:show", false);
-  } else {
+  type CreatedQuestion = Awaited<ReturnType<typeof qaApi.createQuestion>>;
+  let created: CreatedQuestion = null;
+  try {
+    created = await qaApi.createQuestion({
+      title: formModel.title,
+      situation: formModel.situation,
+      content: formModel.detail,
+      category: props.category ?? "help",
+      bountyPeople: formModel.bountyPeople ?? 1,
+      bountyPerPerson: formModel.bountyPerPerson ?? 0,
+    });
+  } catch (e) {
+    // 网络层 reject 不能变成未处理拒绝，且必须按失败处理
+    console.warn("[AskQuestionModal] 发布失败:", e);
+  }
+  if (!created) {
+    // 失败时不能先清草稿/表单：用户的输入会连带丢光，只弹一句「加载失败」很不负责
     showToast(t("common.loadFailed"));
     return;
   }
+  clearDraft();
+  resetForm();
+  showToast(t("page.qa.publishedToast"));
+  emit("published");
+  emit("update:show", false);
   await deleteImageBlobs(refs);
 }
 

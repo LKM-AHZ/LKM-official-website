@@ -34,7 +34,7 @@ export { default as ShellLightDarkSwitch } from "./components/LightDarkSwitch.vu
 export { default as ShellArchivePanel } from "./components/ArchivePanel.vue";
 export { default as ShellDisplaySettings } from "./components/widget/DisplaySettings.vue";
 
-// Vue components
+// Vue user components
 export { default as ShellUserAvatarMenu } from "./components/user/UserAvatarMenu.vue";
 
 // Astro components

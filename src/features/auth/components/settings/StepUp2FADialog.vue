@@ -6,8 +6,12 @@
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
         @click.self="onCancel"
       >
-        <!-- 遮罩 -->
-        <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+        <!-- 遮罩：只负责压暗，pointer-events-none 让点击穿透到外层 overlay，
+             否则事件目标始终是遮罩，外层 @click.self 永远不触发（点遮罩关不掉） -->
+        <div
+          class="absolute inset-0 bg-black/40 pointer-events-none"
+          aria-hidden="true"
+        ></div>
 
         <!-- 对话框 -->
         <div
@@ -90,11 +94,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import type { StepUpDialogState } from "~/lib/http/useStepUp2FA";
 import { t } from "~/lib/i18n";
 
-defineProps<{ state: StepUpDialogState }>();
+const props = defineProps<{ state: StepUpDialogState }>();
 
 const emit = defineEmits<{
   (e: "submit", code: string, mode: "totp" | "recovery"): void;
@@ -104,11 +108,35 @@ const emit = defineEmits<{
 const code = ref("");
 const showRecovery = ref(false);
 
-// TOTP 为 6 位数字；恢复码为 20 位十六进制
+// 验证成功时是父级（useStepUp2FA.finish(true)）直接关弹窗，不走 onCancel：
+// 不复位的话 showRecovery 会残留 true，下次打开直接进「恢复码」模式，输入框与文案都是错的
+watch(
+  () => props.state.open,
+  (open) => {
+    if (!open) {
+      code.value = "";
+      showRecovery.value = false;
+    }
+  },
+);
+
+// Escape 关闭：与「取消」按钮同一语义，submitting 期间同样不允许中断
+function onKeydown(e: KeyboardEvent): void {
+  if (e.key === "Escape" && props.state.open && !props.state.submitting) {
+    onCancel();
+  }
+}
+
+onMounted(() => window.addEventListener("keydown", onKeydown));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
+
+// TOTP 固定 6 位数字（只判长度会把 "abcdef" 也放过去）；
+// 恢复码后端为 secrets.token_hex(10) 生成的 20 位十六进制，这里用 20 位字母数字做超集校验，
+// 不会误拒有效码，最终以服务端校验为准。
 const codeValid = computed(() =>
   showRecovery.value
     ? /^[0-9a-zA-Z]{20}$/.test(code.value.trim())
-    : code.value.length >= 6,
+    : /^\d{6}$/.test(code.value.trim()),
 );
 
 function toggleMode() {

@@ -1,12 +1,15 @@
 ---
 import AdminLogin from '~/features/admin/components/AdminLogin.vue';
-import { t } from '~/lib/i18n';
+import { t, getLocale } from '~/lib/i18n';
+import { I18N } from '~/lib/config';
 
 const metadata = { title: t('page.admin.login.metaTitle') };
+// 与 BaseLayout 一致：lang/dir 跟随请求 locale（t() 已按 cookie 出英文，硬编码 zh-CN 会让读屏/翻译工具认错语言）
+const currentLocale = getLocale();
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={currentLocale} dir={I18N.textDirection}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

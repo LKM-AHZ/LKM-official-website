@@ -86,8 +86,14 @@ export function useQuestionBankStore(): {
     id: string,
     data: Partial<Question>,
   ): Promise<void> {
+    // data 是 Partial<Question>，允许带 id/userId/createdAt：直接展开会写入身份与归属字段
+    // （改主键 Dexie 直接抛错，改 userId 会破坏归属与同步合并）
+    const patch: Partial<Question> = { ...data };
+    delete patch.id;
+    delete patch.userId;
+    delete patch.createdAt;
     await db.questions.update(id, {
-      ...data,
+      ...patch,
       updatedAt: new Date().toISOString(),
     });
     await loadQuestions();

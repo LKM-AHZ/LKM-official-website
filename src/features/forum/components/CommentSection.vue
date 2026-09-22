@@ -22,6 +22,7 @@
           </button>
         </div>
         <textarea
+          ref="commentInputEl"
           v-model="newComment"
           rows="3"
           class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none transition-colors"
@@ -64,6 +65,13 @@
             <span class="text-xs text-text-muted/60">{{
               formatTime(comment.createdAt)
             }}</span>
+            <!-- 回复目标：parentId 从提交起就有，但此前模板是扁平列表、被回复者不可见 -->
+            <span
+              v-if="parentAuthor(comment)"
+              class="text-xs text-text-muted/60"
+            >
+              {{ t("community.forum.replyTo", { name: parentAuthor(comment) }) }}
+            </span>
           </div>
           <p class="text-sm text-deep-text mt-1 leading-relaxed">
             {{ comment.content }}
@@ -82,11 +90,7 @@
                 class="w-3.5 h-3.5"
                 :class="likedComments.has(comment.id) ? 'text-red-500' : ''"
               />
-              {{
-                likedComments.has(comment.id)
-                  ? comment.likeCount + 1
-                  : comment.likeCount || ""
-              }}
+              {{ likeCountFor(comment) }}
             </button>
             <button
               class="text-xs text-text-muted/60 hover:text-primary transition-colors"
@@ -105,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 
@@ -130,11 +134,28 @@ const likedComments = ref<Set<string>>(new Set());
 const newComment = ref("");
 const replyToId = ref("");
 const replyToAuthor = ref("");
+// 本组件输入框的模板引用（回复时只聚焦它，不碰页面上别的 textarea）
+const commentInputEl = ref<HTMLTextAreaElement | null>(null);
+// 回复聚焦的定时器句柄：重复点回复/卸载时要能清掉
+let focusTimer: number | null = null;
+
+// 点赞数展示值：liked 时 +1（本地乐观态，未持久化），0 也要显示 "0" 而不是空串
+function likeCountFor(comment: Comment): number {
+  return (comment.likeCount ?? 0) + (likedComments.value.has(comment.id) ? 1 : 0);
+}
+
+// 被回复者：本地列表里能找到父评论时显示（跨页父评论不在本地则不显示）
+function parentAuthor(comment: Comment): string {
+  if (!comment.parentId) return "";
+  return comments.value.find((c) => c.id === comment.parentId)?.authorName ?? "";
+}
 
 function submitComment() {
   if (!newComment.value.trim()) return;
   const newId = `c-new-${Date.now()}`;
-  const floor = comments.value.length + 1;
+  // 楼层取现有最大值 +1：数组长度在分页/删除/乱序加载下并不等于楼层
+  const floor =
+    comments.value.reduce((max, c) => Math.max(max, c.floorNumber), 0) + 1;
   comments.value.push({
     id: newId,
     authorName: t("community.forum.me"),
@@ -165,12 +186,14 @@ function cancelReply() {
 }
 
 function toggleCommentLike(id: string) {
+  // ref(new Set()) 本身是响应式的：add/delete 就会触发模板更新，重建 Set 只是多分配对象
   if (likedComments.value.has(id)) {
     likedComments.value.delete(id);
   } else {
     likedComments.value.add(id);
   }
-  likedComments.value = new Set(likedComments.value);
+  // 说明：点赞目前只存在本地内存，未持久化到后端——论坛旧 REST/GraphQL 数据层已移除
+  // （见 features/forum/index.ts 顶部注释），要真正落库需先有对应的 content API 契约。
 }
 
 function formatTime(dateStr: string): string {

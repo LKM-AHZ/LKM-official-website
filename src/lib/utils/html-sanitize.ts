@@ -9,7 +9,14 @@ export function sanitizeHtmlContent(html: string): string {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
     allowedAttributes: {
       ...sanitizeHtml.defaults.allowedAttributes,
+      // rel 必须放行：库默认只给 a 放 href/name/target，配上 target="_blank" 会丢掉
+      // noopener，形成反向 tabnabbing。用扩展而不是原地改默认数组，避免污染库的 defaults
+      a: [...(sanitizeHtml.defaults.allowedAttributes.a ?? []), "rel"],
       img: ["src", "alt", "title", "width", "height", "loading"],
     },
+    // 用户/GPT 生成的内容里只允许 https 图片、禁止协议相对 URL：
+    // 否则 `//tracker.example/p.gif` 这类可以当追踪像素、泄露读者 IP
+    allowedSchemesByTag: { img: ["https"] },
+    allowProtocolRelative: false,
   });
 }

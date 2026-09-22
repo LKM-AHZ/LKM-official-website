@@ -15,9 +15,10 @@ const className = Astro.props.class;
 
 <div id="sidebar" class:list={[className, 'w-full']}>
   <div class="flex flex-col w-full gap-4 mb-4">
-    <SidebarProfileCard client:load :username="Astro.props.username" />
+    <!-- 侧栏卡片不是首屏关键内容：可见时再水合，别占用首屏 hydration 预算 -->
+    <SidebarProfileCard client:visible :username={Astro.props.username} />
   </div>
-  <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
+  <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 sticky top-4">
     <Categories class="onload-animation" style="animation-delay: 150ms" />
     <Tag class="onload-animation" style="animation-delay: 200ms" />
   </div>

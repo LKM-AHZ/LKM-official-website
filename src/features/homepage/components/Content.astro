@@ -21,14 +21,16 @@ const {
   bg = await Astro.slots.render('bg'),
 } = Astro.props;
 
+// 每档都显式写全断点（含 grid-cols-1 基线）：原来缺省档返回空串，
+// 靠 grid 默认单列兜底，读起来像没配置
 const columnsClass =
   columns === 4
-    ? 'lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2'
+    ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
     : columns === 3
-      ? 'lg:grid-cols-3 sm:grid-cols-2'
+      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
       : columns === 2
-        ? 'sm:grid-cols-2'
-        : '';
+        ? 'grid-cols-1 sm:grid-cols-2'
+        : 'grid-cols-1';
 ---
 
 <WidgetWrapper
@@ -64,7 +66,7 @@ const columnsClass =
           items.length > 0 && (
             <div class:list={['grid mx-auto gap-y-4 md:gap-y-8 gap-8', columnsClass]}>
               {items.map(({ title: itemTitle, description, icon, callToAction }) => (
-                <div class="  ">
+                <div>
                   <div class="flex flex-row max-w-none">
                     <div class="flex justify-center">
                       <Icon

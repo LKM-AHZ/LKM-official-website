@@ -5,7 +5,7 @@
         {{ t("onboarding.tasks.completeProfile") }}
       </h3>
       <p class="text-sm text-text-muted mt-1">
-        {{ t("onboarding.tasks.rewardHint", { points: 100 }) }}
+        {{ t("onboarding.tasks.rewardHint", { points: REWARD_POINTS }) }}
       </p>
     </div>
 
@@ -76,15 +76,34 @@ import { ref } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 
-const displayName = ref("");
-const bio = ref("");
-const intro = ref("");
+/** 完成新手任务的奖励积分；与 i18n 文案里的「+100 points」需人工保持一致（词条在 languages/*.ts，不在本单元可改范围） */
+const REWARD_POINTS = 100;
+
+const props = defineProps<{ initial?: Record<string, unknown> | null }>();
+
+/** 只接受字符串初值：分步数据来自后端/草稿，形状不可信 */
+function initialText(v: unknown): string {
+  return typeof v === "string" ? v : "";
+}
+
+// 步骤组件每次切步都会被重建（父级用 flow.step 作 key），必须从 initial 恢复已提交内容，
+// 否则来回切步或刷新续做会把用户填过的资料清空
+const displayName = ref(initialText(props.initial?.displayName));
+const bio = ref(initialText(props.initial?.bio));
+const intro = ref(initialText(props.initial?.intro));
 
 defineExpose({
-  getData: () => ({
-    displayName: displayName.value,
-    bio: bio.value,
-    intro: intro.value,
-  }),
+  getData: () => {
+    // 提交前归一：纯空白的名字会被原样存成展示名；而空串在 PUT 语义下会把已保存的资料清空，
+    // 所以只回传真正填了内容的字段（未触碰的字段不参与覆盖）
+    const data: Record<string, string> = {};
+    const name = displayName.value.trim();
+    const motto = bio.value.trim();
+    const description = intro.value.trim();
+    if (name) data.displayName = name;
+    if (motto) data.bio = motto;
+    if (description) data.intro = description;
+    return data;
+  },
 });
 </script>

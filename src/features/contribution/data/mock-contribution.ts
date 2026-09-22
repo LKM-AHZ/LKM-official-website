@@ -1,10 +1,29 @@
+/** 成就分类：取值是封闭集合，用联合类型而不是 string，拼错会在编译期报出来 */
+export type AchievementCategory =
+  "special" | "posting" | "helping" | "files" | "activity";
+
+/** 成就达成条件类型（同样封闭） */
+export type AchievementRequirementType =
+  | "onboarding"
+  | "post_count"
+  | "featured_count"
+  | "accepted_answers"
+  | "approved_files"
+  | "checkin_streak"
+  | "project_count"
+  | "column_articles";
+
+/** 积分流水的关联对象类型 */
+export type PointReferenceType =
+  "checkin" | "post" | "comment" | "answer" | "file" | "competition" | "task";
+
 export interface Achievement {
   id: string;
   name: string;
   description: string;
   icon: string;
-  category: string;
-  requirement: { type: string; threshold: number };
+  category: AchievementCategory;
+  requirement: { type: AchievementRequirementType; threshold: number };
   sortOrder: number;
 }
 
@@ -18,7 +37,7 @@ export interface PointLog {
   id: string;
   amount: number;
   reason: string;
-  referenceType: string;
+  referenceType: PointReferenceType;
   createdAt: string;
 }
 
@@ -161,22 +180,42 @@ export const achievements: Achievement[] = [
   },
 ];
 
-// Current user's unlocked achievements (mock)
-export const userAchievements: UserAchievement[] = [
-  { achievementId: "a1", progress: 1, unlocked: true },
-  { achievementId: "a2", progress: 1, unlocked: true },
-  { achievementId: "a3", progress: 10, unlocked: true },
-  { achievementId: "a4", progress: 1, unlocked: true },
-  { achievementId: "a5", progress: 45, unlocked: false },
-  { achievementId: "a6", progress: 5, unlocked: true },
-  { achievementId: "a7", progress: 12, unlocked: false },
-  { achievementId: "a8", progress: 7, unlocked: false },
-  { achievementId: "a9", progress: 7, unlocked: true },
-  { achievementId: "a10", progress: 7, unlocked: false },
-  { achievementId: "a11", progress: 3, unlocked: true },
-  { achievementId: "a12", progress: 5, unlocked: true },
+// Current user's achievement progress (mock)
+const userAchievementProgress: Array<{
+  achievementId: string;
+  progress: number;
+}> = [
+  { achievementId: "a1", progress: 1 },
+  { achievementId: "a2", progress: 1 },
+  { achievementId: "a3", progress: 10 },
+  { achievementId: "a4", progress: 1 },
+  { achievementId: "a5", progress: 45 },
+  { achievementId: "a6", progress: 5 },
+  { achievementId: "a7", progress: 12 },
+  { achievementId: "a8", progress: 7 },
+  { achievementId: "a9", progress: 7 },
+  { achievementId: "a10", progress: 7 },
+  { achievementId: "a11", progress: 3 },
+  { achievementId: "a12", progress: 5 },
 ];
 
+const thresholdById = new Map(
+  achievements.map((a) => [a.id, a.requirement.threshold]),
+);
+
+// unlocked 由「进度 >= 该成就门槛」派生，不再手工维护：否则改一处忘一处就会渲染出
+// 「已解锁但进度不足」这种自相矛盾的数据
+export const userAchievements: UserAchievement[] = userAchievementProgress.map(
+  ({ achievementId, progress }) => {
+    const threshold = thresholdById.get(achievementId);
+    if (threshold === undefined) {
+      throw new Error(`mock-contribution: 未知成就 id: ${achievementId}`);
+    }
+    return { achievementId, progress, unlocked: progress >= threshold };
+  },
+);
+
+// 按 createdAt 倒序（新流水在前）：消费方直接按数组顺序渲染，不要在这里留乱序
 export const pointLogs: PointLog[] = [
   {
     id: "p1",
@@ -184,6 +223,13 @@ export const pointLogs: PointLog[] = [
     reason: "contributionData.pointLogs.checkin",
     referenceType: "checkin",
     createdAt: "2026-07-27",
+  },
+  {
+    id: "p5",
+    amount: 5,
+    reason: "contributionData.pointLogs.checkin",
+    referenceType: "checkin",
+    createdAt: "2026-07-26",
   },
   {
     id: "p2",
@@ -205,13 +251,6 @@ export const pointLogs: PointLog[] = [
     reason: "contributionData.pointLogs.answerAccepted",
     referenceType: "answer",
     createdAt: "2026-07-18",
-  },
-  {
-    id: "p5",
-    amount: 5,
-    reason: "contributionData.pointLogs.checkin",
-    referenceType: "checkin",
-    createdAt: "2026-07-26",
   },
   {
     id: "p6",
@@ -404,7 +443,8 @@ export const leaderboard: {
       rank: 10,
       username: "qiyue-youzhi",
       displayName: "contributionData.leaderboard.names.qiyueYouzhi",
-      points: 2100,
+      // 名次与积分必须自洽：原值与 rank 9 同为 2100，会让「同分不同名次」出现在榜单里
+      points: 1900,
       title: "contributionData.leaderboard.titles.fileExpert",
     },
   ],
@@ -458,13 +498,16 @@ export const tasks: Task[] = [
   },
 ];
 
+/** 库存哨兵：-1 = 不限量（消费方按 stock > 0 判断低库存、stock === 0 判断下架） */
+export const UNLIMITED_STOCK = -1;
+
 export const exchangeItems: ExchangeItem[] = [
   {
     id: "e1",
     name: "contributionData.exchangeItems.e1.name",
     description: "contributionData.exchangeItems.e1.description",
     pointsCost: 200,
-    stock: -1,
+    stock: UNLIMITED_STOCK,
     isVirtual: true,
   },
   {
@@ -472,7 +515,7 @@ export const exchangeItems: ExchangeItem[] = [
     name: "contributionData.exchangeItems.e2.name",
     description: "contributionData.exchangeItems.e2.description",
     pointsCost: 500,
-    stock: -1,
+    stock: UNLIMITED_STOCK,
     isVirtual: true,
   },
   {

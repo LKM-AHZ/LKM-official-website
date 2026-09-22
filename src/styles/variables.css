@@ -5,6 +5,7 @@
   --page-width: 1280px;
 
   /* 统一动画 Token */
+  --ease: var(--ease-out); /* 通用缓动：全站 transition 引用的 var(--ease) 此前未定义，整条 transition 声明会被判无效而静默失效 */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -85,8 +86,6 @@
     oklch(0.8 0.1 330),
     oklch(0.8 0.1 360)
   );
-  --display-light-icon: 1;
-  --display-dark-icon: 0;
 
   /* Admonition 颜色 */
   --admonitions-color-tip: oklch(0.7 0.14 180);
@@ -99,7 +98,8 @@
   --toc-badge-bg: oklch(0.89 0.05 var(--hue, 250));
   --toc-btn-hover: oklch(0.926 0.015 var(--hue, 250));
   --toc-btn-active: oklch(0.9 0.015 var(--hue, 250));
-  --toc-width: calc((100vw - var(--page-width)) / 2 - 1rem);
+  /* 视口窄于 --page-width + 2rem 时原式会算出负数，用 max() 兜底（当前消费方是 2xl 才显示的 TOC） */
+  --toc-width: max(0px, calc((100vw - var(--page-width)) / 2 - 1rem));
   --toc-item-active: oklch(0.7 0.13 var(--hue, 250));
 
   --text-muted: oklch(0.5 0.01 var(--hue, 250));
@@ -147,9 +147,9 @@
   --line-color: rgba(255, 255, 255, 0.1);
   --meta-divider: rgba(255, 255, 255, 0.2);
   --selection-bg: oklch(0.4 0.08 var(--hue, 250));
-  --codeblock-bg: oklch(0.17 0.015 var(--hue, 250));
   --codeblock-topbar-bg: oklch(0.12 0.015 var(--hue, 250));
   --license-block-bg: var(--codeblock-bg);
+  /* 深色下下划线与 hover 底色刻意同值（浅色下二者不同），不是复制错误 */
   --link-underline: oklch(0.4 0.08 var(--hue, 250));
   --link-hover: oklch(0.4 0.08 var(--hue, 250));
   --link-active: oklch(0.35 0.07 var(--hue, 250));
@@ -173,8 +173,6 @@
     oklch(0.7 0.1 330),
     oklch(0.7 0.1 360)
   );
-  --display-light-icon: 0;
-  --display-dark-icon: 1;
   --admonitions-color-tip: oklch(0.75 0.14 180);
   --admonitions-color-note: oklch(0.75 0.14 250);
   --admonitions-color-important: oklch(0.75 0.14 310);
@@ -189,6 +187,11 @@
   --text-muted: oklch(0.6 0.01 var(--hue, 250));
   --secondary: oklch(0.75 0.01 var(--hue, 250));
   --on-secondary: oklch(0.16 0.01 var(--hue, 250));
+  /* 深色模式里语义色底仍是浅色调（--primary/--info/--success 沿用浅色值），
+     前景必须用深墨：浅色块的 #ffffff 会在 oklch(0.75/0.7/0.65) 底上掉到约 2:1 对比度 */
+  --on-primary: oklch(0.16 0.01 var(--hue, 250));
+  --on-info: oklch(0.16 0.01 var(--hue, 250));
+  --on-success: oklch(0.16 0.01 var(--hue, 250));
   --on-warning: oklch(0.16 0.01 var(--hue, 250));
-  --error: oklch(0.55 0.22 25);
+  /* --error 不重复声明：深色沿用浅色块的同一值（oklch(0.55 0.22 25)） */
 }

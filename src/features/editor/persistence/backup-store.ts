@@ -57,8 +57,10 @@ export async function saveBackup(
   docId: string,
   data: BackupData,
 ): Promise<Result<void, AppError>> {
+  // db 提到 try 外面：中间任何一步抛错都要能关掉连接，否则每次失败都泄漏一个连接
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDB();
+    db = await openDB();
     if (!db)
       return err(
         new AppError(
@@ -74,13 +76,14 @@ export async function saveBackup(
       tx.onerror = () => reject(tx.error);
     });
     await cleanOldSnapshots(db);
-    db.close();
     return ok(undefined);
   } catch (e) {
     console.warn("[backup-store] 备份写入失败:", e);
     return err(
       new AppError("BACKUP_FAILED", t("editor.persistence.backupFailed"), e),
     );
+  } finally {
+    db?.close();
   }
 }
 
@@ -122,8 +125,9 @@ async function cleanOldSnapshots(db?: IDBDatabase): Promise<void> {
 }
 
 export async function getBackups(): Promise<Result<BackupMeta[], AppError>> {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDB();
+    db = await openDB();
     if (!db)
       return err(
         new AppError(
@@ -138,7 +142,6 @@ export async function getBackups(): Promise<Result<BackupMeta[], AppError>> {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    db.close();
     return ok(
       results
         .sort(
@@ -161,14 +164,17 @@ export async function getBackups(): Promise<Result<BackupMeta[], AppError>> {
         e,
       ),
     );
+  } finally {
+    db?.close();
   }
 }
 
 export async function getLatestBackup(
   docId: string,
 ): Promise<Result<BackupData | null, AppError>> {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDB();
+    db = await openDB();
     if (!db)
       return err(
         new AppError(
@@ -184,7 +190,6 @@ export async function getLatestBackup(
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    db.close();
     if (results.length === 0) return ok(null);
     results.sort(
       (a, b) =>
@@ -200,6 +205,8 @@ export async function getLatestBackup(
         e,
       ),
     );
+  } finally {
+    db?.close();
   }
 }
 

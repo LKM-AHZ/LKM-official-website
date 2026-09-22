@@ -30,6 +30,17 @@ const {
 
 const entries = items;
 
+/**
+ * item.url 来自后端，直接绑 href 时 javascript:/data: 之类的 scheme 会在本站 origin 执行脚本。
+ * 只放行 http(s) 与站内相对路径，其余返回 undefined（<a> 无 href 即不可点击）。
+ */
+function safeUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const s = url.trim();
+  if (s.startsWith("/") || /^https?:\/\//i.test(s)) return s;
+  return undefined;
+}
+
 async function loadFirst(): Promise<void> {
   // usePagination.refresh() 按 clearOnRefresh 清空列表并复位 lastCursor/hasMore 后重拉第一页；
   // 手动 `entries.value = []` + loadMore() 会带着旧游标请求（跳过第一页）或被 hasMore 直接拦掉
@@ -79,7 +90,7 @@ onMounted(() => {
             : 'bg-surface-3 text-text-muted hover:bg-surface-3/70'
         "
         :disabled="!isLoggedIn"
-        title="登录后可查看关注流"
+        :title="t('follow.loginToFollow')"
         @click="switchMode('follow')"
       >
         {{ t("timeline.follow") }}
@@ -123,7 +134,12 @@ onMounted(() => {
         :key="`${item.item_type}-${item.id}`"
         class="p-4 rounded-xl bg-card-bg border border-surface-3 hover:border-primary/30 transition-colors"
       >
-        <a class="block" :href="item.url" target="_blank" rel="noopener">
+        <a
+          class="block"
+          :href="safeUrl(item.url)"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <div class="flex items-center gap-2 text-xs text-text-muted mb-1">
             <span class="px-1.5 py-0.5 rounded bg-surface-3 text-text-muted">
               {{ t(`timeline.type.${item.item_type}`) }}

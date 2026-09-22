@@ -10,28 +10,53 @@ const {
 } = Astro.props;
 ---
 
-<button type="button" class={className} aria-label={label} data-mobile-menu-trigger="mobile-nav-header">
+<button
+  type="button"
+  class={className}
+  aria-haspopup="true"
+  aria-expanded="false"
+  aria-controls="mobile-nav-header"
+  data-mobile-menu-trigger="mobile-nav-header"
+>
+  <!-- 可访问名只由这处文本提供：之前同时写了 aria-label 与 sr-only 文本，aria-label 会赢，
+       另一份成为可漂移的冗余副本 -->
   <span class="sr-only">{label}</span>
   <slot>
+    <!-- 这里没有开合态样式，故不带 transition/transform（原来那串动画工具类永远不会被触发） -->
     <span
       aria-hidden="true"
-      class="h-0.5 w-6 my-1 rounded-full bg-base-content transition ease transform duration-200 opacity-80"></span>
+      class="h-0.5 w-6 my-1 rounded-full bg-base-content opacity-80"></span>
     <span
       aria-hidden="true"
-      class="h-0.5 w-6 my-1 rounded-full bg-base-content transition ease transform duration-200 opacity-80"></span>
+      class="h-0.5 w-6 my-1 rounded-full bg-base-content opacity-80"></span>
     <span
       aria-hidden="true"
-      class="h-0.5 w-6 my-1 rounded-full bg-base-content transition ease transform duration-200 opacity-80"></span>
+      class="h-0.5 w-6 my-1 rounded-full bg-base-content opacity-80"></span>
   </slot>
 </button>
 
 <script is:inline>
   (function () {
-    const trigger = document.querySelector('[data-mobile-menu-trigger="mobile-nav-header"]');
-    if (trigger) {
-      trigger.addEventListener('click', () => {
-        document.getElementById('mobile-nav-header')?.dispatchEvent(new CustomEvent('mobile-nav:toggle'));
+    // 遍历所有触发器（可能渲染多次）并从各自的 data 属性解析目标面板：
+    // 旧实现 querySelector 只拿到第一个，其余按钮点不动，且目标 id 写死在两处
+    document.querySelectorAll('[data-mobile-menu-trigger]').forEach(function (trigger) {
+      const panelId = trigger.dataset.mobileMenuTrigger;
+      const panel = panelId ? document.getElementById(panelId) : null;
+      if (!panel) {
+        console.warn('ToggleMenu: 未找到目标面板', panelId);
+        return;
+      }
+      trigger.addEventListener('click', function () {
+        panel.dispatchEvent(new CustomEvent('mobile-nav:toggle'));
+        trigger.setAttribute('aria-expanded', trigger.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
       });
-    }
+      // 面板 API 也会被 open/close 事件驱动，这里同步 ARIA 状态，避免只靠点击推断
+      panel.addEventListener('mobile-nav:open', function () {
+        trigger.setAttribute('aria-expanded', 'true');
+      });
+      panel.addEventListener('mobile-nav:close', function () {
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+    });
   })();
 </script>

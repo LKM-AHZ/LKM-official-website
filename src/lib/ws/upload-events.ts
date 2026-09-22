@@ -43,11 +43,16 @@ export async function waitForUploadRegistration(
     let ws: WebSocket | undefined;
     let settled = false;
 
-    // finish 幂等：多次触发（超时/事件/断连竞态）仅首次生效；不确定时超时定时器
-    // 由 settled early-return 兜底，无需在 finish 内依赖 timer 的声明顺序。
+    // 超时兜底先建（WebSocket 构造是同步的，提前建不影响语义）：
+    // 声明在 finish 之前，finish 里才能安全引用（否则提前 finish 会命中 TDZ）
+    const timer = setTimeout(() => finish("timeout"), timeoutMs);
+
+    // finish 幂等：多次触发（超时/事件/断连竞态）仅首次生效
     const finish = (result: UploadConfirmResult): void => {
       if (settled) return;
       settled = true;
+      // 清掉超时定时器：否则它会把 finish/ws/resolve 这些引用多留一整个超时窗口
+      clearTimeout(timer);
       try {
         ws?.close();
       } catch {
@@ -64,10 +69,6 @@ export async function waitForUploadRegistration(
       finish("ws-unavailable");
       return;
     }
-
-    // 超时兜底：注册事件在成功构造连接后才挂接，故 timer 声明晚于 finish 也无碍
-    // （finish 对 timer 无引用）。
-    setTimeout(() => finish("timeout"), timeoutMs);
 
     ws.onmessage = (ev: MessageEvent): void => {
       try {

@@ -84,7 +84,7 @@
       <div
         v-if="throwDialogOpen"
         class="dialog-overlay"
-        @click.self="throwDialogOpen = false"
+        @click.self="closeThrowDialog"
       >
         <div class="dialog-box glass">
           <h3 class="dialog-title">
@@ -100,10 +100,7 @@
           <div class="dialog-actions">
             <button
               class="chip"
-              @click="
-                throwDialogOpen = false;
-                throwText = '';
-              "
+              @click="closeThrowDialog"
             >
               {{ t("treehole.bottle.cancel") }}
             </button>
@@ -141,7 +138,10 @@ const throwDialogOpen = ref(false);
 const throwText = ref("");
 
 const bottleCount = computed(() => {
-  return allBottles.value.filter((b) => !b.picked).length;
+  // 与 storage.pickBottle() 的过滤口径一致（自己扔的瓶子不算可捞）：否则会出现
+  // 「计数 > 0、按钮可点，点下去 pickBottle() 返回 null、界面毫无反应」
+  return allBottles.value.filter((b) => !b.picked && b.ownerId !== "me_local")
+    .length;
 });
 
 function loadBottles() {
@@ -156,6 +156,9 @@ function pickBottleHandler() {
     const bottle = pickBottle();
     currentBottle.value = bottle;
     picking.value = false;
+    // 竞态下可能已无可捞的瓶子：重载列表把计数与禁用态拉回真实值（面向用户的提示文案需新增
+    // i18n key，而 src/lib/i18n/languages/*.ts 不在本单元文件清单内，故此处只做自校正）
+    if (!bottle) loadBottles();
   }, 500);
 }
 
@@ -169,6 +172,12 @@ function sendBottleReply() {
     replyText.value = "";
     replyOk.value = false;
   }, 1500);
+}
+
+// 关闭弹窗（遮罩点击/取消按钮共用）：只关不重置的话，下次打开会看到上次的草稿
+function closeThrowDialog() {
+  throwDialogOpen.value = false;
+  throwText.value = "";
 }
 
 function throwBottle() {

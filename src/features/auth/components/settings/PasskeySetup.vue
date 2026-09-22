@@ -43,7 +43,7 @@
           <button
             type="button"
             class="btn btn-ghost btn-xs text-error"
-            :disabled="deletingId === pk.id"
+            :disabled="deletingId !== null"
             @click="confirmDelete = pk.id"
           >
             {{ t("common.delete") }}
@@ -61,7 +61,7 @@
       :message="t('settings.passkey.deleteMessage')"
       :confirm-text="t('common.delete')"
       danger
-      @confirm="doDelete(confirmDelete!)"
+      @confirm="confirmDelete && doDelete(confirmDelete)"
       @cancel="confirmDelete = null"
     />
 
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { authApi } from "~/lib/api/modules/auth";
 import { t } from "~/lib/i18n";
 import type { PasskeyCredential } from "~/lib/api/modules/auth";
@@ -85,7 +85,7 @@ import StepUp2FADialog from "./StepUp2FADialog.vue";
 import { useStepUp2FA } from "~/lib/http/useStepUp2FA";
 import { registerNew } from "../../lib/webauthn";
 
-defineProps<{
+const props = defineProps<{
   user: User;
 }>();
 
@@ -109,6 +109,10 @@ async function load() {
       return;
     }
     passkeys.value = r.value;
+  } catch (e) {
+    // 只有 finally 的话，抛出的异常会以未处理拒绝逃出去，列表空着且没有任何提示
+    error.value =
+      e instanceof Error ? e.message : t("messages.operationFailed");
   } finally {
     loadingList.value = false;
   }
@@ -116,6 +120,8 @@ async function load() {
 
 // 创建通行密钥：begin → 浏览器 WebAuthn → registerComplete
 async function createPasskey() {
+  // 显式在飞判断：按钮虽然 disabled，但 Enter 提交/程序化调用仍可能重复触发（WebAuthn 会弹两次窗）
+  if (creating.value) return;
   error.value = "";
   const name = newName.value.trim();
   if (!name) return;
@@ -160,10 +166,22 @@ async function doDelete(id: string) {
       return;
     }
     passkeys.value = passkeys.value.filter((p) => p.id !== id);
+  } catch (e) {
+    // 与 createPasskey 对齐：step-up 编排/接口抛错时也要落成可见错误，
+    // 否则行静默留在列表里，用户以为删除失败是「没反应」
+    error.value =
+      e instanceof Error ? e.message : t("messages.operationFailed");
   } finally {
     deletingId.value = null;
   }
 }
 
 onMounted(load);
+
+// 用上 user：同一实例内换账号（设置页不重新挂载）时重取列表——passkey 列表属于当前账号，
+// 沿用旧数据会显示上一个账号的钥匙
+watch(
+  () => props.user.id,
+  () => void load(),
+);
 </script>

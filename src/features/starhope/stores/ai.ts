@@ -32,7 +32,7 @@ export function useAiStore(): {
     content: string,
     attachments?: { name: string; data: string; type: string }[],
   ) => Promise<void>;
-  clearConversation: () => void;
+  clearConversation: () => Promise<void>;
 } {
   const auth = useAuthStore();
 
@@ -104,20 +104,32 @@ export function useAiStore(): {
     id: string,
     data: Partial<AiAgent>,
   ): Promise<void> {
-    await db.aiAgents.update(id, data);
-    await loadAgents();
-    const updated = await db.aiAgents.get(id);
-    if (updated) enqueue("agents", id, "upsert", updated);
+    try {
+      await db.aiAgents.update(id, data);
+      await loadAgents();
+      // loadAgents 刚把库里最新数据读进 agents.value，这里再 db.get 一次是多余的往返
+      const updated = agents.value.find((a) => a.id === id);
+      if (updated) enqueue("agents", id, "upsert", updated);
+    } catch (e) {
+      // 写失败不能变成未处理拒绝：置 error 让 UI 有反馈（与 createAgent 一致）
+      error.value = t("messages.operationFailed");
+      console.error("updateAgent failed:", e);
+    }
   }
 
   async function deleteAgent(id: string): Promise<void> {
-    await db.aiAgents.delete(id);
-    enqueue("agents", id, "delete");
-    await db.aiMessages.where("agentId").equals(id).delete();
-    await loadAgents();
-    if (currentAgentId.value === id) {
-      currentAgentId.value = agents.value[0]?.id ?? null;
-      await loadMessages();
+    try {
+      await db.aiAgents.delete(id);
+      enqueue("agents", id, "delete");
+      await db.aiMessages.where("agentId").equals(id).delete();
+      await loadAgents();
+      if (currentAgentId.value === id) {
+        currentAgentId.value = agents.value[0]?.id ?? null;
+        await loadMessages();
+      }
+    } catch (e) {
+      error.value = t("messages.operationFailed");
+      console.error("deleteAgent failed:", e);
     }
   }
 
@@ -131,20 +143,33 @@ export function useAiStore(): {
       messages.value = [];
       return;
     }
-    messages.value = await db.aiMessages
-      .where("agentId")
-      .equals(currentAgentId.value)
-      .sortBy("timestamp");
+    try {
+      messages.value = await db.aiMessages
+        .where("agentId")
+        .equals(currentAgentId.value)
+        .sortBy("timestamp");
+    } catch (e) {
+      error.value = t("starhopeData.ai.loadFail");
+      console.error("loadMessages failed:", e);
+    }
   }
 
   async function sendMessage(
     content: string,
     attachments?: { name: string; data: string; type: string }[],
   ): Promise<void> {
-    if (!currentAgentId.value || !auth.isLoggedIn.value) return;
+    // 并发保护：第二次调用会与第一次交错写 messages/streamContent，
+    // 且先结束的 finally 会把 isGenerating 提前清掉
+    if (isGenerating.value) return;
+    // 目标 agent 在 await 前固定：全程用局部量，避免生成期间用户切换
+    // selectAgent/发起另一次发送后，回复被写进别的会话
+    const agentId = currentAgentId.value;
+    if (!agentId || !auth.isLoggedIn.value) return;
+    const agent = agents.value.find((a) => a.id === agentId) ?? null;
+
     const userMsg: AiMessage = {
       id: crypto.randomUUID(),
-      agentId: currentAgentId.value,
+      agentId,
       role: "user",
       content,
       attachments,
@@ -154,7 +179,6 @@ export function useAiStore(): {
     messages.value = [...messages.value, userMsg];
     isGenerating.value = true;
     streamContent.value = "";
-    const agent = currentAgent.value;
     if (!agent) {
       isGenerating.value = false;
       return;
@@ -164,7 +188,7 @@ export function useAiStore(): {
       streamContent.value = response;
       const assistantMsg: AiMessage = {
         id: crypto.randomUUID(),
-        agentId: currentAgentId.value,
+        agentId,
         role: "assistant",
         content: response,
         timestamp: new Date().toISOString(),
@@ -175,7 +199,7 @@ export function useAiStore(): {
     } catch (e) {
       const errorMsg: AiMessage = {
         id: crypto.randomUUID(),
-        agentId: currentAgentId.value,
+        agentId,
         role: "assistant",
         content: t("starhopeData.ai.errorPrefix", {
           message:
@@ -191,10 +215,17 @@ export function useAiStore(): {
     }
   }
 
-  function clearConversation(): void {
-    if (!currentAgentId.value) return;
-    db.aiMessages.where("agentId").equals(currentAgentId.value).delete();
-    messages.value = [];
+  async function clearConversation(): Promise<void> {
+    const agentId = currentAgentId.value;
+    if (!agentId) return;
+    try {
+      // 之前是 fire-and-forget 的 delete：失败只会变成未处理拒绝，且本地消息已清空
+      await db.aiMessages.where("agentId").equals(agentId).delete();
+      messages.value = [];
+    } catch (e) {
+      error.value = t("messages.operationFailed");
+      console.error("clearConversation failed:", e);
+    }
   }
 
   async function mockAiResponse(

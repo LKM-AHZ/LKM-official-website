@@ -2,11 +2,11 @@
   <Teleport to="body">
     <div
       v-if="isOpen"
+      ref="dialogRef"
       class="fixed inset-0 z-[100] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Authentication dialog"
-      @keydown.esc="close"
     >
       <!-- 遮罩：点击关闭 -->
       <div
@@ -53,20 +53,31 @@ type View = "login" | "register" | "recovery";
 
 const isOpen = ref(false);
 const view = ref<View>("login");
+const dialogRef = ref<HTMLElement | null>(null);
 
 // 触发元素：关闭后恢复焦点
 let triggerElement: HTMLElement | null = null;
+// 本弹窗打开前的 body overflow。非 null 同时表示「滚动锁是本弹窗加的」：
+// 别的浮层可能已经锁了滚动，关闭时直接置空会把它的锁一并解掉
+let previousBodyOverflow: string | null = null;
 
 const VALID_VIEWS: View[] = ["login", "register", "recovery"];
 
 function open(nextView: View = "login") {
-  triggerElement =
-    document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null;
+  // 已经打开时不要重新捕获焦点来源：此时 activeElement 已经是弹窗内部的节点，
+  // 关闭时它会随弹窗一起卸载，原来的「关闭后把焦点还回去」目标就永久丢了
+  if (!isOpen.value) {
+    triggerElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+  }
   view.value = nextView;
   isOpen.value = true;
-  // 滚动锁定
+  // 滚动锁定（记录打开前的值，关闭时原样还回去）
+  if (previousBodyOverflow === null) {
+    previousBodyOverflow = document.body.style.overflow;
+  }
   document.body.style.overflow = "hidden";
   // 打开后聚焦首个可聚焦元素
   nextTickFocus();
@@ -76,17 +87,24 @@ function close() {
   if (!isOpen.value) return;
   isOpen.value = false;
   // 复原滚动
-  document.body.style.overflow = "";
-  // 焦点还原到触发元素
-  triggerElement?.focus?.();
+  if (previousBodyOverflow !== null) {
+    document.body.style.overflow = previousBodyOverflow;
+    previousBodyOverflow = null;
+  }
+  // 焦点还原到触发元素（它可能在弹窗打开期间被卸载，对脱离文档的元素 focus 是空操作）
+  if (triggerElement?.isConnected) {
+    triggerElement.focus();
+  }
   triggerElement = null;
 }
 
 function nextTickFocus() {
   requestAnimationFrame(() => {
-    const modal = document.querySelector('[role="dialog"][aria-modal="true"]');
-    const focusable = modal?.querySelector<HTMLElement>(
-      "input, button, select, textarea, a[href], [tabindex]",
+    // 用模板 ref 而不是全局 document.querySelector：页面上可能有别的 [role=dialog]
+    // （如提问弹窗），全局取第一个会把焦点送进不属于本弹窗的对话框；
+    // 同时排除 tabindex="-1"（不可顺序聚焦）
+    const focusable = dialogRef.value?.querySelector<HTMLElement>(
+      'input:not([disabled]), button:not([disabled]), select, textarea, a[href], [tabindex]:not([tabindex="-1"])',
     );
     if (focusable) focusable.focus();
   });
@@ -121,7 +139,10 @@ onUnmounted(() => {
   window.removeEventListener("open-auth-modal", onOpenAuth);
   window.removeEventListener("close-auth-modal", onCloseAuth);
   document.removeEventListener("keydown", onKeydown);
-  // 卸载时确保滚动解锁
-  document.body.style.overflow = "";
+  // 卸载时只在「锁是本弹窗加的」情况下解锁，否则会解掉别的浮层的锁
+  if (previousBodyOverflow !== null) {
+    document.body.style.overflow = previousBodyOverflow;
+    previousBodyOverflow = null;
+  }
 });
 </script>

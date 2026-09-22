@@ -2,6 +2,7 @@
 import { Icon } from 'astro-icon/components';
 import { twMerge } from 'tailwind-merge';
 import type { Item } from '~/types/core';
+import { sanitizeHtmlContent } from '~/lib/utils/html-sanitize';
 
 export interface Props {
   items?: Array<Item>;
@@ -21,10 +22,10 @@ const {
 ---
 
 {
-  items && items.length > 0 && (
-    <div class={containerClass}>
-      {items.map(({ title, description, icon, classes: itemClasses = {} }, index = 0) => (
-        <div class={twMerge('flex ', panelClass, itemClasses?.panel)}>
+  items.length > 0 && (
+    <ul class={containerClass}>
+      {items.map(({ title, description, icon, classes: itemClasses = {} }, index) => (
+        <li class={twMerge('flex ', panelClass, itemClasses?.panel)}>
           <div class="flex flex-col items-center mr-4 rtl:mr-0 rtl:ml-4">
             <div>
               <div class="flex items-center justify-center">
@@ -36,19 +37,26 @@ const {
                 )}
               </div>
             </div>
-            {index !== items.length - 1 && <div class="w-px h-full bg-surface-3" />}
+            {/* flex-1 而不是 h-full：父级高度由内容决定，百分比高度会退化成 0 高（连接线消失） */}
+            {index !== items.length - 1 && <div class="w-px flex-1 bg-surface-3" />}
           </div>
           <div class:list={['pt-1', { 'pb-8': index !== items.length - 1 }]}>
-            {title && <p class={twMerge('text-xl font-bold', titleClass, itemClasses?.title)} set:html={title} />}
+            {/* items 由调用方/数据层提供，set:html 是存储型 XSS 入口：一律先过统一消毒 */}
+            {title && (
+              <p
+                class={twMerge('text-xl font-bold', titleClass, itemClasses?.title)}
+                set:html={sanitizeHtmlContent(String(title))}
+              />
+            )}
             {description && (
               <p
                 class={twMerge('text-text-muted mt-2', descriptionClass, itemClasses?.description)}
-                set:html={description}
+                set:html={sanitizeHtmlContent(String(description))}
               />
             )}
           </div>
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

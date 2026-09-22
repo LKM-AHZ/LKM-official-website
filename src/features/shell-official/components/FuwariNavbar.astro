@@ -68,6 +68,7 @@ const links: NavBarLink[] = Astro.props.links;
                 aria-label={t(l.name)}
                 href={l.external ? l.url : url(l.url)}
                 target={l.external ? '_blank' : null}
+                rel={l.external ? 'noopener noreferrer' : null}
                 class="scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 flex items-center gap-1 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               >
                 {t(l.name)}
@@ -102,6 +103,7 @@ const links: NavBarLink[] = Astro.props.links;
                       aria-label={t(child.name)}
                       href={child.external ? child.url : url(child.url)}
                       target={child.external ? '_blank' : null}
+                      rel={child.external ? 'noopener noreferrer' : null}
                       class="flex transition-colors whitespace-nowrap items-center !justify-start w-full scale-animation rounded-lg h-9 px-3 font-medium active:scale-95 mb-0.5 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10"
                     >
                       {t(child.name)}

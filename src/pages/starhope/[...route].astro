@@ -9,6 +9,9 @@ const metadata = { title: `${t('page.misc.starHopeTitle')} —— LKM` };
 
 <Layout metadata={metadata} showFooter={false}>
   <div style="min-height: calc(100vh - 10rem)">
-    <StarHopeShell client:load />
+    {/* client:only：StarHope 是依赖 localStorage/IndexedDB 的纯前端应用壳，
+        SSR 时既拿不到登录态（服务端渲染出的总是未登录 HTML，水合后闪一下），
+        又没有可用的服务端数据；交给客户端渲染，避免无意义的水合不一致 */}
+    <StarHopeShell client:only="vue" />
   </div>
 </Layout>

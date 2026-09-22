@@ -8,7 +8,9 @@ export function pathsEqual(path1: string, path2: string): boolean {
 }
 
 export function getPostUrlBySlug(slug: string): string {
-  return buildUrl(`/blog/posts/${slug}/`);
+  // 与 getTagUrl/getCategoryUrl 保持一致：slug 里可能含空格、#、?、../ 等，
+  // 不编码会产出畸形或可越权的路径
+  return buildUrl(`/blog/posts/${encodeURIComponent(slug)}/`);
 }
 
 export function getTagUrl(tag: string): string {

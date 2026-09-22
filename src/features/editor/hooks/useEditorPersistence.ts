@@ -1,7 +1,6 @@
-import { useRef, type RefObject } from "react";
+import { useCallback, useRef, type RefObject } from "react";
 import { useAutoSave } from "./useAutosave";
-import { importMdx } from "../engine/mdx/index";
-import { exportMdx } from "../engine/mdx/index";
+import { exportMdx, importMdx } from "../engine/mdx/index";
 import type {
   PersistenceAdapter,
   SaveStatus,
@@ -38,28 +37,37 @@ export function useEditorPersistence(
   const sourceMdxRef = useRef("");
   const lastValidJsonRef = useRef<Record<string, unknown> | null>(null);
 
-  const importMdxContent = async (mdx: string): Promise<ImportResult> => {
-    const result = importMdx(mdx);
-    frontmatterRef.current = result.frontmatter;
-    sourceMdxRef.current = mdx;
-    return result;
-  };
+  // 必须保持引用稳定：调用方把这两个函数放进了 effect/useMemo 依赖
+  //（如 DocumentEditor 的文档加载 effect），每次渲染换引用会让 effect 反复重跑，
+  // 重新 setContent 覆盖用户正在编辑的内容。二者只用到 ref 与模块级函数，故依赖为 []。
+  const importMdxContent = useCallback(
+    async (mdx: string): Promise<ImportResult> => {
+      const result = importMdx(mdx);
+      frontmatterRef.current = result.frontmatter;
+      sourceMdxRef.current = mdx;
+      return result;
+    },
+    [],
+  );
 
-  const exportMdxContent = async (
-    json: Record<string, unknown>,
-    frontmatter: Record<string, unknown> = {},
-  ): Promise<string> => {
-    const nodes =
-      typeof json === "object" && json !== null && "content" in json
-        ? (json as { content: unknown[] }).content
-        : [];
-    const result = exportMdx(
-      nodes as Parameters<typeof exportMdx>[0],
-      frontmatter,
-    );
-    sourceMdxRef.current = result.mdx;
-    return result.mdx;
-  };
+  const exportMdxContent = useCallback(
+    async (
+      json: Record<string, unknown>,
+      frontmatter: Record<string, unknown> = {},
+    ): Promise<string> => {
+      const nodes =
+        typeof json === "object" && json !== null && "content" in json
+          ? (json as { content: unknown[] }).content
+          : [];
+      const result = exportMdx(
+        nodes as Parameters<typeof exportMdx>[0],
+        frontmatter,
+      );
+      sourceMdxRef.current = result.mdx;
+      return result.mdx;
+    },
+    [],
+  );
 
   return {
     saveStatus,

@@ -129,13 +129,26 @@ onMounted(() => void refresh());
                     f.status === 'approved',
                   'bg-red-100 dark:bg-red-950/30 text-red-500':
                     f.status === 'rejected',
+                  // 后端新增状态时给中性底色，避免 badge 变成无样式的裸文本
+                  // （文案侧 statusLabel 已回退为原始值，不再假装成某个已知状态）
+                  'bg-surface-3 text-text-muted': ![
+                    'pending',
+                    'approved',
+                    'rejected',
+                  ].includes(f.status),
                 }"
               >
                 {{ statusLabel(f.status) }}
               </span>
             </td>
           </tr>
-          <tr v-if="!loading && rows.length === 0">
+          <!-- 加载态单独占一行：原先只有空态行且被 !loading 挡住，首次加载时表体整片空白 -->
+          <tr v-if="loading">
+            <td colspan="4" class="px-4 py-8 text-center text-text-muted">
+              <span class="inline-block animate-pulse">…</span>
+            </td>
+          </tr>
+          <tr v-else-if="rows.length === 0">
             <td colspan="4" class="px-4 py-8 text-center text-text-muted">
               {{ t("admin.files.empty") }}
             </td>

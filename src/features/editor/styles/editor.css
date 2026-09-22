@@ -88,10 +88,11 @@
   cursor: not-allowed;
 }
 
+/* 尺寸只在本块声明一次：此前这里还写过 width/height: 1.75rem，
+   但文件末尾的移动端块同样用 2.25rem 覆盖了它们（同特异性、后者胜），只有 font-size 生效，
+   留着 1.75rem 会让人以为工具栏按钮是 28px（实测渲染是 2.25rem = 36px） */
 @media (max-width: 768px) {
   .rte-toolbar-btn {
-    width: 1.75rem;
-    height: 1.75rem;
     font-size: 0.75rem;
   }
 }
@@ -114,7 +115,9 @@
     background var(--rte-dur-fast) var(--rte-ease-out),
     border-color var(--rte-dur-fast) var(--rte-ease-out);
   -webkit-tap-highlight-color: transparent;
-  will-change: transform;
+  /* 不声明 will-change: transform：.rte-btn 覆盖工具栏/状态栏/对话框里几十个按钮，
+     常驻提升会为整页生命周期各占一个合成层、白占 GPU 内存；只在 :active 才做 scale，
+     交给浏览器按需提升即可 */
 }
 
 .rte-btn:active:not(:disabled) {
@@ -318,6 +321,18 @@
   }
 }
 
+/* 移动端面板是底部抽屉（见文件末尾的 max-width:768px 块），横向滑入与版式不符 */
+@keyframes rte-panel-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ===== Bubble 菜单（浮动格式化菜单） ===== */
 .rte-bubble-menu {
   position: absolute;
@@ -503,8 +518,10 @@
     color 0.15s;
 }
 
-.rte-mode-tab:hover {
-  background: var(--rte-btn-hover-bg, #f3f4f6);
+@media (hover: hover) and (pointer: fine) {
+  .rte-mode-tab:hover {
+    background: var(--rte-btn-hover-bg, #f3f4f6);
+  }
 }
 
 .rte-mode-tab.is-active {
@@ -596,8 +613,11 @@
   color: var(--rte-btn-color, #374151);
 }
 
-.rte-fullscreen-btn:hover {
-  background: var(--rte-btn-hover-bg, #f3f4f6);
+/* hover 只在真有指针的设备上生效：否则触屏点一下会「粘住」悬停态，按钮看起来一直是按下的 */
+@media (hover: hover) and (pointer: fine) {
+  .rte-fullscreen-btn:hover {
+    background: var(--rte-btn-hover-bg, #f3f4f6);
+  }
 }
 
 /* ===== 链接编辑弹窗 ===== */
@@ -853,6 +873,8 @@
     border-top: 1px solid var(--surface-3);
     border-radius: 12px 12px 0 0;
     z-index: 40;
+    /* 抽屉从底部进：沿用上面的 rte-panel-in 会变成横向滑入 */
+    animation: rte-panel-in-bottom var(--rte-dur-menu) var(--rte-ease-out);
   }
 
   .rte-editor-content {
@@ -871,9 +893,11 @@
 
 /* ===== Callout 节点：图标居左 + 文字在剩余空间水平/垂直居中 =====
    覆盖 main.css 的 `.alert`（display:grid / place-items:center start），
-   用更高特异性 `.rte-callout.alert` 强制 flex，使图标占据首列、正文占满并列居中。 */
+   使图标占据首列、正文占满并列居中。此规则无需 !important：main.css 的 `.alert` 在
+   `@layer components` 内，未分层的本文件规则本就胜出，且 `.rte-callout.alert` 还多一个类名。
+   去掉 !important 后，将来更具体的 `.alert` 变体（如改布局的修饰类）仍能正常覆盖。 */
 .rte-callout.alert {
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 0.5rem;

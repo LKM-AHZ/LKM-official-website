@@ -10,10 +10,7 @@ interface TextMetrics {
 }
 
 // 简单缓存：相同文本不重复 prepare
-const cache = new Map<
-  string,
-  { prepared: ReturnType<typeof prepare>; result: TextMetrics }
->();
+const cache = new Map<string, TextMetrics>();
 const MAX_CACHE_SIZE = 20;
 
 /**
@@ -28,7 +25,8 @@ function extractText(doc: Record<string, unknown>): string {
     }
     if (Array.isArray(node.content)) {
       for (const child of node.content as Array<Record<string, unknown>>) {
-        walk(child);
+        // 导入的 JSON 里可能有 null/非对象子项，直接读 child.type 会抛错让整次统计失败
+        if (child && typeof child === "object") walk(child);
       }
     }
   };
@@ -43,12 +41,16 @@ function extractText(doc: Record<string, unknown>): string {
 function countWords(text: string): number {
   const trimmed = text.trim();
   if (!trimmed) return 0;
-  // 检测是否主要包含 CJK 字符
-  const cjkCount = (trimmed.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || [])
-    .length;
-  if (cjkCount > trimmed.length * 0.5) {
-    // CJK 文本：字数 = 字符数（标点和空白不计）
-    return trimmed.replace(/\s/g, "").length;
+  // 检测是否主要包含 CJK 字符（含假名与谚文，否则日/韩文本会走按空白分词）
+  const cjkCount = (
+    trimmed.match(/[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u30ff\uac00-\ud7af]/g) ||
+    []
+  ).length;
+  // 分母去掉空白：用 trimmed.length 会让空白多的 CJK 文本比例偏低而误判成按词计数
+  const letters = trimmed.replace(/\s/g, "");
+  if (cjkCount > letters.length * 0.5) {
+    // CJK 文本：字数 = 去空白后的字符数（标点仍计入）
+    return letters.length;
   }
   // 非 CJK 文本：按空白分词
   return trimmed.split(/\s+/).length;
@@ -63,15 +65,15 @@ export function computeTextMetrics(
 
   // 检查缓存
   const cached = cache.get(text);
-  if (cached) return cached.result;
+  if (cached) return cached;
 
-  // pretext 的 prepared 对象内部有分段信息，但我们只需要字符数
-  // 直接用文本长度作为字符数（pretext 的 prepare 验证了文本可处理性）
+  // 直接用文本长度作为字符数（pretext 的 prepare 验证了文本可处理性），
+  // prepare 的返回值内部虽有分段信息但从未被读取，不再往缓存里存
   const characters = text.length;
   const words = countWords(text);
 
   try {
-    const prepared = prepare(text, "16px / Inter, sans-serif", {
+    prepare(text, "16px / Inter, sans-serif", {
       whiteSpace: "pre-wrap",
     });
     // 清理旧缓存
@@ -81,7 +83,7 @@ export function computeTextMetrics(
     }
     // words 不依赖 pretext，但必须一起写入缓存：命中缓存时直接返回 result，
     // 存 words: 0 会让所有已缓存文本的字数恒为 0
-    cache.set(text, { prepared, result: { characters, words } });
+    cache.set(text, { characters, words });
   } catch (err) {
     console.warn("[text-metrics] pretext prepare 失败:", err);
   }

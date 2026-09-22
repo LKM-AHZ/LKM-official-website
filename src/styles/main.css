@@ -248,6 +248,11 @@
   .loading-sm {
     width: calc(var(--size-selector, 0.25rem) * 5);
   }
+  /* 页面级 loading 用的是 loading-md（editor.astro / admin/documents），之前漏定义：
+     基础 .loading 只设了 aspect-ratio，没有宽度时 spinner 会塌成看不见的点 */
+  .loading-md {
+    width: calc(var(--size-selector, 0.25rem) * 6);
+  }
   .loading-lg {
     width: calc(var(--size-selector, 0.25rem) * 9);
     border-width: 4px;
@@ -294,10 +299,11 @@
 @media (prefers-reduced-motion: no-preference) {
   .loading,
   .loading-spinner {
-    animation: spin 1.2s linear infinite;
+    animation: lkm-spin 1.2s linear infinite;
   }
 }
-@keyframes spin {
+/* 不用内置名 spin：本项目这份是无层级声明，会盖过 tailwind 的 animate-spin 关键帧 */
+@keyframes lkm-spin {
   to {
     transform: rotate(360deg);
   }

@@ -19,7 +19,7 @@ interface Props {
 const { id, links = [], title = t('nav.navigation') } = Astro.props;
 ---
 
-<div id={id} data-mobile-nav-panel class="fixed inset-0 z-[100] pointer-events-none" aria-hidden="true">
+<div id={id} data-mobile-nav-panel class="fixed inset-0 z-[100] pointer-events-none" aria-hidden="true" inert>
   <!-- overlay -->
   <div data-nav-overlay class="absolute inset-0 bg-black/50 dark:bg-black/70 opacity-0 transition-opacity duration-300">
   </div>
@@ -108,9 +108,8 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
   </div>
 </div>
 
-<script is:inline define:vars={{ id }}>
+<script is:inline>
   (function () {
-    const panelId = id;
     const openClass = 'mobile-nav-open';
 
     function getPanelElements(panelRoot) {
@@ -124,6 +123,7 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
       if (!overlay || !panel) return;
 
       panelRoot.classList.remove('pointer-events-none');
+      panelRoot.removeAttribute('inert');
       panelRoot.setAttribute('aria-hidden', 'false');
       overlay.classList.remove('opacity-0');
       panel.classList.remove('translate-x-full');
@@ -143,6 +143,9 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
       setTimeout(function () {
         if (panel.classList.contains('translate-x-full')) {
           panelRoot.classList.add('pointer-events-none');
+          // 关闭态用 inert 把抽屉内的链接/按钮移出 Tab 序列。
+          // 只加 aria-hidden + pointer-events-none 只挡鼠标，键盘仍能 Tab 进不可见内容（WCAG 失败）。
+          panelRoot.setAttribute('inert', '');
           panelRoot.setAttribute('aria-hidden', 'true');
         }
       }, 300);
@@ -158,66 +161,87 @@ const { id, links = [], title = t('nav.navigation') } = Astro.props;
       }
     }
 
-    function initAllPanels() {
-      document.querySelectorAll('[data-mobile-nav-panel]').forEach(function (el) {
-        const panelRoot = el;
-        const overlay = panelRoot.querySelector('[data-nav-overlay]');
+    // 每个面板只绑定一次。astro:after-swap 后会对新节点重新初始化，
+    // 若重复绑定，手风琴触发的 toggle 会被执行偶数次而看似失灵，close() 也会重复执行。
+    function initPanel(panelRoot) {
+      if (!panelRoot || panelRoot.dataset.navInit === '1') return;
+      panelRoot.dataset.navInit = '1';
 
-        if (overlay) {
-          overlay.addEventListener('click', function () {
-            close(panelRoot);
-          });
-        }
-
-        const closeBtn = panelRoot.querySelector('[data-nav-close]');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function () {
-            close(panelRoot);
-          });
-        }
-
-        panelRoot.querySelectorAll('[data-nav-link]').forEach(function (link) {
-          link.addEventListener('click', function () {
-            setTimeout(function () {
-              close(panelRoot);
-            }, 150);
-          });
+      const overlay = panelRoot.querySelector('[data-nav-overlay]');
+      if (overlay) {
+        overlay.addEventListener('click', function () {
+          close(panelRoot);
         });
+      }
 
-        panelRoot.querySelectorAll('[data-nav-accordion-trigger]').forEach(function (trigger) {
-          trigger.addEventListener('click', function () {
-            const arrow = trigger.querySelector('[data-nav-accordion-arrow]');
-            const content = trigger.nextElementSibling;
-            if (!content) return;
-            if (content.classList.contains('hidden')) {
-              content.classList.remove('hidden');
-              if (arrow) arrow.classList.add('rotate-180');
-            } else {
-              content.classList.add('hidden');
-              if (arrow) arrow.classList.remove('rotate-180');
-            }
-          });
+      const closeBtn = panelRoot.querySelector('[data-nav-close]');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          close(panelRoot);
         });
+      }
+
+      panelRoot.querySelectorAll('[data-nav-link]').forEach(function (link) {
+        link.addEventListener('click', function () {
+          setTimeout(function () {
+            close(panelRoot);
+          }, 150);
+        });
+      });
+
+      panelRoot.querySelectorAll('[data-nav-accordion-trigger]').forEach(function (trigger) {
+        trigger.addEventListener('click', function () {
+          const arrow = trigger.querySelector('[data-nav-accordion-arrow]');
+          const content = trigger.nextElementSibling;
+          if (!content) return;
+          if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            if (arrow) arrow.classList.add('rotate-180');
+          } else {
+            content.classList.add('hidden');
+            if (arrow) arrow.classList.remove('rotate-180');
+          }
+        });
+      });
+
+      // 通过 CustomEvent 暴露面板 API，替代 window.__mobileNavPanel 全局对象
+      panelRoot.addEventListener('mobile-nav:open', function () {
+        open(panelRoot);
+      });
+      panelRoot.addEventListener('mobile-nav:close', function () {
+        close(panelRoot);
+      });
+      panelRoot.addEventListener('mobile-nav:toggle', function () {
+        toggle(panelRoot);
       });
     }
 
-    // 通过 CustomEvent 暴露面板 API，替代 window.__mobileNavPanel 全局对象
-    const panelRootEl = document.getElementById(panelId);
-    if (panelRootEl) {
-      panelRootEl.addEventListener('mobile-nav:open', () => open(panelRootEl));
-      panelRootEl.addEventListener('mobile-nav:close', () => close(panelRootEl));
-      panelRootEl.addEventListener('mobile-nav:toggle', () => toggle(panelRootEl));
+    function initAllPanels() {
+      document.querySelectorAll('[data-mobile-nav-panel]').forEach(initPanel);
+    }
+
+    function closeOpenPanels() {
+      document.querySelectorAll('[data-mobile-nav-panel]').forEach(function (root) {
+        const panel = root.querySelector('[data-nav-panel]');
+        if (panel && !panel.classList.contains('translate-x-full')) close(root);
+      });
     }
 
     initAllPanels();
-    document.addEventListener('astro:after-swap', function () {
-      const el = document.getElementById(panelId);
-      if (el) {
-        el.addEventListener('mobile-nav:open', () => open(el));
-        el.addEventListener('mobile-nav:close', () => close(el));
-        el.addEventListener('mobile-nav:toggle', () => toggle(el));
-      }
-      initAllPanels();
-    });
+
+    // document 在视图切换（Swup/ClientRouter）之间是复用的，若每次导航都注册，
+    // document 上的监听会逐次累积；用 documentElement 标记保证全局只注册一次。
+    if (!document.documentElement.dataset.mobileNavHooked) {
+      document.documentElement.dataset.mobileNavHooked = '1';
+
+      document.addEventListener('astro:after-swap', function () {
+        // 页面主体被换掉后，旧节点上的监听已随旧 DOM 一并消失，这里对新节点重新绑定
+        initAllPanels();
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeOpenPanels();
+      });
+    }
   })();
 </script>

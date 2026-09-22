@@ -187,7 +187,7 @@ export const en = {
     supportUs: "Support Us",
     privacyPolicy: "Privacy Policy",
     terms: "Terms of Service",
-    copyright: "LKM &copy; 2026 · All rights reserved.",
+    copyright: "LKM © 2026 · All rights reserved.",
   },
 
   blog: {
@@ -690,7 +690,8 @@ export const en = {
         },
         rhythm: {
           name: "Rhythm Game Club (Anime-style)",
-          desc: "The Cooking Club mainly explores the chemical reactions behind cooking, for sharing culinary skills and showing off your homemade dishes. In the future, if possible, we will also host live streams and tutorials on cooking.",
+          // 原为 Cooking Club 的文案（误抄）；沿用 forumData.categories.hobbyMusicGame.description 的表述
+          desc: "Discuss rhythm games, share charts and techniques.",
         },
         cooking: {
           name: "Cooking Club",
@@ -750,10 +751,10 @@ export const en = {
         dream: "Dream: Every child can be exposed to science",
       },
       julyRobin: {
-        desc: "To be filled in — still a student settling in (let us look forward to their growth~",
+        desc: "To be filled in — still a student settling in (let us look forward to their growth~)",
       },
       julyAhong: {
-        desc: "To be filled in — still a student settling in (let us look forward to their growth~",
+        desc: "To be filled in — still a student settling in (let us look forward to their growth~)",
       },
       julyMoran: {
         desc: "Physics from a non-elite university, currently switching fields",
@@ -791,7 +792,7 @@ export const en = {
         quote: "— To the imperfect tomorrow",
       },
       julyQingqian: {
-        desc: "A bit of a lurker with not much knowledge in stock (",
+        desc: "A bit of a lurker with not much knowledge in stock",
         dream: "Dream: Become a researcher",
       },
       julyMk: {

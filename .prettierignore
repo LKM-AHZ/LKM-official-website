@@ -1,9 +1,12 @@
 dist
 node_modules
 .pnpm-store
-.github
+# 只忽略无法格式化的具体工作流文件，而非整个 .github
+.github/workflows/actions.yaml
+.github/workflows/lighthouse.yaml
 pnpm-lock.yaml
-backend/.pytest_cache
-backend/**/__pycache__
+# 与目录深度无关的缓存目录（写 backend/ 前缀会漏掉仓库根或其它子项目的同类目录）
+**/.pytest_cache
+**/__pycache__
 src/lib/icons/astro-include.ts
 LICENSE.md

@@ -61,10 +61,10 @@ export default function TableInsertMenu({
         case "Enter":
         case " ":
           e.preventDefault();
-          if (focusRow > 0 && focusCol > 0) {
-            onInsert(focusRow + 1, focusCol + 1);
-            onClose();
-          }
+          // 与 onClick 保持一致：任意单元格都能插入（focus 为 0/0 时就是 1×1），
+          // 原 `focusRow > 0 && focusCol > 0` 会把 1×1 和所有 1×N、N×1 都挡掉
+          onInsert(focusRow + 1, focusCol + 1);
+          onClose();
           break;
         case "Escape":
           e.preventDefault();
@@ -104,9 +104,11 @@ export default function TableInsertMenu({
       >
         {Array.from({ length: MAX_ROWS }, (_, r) =>
           Array.from({ length: MAX_COLS }, (_, c) => {
+            // 悬停优先于键盘光标：鼠标在场时按 hover 显示，鼠标离开后回落到键盘位置
             const isActive =
-              (hoverRow > 0 && r < hoverRow && c < hoverCol) ||
-              (r <= focusRow && c <= focusCol);
+              hoverRow > 0
+                ? r < hoverRow && c < hoverCol
+                : r <= focusRow && c <= focusCol;
             const isFocused = r === focusRow && c === focusCol;
             return (
               <button
@@ -120,8 +122,8 @@ export default function TableInsertMenu({
                   cols: c + 1,
                 })}
                 onMouseEnter={() => {
-                  setFocusRow(r);
-                  setFocusCol(c);
+                  // 只更新 hover：之前顺带写 focusRow/focusCol，鼠标一划过就毁掉
+                  // 用户用键盘建好的选择位置
                   setHoverRow(r + 1);
                   setHoverCol(c + 1);
                 }}

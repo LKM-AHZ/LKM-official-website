@@ -8,7 +8,9 @@ import {
 import { t } from "~/lib/i18n";
 
 const isOpen = ref(false);
-const notifications = ref<MockNotification[]>(mockNotifications);
+// 复制一份：直接持有模块级 mock 数组会让本组件与所有引用方共享同一份状态，
+// 将来任何原地修改都会泄漏到别的实例
+const notifications = ref<MockNotification[]>([...mockNotifications]);
 
 const unreadCount = computed(
   () => notifications.value.filter((n) => !n.isRead).length,
@@ -31,7 +33,7 @@ function markAllAsRead() {
   }));
 }
 
-function getIcon(type: string): string {
+function getIcon(type: MockNotification["type"]): string {
   switch (type) {
     case "reply":
       return "material-symbols:chat-bubble-outline";
@@ -70,12 +72,19 @@ function handleClickOutside(e: MouseEvent) {
   }
 }
 
+// 键盘用户需要能关掉这个下拉
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === "Escape") isOpen.value = false;
+}
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  document.addEventListener("keydown", handleKeydown);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
@@ -83,7 +92,11 @@ onUnmounted(() => {
   <div id="notification-bell" class="relative">
     <!-- 铃铛触发按钮 -->
     <button
+      type="button"
       :aria-label="t('notification.title')"
+      aria-haspopup="true"
+      :aria-expanded="isOpen"
+      aria-controls="notification-panel"
       class="scale-animation rounded-lg w-11 h-11 active:scale-90 relative flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       @click="toggle"
     >
@@ -102,6 +115,7 @@ onUnmounted(() => {
 
     <!-- 下拉通知面板 -->
     <div
+      id="notification-panel"
       v-if="isOpen"
       class="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] float-panel p-2 z-50 shadow-xl dark:shadow-2xl transition-all"
       @click.stop
@@ -116,6 +130,7 @@ onUnmounted(() => {
         >
         <button
           v-if="unreadCount > 0"
+          type="button"
           class="text-xs text-primary hover:underline font-medium transition-colors"
           @click="markAllAsRead"
         >
@@ -135,6 +150,7 @@ onUnmounted(() => {
       <button
         v-for="n in notifications"
         :key="n.id"
+        type="button"
         class="w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors group mb-0.5"
         :class="{ 'opacity-60': n.isRead }"
         @click="markAsRead(n.id)"

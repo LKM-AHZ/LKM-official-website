@@ -1,7 +1,10 @@
 ---
 import { Icon } from 'astro-icon/components';
+import type { HTMLAttributes } from 'astro/types';
 
-interface Props {
+// 继承 li 的属性集：调用方的 class / id / data-* / aria-* 需要能落到根元素，
+// 否则 <TimelineItem class="…" data-… /> 会被静默丢掉
+interface Props extends HTMLAttributes<'li'> {
   year: string;
   title: string;
   description: string;
@@ -11,17 +14,30 @@ interface Props {
   iconColor?: string;
 }
 
-const { year, title, description, index, iconName = 'tabler:circle-check', iconColor = 'text-primary' } = Astro.props;
+const {
+  year,
+  title,
+  description,
+  index,
+  total,
+  iconName = 'tabler:circle-check',
+  iconColor = 'text-primary',
+  class: className,
+  ...rest
+} = Astro.props;
 
 const isEven = index % 2 === 0;
 // isEven: 圆点在 1/3、文字在右宽侧；否则圆点在 2/3、文字在左宽侧
 // 连接线由 Timeline.astro 的 SVG 依据圆点实际位置动态绘制
 ---
 
-<li class="tl-item">
+<li class:list={['tl-item', className]} {...rest}>
   {/* ===================== 移动端（<md）：圆环样式，连接线由 SVG 绘制 ===================== */}
-  <div class="relative pb-10 last:pb-0 md:hidden">
-    <span class="tl-dot-mobile" data-tl-dot-mobile>
+  {/* 用 index/total 判末尾，不能用 last:pb-0：本 div 是 <li> 的**第一个**子元素，
+      :last-child 永不命中，末项的 40px 尾距会一直留着 */}
+  <div class:list={['relative md:hidden', index === total - 1 ? 'pb-0' : 'pb-10']}>
+    {/* 圆点纯装饰：年份/标题已把内容说清，图标不该进读屏树 */}
+    <span class="tl-dot-mobile" data-tl-dot-mobile aria-hidden="true">
       <Icon name={iconName} class:list={['h-5 w-5', iconColor]} />
     </span>
     <div class="pl-12">
@@ -33,8 +49,8 @@ const isEven = index % 2 === 0;
 
   {/* ===================== 桌面端（≥md）：圆点@1/3·2/3，文字宽侧；连接线由 SVG 画 ===================== */}
   <div class:list={['tl-row hidden md:block', isEven ? 'tl-left' : 'tl-right']}>
-    {/* 圆点：锚定 1/3 或 2/3，垂直居中。data-tl-dot 供 SVG 脚本定位 */}
-    <span class="tl-circle" data-tl-dot data-tl-dot-desktop>
+    {/* 圆点：锚定 1/3 或 2/3，垂直居中。data-tl-dot 供 SVG 脚本定位；aria-hidden 同移动端 */}
+    <span class="tl-circle" data-tl-dot data-tl-dot-desktop aria-hidden="true">
       <Icon name={iconName} class:list={['h-6 w-6', iconColor]} />
     </span>
     {/* 文字：宽侧 */}

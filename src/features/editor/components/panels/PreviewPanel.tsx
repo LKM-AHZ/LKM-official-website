@@ -31,26 +31,26 @@ export function renderNode(node: JSONContent, key: number): React.ReactNode {
     case "text": {
       const text = node.text ?? "";
       const marks = node.marks ?? [];
-      if (marks.some((m) => m.type === "bold"))
-        return <strong key={key}>{text}</strong>;
-      if (marks.some((m) => m.type === "italic"))
-        return <em key={key}>{text}</em>;
-      if (marks.some((m) => m.type === "strike"))
-        return <del key={key}>{text}</del>;
-      if (marks.some((m) => m.type === "code"))
-        return <code key={key}>{text}</code>;
-      if (marks.some((m) => m.type === "underline"))
-        return <u key={key}>{text}</u>;
-      const linkMark = marks.find((m) => m.type === "link");
-      if (linkMark) {
-        const href = (linkMark.attrs as Record<string, string>)?.href ?? "#";
-        return (
-          <a key={key} href={href} className="text-primary underline">
-            {text}
-          </a>
-        );
+      // 逐个 mark 嵌套包裹（与 serialize-html 的 renderText 一致）：原来「首个命中即 return」
+      // 会让 bold+link 这类组合丢掉后面的 mark，预览与导出的 HTML 对不上
+      if (marks.length === 0) return <span key={key}>{text}</span>;
+      let el: React.ReactElement = <>{text}</>;
+      for (const m of marks) {
+        if (m.type === "bold") el = <strong>{el}</strong>;
+        else if (m.type === "italic") el = <em>{el}</em>;
+        else if (m.type === "strike") el = <del>{el}</del>;
+        else if (m.type === "code") el = <code>{el}</code>;
+        else if (m.type === "underline") el = <u>{el}</u>;
+        else if (m.type === "link") {
+          const href = (m.attrs as Record<string, string>)?.href ?? "#";
+          el = (
+            <a href={href} className="text-primary underline">
+              {el}
+            </a>
+          );
+        }
       }
-      return <span key={key}>{text}</span>;
+      return React.cloneElement(el, { key });
     }
     case "blockquote":
       return (
@@ -72,6 +72,14 @@ export function renderNode(node: JSONContent, key: number): React.ReactNode {
         <ol key={key} className="list-decimal pl-6">
           {children}
         </ol>
+      );
+    case "taskList":
+      // TaskList 是 taskItem 的容器，不处理会落到 default 的 <span> 里，
+      // 生成 <span><li> 这种非法嵌套
+      return (
+        <ul key={key} className="list-none pl-0">
+          {children}
+        </ul>
       );
     case "listItem":
     case "taskItem":
@@ -128,13 +136,18 @@ export function renderNode(node: JSONContent, key: number): React.ReactNode {
       return <tr key={key}>{children}</tr>;
     }
     case "tableCell":
-    case "tableHeader": {
       return (
         <td key={key} className="border border-surface-3 px-3 py-1">
           {children ?? node.text}
         </td>
       );
-    }
+    case "tableHeader":
+      // 表头要保持 th 语义（与 engine/serialize-html.ts 导出的一致），否则预览与导出的 HTML 不同
+      return (
+        <th key={key} className="border border-surface-3 px-3 py-1">
+          {children ?? node.text}
+        </th>
+      );
     case "inlineMath":
     case "blockMath": {
       const latex = (node.attrs as Record<string, string>)?.latex ?? "";
@@ -162,7 +175,9 @@ export function renderNode(node: JSONContent, key: number): React.ReactNode {
       );
     }
     default:
-      return <span key={key}>{children ?? node.text}</span>;
+      // 未映射的节点多为块级（其 children 里可能有 li/p/div），
+      // 用 span 包裹会生成非法嵌套并触发 React 的 DOM 嵌套告警
+      return <div key={key}>{children ?? node.text}</div>;
   }
 }
 

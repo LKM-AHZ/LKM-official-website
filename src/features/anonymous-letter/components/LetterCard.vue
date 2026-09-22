@@ -20,7 +20,7 @@
       <div v-if="!expanded && isLong" class="lc-fade"></div>
     </div>
     <button
-      v-if="isLong && (!letter.encrypted || decrypted)"
+      v-if="isLong && !letter.encrypted"
       class="lc-toggle"
       @click="expanded = !expanded"
     >
@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { getCategory, getPaper, getTag, moodKey } from "../stores/constants";
-import { toggleFavorite } from "../stores/storage";
+import { toggleFavorite, getFavorites } from "../stores/storage";
 import ReportDialog from "./ReportDialog.vue";
 import { t } from "~/lib/i18n";
 
@@ -114,10 +114,9 @@ function tagEmoji(k) {
 const expanded = ref(false);
 const isLong = computed(() => (props.letter.content || "").length > 90);
 
-const isFav = ref(false);
-const favCount = computed(
-  () => (props.letter.favorites || 0) + (isFav.value ? 1 : 0),
-);
+const isFav = ref(getFavorites().includes(props.letter.id));
+// 收藏数单一来源：onFav 已经同步了 props.letter.favorites，这里不能再叠加 isFav（会 +2）
+const favCount = computed(() => props.letter.favorites || 0);
 
 const reportVisible = ref(false);
 const burst = ref(false);
@@ -245,34 +244,6 @@ function onSameType() {
   background: linear-gradient(to bottom, transparent, var(--card-bg));
   border-radius: 0 0 12px 12px;
   pointer-events: none;
-}
-.lc-encrypted {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 0;
-}
-.lc-lock {
-  font-size: 13px;
-  color: var(--text-sub);
-}
-.lc-decrypt {
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  background: transparent;
-  border-radius: var(--radius-pill);
-  padding: 6px 16px;
-  cursor: pointer;
-  font-size: 13px;
-  transition:
-    background var(--duration-base) var(--ease),
-    color var(--duration-base) var(--ease),
-    border-color var(--duration-base) var(--ease),
-    opacity var(--duration-base) var(--ease);
-}
-.lc-decrypt:hover {
-  background: var(--grad-soft);
 }
 .lc-sticker {
   position: absolute;

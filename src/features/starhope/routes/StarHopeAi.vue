@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick, watch } from "vue";
 import { useAiStore } from "../stores/ai";
 import type { AiAgent } from "~/features/starhope/types";
 import { t } from "~/lib/i18n";
@@ -8,6 +8,18 @@ const ai = useAiStore();
 const inputText = ref("");
 const _showAgentEditor = ref(false);
 const _editingAgent = ref<AiAgent | null>(null);
+const messagesEl = ref<HTMLElement | null>(null);
+
+// 追加消息后滚到底：否则新消息与「生成中」提示会停在视口之外，用户看不到反馈
+watch(
+  () => ai.messages.value.length,
+  async () => {
+    await nextTick();
+    if (messagesEl.value) {
+      messagesEl.value.scrollTop = messagesEl.value.scrollHeight;
+    }
+  },
+);
 
 onMounted(() => {
   ai.loadAgents();
@@ -30,6 +42,8 @@ async function handleSend() {
         <div
           v-for="agent in ai.agents.value"
           :key="agent.id"
+          role="button"
+          tabindex="0"
           class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 cursor-pointer"
           :class="
             ai.currentAgentId.value === agent.id
@@ -37,6 +51,8 @@ async function handleSend() {
               : 'text-text-muted hover:bg-surface-3'
           "
           @click="ai.selectAgent(agent.id)"
+          @keydown.enter="ai.selectAgent(agent.id)"
+          @keydown.space.prevent="ai.selectAgent(agent.id)"
         >
           <span>{{ agent.name }}</span>
         </div>
@@ -65,7 +81,10 @@ async function handleSend() {
             {{ t("starhope.ai.clearConversation") }}
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div
+          ref="messagesEl"
+          class="flex-1 overflow-y-auto px-6 py-4 space-y-4"
+        >
           <div
             v-for="msg in ai.messages.value"
             :key="msg.id"

@@ -1,5 +1,5 @@
 import type { NavBarLink } from "~/types/config";
-import { getPermalink, getAsset } from "./utils/permalinks";
+import { getPermalink } from "./utils/permalinks";
 
 /** 按一级菜单名（name）白名单过滤顶栏链接；names 未传(undefined)时不过滤，原样返回；空数组会返回空列表。 */
 export function filterNavbarByNames(
@@ -10,7 +10,28 @@ export function filterNavbarByNames(
   return links.filter((item) => names.includes(item.name));
 }
 
-export const footerData = {
+/** 页脚数据结构（与 features/shell/components/Footer.astro 的 Props 对齐；显式标注才挡得住拼写错误） */
+interface FooterLink {
+  /** i18n key；社交图标那类只有 ariaLabel 的条目不带它 */
+  text?: string;
+  href: string;
+  ariaLabel?: string;
+  icon?: string;
+}
+
+interface FooterLinkGroup {
+  title: string;
+  links: FooterLink[];
+}
+
+interface FooterData {
+  links: FooterLinkGroup[];
+  secondaryLinks: FooterLink[];
+  socialLinks: FooterLink[];
+  footNote: string;
+}
+
+export const footerData: FooterData = {
   links: [
     {
       title: "footer.community",
@@ -48,7 +69,8 @@ export const footerData = {
       icon: "tabler:brand-github",
       href: "https://github.com/LKM-AHZ",
     },
-    { ariaLabel: "RSS", icon: "tabler:rss", href: getAsset("/rss.xml") },
+    // 原 RSS 链接指向 /rss.xml，但本仓库既没有 public/rss.xml 也没有 pages/rss.xml.* 端点
+    //（@astrojs/rss 只是依赖、从未 import），点了必然 404。等博客 API 提供 feed 后再恢复
   ],
   footNote: "footer.copyright",
 };

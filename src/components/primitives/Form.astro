@@ -1,16 +1,22 @@
 ---
+import type { HTMLAttributes } from 'astro/types';
 import type { Form as Props } from '~/types/core';
 import Button from './Button.astro';
 
-const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } = Astro.props;
+// 与 astro 的 JSX 定义同源（HTMLAttributes<'input'>['type']），比 as never 有约束力
+type InputType = HTMLAttributes<'input'>['type'];
+
+const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } = Astro.props as Props;
 ---
 
-<form id="contact-form" method="POST" action="#">
-  <div id="form-message" class="hidden mb-4"></div>
+{/* 这是静态展示表单（提交由脚本拦下并提示，i18n 文案见 primitives.formStaticWarning）：
+    没有接收端，就不该保留 method="POST"/action="#" 这套假接线 */}
+<form id="contact-form">
+  <div id="form-message" class="hidden mb-4" role="alert"></div>
   {
     inputs &&
       inputs.map(
-        ({ type, name, label = '', autocomplete = 'on', placeholder = '' }) =>
+        ({ type, name, label = '', autocomplete = 'on', placeholder = '', ...rest }) =>
           name && (
             <div class="mb-6">
               {label && (
@@ -19,11 +25,12 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
                 </label>
               )}
               <input
-                type={(type ?? 'text') as never}
+                type={(type ?? 'text') as InputType}
                 name={name}
                 id={name}
                 autocomplete={autocomplete}
                 placeholder={placeholder}
+                {...rest}
                 class="input input-bordered w-full"
               />
             </div>
@@ -88,7 +95,9 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
       e.preventDefault();
       const msg = document.getElementById('form-message');
       if (msg) {
-        msg.className = 'mb-4 alert alert-warning';
+        // 只摘掉 hidden，别整体覆盖 className——否则模板上新加的类会被无声丢弃
+        msg.classList.remove('hidden');
+        msg.classList.add('alert', 'alert-warning');
         msg.textContent = t('primitives.formStaticWarning');
       }
     });

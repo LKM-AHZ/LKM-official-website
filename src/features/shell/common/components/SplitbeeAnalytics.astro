@@ -2,5 +2,12 @@
 const { doNotTrack = true, noCookieMode = false, url = 'https://cdn.splitbee.io/sb.js' } = Astro.props;
 ---
 
-<!-- Splitbee 分析 -->
-<script is:inline data-respect-dnt={doNotTrack} data-no-cookie={noCookieMode} async src={url}></script>
+<!-- Splitbee 分析 —— 两个开关按「有该属性即生效」解析，故 false 时整条属性不输出（undefined 会被 Astro 跳过），
+     否则 data-no-cookie="false" 也会被当成开启 cookie 限制 -->
+<script
+  is:inline
+  data-respect-dnt={doNotTrack ? 'true' : undefined}
+  data-no-cookie={noCookieMode ? 'true' : undefined}
+  async
+  src={url}
+></script>

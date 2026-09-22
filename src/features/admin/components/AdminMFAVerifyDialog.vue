@@ -29,16 +29,23 @@ const code = ref("");
         </h3>
         <p class="text-sm text-text-muted mb-4">{{ t("admin.mfaHint") }}</p>
 
-        <form @submit.prevent="emit('verify', code)">
+        <form @submit.prevent="emit('verify', code.trim())">
           <input
             v-model="code"
             type="text"
             inputmode="numeric"
             autocomplete="one-time-code"
+            maxlength="32"
+            :aria-invalid="!!props.state.error"
             :placeholder="t('admin.mfaCodePlaceholder')"
             class="w-full px-3 py-2 rounded-lg text-base tracking-widest text-center bg-page-bg border border-surface-3 focus:outline-none focus:border-primary"
           />
-          <p v-if="props.state.error" class="mt-2 text-sm text-red-500">
+          <!-- role="alert" 让「验证失败」被读屏即时播报；输入框同时标 aria-invalid -->
+          <p
+            v-if="props.state.error"
+            role="alert"
+            class="mt-2 text-sm text-red-500"
+          >
             {{ props.state.error }}
           </p>
           <div class="flex gap-2 mt-4">

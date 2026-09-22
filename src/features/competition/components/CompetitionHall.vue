@@ -38,9 +38,14 @@
               >{{ t("community.competition.participants")
               }}{{ comp.participantCount }}</span
             >
-            <span v-else class="text-sm text-text-muted">{{
-              t("community.competition.upcoming")
-            }}</span>
+            <!-- 按状态而非人数兜底：0 人的进行中/已结束比赛不能被标成「即将开始」，
+                 且 upcoming 的文案下面已有同款 v-else-if，重复渲染 -->
+            <span
+              v-else-if="comp.status === 'upcoming'"
+              class="text-sm text-text-muted"
+              >{{ t("community.competition.upcoming") }}</span
+            >
+            <span v-else class="text-sm text-text-muted/60">—</span>
             <a
               v-if="comp.status === 'ongoing'"
               :href="buildUrl(`/competition/${comp.id}/exam`)"
@@ -83,6 +88,8 @@ const groupedCompetitions = computed(() => {
   }
   return Object.entries(groups)
     .sort(([a], [b]) => order[a] - order[b])
+    // 去掉空分组：三个状态键总是存在，零比赛的组会渲染出「只有标题、没有卡片」的孤立段落
+    .filter(([, items]) => items.length > 0)
     .map(([status, items]) => ({ status, items }));
 });
 

@@ -33,7 +33,10 @@ export const BLOG_API = {
     comments: {
       list: (slug: string) => `/api/v1/articles/${slug}/comments`,
       create: (slug: string) => `/api/v1/articles/${slug}/comments`,
-      delete: (commentId: string) => `/api/v1/articles/comments/${commentId}`,
+      // 扁平路由是后端真实形态（LKM-service app/modules/articles/router.py:67 的
+      // `@router.delete("/comments/{comment_id}")` 挂在 /articles 前缀下），并非漏了父级
+      delete: (commentId: string) =>
+        `/api/v1/articles/comments/${encodeURIComponent(commentId)}`,
     },
   },
   categories: {

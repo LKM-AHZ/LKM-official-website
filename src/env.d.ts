@@ -1,10 +1,11 @@
 /// <reference path="../.astro/types.d.ts" />
-/// <reference path="./core/global.d.ts" />
 
-// Svelte Language Server 通过快照运行独立 tsc 实例，不总能跟随
-// <reference> 发现 global.d.ts；在此直接追加声明。
+// 全局声明直接写在这里：编辑器的 LSP 用快照跑独立 tsc，不总能跟随 <reference>
+// 去发现声明文件（原先指向的 ./core/global.d.ts 已随 src/core 一起移除）。
 interface Window {
-  pagefind: {
+  // 可选：pagefind 只在异步 loader（FuwariNavbar）成功后才挂到 window 上，
+  // 声明成必选会让消费方漏掉 null 检查
+  pagefind?: {
     search: (query: string) => Promise<{
       results: Array<{
         data: () => Promise<{
@@ -58,7 +59,3 @@ declare module "virtual:config" {
 declare module "~/scripts/blog-init.ts";
 declare module "~/scripts/blog-transitions.ts";
 declare module "~/scripts/blog-photoswipe.ts";
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}

@@ -62,8 +62,15 @@ export function useAutoSave(
   // null 表示「未指定」，走原有的 exportMdx 派生路径。
   const latestMdxRef = useRef<string | null>(null);
   // 串行化保存链：把可能并发的 doSave 排队执行（乐观锁依赖 baseVersionRef，并发会竞态）。
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const saveChainRef = useRef<Promise<any>>(Promise.resolve());
+  // 只用于串行排队，链上具体返回什么值并不关心，故用 Promise<unknown> 而不必关 any 规则
+  const saveChainRef = useRef<Promise<unknown>>(Promise.resolve());
+
+  // 卸载 flush 的 effect 是空依赖，直接闭包引用 enqueueSave 会固化成首次渲染的 saveImpl
+  // （其中捕获了当时的 documentId/adapter）：切过文档后卸载就会写进旧文档。
+  // 这里转存最新实现，并记下未保存内容所属的文档，只在仍属当前文档时才 flush。
+  const enqueueSaveRef = useRef<() => void>(() => {});
+  const currentDocIdRef = useRef(documentId);
+  const pendingDocIdRef = useRef(documentId);
 
   const loadDraft = useCallback(async () => {
     const doc = await Promise.resolve(adapter.loadDocument(documentId));
@@ -92,11 +99,12 @@ export function useAutoSave(
       setSaveStatus("saving");
       try {
         const jsonStr = JSON.stringify(content);
-        // 去重键必须带上 mdx 覆盖值：源码模式下 editorJson 不变、MDX 却在变，
-        // 只用 content 做键会把后续源码编辑全判成「无变化」直接丢弃。
+        // 去重键必须带上 mdx 覆盖值和 frontmatter：源码模式下 editorJson 不变、MDX 却在变，
+        // 而 frontmatter（title/status/slug）改动不体现在 editorJson 里，
+        // 只用 content 做键会把这两类改动全判成「无变化」直接丢弃。
         const saveKey =
           contentMdxOverride === null
-            ? jsonStr
+            ? `${jsonStr}\u0000${JSON.stringify(getFrontmatter?.() ?? {})}`
             : `${jsonStr}\u0000${contentMdxOverride}`;
         if (saveKey === lastSavedJsonHashRef.current) {
           setSaveStatus("saved");
@@ -130,6 +138,16 @@ export function useAutoSave(
 
         if (existing && existing.version !== baseVersionRef.current) {
           setSaveStatus("conflict");
+          // 冲突时不能只是 return：hasUnsavedRef 仍为 true 会让后续 debounce/卸载 flush
+          // 反复发起必然冲突的保存，状态停在用户无法处理的终态。
+          // 这里把当前内容写进本地兜底（loadDraft 会读回并恢复），并清掉未保存标记停止重试；
+          // 真正的冲突合并（拉取远端版本/diff）需要产品层面的冲突解决 UI，不在本处展开。
+          writeFallback(documentId, {
+            content,
+            mdxContent,
+            version: existing.version,
+          });
+          hasUnsavedRef.current = false;
           return;
         }
 
@@ -158,7 +176,7 @@ export function useAutoSave(
 
         // 异步备份
         try {
-          await adapter.createBackup(documentId, {
+          const backed = await adapter.createBackup(documentId, {
             docId: documentId,
             title: doc.title,
             contentMdx: mdxContent,
@@ -166,6 +184,8 @@ export function useAutoSave(
             status: doc.status,
             version: newVersion,
           });
+          // 适配器用 false 表示「未实现/写入失败」且不抛错（如 git 适配器），必须显式判断
+          if (backed === false) throw new Error("createBackup 未成功");
         } catch {
           writeFallback(documentId, {
             content,
@@ -201,8 +221,10 @@ export function useAutoSave(
     const mdx = latestMdxRef.current;
     saveChainRef.current = saveChainRef.current
       .then(() => saveImpl(content, mdx))
-      .catch(() => {
-        // 单个保存失败不中断后续链（saveImpl 内部已 try/catch 处理，正常不会走到这）
+      .catch((e) => {
+        // 单个保存失败不中断后续链（saveImpl 内部已 try/catch 处理，正常不会走到这）；
+        // 但异常不能就此静默——否则链上出错时调用方完全无从察觉
+        console.warn("[autosave] 保存链异常:", e);
       });
     return saveChainRef.current;
   }, [saveImpl]);
@@ -211,6 +233,7 @@ export function useAutoSave(
     (content: Record<string, unknown>, contentMdx?: string) => {
       latestContentRef.current = content;
       latestMdxRef.current = contentMdx ?? null;
+      pendingDocIdRef.current = documentId;
       hasUnsavedRef.current = true;
       setSaveStatus("unsaved");
 
@@ -228,6 +251,7 @@ export function useAutoSave(
   const flushImmediate = useCallback(
     (content: Record<string, unknown>) => {
       latestContentRef.current = content;
+      pendingDocIdRef.current = documentId;
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -238,6 +262,11 @@ export function useAutoSave(
     },
     [enqueueSave],
   );
+
+  useEffect(() => {
+    enqueueSaveRef.current = enqueueSave;
+    currentDocIdRef.current = documentId;
+  }, [enqueueSave, documentId]);
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent): void => {
@@ -257,10 +286,14 @@ export function useAutoSave(
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
-      // 仅在确有未保存内容且尚未处于保存中时才发起（避免卸载瞬间重复写一次已保存内容）
-      if (hasUnsavedRef.current) {
+      // 仅在确有未保存内容、且该内容仍属于当前文档时才发起
+      // （文档已切换时宁可放弃这次 flush，也不能把旧文档内容写进新文档）
+      if (
+        hasUnsavedRef.current &&
+        pendingDocIdRef.current === currentDocIdRef.current
+      ) {
         // 用离线微任务而非同步网络请求，避免卸载路径上的可见异常
-        void Promise.resolve().then(() => enqueueSave());
+        void Promise.resolve().then(() => enqueueSaveRef.current());
       }
     };
   }, []);

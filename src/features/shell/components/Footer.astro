@@ -41,7 +41,8 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
           {
             secondaryLinks.map(({ text, href }, index) => (
               <>
-                {index !== 0 ? ' · ' : ''}
+                {/* 分隔符纯装饰：标 aria-hidden，避免读屏把它念出来 */}
+                {index !== 0 ? <span aria-hidden="true"> · </span> : ''}
                 <a
                   class="text-[12px] text-text-muted hover:text-deep-text hover:underline transition duration-150 ease-in-out"
                   href={href}
@@ -53,12 +54,12 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
         </div>
       </div>
       {
-        links.map(({ title, links }) => (
+        links.map(({ title, links: groupLinks }) => (
           <div class="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2">
             <div class="text-[14px] font-semibold text-deep-text mb-2">{t(title)}</div>
-            {links && Array.isArray(links) && links.length > 0 && (
+            {groupLinks.length > 0 && (
               <ul class="text-[12px] leading-[2.41]">
-                {links.map(({ text, href, ariaLabel }) => (
+                {groupLinks.map(({ text, href, ariaLabel }) => (
                   <li class="mb-2">
                     <a
                       class="text-[12px] text-text-muted hover:text-deep-text hover:underline transition duration-150 ease-in-out"
@@ -83,18 +84,16 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
               <li>
                 <a
                   class="text-text-muted hover:text-deep-text focus:outline-none focus:ring-2 focus:ring-[var(--primary)] rounded-[8px] text-sm p-2.5 inline-flex items-center"
-                  aria-label={ariaLabel}
+                  aria-label={ariaLabel ?? (text ? undefined : icon)}
                   href={href}
                 >
-                  {icon && <Icon name={icon} class="w-5 h-5" />}
+                  {icon && <Icon name={icon} class="w-5 h-5" aria-hidden="true" />}
                   <Fragment set:html={t(text)} />
                 </a>
               </li>
             ))}
           </ul>
-        ) : (
-          ''
-        )
+        ) : null
       }
 
       <div class="text-[12px] mr-4 text-text-muted">

@@ -12,10 +12,12 @@ export interface MockCompetition {
 
 export interface MockQuestion {
   id: string;
-  type: "single" | "multiple" | "true_false";
+  // 只保留单选/判断：作答 UI（ExamInterface）用 answers[index] = 选项下标 存答案，
+  // 不支持多选数组，数据集中也没有任何 multiple/数组答案，故不再声明该形状
+  type: "single" | "true_false";
   stem: string;
   options: string[];
-  answer: number | number[];
+  answer: number;
   explanation: string;
   difficulty: number;
 }

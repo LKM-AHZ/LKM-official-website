@@ -9,7 +9,11 @@ export const trimSlash = (s: string): string => trim(trim(s, "/"), "/");
 
 export function joinPaths(...parts: string[]): string {
   const joined = parts.join("/");
-  return joined.replace(/\/+/g, "/");
+  // 只合并“路径分隔符”产生的重复斜杠：scheme 后的 `//`（https://）和协议相对
+  // URL 开头的 `//` 必须保留，否则传入完整 URL 的 base 会被破坏（https:/x）
+  return joined
+    .replace(/([a-z][a-z0-9+.-]*:)\/{2,}/gi, "$1//")
+    .replace(/(?<!:)\/{2,}/g, "/");
 }
 
 // ── Web URL 拼接（编译时 BASE_URL） ──
@@ -21,6 +25,9 @@ export function buildUrl(path: string): string {
 // ── Permalink 拼接 ──
 
 const BASE_PATHNAME = SITE.base || "/";
+
+/** 内容集合目录（与 content glob 的约定同步；目录一旦调整只改这一处） */
+const CONTENT_POSTS_DIR = "content/posts/";
 
 export const BLOG_BASE = trimSlash(
   (APP_BLOG?.list?.pathname as string) ?? "blog",
@@ -42,14 +49,12 @@ export function buildPermalink(
   const { type = "page", trailingSlash } = options;
   const useTrailingSlash = trailingSlash ?? SITE.trailingSlash ?? false;
 
-  if (
-    slug.startsWith("https://") ||
-    slug.startsWith("http://") ||
-    slug.startsWith("://")
-  ) {
-    return slug;
+  // 任意 scheme（http/https/mailto/tel/data…，大小写不敏感）与协议相对 URL 原样放行；
+  // 可执行的 javascript:/vbscript: 替换成占位符，避免输出到 href
+  if (/^[a-z][a-z0-9+.-]*:/i.test(slug) || slug.startsWith("//")) {
+    return /^\s*(javascript|vbscript):/i.test(slug) ? "#" : slug;
   }
-  if (slug.startsWith("#") || slug.startsWith("javascript:")) {
+  if (slug.startsWith("#")) {
     return slug;
   }
 
@@ -114,7 +119,7 @@ export function getPostImageBasePath(entryId: string): string {
   const lastSlashIndex = entryId.lastIndexOf("/");
   const dir =
     lastSlashIndex < 0 ? "/" : entryId.substring(0, lastSlashIndex + 1);
-  return joinPaths("content/posts/", dir);
+  return joinPaths(CONTENT_POSTS_DIR, dir);
 }
 
 // ── Auth 运行时路径拼接 ──

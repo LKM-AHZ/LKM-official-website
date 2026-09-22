@@ -138,7 +138,13 @@ export async function adminLogin(
     body: JSON.stringify({ username, password }),
   });
   const body = await readAdminResp(res);
-  return { user: body.data as unknown as AdminUser };
+  // 校验载荷形状：登录接口返回 null/缺字段时不能直接断言成 AdminUser，
+  // 否则调用方会拿到「字段全 undefined 的合法对象」
+  const data = body.data;
+  if (!data || typeof data !== "object") {
+    throw new Error(t("messages.admin.requestFailed"));
+  }
+  return { user: data as unknown as AdminUser };
 }
 
 /** 危险操作 step-up：提交当前 TOTP 码，通过后后端 Set-Cookie 更新为带 2FA 信任的会话。 */
@@ -175,9 +181,10 @@ export async function bootAdminSession(): Promise<AdminUser | null> {
     const res = await adminFetch("/api/v1/admin/auth/me");
     const body = await readAdminResp(res);
     return (body.data as unknown as AdminUser) ?? null;
-  } catch (e) {
-    if (e instanceof AdminAuthError) return null;
-    // 网络/后端 5xx：不强行跳登录，返回 null 并由调用方降级展示
+  } catch {
+    // 会话失效（AdminAuthError，已由 adminFetch 触发跳转）或网络/后端 5xx：
+    // 都不在此强跳登录，统一返回 null 由调用方降级展示。
+    // 原先还写了 `if (e instanceof AdminAuthError) return null;` —— 与兜底分支返回同一值，是死代码。
     return null;
   }
 }

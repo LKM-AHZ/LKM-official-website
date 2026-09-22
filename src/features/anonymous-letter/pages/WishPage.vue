@@ -38,8 +38,20 @@
             </button>
             <span class="wish-date">{{ formatDate(w.createdAt) }}</span>
             <template v-if="w.ownerId === 'me_local'">
-              <button class="wish-action-chip" @click="openEdit(w)">✏️</button>
-              <button class="wish-action-chip wish-del" @click="onDelete(w)">
+              <button
+                class="wish-action-chip"
+                :title="t('common.edit')"
+                :aria-label="t('common.edit')"
+                @click="openEdit(w)"
+              >
+                ✏️
+              </button>
+              <button
+                class="wish-action-chip wish-del"
+                :title="t('common.delete')"
+                :aria-label="t('common.delete')"
+                @click="onDelete(w)"
+              >
                 🗑️
               </button>
             </template>
@@ -118,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import { getWishes, addWish, lightWish, saveWishes } from "../stores/storage";
 import { t } from "~/lib/i18n";
@@ -210,8 +222,19 @@ function cardColor(id) {
   return COLORS[Math.abs(hash) % COLORS.length];
 }
 
+// 跨标签页同步：storage 事件只在**其它**标签页改写 localStorage 时触发，本地写入不触发（无回环）。
+// 不做 key 过滤：本页只读愿望列表，多读一次代价可忽略，过滤反而会因 key 前缀变化而失效
+function onStorage() {
+  loadWishes();
+}
+
 onMounted(() => {
   loadWishes();
+  window.addEventListener("storage", onStorage);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("storage", onStorage);
 });
 </script>
 

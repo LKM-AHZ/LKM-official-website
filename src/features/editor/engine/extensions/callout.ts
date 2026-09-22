@@ -48,17 +48,29 @@ export function parseCalloutProps(node: unknown): Record<string, unknown> {
     }
   }
 
-  return calloutPropsSchema.parse(attrs) as Record<string, unknown>;
+  // safeParse：title 是布尔、type 不在枚举里等非法属性不该抛 ZodError 中断整篇文档转换，
+  // 回落到 schema 默认值（type=info / title=""）
+  const parsed = calloutPropsSchema.safeParse(attrs);
+  return (
+    parsed.success ? parsed.data : calloutPropsSchema.parse({})
+  ) as Record<string, unknown>;
+}
+
+/** JSX 属性值里的引号/反斜杠/换行会破坏输出甚至注入额外属性，必须转义 */
+function escapeJsxAttr(v: string): string {
+  return v.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n");
 }
 
 export function serializeCalloutProps(props: Record<string, unknown>): string {
-  const valid = calloutPropsSchema.parse(props);
+  const parsed = calloutPropsSchema.safeParse(props);
+  const valid = parsed.success ? parsed.data : calloutPropsSchema.parse({});
   return Object.entries(valid)
     .filter(([, v]) => v !== "" && v !== undefined && v !== null)
     .map(([k, v]) => {
-      if (typeof v === "string") return `${k}="${v}"`;
-      if (typeof v === "number") return `${k}={${v}}`;
-      return `${k}="${String(v)}"`;
+      if (typeof v === "string") return `${k}="${escapeJsxAttr(v)}"`;
+      // 布尔/数字要以表达式输出：`k="true"` 在 JSX 里是字符串 "true"
+      if (typeof v === "number" || typeof v === "boolean") return `${k}={${v}}`;
+      return `${k}="${escapeJsxAttr(String(v))}"`;
     })
     .join(" ");
 }

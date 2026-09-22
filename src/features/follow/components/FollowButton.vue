@@ -19,6 +19,17 @@ const loading = ref(false);
 
 async function apply(): Promise<void> {
   if (!isLoggedIn.value) return;
+  if (props.targetType === "board") {
+    // followStatus 只有用户维度（/users/{id}/follow/status），拿版块 id 去查必然错/404。
+    // 版块初态改用「我关注的版块」列表判断。
+    const res = await followApi.myFollowingBoards();
+    if (res.isOk()) {
+      following.value = res.value.items.some(
+        (b) => b.board_id === props.targetId,
+      );
+    }
+    return;
+  }
   const res = await followApi.followStatus(props.targetId);
   if (res.isOk()) following.value = res.value.is_following;
 }

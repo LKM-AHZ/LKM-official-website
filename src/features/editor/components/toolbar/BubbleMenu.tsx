@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef, memo } from "react";
 import type { Editor } from "@tiptap/core";
 import LinkEditPopover from "../dialogs/LinkEditPopover";
+import CommentBubbleButton from "../nodes/CommentBubbleButton";
 import { t } from "~/lib/i18n";
 
 interface BubbleMenuWrapperProps {
@@ -24,56 +25,87 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
     empty: boolean;
   } | null>(null);
 
-  const update = useCallback(() => {
-    // requestAnimationFrame 防抖：连续 selectionUpdate 合并为一次更新
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      const { from, to, empty } = editor.state.selection;
-      // 去重：选区坐标未变化时跳过 layout 计算
-      const prev = lastSelectionRef.current;
-      if (
-        prev &&
-        prev.from === from &&
-        prev.to === to &&
-        prev.empty === empty
-      ) {
-        return;
+  const update = useCallback(
+    (force = false) => {
+      // 出现新选区时撤销待执行的 blur 隐藏：否则 200ms 后会把刚显示出来的气泡又藏掉
+      if (blurTimerRef.current) {
+        clearTimeout(blurTimerRef.current);
+        blurTimerRef.current = null;
       }
-      lastSelectionRef.current = { from, to, empty };
+      // requestAnimationFrame 防抖：连续 selectionUpdate 合并为一次更新
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const { from, to, empty } = editor.state.selection;
+        // 去重：选区坐标未变化时跳过 layout 计算。滚动驱动的调用必须带 force：
+        // 滚动时选区没变，靠去重会把 setPos 一并跳过，气泡不会跟随正文移动。
+        const prev = lastSelectionRef.current;
+        if (
+          !force &&
+          prev &&
+          prev.from === from &&
+          prev.to === to &&
+          prev.empty === empty
+        ) {
+          return;
+        }
+        lastSelectionRef.current = { from, to, empty };
 
-      if (empty || from === to) {
-        setShow(false);
-        return;
-      }
-      const start = editor.view.coordsAtPos(from);
-      const end = editor.view.coordsAtPos(to);
-      setPos({
-        top: Math.max(8, start.top - 44),
-        left: Math.min(
-          window.innerWidth - 80,
-          Math.max(80, (start.left + end.right) / 2),
-        ),
+        if (empty || from === to) {
+          setShow(false);
+          return;
+        }
+        // rAF 里拿到的位置可能已经过期（期间 undo/redo、协同编辑、异步内容加载都会改动文档）：
+        // 越界坐标会让 coordsAtPos 抛错并打断 selection 监听，先校验再量
+        const docSize = editor.state.doc.content.size;
+        if (from < 0 || to > docSize || from > to) {
+          setShow(false);
+          return;
+        }
+        let start: { top: number; left: number; right: number };
+        let end: { top: number; left: number; right: number };
+        try {
+          start = editor.view.coordsAtPos(from);
+          end = editor.view.coordsAtPos(to);
+        } catch {
+          setShow(false);
+          return;
+        }
+        setPos({
+          top: Math.max(8, start.top - 44),
+          left: Math.min(
+            window.innerWidth - 80,
+            Math.max(80, (start.left + end.right) / 2),
+          ),
+        });
+        setShow(true);
       });
-      setShow(true);
-    });
-  }, [editor]);
+    },
+    [editor],
+  );
+
+  // 事件回调不能直接把 tiptap 注入的事件对象当 force 参数（恒为真会关掉去重）
+  const handleSelectionUpdate = useCallback(() => update(false), [update]);
 
   useEffect(() => {
-    editor.on("selectionUpdate", update);
+    editor.on("selectionUpdate", handleSelectionUpdate);
     // Listen to scroll within the editor's parent for position updates
-    const scrollHandler = (): void => update();
+    const scrollHandler = (): void => update(true);
     const editorDom = editor.view.dom;
-    const scrollParent = editorDom.closest('[class*="overflow"]') || window;
+    // 用编辑器自己的滚动容器类名（editor.css 里 .rte-editor-main 才是 overflow-y:auto 的那个），
+    // 不再靠 `[class*="overflow"]` 子串匹配——它会把 overflow-hidden 之类的祖先也算进来
+    const scrollParent = editorDom.closest(".rte-editor-main") || window;
     scrollParent.addEventListener("scroll", scrollHandler, { passive: true });
 
     const handleBlur = (): void => {
       lastSelectionRef.current = null;
+      // 连续 blur 时先清掉上一个定时器，避免互相覆盖后泄漏
+      if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
       blurTimerRef.current = setTimeout(() => setShow(false), 200);
     };
     editor.on("blur", handleBlur);
 
     return () => {
-      editor.off("selectionUpdate", update);
+      editor.off("selectionUpdate", handleSelectionUpdate);
       editor.off("blur", handleBlur);
       scrollParent.removeEventListener("scroll", scrollHandler);
       if (blurTimerRef.current) {
@@ -84,7 +116,7 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [editor, update]);
+  }, [editor, handleSelectionUpdate]);
 
   // 链接浮层打开时需保留组件挂载（浮层依赖浏览器事件、点击外部关闭），此时不显示气泡按钮本体
   if (!show && !linkOpen) return null;
@@ -176,35 +208,10 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
           </div>
         )}
       </div>
+      {/* 复用 CommentBubbleButton（它把动作挂在 click 上，键盘 Enter/Space 也能加批注；
+          原来内联的这份只写 onMouseDown，键盘用户点不到），避免两份实现各自漂移 */}
       {onComment && (
-        <button
-          type="button"
-          className="rte-toolbar-btn"
-          aria-label={t("editor.addComment")}
-          title={t("editor.addComment")}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            const { from, to } = editor.state.selection;
-            const text = editor.state.doc.textBetween(from, to, " ");
-            if (text.trim()) {
-              onComment(from, to, text);
-            }
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </button>
+        <CommentBubbleButton editor={editor} onClick={onComment} />
       )}
     </div>
   );

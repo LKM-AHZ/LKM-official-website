@@ -20,7 +20,13 @@
         passwordError
       }}</span>
     </div>
-    <div v-if="identifiedAccount.account_level !== 'local'" class="text-right">
+    <div
+      v-if="
+        identifiedAccount.account_level &&
+        identifiedAccount.account_level !== 'local'
+      "
+      class="text-right"
+    >
       <a
         :href="getAuthPath('account/recovery')"
         class="text-xs text-primary hover:underline"

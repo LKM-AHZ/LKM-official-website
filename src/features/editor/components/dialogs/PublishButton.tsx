@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import type { DocumentData, PersistenceAdapter } from "../../engine/types";
 import ConfirmDialog from "./ConfirmDialog";
@@ -19,17 +19,14 @@ export default function PublishButton({
 }: PublishButtonProps): ReactElement | null {
   const [doc, setDoc] = useState<DocumentData | null>(null);
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
-  const adapterRef = useRef(adapter);
-  adapterRef.current = adapter;
-
   useEffect(() => {
-    const result = adapterRef.current.loadDocument(documentId);
+    const result = adapter.loadDocument(documentId);
     if (result instanceof Promise) {
       result.then((d) => setDoc(d ?? null));
     } else {
       setDoc(result ?? null);
     }
-  }, [documentId]);
+  }, [adapter, documentId]);
 
   if (!doc) return null;
 
@@ -37,15 +34,30 @@ export default function PublishButton({
     onOpenPublishDialog();
   };
 
-  const handleUnpublish = (): void => {
-    const result = adapter.saveDocument({ ...doc, status: "draft" });
-    if (result instanceof Promise) {
-      result.then((ok) => {
-        if (ok !== false) onStatusChange();
-      });
-    } else if (result !== false) {
+  /** 保存状态并同步本地 doc：否则组件仍按旧 status 渲染（如取消发布后还显示已发布控件）。 */
+  const persistStatus = (status: DocumentData["status"]): void => {
+    const result = adapter.saveDocument({ ...doc, status });
+    const onSaved = (): void => {
+      setDoc((prev) => (prev ? { ...prev, status } : prev));
       onStatusChange();
+    };
+    if (result instanceof Promise) {
+      result
+        .then((ok) => {
+          if (ok !== false) onSaved();
+        })
+        .catch((err: unknown) => {
+          // 没有 catch 时保存失败的 rejection 会被静默吞掉，用户看不到任何反馈
+          console.error("[editor] 保存文档状态失败", err);
+          alert(t("messages.operationFailed"));
+        });
+    } else if (result !== false) {
+      onSaved();
     }
+  };
+
+  const handleUnpublish = (): void => {
+    persistStatus("draft");
   };
 
   const handleArchive = (): void => {
@@ -54,14 +66,7 @@ export default function PublishButton({
 
   const handleArchiveConfirmed = (): void => {
     setArchiveConfirmOpen(false);
-    const result = adapter.saveDocument({ ...doc, status: "archived" });
-    if (result instanceof Promise) {
-      result.then((ok) => {
-        if (ok !== false) onStatusChange();
-      });
-    } else if (result !== false) {
-      onStatusChange();
-    }
+    persistStatus("archived");
   };
 
   const status = doc.status as DocumentData["status"];

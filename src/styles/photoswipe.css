@@ -1,20 +1,29 @@
 @reference "tailwindcss";
 .pswp__button {
+  /* 用 background-color 而非 background 简写：简写会把 background-image/position/size 一并重置，
+     且过渡简写会让浏览器追踪全部背景子属性；scale 也加进过渡，避免按下时瞬跳 */
   transition:
-    background var(--duration-base) var(--ease),
-    opacity var(--duration-base) var(--ease);
-  background: rgba(0, 0, 0, 0.4);
-  @apply flex items-center justify-center w-12 h-12;
+    background-color var(--duration-base) var(--ease),
+    opacity var(--duration-base) var(--ease),
+    scale var(--duration-base) var(--ease);
+  background-color: rgba(0, 0, 0, 0.4);
+  @apply flex items-center justify-center;
   &:hover {
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
   }
   &:active {
-    background: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  /* 键盘用户需要可见的焦点反馈 */
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
   &,
   &:hover,
   &:active {
-    margin-right: 0 !important;
+    /* 不要在这里 reset margin-right：本组选择器含 :hover/:active，优先级高于后面
+       .pswp__button--zoom/--close 的 margin-right，会让两个按钮在 hover 时左移再弹回 */
     width: 3rem !important;
     height: 3rem !important;
   }

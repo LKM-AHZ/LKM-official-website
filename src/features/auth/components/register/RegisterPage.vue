@@ -44,7 +44,7 @@
         <AuthSegmentedControl
           :options="segmentedOptions"
           :model-value="flow.type"
-          @update:model-value="flow.type = $event as RegisterType"
+          @update:model-value="onTypeChange($event as RegisterType)"
           class="mb-6"
         />
 
@@ -63,11 +63,14 @@
             }}</span>
             <div class="h-px flex-1 bg-[var(--surface-3)]"></div>
           </div>
+          <!-- GitHub 注册尚未接通：按钮置灰并给出可见说明，不再用 alert 假装可用 -->
           <AuthMethodButton
             :label="t('auth.register.githubRegister')"
-            :disabled="flow.loading"
-            @click="handleGithub"
+            disabled
           />
+          <p class="mt-2 text-center text-xs text-text-muted">
+            {{ t("auth.register.githubNotSupported") }}
+          </p>
         </template>
 
         <!-- 已有账号 -->
@@ -121,8 +124,14 @@ const segmentedOptions = [
   { key: "local" as RegisterType, label: t("auth.register.localAccount") },
 ];
 
-function handleGithub() {
-  alert(t("auth.register.githubNotSupported"));
+// 注册进行中或已进入验证码阶段时禁止切换注册方式：
+// LocalRegister/NormalRegister 是按 flow.type 二选一渲染的，NormalRegister 持有验证码 UI，
+// 中途切换会卸载验证码步骤，而 flow.stage 仍停在 'verify'、txnId 也还留着，
+// 待验证的流程会凭空消失且表单状态与 flow 脱节。
+// AuthSegmentedControl 没有 disabled 能力，故在 handler 里拦。
+function onTypeChange(next: RegisterType) {
+  if (flow.loading || flow.stage !== "form") return;
+  flow.type = next;
 }
 
 function switchToLogin() {

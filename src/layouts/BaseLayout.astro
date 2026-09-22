@@ -39,7 +39,9 @@ const currentLocale = getLocale();
 // 空 DSN 时整个组件不渲染，不影响首屏/本地/测试（计划模块 0 开关设计）。
 const sentryDsn = ((import.meta.env.PUBLIC_SENTRY_DSN as string | undefined) ?? '').trim();
 
-// 未传入 navbarLinks 时，兜底为官网默认菜单（官方 4 项）
+// 未传入 navbarLinks 时，兜底为官网默认菜单（当前 officialDefaultNavItems 是 3 项：
+// nav.home/nav.community/nav.resources；历史注释与 menus.ts 里同款注释写作「4 项」，
+// 是否补回 nav.mine 属产品决定，未在本轮改）
 const navbarLinks: NavBarLink[] = navbarLinksProp ?? filterNavbarByNames(allMenuItems, officialDefaultNavItems);
 ---
 
@@ -47,11 +49,25 @@ const navbarLinks: NavBarLink[] = navbarLinksProp ?? filterNavbarByNames(allMenu
 <html lang={currentLocale} dir={textDirection} class="2xl:text-[20px]">
   <head>
     <CommonMeta />
+    {/* CSP 以 <meta> 下发时只对「解析到它之后」的内容生效：必须放在所有内联脚本之前，
+        否则这几个脚本（以及任何被注入到 head 前部的标记）不受策略约束。
+        安全：策略里 script-src 含 'unsafe-inline'，前移不会拦掉这些内联脚本。 */}
+    <SecurityHeaders />
     <script is:inline define:vars={{ configHue: siteConfig.themeColor.hue }}>
       // 在首次渲染前设置主题色相，避免颜色闪烁
       (function () {
-        const hue = localStorage.getItem('hue') || configHue;
-        document.documentElement.style.setProperty('--hue', hue);
+        // 与另两个内联脚本一致地包 try/catch：存储被禁用时读 localStorage 会抛
+        // SecurityError，脚本中断就恰好错过了它要防的颜色闪烁。
+        // 且只接受有限数值：getHue() 用 parseInt 读取，写坏的字符串会让所有
+        // oklch(... var(--hue)) 颜色失效。
+        let hue = configHue;
+        try {
+          const stored = localStorage.getItem('hue');
+          if (stored && Number.isFinite(Number(stored))) hue = stored;
+        } catch {
+          /* 存储不可用：回退配置色相 */
+        }
+        document.documentElement.style.setProperty('--hue', String(hue));
       })();
     </script>
     <script is:inline>
@@ -80,7 +96,6 @@ const navbarLinks: NavBarLink[] = navbarLinksProp ?? filterNavbarByNames(allMenu
         }
       })();
     </script>
-    <SecurityHeaders />
     <Favicons />
     <CustomStyles />
     <ApplyColorMode />

@@ -46,7 +46,11 @@ function convertBlocks(nodes: JSONContent[]): RootContent[] {
       case "codeBlock": {
         const lang =
           (node.attrs as Record<string, string> | undefined)?.language ?? "";
-        const text = node.content?.[0]?.text ?? "";
+        // codeBlock 合法地可有多个 text 子节点（粘贴、高亮装饰把文本切开、程序化插入），
+        // 只取第一个会把代码块截断，故拼接全部 text 子节点
+        const text = (node.content ?? [])
+          .map((child) => child.text ?? "")
+          .join("");
         result.push({
           type: "code",
           lang: lang || null,
@@ -105,7 +109,13 @@ function convertBlocks(nodes: JSONContent[]): RootContent[] {
                 // 输出 tableHeader 会让 remark-stringify 抛
                 // "Cannot handle unknown node 'tableHeader'"，含表格的文档直接导不出去。
                 type: "tableCell" as const,
-                children: convertBlocks(cell.content ?? []),
+                // tableCell.children 必须是 PhrasingContent（GFM 契约）：单元格里是
+                // 段落包裹的内联内容，直接 convertBlocks 会多包一层 paragraph，
+                // 扁平表格序列化会因此错位；与导入侧（mdast-to-tiptap 把常规单元格
+                // 当内联处理）保持一致，把段落展开成内联节点
+                children: convertInline(
+                  (cell.content ?? []).flatMap((child) => child.content ?? []),
+                ),
               }) as unknown as RootContent,
           ) as RootContent[],
         }));
@@ -113,10 +123,11 @@ function convertBlocks(nodes: JSONContent[]): RootContent[] {
           type: "table",
           children: rows,
         };
-        // 汇总列对齐数组；长度按实际列数补齐 null，保障 `---`/`:--:` 序列化正确
-        const alignArr = alignMap.map((a) => a ?? null) as Array<
-          "left" | "right" | "center" | null
-        >;
+        // 汇总列对齐数组；只接受 GFM 支持的三种值，其余（justify、样式串等）一律按 null 处理——
+        // 否则会被序列化器静默按错误对齐输出；长度按实际列数补齐 null，保障 `---`/`:--:` 正确
+        const alignArr = alignMap.map((a) =>
+          a === "left" || a === "right" || a === "center" ? a : null,
+        );
         if (alignArr.some((a) => a)) tableNode.align = alignArr;
         result.push(tableNode as unknown as RootContent);
         break;
@@ -188,7 +199,18 @@ function convertBlocks(nodes: JSONContent[]): RootContent[] {
         break;
       }
       default:
-        // 未知块 → 原始 HTML 透传
+        // 未知块类型（新注册的扩展、块级出现的 inlineComponent 等）：原来这里只写注释、
+        // 实际静默丢弃，导出后内容无声消失。改为留告警 + 有 text 就按段落保底落一行。
+        console.warn(
+          "[tiptap-to-mdast] 未处理的块级节点，仅保留其文本：",
+          node.type,
+        );
+        if (typeof node.text === "string" && node.text) {
+          result.push({
+            type: "paragraph",
+            children: [{ type: "text", value: node.text }],
+          } as RootContent);
+        }
         break;
     }
   }
@@ -287,6 +309,12 @@ function convertInline(nodes: JSONContent[]): PhrasingContent[] {
       // 破坏 MARKDOWN 结构。故按 `\n` 切分，段间插入 hardBreak（mdast `break`），
       // 并把同一组 marks 应用到一个段落内的每个文本片段上。
       const segments = (node.text ?? "").split("\n");
+      // 末尾的空段会被下面的 continue 跳过，故用「最后一个非空段」决定是否还要插硬换行：
+      // 否则 `"a\nb\n"` 会多出一个落在文末的 <br>（导出成 `a\\\nb\\\n`）
+      let lastContentIdx = segments.length - 1;
+      while (lastContentIdx >= 0 && segments[lastContentIdx] === "") {
+        lastContentIdx--;
+      }
       for (let i = 0; i < segments.length; i++) {
         const seg = segments[i];
         if (seg === "" && i === segments.length - 1) continue;
@@ -309,8 +337,8 @@ function convertInline(nodes: JSONContent[]): PhrasingContent[] {
 
         result.push(...current);
 
-        // 非末尾段之后插硬换行
-        if (i < segments.length - 1) {
+        // 仅当后面还有非空段时才插硬换行（末尾空段已被跳过，见上）
+        if (i < lastContentIdx) {
           result.push({ type: "break" } as PhrasingContent);
         }
       }
@@ -332,10 +360,12 @@ function convertInline(nodes: JSONContent[]): PhrasingContent[] {
         value: `[[${label}]]`,
       } as unknown as PhrasingContent);
     } else if (node.type === "inlineMath") {
-      result.push({
-        type: "inlineMath",
-        value: (node.attrs as Record<string, string> | undefined)?.latex ?? "",
-      } as PhrasingContent);
+      // 与上面的 mark 路径同一表示：用 html 节点输出 `$latex$`（mdast-util-math 的
+      // 序列化在当前依赖树里缺失，产出真实 inlineMath 节点会让导出失败）；
+      // 本仓 Tiptap 侧行内公式也确实是 mark，不产生 inlineMath 节点
+      const latex =
+        (node.attrs as Record<string, string> | undefined)?.latex ?? "";
+      result.push({ type: "html", value: `$${latex}$` } as PhrasingContent);
     }
     // 注：inlineComponent 处理已推迟 — 第二阶段通常不使用
   }

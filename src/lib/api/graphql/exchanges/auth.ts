@@ -27,18 +27,29 @@ export const authExchange = mapExchange({
         typeof operation.context.fetchOptions === "function"
           ? operation.context.fetchOptions()
           : operation.context.fetchOptions;
+
+      // RequestInit.headers 可能是 Headers 实例或 [name, value][]：直接展开前者会得到 {}、
+      // 后者的会掺入 "0"/"1" 这类下标键，都会丢掉/污染原有请求头。统一归一化成普通对象。
+      const normalizedHeaders: Record<string, string> = {};
+      if (prevFetchOptions) {
+        new Headers(
+          (prevFetchOptions as RequestInit).headers as HeadersInit,
+        ).forEach((value, key) => {
+          normalizedHeaders[key] = value;
+        });
+      }
+
       operation.context.fetchOptions = {
         ...prevFetchOptions,
         headers: {
-          ...((prevFetchOptions as RequestInit)?.headers as Record<
-            string,
-            string
-          >),
+          ...normalizedHeaders,
           ...headers,
         },
       };
-    } catch {
-      // ignore parse errors or missing adapter
+    } catch (err) {
+      // 不再静默：认证头附加失败会让请求以未认证身份发出，最终只在别处表现为 401。
+      // 注意不打印 token/cookie 等敏感内容。
+      console.warn("[GraphQL] 附加认证头失败:", err);
     }
   },
 });

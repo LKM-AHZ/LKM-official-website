@@ -8,7 +8,8 @@ const title = t('page.notFound.title');
 ---
 
 <Layout metadata={{ title }}>
-  <main class="flex items-center h-full p-16">
+  {/* 同 404：父级 <body> 高度不确定，h-full 无效，用视口高度 */}
+  <main class="flex items-center min-h-dvh p-16">
     <div class="container flex flex-col items-center justify-center px-5 mx-auto my-8">
       <div class="max-w-md text-center">
         <h1 class="mb-8 font-bold text-9xl">

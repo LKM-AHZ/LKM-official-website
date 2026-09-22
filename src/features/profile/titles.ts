@@ -14,5 +14,10 @@ export const TITLE_MAP: Record<string, TitleInfo> = {
 };
 
 export function titleInfoOf(key: string | undefined): TitleInfo {
-  return TITLE_MAP[key || ""] || TITLE_MAP.newbie;
+  const info = TITLE_MAP[key || ""];
+  // 后端新增/拼错称号时会静默落到「新人」，线上无从察觉；开发期显式提示一次
+  if (!info && key && import.meta.env.DEV) {
+    console.warn(`[profile] 未知称号 key=${key}，已回退为 newbie`);
+  }
+  return info || TITLE_MAP.newbie;
 }

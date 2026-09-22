@@ -84,23 +84,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 
-const props = defineProps<{
-  likeCount: number;
-  bookmarkCount: number;
-  forwardCount: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    likeCount: number;
+    bookmarkCount: number;
+    forwardCount: number;
+    /** 当前用户是否已点赞/已收藏（由父级或后端回填）；缺省 false */
+    liked?: boolean;
+    bookmarked?: boolean;
+  }>(),
+  { liked: false, bookmarked: false },
+);
 
-const liked = ref(false);
-const bookmarked = ref(false);
+const liked = ref(props.liked);
+const bookmarked = ref(props.bookmarked);
 const showReport = ref(false);
 
 const likeCount = ref(props.likeCount);
 const bookmarkCount = ref(props.bookmarkCount);
 const forwardCount = ref(props.forwardCount);
+
+// 本地态是一次性快照会随源变化而失真（切帖子、后台刷新回填）：
+// props 变了就重新同步，服务端真值优先于本地乐观值
+watch(
+  () => [props.liked, props.bookmarked] as const,
+  ([l, b]) => {
+    liked.value = l;
+    bookmarked.value = b;
+  },
+);
+watch(
+  () => [props.likeCount, props.bookmarkCount, props.forwardCount] as const,
+  ([l, b, f]) => {
+    likeCount.value = l;
+    bookmarkCount.value = b;
+    forwardCount.value = f;
+  },
+);
 
 const reportReasons = computed(() => [
   t("community.forum.reportSpam"),
@@ -121,10 +145,20 @@ function toggleBookmark() {
 }
 
 function handleShare() {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    forwardCount.value += 1;
+  // 非安全上下文（http/旧浏览器）下 navigator.clipboard 是 undefined，直接调用会抛 TypeError
+  if (!navigator.clipboard) {
     alert(t("community.forum.linkCopied"));
-  });
+    return;
+  }
+  // window.location.href 即帖子详情页地址（本组件只在该页使用）；
+  // 转发数不再本地 +1：分享没有对应的后端端点上账，本地自增只会让显示与真实数据脱节
+  navigator.clipboard
+    .writeText(window.location.href)
+    .then(() => alert(t("community.forum.linkCopied")))
+    .catch((err) => {
+      console.warn("[PostInteractions] 复制链接失败:", err);
+      alert(t("messages.operationFailed"));
+    });
 }
 
 function submitReport(reason: string) {

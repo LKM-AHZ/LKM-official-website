@@ -75,6 +75,8 @@ watch(
 );
 
 function submit() {
+  // 调用方漏绑 :target-id 时不得写入空 id 的举报记录（required 只校验「传了」，挡不住空串）
+  if (!props.targetId) return;
   addReported(props.targetId);
   emit("reported");
   emit("update:modelValue", false);

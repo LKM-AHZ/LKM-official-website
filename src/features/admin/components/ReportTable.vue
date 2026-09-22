@@ -101,14 +101,14 @@ onMounted(() => void refresh());
       <div class="flex gap-2">
         <button
           class="px-3 py-1.5 rounded-lg bg-surface-3 text-deep-text disabled:opacity-40"
-          :disabled="page <= 1"
+          :disabled="loading || page <= 1"
           @click="goTo(page - 1)"
         >
           {{ t("admin.prevPage") }}
         </button>
         <button
           class="px-3 py-1.5 rounded-lg bg-surface-3 text-deep-text disabled:opacity-40"
-          :disabled="page >= totalPages"
+          :disabled="loading || page >= totalPages"
           @click="goTo(page + 1)"
         >
           {{ t("admin.nextPage") }}

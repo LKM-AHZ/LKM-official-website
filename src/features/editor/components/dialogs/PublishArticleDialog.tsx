@@ -67,7 +67,8 @@ export default function PublishArticleDialog({
           type="text"
           className="rte-input w-full mb-3"
           value={category}
-          onChange={(e) => setCategory(e.target.value.trim())}
+          /* 不在输入时 trim：否则多词文本打不进空格；提交时 onConfirm 已经 trim */
+          onChange={(e) => setCategory(e.target.value)}
           placeholder={t("editor.categoryPlaceholder")}
         />
 
@@ -95,16 +96,19 @@ export default function PublishArticleDialog({
             type="button"
             className="rte-btn rte-btn--primary rte-btn--sm"
             disabled={disabled}
-            onClick={() =>
-              onConfirm(
-                slug.trim(),
-                category.trim(),
-                tags
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-              )
-            }
+            onClick={() => {
+              // 标签：兼容中英文逗号/分号/换行分隔，按小写去重（保留首个写法），并限制条数
+              const tagList = Array.from(
+                new Map(
+                  tags
+                    .split(/[,，;；\n]/)
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .map((s) => [s.toLowerCase(), s] as const),
+                ).values(),
+              ).slice(0, 20);
+              onConfirm(slug.trim(), category.trim(), tagList);
+            }}
           >
             {publishing ? t("editor.publishing") : t("editor.confirmPublish")}
           </button>

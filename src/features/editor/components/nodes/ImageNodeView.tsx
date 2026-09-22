@@ -22,9 +22,43 @@ const ImageNodeView = memo(function ImageNodeView({
   const [showToolbar, setShowToolbar] = useState(false);
   const [inlineMode, setInlineMode] = useState<"url" | "alt" | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  // 内联输入框渲染在 toolbar 之外的兄弟节点里，需一并计入「内部点击」
+  const inlineRef = useRef<HTMLDivElement>(null);
   const src = (node.attrs.src as string) ?? "";
   // 实际可展示的 src：blob 引用需从 IndexedDB 解析为 ObjectURL
   const [displaySrc, setDisplaySrc] = useState<string>("");
+
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressNextClick = useRef(false);
+
+  const clearLongPress = (): void => {
+    if (longPressTimer.current !== null) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+  useEffect(() => clearLongPress, []);
+
+  // 触屏用真正的长按（500ms）开关工具条：原实现是「每次 touchend 都切一次」，而移动端
+  // touchend 之后浏览器还会补发 click，两次切换互相抵消、工具条实际打不开
+  const handleTouchStart = (): void => {
+    if (window.innerWidth >= 768) return;
+    clearLongPress();
+    longPressTimer.current = setTimeout(() => {
+      longPressTimer.current = null;
+      suppressNextClick.current = true;
+      setShowToolbar((v) => !v);
+    }, 500);
+  };
+
+  const handleImageClick = (): void => {
+    // 长按已开/关过工具条，随后的合成 click 要吞掉，否则又被切回去
+    if (suppressNextClick.current) {
+      suppressNextClick.current = false;
+      return;
+    }
+    setShowToolbar((v) => !v);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -39,13 +73,13 @@ const ImageNodeView = memo(function ImageNodeView({
   useEffect(() => {
     if (!showToolbar) return;
     const handler = (e: MouseEvent): void => {
-      if (
-        toolbarRef.current &&
-        !toolbarRef.current.contains(e.target as HTMLElement)
-      ) {
-        setShowToolbar(false);
-        setInlineMode(null);
-      }
+      const target = e.target as HTMLElement;
+      // 内联输入框（URL/Alt）不在 toolbar 容器内，必须单独放行：
+      // 否则第一次点进输入框就被判成外部点击而立刻卸载，输入框根本用不了。
+      if (toolbarRef.current?.contains(target)) return;
+      if (inlineRef.current?.contains(target)) return;
+      setShowToolbar(false);
+      setInlineMode(null);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -78,14 +112,10 @@ const ImageNodeView = memo(function ImageNodeView({
           maxWidth: "100%",
         }}
         className="rounded-md cursor-pointer border-2 border-transparent hover:border-primary/50 transition-colors"
-        onClick={() => setShowToolbar(!showToolbar)}
-        onTouchEnd={(e) => {
-          // Long-press on mobile to toggle toolbar
-          if (window.innerWidth < 768) {
-            e.preventDefault();
-            setShowToolbar(!showToolbar);
-          }
-        }}
+        onClick={handleImageClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={clearLongPress}
+        onTouchMove={clearLongPress}
         draggable={false}
       />
 
@@ -172,7 +202,10 @@ const ImageNodeView = memo(function ImageNodeView({
 
       {/* Inline input for URL or Alt */}
       {inlineMode === "url" && (
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-40">
+        <div
+          ref={inlineRef}
+          className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-40"
+        >
           <InlineInput
             placeholder={t("editor.imageNode.urlPlaceholder")}
             defaultValue={src}
@@ -185,7 +218,10 @@ const ImageNodeView = memo(function ImageNodeView({
         </div>
       )}
       {inlineMode === "alt" && (
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-40">
+        <div
+          ref={inlineRef}
+          className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-40"
+        >
           <InlineInput
             placeholder={t("editor.imageNode.altPlaceholder")}
             defaultValue={alt}

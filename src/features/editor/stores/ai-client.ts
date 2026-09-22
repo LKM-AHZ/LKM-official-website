@@ -20,13 +20,6 @@ import { t } from "~/lib/i18n";
 
 // ---- Types -----------------------------------------------------------------
 
-export interface AiRequest {
-  prompt: string;
-  context: string;
-  operation: string;
-  language?: string;
-}
-
 export interface AiCompletionInput {
   prompt: string;
   context: string;
@@ -92,15 +85,8 @@ export function validateAiEndpoint(raw: string): Result<URL, string> {
     return err(t("editorData.errCredentials"));
   }
 
-  // Block pseudo-protocols that the URL constructor might accept on some runtimes
-  const lower = trimmed.toLowerCase();
-  if (
-    lower.startsWith("javascript:") ||
-    lower.startsWith("data:") ||
-    lower.startsWith("file:")
-  ) {
-    return err(t("editorData.errUnsupportedProtocol"));
-  }
+  // 伪协议（javascript:/data:/file:）会被 URL 解析成各自的 protocol，上面 ALLOWED_PROTOCOLS
+  // 只放行 https:，已在此前拦掉；这层 startsWith 检查不可达，故删除以免留下「多一层保护」的错觉
 
   return ok(url);
 }
@@ -162,7 +148,6 @@ export async function requestAiCompletion(
     );
   }
 
-  const endpoint = _endpoint;
   const apiKey = _apiKey || "";
   const model = _model;
 
@@ -179,7 +164,11 @@ export async function requestAiCompletion(
   }
 
   // ---- 3. Fetch (via unified apiFetch wrapper, handles timeout + abort) -----
-  const url = `${endpoint.replace(/\/$/, "")}/v1/chat/completions`;
+  // 用校验后的 URL 组装请求地址，而不是拿原始字符串拼接：
+  // 若 endpoint 带 ?query 或 #fragment（校验只查协议/凭据，不拦这些），
+  // 字符串拼接会得到 https://host/api?token=1/v1/chat/completions 这类畸形地址。
+  const endpointUrl = endpointValidation.value;
+  const url = `${endpointUrl.origin}${endpointUrl.pathname.replace(/\/$/, "")}/v1/chat/completions`;
 
   const fetchResult = await apiFetch(url, {
     method: "POST",
@@ -205,8 +194,9 @@ export async function requestAiCompletion(
 
   if (fetchResult.isErr()) {
     const message = fetchResult.error.message;
-    // Never echo back anything that might contain secrets
-    if (message.includes(apiKey) && apiKey.length > 4) {
+    // 只要报文里出现了 key（不论长短）就退回泛化文案：原条件额外要求 length > 4，
+    // 于是 ≤4 字符的短 key 会随下面的 detail 一起回显到 UI
+    if (apiKey && message.includes(apiKey)) {
       return err(t("editorData.errNetworkFailed"));
     }
     return err(

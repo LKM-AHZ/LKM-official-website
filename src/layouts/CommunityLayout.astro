@@ -11,9 +11,18 @@ import type { MetaData } from '~/types/core';
 export interface Props {
   metadata?: MetaData;
   navItems?: string[];
+  /** 与 Official/Page/Sidebar 系列布局对齐：社区页也应能关掉页脚 */
+  showFooter?: boolean;
 }
 
-const { metadata, navItems } = Astro.props;
+// 默认白名单与社区各页实际传入的一致：不设默认时漏传 navItems 会让
+// filterNavbarByNames(allMenuItems, undefined) 放行全站菜单（含「我的」/account）
+const {
+  metadata,
+  // nav.blog 不在 allMenuItems 中（filterNavbarByNames 会静默丢弃），故不列
+  navItems = ['nav.community', 'nav.resources', 'nav.mine'],
+  showFooter = true,
+} = Astro.props;
 
 // 社区顶栏：从统一菜单池用 navItems 白名单挑选；桌面 SiteNavbar 与移动端共用
 const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
@@ -29,7 +38,11 @@ const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
   <main>
     <slot />
   </main>
-  <slot name="footer">
-    <Footer {...footerData} />
-  </slot>
+  {
+    showFooter && (
+      <slot name="footer">
+        <Footer {...footerData} />
+      </slot>
+    )
+  }
 </Layout>
