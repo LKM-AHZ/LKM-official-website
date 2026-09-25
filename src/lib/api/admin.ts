@@ -95,28 +95,28 @@ export async function adminFetch(
   return res;
 }
 
-/** 解析 @respond 包络 {code, msg, data} 的 JSON；失败抛错。 */
+/** 解析 @respond 包络 {code, message, data, request_id} 的 JSON；失败抛错。 */
 export async function readAdminResp(
   res: Response,
-): Promise<{ code: number; msg: string; data: unknown }> {
+): Promise<{ code: number; message: string; data: unknown }> {
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as {
       detail?: string;
-      msg?: string;
+      message?: string;
     };
     throw new Error(
-      body.msg ||
+      body.message ||
         body.detail ||
         t("messages.admin.requestFailedStatus", { status: res.status }),
     );
   }
   const json = (await res.json()) as {
     code: number;
-    msg: string;
+    message: string;
     data: unknown;
   };
   if (json.code !== 0)
-    throw new Error(json.msg || t("messages.admin.requestFailed"));
+    throw new Error(json.message || t("messages.admin.requestFailed"));
   return json;
 }
 

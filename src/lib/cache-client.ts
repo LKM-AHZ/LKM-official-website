@@ -98,7 +98,7 @@ export async function fetchWithCache<T>(
         cacheSet(cacheKey, json.data as T, ttlMs);
         return { data: json.data as T, error: null };
       }
-      return { data: null, error: json.msg || t("messages.unknownError") };
+      return { data: null, error: json.message || t("messages.unknownError") };
     } catch (err: unknown) {
       return {
         data: null,

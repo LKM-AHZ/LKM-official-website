@@ -190,7 +190,7 @@ async function isMfaRequired(response: Response): Promise<boolean> {
 
 /**
  * 真正的请求执行。401 时触发「单飞」刷新（并发去重），成功后带新 token 重放一次。
- * 返回 ok(data)（解包 {code,msg,data}）或 err(AppError)。
+ * 返回 ok(data)（解包 {code,message,data}）或 err(AppError)。
  */
 async function rawRequest<T>(
   config: RequestConfig,
@@ -331,7 +331,7 @@ async function toResult<T>(response: Response): Promise<Result<T, AppError>> {
     data = null;
   }
 
-  // unpack {code, msg, data} → 返回内层 data（契约与旧 axios request 一致）。
+  // unpack {code, message, data} → 返回内层 data（契约与旧 axios request 一致）。
   // 必须同时要求 code 是数字且等于成功码 0：后端 err.py 的 @respond 只在成功时返回
   // CommonErr.OK(0)，失败一律走非 2xx；仅凭「有 code 和 data 两个键」就拆包，
   // 会把恰好含 code/data 字段的业务对象误拆。

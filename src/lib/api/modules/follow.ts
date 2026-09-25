@@ -1,6 +1,6 @@
 // src/lib/api/modules/follow.ts — 关注关系（用户 & 版块）
 // 契约 = 后端 /api/v1，snake_case → camelCase。
-// 依赖 src/lib/http/client 的 get/post/del（自动解包 {code,msg,data}）返回 Result<T>。
+// 依赖 src/lib/http/client 的 get/post/del（自动解包 {code,message,data}）返回 Result<T>。
 
 import { get, post, del } from "../../http/client";
 

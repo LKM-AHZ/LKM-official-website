@@ -88,8 +88,9 @@ export interface ArticleCommentCreate {
 
 export interface ApiResponse<T> {
   code: number;
-  msg: string;
+  message: string;
   data: T;
+  request_id?: string;
 }
 
 export interface ListData<T> {

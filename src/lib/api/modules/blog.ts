@@ -158,7 +158,7 @@ function notImplemented<T>(endpoint: string): Result<T, AppError> {
 }
 
 /**
- * 拆掉写接口的 {code,msg,data} 包络取 data。
+ * 拆掉写接口的 {code,message,data} 包络取 data。
  * 原先把这段 match 在 put/publish/create/star 等 6 处各抄一遍，改包络语义时必然漏改。
  */
 function unwrap<T>(r: Result<ApiResponse<T>, AppError>): Result<T, AppError> {
@@ -249,7 +249,7 @@ export const blogApi = {
   },
 
   // DELETE 契约：后端不返回可用 body（唯一有意义的信息是 HTTP 状态），故不像其它写方法那样
-  // 拆 {code,msg,data} 包络——调用方只需判断 Result 的 ok/err，不要读取 value
+  // 拆 {code,message,data} 包络——调用方只需判断 Result 的 ok/err，不要读取 value
   deleteComment: (seriesId: string, commentId: string) =>
     del<null>(BLOG_API.comments.delete(seriesId, commentId)),
 
