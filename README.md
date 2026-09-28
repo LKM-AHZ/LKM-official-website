@@ -4,9 +4,10 @@
 >
 > 建议开发在电脑端完成，以下以 **Windows + cmd** 为例。默认你已基本会使用 GitHub（[还不会？点我](https://www.bilibili.com/video/BV1m4GhzEER3/?spm_id_from=333.337.search-card.all.click&vd_source=0fd643b947c80b42ab465c4ed3101244)）。
 
-
 ---
+
 ## 读前须知
+
 本教程由**清汉**`QQ1121840744`负责更新与维护，任何对本教程有意见或修改者，请务必以私信的方式联系我！！！未征得本人同意，严禁修改此处的任何内容，同时也欢迎各位指出本教程的错误/遗漏之处。
 
 `cmd`同下文的`终端`一词。
@@ -53,12 +54,10 @@
 - 后独立于`LKM-official-website`的`http://127.0.0.1:4321`端口: [LKM-AHZ/LKM-official-static](https://github.com/LKM-AHZ/LKM-official-static)
 - `LKM`网站的本地开发与部署编排仓库：[LKM-AHZ/LKM-Website](https://github.com/LKM-AHZ/LKM-Website)
 
-
 如下，我介绍对网站的部署和开发。
 主要涉及到`总仓库`(你目前所处的页面)、`后端仓库`和`LKM-AHZ/LKM-official-static`
 
 目前，[LKM-official-website](https://github.com/LKM-AHZ/LKM-official-website)是网站的`总前端`，你可以在[LKM-AHZ](https://github.com/LKM-AHZ)看到目前所有的总分支。
-
 
 ## 环境部署
 
@@ -183,7 +182,7 @@ pnpm install --network-concurrency=2 --fetch-timeout=60000
 
 ```cmd
 C:\Users\Administrator\LKM-official-website>pnpm --version
-'"C:\Users\Administrator\AppData\Local\pnpm\.tools\pnpm\12.6.0\bin\\..\node_modules\pnpm\pnpm"' 
+'"C:\Users\Administrator\AppData\Local\pnpm\.tools\pnpm\12.6.0\bin\\..\node_modules\pnpm\pnpm"'
 不是内部或外部命令，也不是可运行的程序
 或批处理文件。
 ```
@@ -214,7 +213,7 @@ copy pnpm.CMD pnpm.CMD.bak
 
 这一步是为了备份
 
-```cmd 
+```cmd
 notepad pnpm.CMD
 ```
 
@@ -283,7 +282,6 @@ pnpm dev
 建议先熟悉一下项目的基本架构。例如要编写起始页的信息，具体位置在：
 
 `LKM-official-website\src\pages\official\index.astro`
-
 
 ## 正式加入
 
