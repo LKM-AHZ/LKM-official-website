@@ -32,6 +32,25 @@ const STATIC_EXT = new Set([
 // 关键路径页（已删的 /official/*、/blog 旧路由不再列入；新增页面按需追加）
 const KEY_PAGES = ["/", "/login/", "/register/"];
 
+/**
+ * 探测 GraphQL 后端是否可达。
+ * 只要端口在监听，即使返回 400/405 也算可达；ECONNREFUSED / DNS 失败才算不在。
+ * 地址与 [graphql] 的回退规则保持一致：未配 API_URL 时用 localhost:8000/graphql。
+ * 为了方便过CI，这里采取两种方案：
+ * 在 check-links.mjs 里加一个探测函数并修改const ok判定
+ * 在 CI workflow 里给真后端：加 service container，在 job 的 env: 里注入指向预发环境的 API_UR
+ * 2026/9/28   清汉
+ */
+async function backendReachable() {
+  const url = process.env.API_URL || "http://localhost:8000/graphql";
+  try {
+    await fetch(url, { method: "GET" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function extractPageHrefs(html) {
   const hrefs = [];
   const re = /href=["']([^"']+)["']/g;
@@ -64,6 +83,18 @@ async function main() {
 
   let errors = 0;
   let totalLinks = 0;
+  let degraded = 0;
+
+  // 后端不可用时，5xx 属于「环境降级」而非「链接失效」，只警告不判失败；
+  // 后端可达（CI 注入了 API_URL）时恢复严格判定，5xx 一样算失败。
+  // 也可用 LINK_CHECK_ALLOW_5XX=1 强制降级，用于本地无后端时的临时排查。
+  const backendUp = await backendReachable();
+  const allow5xx = !backendUp || process.env.LINK_CHECK_ALLOW_5XX === "1";
+  if (!backendUp) {
+    console.warn(
+      "  WARN: 未探测到 GraphQL 后端，5xx 将视为环境降级（4xx 仍严格判定为失效）",
+    );
+  }
 
   await withPreview(async (base) => {
     for (const page of KEY_PAGES) {
@@ -90,19 +121,32 @@ async function main() {
         if (checkRes?.status === 405) {
           checkRes = await fetch(target).catch(() => null);
         }
-        const ok = checkRes && checkRes.status < 400;
-        if (!ok) {
-          console.error(
-            `  FAIL ${page}: "${href}" (HTTP ${checkRes?.status ?? "无响应"})`,
-          );
+
+        const status = checkRes?.status ?? 0;
+        const label = status === 0 ? "无响应" : `HTTP ${status}`;
+
+        if (status >= 400 && status < 500) {
+          // 真死链：路由不存在，任何环境都该失败
+          console.error(`  FAIL ${page}: "${href}" (${label})`);
           errors++;
+        } else if (status >= 500 || status === 0) {
+          // 服务端错误：后端不在时属环境降级，后端在时是真故障
+          if (allow5xx) {
+            console.warn(
+              `  WARN ${page}: "${href}" (${label}) — 后端不可用，非链接失效`,
+            );
+            degraded++;
+          } else {
+            console.error(`  FAIL ${page}: "${href}" (${label})`);
+            errors++;
+          }
         }
       }
     }
   });
 
   console.log(
-    `\n链接检查完成 (${KEY_PAGES.length} 关键页面): ${totalLinks} 次链接检查, ${errors} 失效`,
+    `\n链接检查完成 (${KEY_PAGES.length} 关键页面): ${totalLinks} 次链接检查, ${errors} 失效, ${degraded} 后端降级`,
   );
   process.exit(errors > 0 ? 1 : 0);
 }
