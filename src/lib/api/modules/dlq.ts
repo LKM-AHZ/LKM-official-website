@@ -1,7 +1,7 @@
 // src/lib/api/modules/dlq.ts — 后台死信队列（DLQ）管理
 // 契约 = 后端 /api/v1/admin/dlq，走后端 cookie 会话（adminFetch）。
 // 端点：GET ""（按 status 列）、POST /{id}/requeue、POST /{id}/discard；
-// 当前后端仅要求 require_admin（无 2FA step-up）。
+// 列表需 admin.events_manage；重投/丢弃还需后台 2FA 信任。
 
 import { adminFetch, readAdminResp } from "~/lib/api/admin";
 

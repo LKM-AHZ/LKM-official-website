@@ -1,10 +1,12 @@
 <script setup lang="ts">
 // DlqTable.vue — 后台死信队列：按状态查看、重投、丢弃。
-// 列表/重投/丢弃均走 adminFetch（后端 require_admin，无 2FA step-up）。
+// 列表走后台事件权限；重投/丢弃还需 2FA step-up。
 import { ref, computed, onMounted } from "vue";
 import { dlqApi } from "~/lib/api";
 import type { DlqMessageInfo, DlqStatus } from "~/lib/api/modules/dlq";
+import { useAdminMFA } from "~/lib/http/useAdminMFA";
 import { t } from "~/lib/i18n";
+import AdminMFAVerifyDialog from "./AdminMFAVerifyDialog.vue";
 
 const STATUSES: DlqStatus[] = ["pending", "requeued", "discarded"];
 const STATUS_LABEL: Record<DlqStatus, string> = {
@@ -19,6 +21,7 @@ const loading = ref(false);
 const error = ref("");
 const message = ref("");
 const actingId = ref<string | null>(null);
+const mfa = useAdminMFA();
 // 任一行动作在途时禁用**所有**行的按钮：只按行禁用的话，多行会被并发重投/丢弃，
 // 各自触发的 load() 交错回来只会展示中间态
 const busy = computed(() => actingId.value !== null);
@@ -53,7 +56,8 @@ async function requeue(id: string): Promise<void> {
   actingId.value = id;
   error.value = "";
   try {
-    await dlqApi.requeue(id);
+    const result = await mfa.run(() => dlqApi.requeue(id));
+    if (result === null) return;
     message.value = t("admin.dlq.requeued");
     await load();
   } catch (e) {
@@ -68,7 +72,8 @@ async function discard(id: string): Promise<void> {
   actingId.value = id;
   error.value = "";
   try {
-    await dlqApi.discard(id);
+    const result = await mfa.run(() => dlqApi.discard(id));
+    if (result === null) return;
     message.value = t("admin.dlq.discarded");
     await load();
   } catch (e) {
@@ -95,6 +100,11 @@ onMounted(() => void load());
 
 <template>
   <div>
+    <AdminMFAVerifyDialog
+      :state="mfa.dialog"
+      @verify="mfa.onCode"
+      @cancel="mfa.onCancel"
+    />
     <!-- 状态筛选 -->
     <div class="flex gap-2 mb-4">
       <button

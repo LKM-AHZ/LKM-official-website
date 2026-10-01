@@ -16,6 +16,7 @@ const mode = ref<TimelineMode>(isLoggedIn.value ? "follow" : "hot");
 
 const {
   items,
+  hasMore,
   loading,
   error,
   loadMore,
@@ -125,7 +126,7 @@ onMounted(() => {
       {{ error }}
     </div>
     <div
-      v-else-if="entries.length === 0"
+      v-else-if="entries.length === 0 && !hasMore"
       class="text-sm text-text-muted py-8 text-center"
     >
       {{ t("timeline.empty") }}
@@ -174,7 +175,7 @@ onMounted(() => {
 
     <div class="mt-6 text-center">
       <button
-        v-if="entries.length > 0"
+        v-if="hasMore"
         type="button"
         class="px-4 py-2 rounded-lg text-sm bg-surface-3 text-deep-text hover:bg-surface-3/70 disabled:opacity-40"
         :disabled="loading"
