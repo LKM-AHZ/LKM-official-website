@@ -259,6 +259,7 @@
     <!-- 上传按钮 -->
     <button
       class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-primary text-on-primary shadow-xl hover:shadow-2xl hover:scale-110 transition-all flex items-center justify-center z-40"
+      :aria-label="t('community.fileLibrary.uploadTitle')"
       @click="showUpload = true"
     >
       <Icon icon="material-symbols:add" class="w-7 h-7" />
@@ -365,6 +366,7 @@ import { Icon } from "@iconify/vue";
 import { fileLibraryApi } from "~/lib/api";
 import type { FileEntry } from "~/lib/api/modules/file-library";
 import { waitForUploadRegistration } from "~/lib/ws/upload-events";
+import { downloadFileContent } from "../utils/download";
 import { forumCategories } from "../../forum/data/categories";
 import {
   getChildren,
@@ -603,23 +605,7 @@ async function downloadFile(file: FileEntry) {
   if (downloading.value.has(file.id)) return;
   downloading.value.add(file.id);
   try {
-    const info = await fileLibraryApi.getDownloadUrl(file.id);
-    if (info.kind === "presigned") {
-      // S3 预签名直连
-      window.location.href = info.url;
-    } else {
-      const blob = await fileLibraryApi.getContentBlob(file.id); // backend: fetch+blob+鉴权
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = file.originalName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      // 点击后立即 revoke 会让 Firefox/Safari 尚未开始读取 blob 的下载被中断（静默失败），
-      // 故延后释放
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
+    await downloadFileContent(file.id, file.originalName);
   } catch (e) {
     // 失败提示：组件无 toast 体系，沿用 alert 原语 + console
     console.error("文件下载失败", e);
@@ -633,8 +619,8 @@ async function downloadFile(file: FileEntry) {
 // 不能再用裸导航 window.open(previewUrl)，浏览器导航无法携带自定义头，
 // 后端 /preview 由 get_current_user 保护会 401。
 async function previewFile(file: FileEntry) {
-  if (previewing.has(file.id)) return;
-  previewing.add(file.id);
+  if (previewing.value.has(file.id)) return;
+  previewing.value.add(file.id);
   // 必须在 await 之前**同步**开窗：await 之后不再算用户手势，弹窗拦截器会直接拦掉，
   // 原实现表现为「点了预览没反应」
   const win = window.open("", "_blank");
@@ -660,7 +646,7 @@ async function previewFile(file: FileEntry) {
     console.error("文件预览失败", e);
     alert("文件预览失败，请稍后重试");
   } finally {
-    previewing.delete(file.id);
+    previewing.value.delete(file.id);
   }
 }
 </script>

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { allMenuItems } from "../menus";
+import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
 
 describe("menus", () => {
   it("统一菜单池含 4 个一级项（news/help/blog 已并入论坛入口 nav.community）", () => {
@@ -11,11 +12,16 @@ describe("menus", () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it("每个一级项都有 url 与 children", () => {
+  it("站内一级项有子菜单，官网入口直达独立站点", () => {
     allMenuItems.forEach((item) => {
       expect(item.url).toBeTruthy();
-      expect(Array.isArray(item.children)).toBe(true);
+      if (item.name !== "nav.home") {
+        expect(Array.isArray(item.children)).toBe(true);
+      }
     });
+    const home = allMenuItems.find((item) => item.name === "nav.home");
+    expect(home).toMatchObject({ url: OFFICIAL_SITE_URL, external: true });
+    expect(home?.children).toBeUndefined();
   });
 
   it("nav.community 是唯一内容入口（/forum）", () => {

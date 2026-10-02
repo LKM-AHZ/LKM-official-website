@@ -10,6 +10,7 @@ import { SearchGlobalSearch } from '~/features/search';
 import DisplaySettings from '~/features/shell/components/widget/DisplaySettings.vue';
 import { NotificationBell } from '~/features/notification';
 import UserAvatarMenu from '~/features/shell/components/user/UserAvatarMenu.vue';
+import { OFFICIAL_SITE_URL } from '~/lib/constants/site-urls';
 
 interface Props {
   class?: string;
@@ -18,8 +19,8 @@ interface Props {
 }
 
 const moduleType = Astro.props.module || 'official';
-// 官网模式切到社区论坛入口（原 /community 前缀已并入 /forum）
-const switchHref = moduleType === 'official' ? url('/forum') : url('/');
+// 社区与独立静态官网之间切换。
+const switchHref = moduleType === 'official' ? url('/forum') : OFFICIAL_SITE_URL;
 const switchText = moduleType === 'official' ? t('shell.community') : t('shell.official');
 
 const className = Astro.props.class;

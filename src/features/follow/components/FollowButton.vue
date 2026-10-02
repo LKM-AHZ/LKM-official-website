@@ -5,6 +5,7 @@ import { ref, watch, computed } from "vue";
 import { followApi } from "~/lib/api";
 import { useAuthStore } from "~/stores/auth";
 import { t } from "~/lib/i18n";
+import { dispatchOpenLoginModal } from "~/features/shell/common/shell-events";
 
 const props = defineProps<{
   targetType: "user" | "board";
@@ -41,7 +42,10 @@ async function apply(): Promise<void> {
 }
 
 async function toggle(): Promise<void> {
-  if (!isLoggedIn.value) return;
+  if (!isLoggedIn.value) {
+    dispatchOpenLoginModal();
+    return;
+  }
   loading.value = true;
   const call =
     props.targetType === "user"
@@ -68,7 +72,7 @@ watch(
 <template>
   <button
     type="button"
-    :disabled="loading || !isLoggedIn"
+    :disabled="loading"
     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
     :class="
       following

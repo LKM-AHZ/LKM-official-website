@@ -3,6 +3,7 @@ import CommunitySidebarLayout from '~/layouts/CommunitySidebarLayout.astro';
 import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
 import { Icon } from 'astro-icon/components';
 import { fileLibraryApi } from '~/lib/api';
+import FileDownloadButton from '~/features/file-library/components/FileDownloadButton.vue';
 import { getPermalink } from '~/lib/utils/permalinks';
 import { t, getLocale } from '~/lib/i18n';
 
@@ -145,10 +146,7 @@ const metadata = { title: `${file.originalName} —— LKM` };
         /* 只有审核通过的文件才提供下载入口（pending/rejected 的内容不该从详情页拿走） */
         file.status === 'approved' && (
           <div class="flex gap-3 mt-4">
-            <button class="btn-primary px-6 py-2.5 rounded-lg text-sm font-semibold inline-flex items-center gap-2">
-              <Icon name="tabler:download" class="w-4 h-4" />
-              {t('page.communityDetail.files.download')}
-            </button>
+            <FileDownloadButton client:load fileId={file.id} fileName={file.originalName} />
           </div>
         )
       }

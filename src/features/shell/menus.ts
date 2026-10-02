@@ -1,7 +1,8 @@
 import type { NavBarLink } from "~/types/config";
+import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
 
 /**
- * 官网默认顶栏一级菜单（原官方 navbar 的 4 项），供无显式 navItems 的布局兜底。
+ * 顶栏默认一级菜单，供无显式 navItems 的布局兜底。
  * 值为菜单 name（即 i18n key），与 allMenuItems 中对应菜单的 name 匹配。
  */
 export const officialDefaultNavItems: string[] = [
@@ -24,19 +25,13 @@ const competitionItem: NavBarLink = {
  * 全站统一导航菜单池（原 config.yaml fuwari.navbar 与 fuwari.navbarCommunity 合并）。
  * 页面用 navItems 白名单（name，即 i18n key）从该池中挑选要显示的一级菜单。
  * 渲染层通过 t(name) 显示本地化文本。
- * 已扁平化：去掉 /official 与 /community 前缀；移除已迁到静态站的官方页（team/services/contact/pricing/funding/communities/project-team 等）。
+ * 已扁平化：去掉 /official 与 /community 前缀；官方主页转到独立静态站。
  */
 export const allMenuItems: NavBarLink[] = [
   {
     name: "nav.home",
-    url: "/",
-    children: [
-      { name: "nav.intro", url: "/" },
-      { name: "nav.teamMembers", url: "/#team" },
-      { name: "nav.timeline", url: "/#timeline" },
-      { name: "nav.recentUpdates", url: "/#update" },
-      { name: "nav.faq", url: "/#faq" },
-    ],
+    url: OFFICIAL_SITE_URL,
+    external: true,
   },
   {
     name: "nav.community",

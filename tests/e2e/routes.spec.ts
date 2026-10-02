@@ -42,4 +42,27 @@ test.describe("关键路由烟雾测试", () => {
     await page.goto(`${BASE_PATH}/`);
     expect(errors).toEqual([]);
   });
+
+  test("文件库分类和上传按钮在水合后可操作", async ({ page }) => {
+    await page.goto(`${BASE_PATH}/files/`);
+    await page
+      .locator('astro-island[component-url*="FileListPage"]:not([ssr])')
+      .waitFor();
+
+    await page.getByRole("button", { name: /基础学科/ }).click();
+    await expect(page.getByRole("button", { name: /数学/ })).toBeVisible();
+
+    await page.getByRole("button", { name: "上传文件" }).click();
+    await expect(page.getByRole("heading", { name: "上传文件" })).toBeVisible();
+  });
+
+  test("静态板块卡片打开详情而不是跳回广场", async ({ page }) => {
+    await page.goto(`${BASE_PATH}/forum/`);
+    await page
+      .getByRole("link", { name: /基础学科/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/forum\/basic-science\/?$/);
+    await expect(page.getByRole("heading", { name: "基础学科" })).toBeVisible();
+  });
 });
