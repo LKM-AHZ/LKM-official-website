@@ -43,6 +43,31 @@ test.describe("关键路由烟雾测试", () => {
     expect(errors).toEqual([]);
   });
 
+  test("首页展示社区入口并可进入论坛", async ({ page }) => {
+    await page.goto(`${BASE_PATH}/`);
+    await expect(
+      page.getByRole("heading", { name: /好奇有方向/ }),
+    ).toBeVisible();
+    await page.getByRole("link", { name: "进入社区" }).click();
+    await expect(page).toHaveURL(/\/forum\/?$/);
+    await expect(page.getByRole("heading", { name: "板块广场" })).toBeVisible();
+  });
+
+  test("移动端首页保持在视口内且菜单可打开", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${BASE_PATH}/`);
+    await expect(
+      page.getByRole("heading", { name: /好奇有方向/ }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(390);
+    await page.getByRole("button", { name: "Menu" }).click();
+    await expect(
+      page.getByRole("navigation", { name: "移动端导航" }),
+    ).toBeVisible();
+  });
+
   test("文件库分类和上传按钮在水合后可操作", async ({ page }) => {
     await page.goto(`${BASE_PATH}/files/`);
     await page

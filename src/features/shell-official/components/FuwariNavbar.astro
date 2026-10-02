@@ -1,65 +1,75 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { siteConfig } from '~/lib/config';
-import type { NavBarLink } from '~/types/config';
-import { url } from '~/lib/utils/url-utils';
-import { t } from '~/lib/i18n';
-import LightDarkSwitch from '~/features/shell/components/LightDarkSwitch.vue';
-import LanguageSwitcher from '~/features/shell/components/LanguageSwitcher.vue';
-import { SearchGlobalSearch } from '~/features/search';
-import DisplaySettings from '~/features/shell/components/widget/DisplaySettings.vue';
-import { NotificationBell } from '~/features/notification';
-import UserAvatarMenu from '~/features/shell/components/user/UserAvatarMenu.vue';
-import { OFFICIAL_SITE_URL } from '~/lib/constants/site-urls';
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "~/lib/config";
+import type { NavBarLink } from "~/types/config";
+import { url } from "~/lib/utils/url-utils";
+import { t } from "~/lib/i18n";
+import LightDarkSwitch from "~/features/shell/components/LightDarkSwitch.vue";
+import LanguageSwitcher from "~/features/shell/components/LanguageSwitcher.vue";
+import { SearchGlobalSearch } from "~/features/search";
+import DisplaySettings from "~/features/shell/components/widget/DisplaySettings.vue";
+import { NotificationBell } from "~/features/notification";
+import UserAvatarMenu from "~/features/shell/components/user/UserAvatarMenu.vue";
+import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
 
 interface Props {
   class?: string;
   links: NavBarLink[];
-  module?: 'official' | 'community';
+  module?: "official" | "community";
 }
 
-const moduleType = Astro.props.module || 'official';
+const moduleType = Astro.props.module || "official";
 // 社区与独立静态官网之间切换。
-const switchHref = moduleType === 'official' ? url('/forum') : OFFICIAL_SITE_URL;
-const switchText = moduleType === 'official' ? t('shell.community') : t('shell.official');
+const switchHref =
+  moduleType === "official" ? url("/forum") : OFFICIAL_SITE_URL;
+const switchText =
+  moduleType === "official" ? t("shell.community") : t("shell.official");
 
 const className = Astro.props.class;
 const navInnerClass = [
-  'bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none transition !overflow-visible h-[4.5rem] !rounded-t-none grid grid-cols-[0.6fr_auto_1fr] items-center px-4',
+  "bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none transition !overflow-visible h-[4.5rem] !rounded-t-none grid grid-cols-[minmax(0,1fr)_auto] xl:grid-cols-[0.6fr_auto_1fr] items-center px-2 sm:px-4",
   className,
 ]
   .filter(Boolean)
-  .join(' ');
+  .join(" ");
 
 const links: NavBarLink[] = Astro.props.links;
 ---
 
 <div id="navbar" class="z-50 onload-animation">
-  <div class="absolute h-8 left-0 right-0 -top-8 bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] transition-colors">
+  <div
+    class="absolute h-8 left-0 right-0 -top-8 bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] transition-colors"
+  >
   </div>
   <div class={navInnerClass}>
     <!-- 左侧：首页与切换按钮 -->
-    <div class="flex items-center gap-1 justify-self-start">
+    <div class="flex min-w-0 items-center gap-1 justify-self-start">
       <a
-        href={url('/')}
-        class="scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 flex items-center text-neutral-800 dark:text-neutral-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+        href={url("/")}
+        class="scale-animation rounded-lg h-[3.25rem] px-2 sm:px-5 font-bold active:scale-95 flex items-center text-neutral-800 dark:text-neutral-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       >
         <div class="flex flex-row text-primary items-center text-md">
-          <Icon name="material-symbols:home-outline-rounded" class="text-[1.75rem] mb-1 mr-2" />
+          <Icon
+            name="material-symbols:home-outline-rounded"
+            class="text-[1.75rem] mb-1 mr-2"
+          />
           {siteConfig.title}
         </div>
       </a>
       <a
         href={switchHref}
-        class="scale-animation rounded-lg h-11 px-3 font-bold active:scale-95 flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+        class="hidden xl:flex scale-animation rounded-lg h-11 px-3 font-bold active:scale-95 items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       >
-        <Icon name="material-symbols:swap-horiz-rounded" class="text-[1.125rem]" />
+        <Icon
+          name="material-symbols:swap-horiz-rounded"
+          class="text-[1.125rem]"
+        />
         {switchText}
       </a>
     </div>
 
     <!-- 中间：导航链接列表 -->
-    <div class="hidden md:flex" id="navbar-links">
+    <div class="hidden xl:flex" id="navbar-links">
       {
         links.map((l, idx) => {
           const hasChildren = l.children && l.children.length > 0;
@@ -68,8 +78,8 @@ const links: NavBarLink[] = Astro.props.links;
               <a
                 aria-label={t(l.name)}
                 href={l.external ? l.url : url(l.url)}
-                target={l.external ? '_blank' : null}
-                rel={l.external ? 'noopener noreferrer' : null}
+                target={l.external ? "_blank" : null}
+                rel={l.external ? "noopener noreferrer" : null}
                 class="scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 flex items-center gap-1 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               >
                 {t(l.name)}
@@ -97,14 +107,17 @@ const links: NavBarLink[] = Astro.props.links;
                   data-dropdown-arrow
                 />
               </button>
-              <div class="absolute left-0 top-full pt-2 hidden z-50" data-dropdown-menu>
+              <div
+                class="absolute left-0 top-full pt-2 hidden z-50"
+                data-dropdown-menu
+              >
                 <div class="bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-md dark:shadow-none border border-black/5 dark:border-white/10 float-panel p-2">
                   {l.children!.map((child) => (
                     <a
                       aria-label={t(child.name)}
                       href={child.external ? child.url : url(child.url)}
-                      target={child.external ? '_blank' : null}
-                      rel={child.external ? 'noopener noreferrer' : null}
+                      target={child.external ? "_blank" : null}
+                      rel={child.external ? "noopener noreferrer" : null}
                       class="flex transition-colors whitespace-nowrap items-center !justify-start w-full scale-animation rounded-lg h-9 px-3 font-medium active:scale-95 mb-0.5 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10"
                     >
                       {t(child.name)}
@@ -120,26 +133,29 @@ const links: NavBarLink[] = Astro.props.links;
 
     <!-- 右侧：功能按钮组 -->
     <div class="flex justify-self-end items-center gap-1">
-      <SearchGlobalSearch client:load />
+      <div class="hidden xl:block"><SearchGlobalSearch client:load /></div>
       {
         !siteConfig.themeColor.fixed && (
           <button
             aria-label="Display Settings"
-            class="scale-animation rounded-lg h-11 w-11 active:scale-90 flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            class="hidden xl:flex scale-animation rounded-lg h-11 w-11 active:scale-90 items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             id="display-settings-switch"
           >
-            <Icon name="material-symbols:palette-outline" class="text-[1.25rem]" />
+            <Icon
+              name="material-symbols:palette-outline"
+              class="text-[1.25rem]"
+            />
           </button>
         )
       }
       <LightDarkSwitch client:load />
-      <LanguageSwitcher client:load />
-      <NotificationBell client:idle />
-      <UserAvatarMenu client:idle base={url('/')} />
+      <div class="hidden xl:block"><LanguageSwitcher client:load /></div>
+      <div class="hidden xl:block"><NotificationBell client:idle /></div>
+      <UserAvatarMenu client:idle base={url("/")} />
       <button
         aria-label="Menu"
         name="Nav Menu"
-        class="scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors group"
+        class="scale-animation rounded-lg w-11 h-11 active:scale-90 xl:!hidden flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors group"
         id="nav-menu-switch"
       >
         <Icon
@@ -162,114 +178,143 @@ const links: NavBarLink[] = Astro.props.links;
   // 用 var 而非 const：本内联脚本位于 Swup 容器内，会被 reloadScripts 在每次过渡时重新执行，
   // 顶层 const 重复声明会抛 "Identifier 'B' has already been declared"，中断整个脚本及后续
   // 绑定 → 页面切换/导航水合异常。var 重复声明合法（仅覆盖），保证重跑安全、可重绑新节点。
-  var B = '__lkmBound__';
+  var B = "__lkmBound__";
   function mark(el) {
     if (el) el[B] = true;
   }
-  function bound(el) { return !!el && el[B] === true; }
+  function bound(el) {
+    return !!el && el[B] === true;
+  }
 
   function bindNavbarButtons() {
     // ── display-setting 面板 ──
-    const settingBtn = document.getElementById('display-settings-switch');
+    const settingBtn = document.getElementById("display-settings-switch");
     if (settingBtn && !bound(settingBtn)) {
       mark(settingBtn);
-      settingBtn.addEventListener('click', function dsHandler(e) {
+      settingBtn.addEventListener("click", function dsHandler(e) {
         e.stopPropagation();
-        const panel = document.getElementById('display-setting');
+        const panel = document.getElementById("display-setting");
         if (!panel) return;
-        const willOpen = panel.classList.contains('float-panel-closed');
+        const willOpen = panel.classList.contains("float-panel-closed");
         // 先关闭所有，再决定展开
-        document.querySelectorAll('[data-dropdown-menu]').forEach((m) => m.classList.add('hidden'));
-        document.querySelectorAll('[data-dropdown-arrow]').forEach((a) => a.classList.remove('rotate-180'));
+        document
+          .querySelectorAll("[data-dropdown-menu]")
+          .forEach((m) => m.classList.add("hidden"));
+        document
+          .querySelectorAll("[data-dropdown-arrow]")
+          .forEach((a) => a.classList.remove("rotate-180"));
         if (willOpen) {
-          panel.classList.remove('float-panel-closed');
+          panel.classList.remove("float-panel-closed");
         } else {
-          panel.classList.add('float-panel-closed');
+          panel.classList.add("float-panel-closed");
         }
       });
     }
 
     // ── nav-menu 面板（移动端） ──
-    const menuBtn = document.getElementById('nav-menu-switch');
-    const menuIcon = menuBtn?.querySelector('[data-menu-icon]');
+    const menuBtn = document.getElementById("nav-menu-switch");
+    const menuIcon = menuBtn?.querySelector("[data-menu-icon]");
     if (menuBtn?.id && !bound(menuBtn)) {
       mark(menuBtn);
-      menuBtn.addEventListener('click', function nmHandler(e) {
+      menuBtn.addEventListener("click", function nmHandler(e) {
         e.stopPropagation();
-        document.getElementById('display-setting')?.classList.add('float-panel-closed');
-        document.querySelectorAll('[data-dropdown-menu]').forEach((m) => m.classList.add('hidden'));
-        document.querySelectorAll('[data-dropdown-arrow]').forEach((a) => a.classList.remove('rotate-180'));
-        document.getElementById('mobile-nav-fuwari')?.dispatchEvent(new CustomEvent('mobile-nav:toggle'));
+        document
+          .getElementById("display-setting")
+          ?.classList.add("float-panel-closed");
+        document
+          .querySelectorAll("[data-dropdown-menu]")
+          .forEach((m) => m.classList.add("hidden"));
+        document
+          .querySelectorAll("[data-dropdown-arrow]")
+          .forEach((a) => a.classList.remove("rotate-180"));
+        document
+          .getElementById("mobile-nav-fuwari")
+          ?.dispatchEvent(new CustomEvent("mobile-nav:toggle"));
       });
     }
 
     // ── navbar dropdown ──
-    document.querySelectorAll('[data-nav-dropdown]').forEach((dropdown) => {
-      const trigger = dropdown.querySelector('[data-dropdown-trigger]');
-      const menu = dropdown.querySelector('[data-dropdown-menu]');
-      const arrow = dropdown.querySelector('[data-dropdown-arrow]');
+    document.querySelectorAll("[data-nav-dropdown]").forEach((dropdown) => {
+      const trigger = dropdown.querySelector("[data-dropdown-trigger]");
+      const menu = dropdown.querySelector("[data-dropdown-menu]");
+      const arrow = dropdown.querySelector("[data-dropdown-arrow]");
       if (!trigger || !menu) return;
       // 同一 trigger 节点只绑一次（标记持久化在元素上，脚本重跑/节点复用也不重复绑定）
       if (bound(trigger)) return;
       mark(trigger);
 
-      trigger.addEventListener('click', function ddHandler(e) {
+      trigger.addEventListener("click", function ddHandler(e) {
         e.stopPropagation();
-        const isOpen = !menu.classList.contains('hidden');
+        const isOpen = !menu.classList.contains("hidden");
         // 关闭其他所有弹出
-        document.querySelectorAll('[data-dropdown-menu]').forEach((m) => m.classList.add('hidden'));
-        document.querySelectorAll('[data-dropdown-arrow]').forEach((a) => a.classList.remove('rotate-180'));
-        document.getElementById('display-setting')?.classList.add('float-panel-closed');
+        document
+          .querySelectorAll("[data-dropdown-menu]")
+          .forEach((m) => m.classList.add("hidden"));
+        document
+          .querySelectorAll("[data-dropdown-arrow]")
+          .forEach((a) => a.classList.remove("rotate-180"));
+        document
+          .getElementById("display-setting")
+          ?.classList.add("float-panel-closed");
         if (!isOpen) {
-          menu.classList.remove('hidden');
-          if (arrow) arrow.classList.add('rotate-180');
+          menu.classList.remove("hidden");
+          if (arrow) arrow.classList.add("rotate-180");
         }
       });
     });
 
     // 监听面板状态切换图标（同一面板节点只 observe 一次，防重复叠加触发）
-    const panelRoot = document.getElementById('mobile-nav-fuwari');
-    const panelEl = panelRoot?.querySelector('[data-nav-panel]');
+    const panelRoot = document.getElementById("mobile-nav-fuwari");
+    const panelEl = panelRoot?.querySelector("[data-nav-panel]");
     if (panelEl && menuIcon && !bound(panelEl)) {
       mark(panelEl);
       const observer = new MutationObserver(() => {
-        const isOpen = !panelEl.classList.contains('translate-x-full');
+        const isOpen = !panelEl.classList.contains("translate-x-full");
         if (isOpen) {
-          menuIcon.setAttribute('name', 'material-symbols:close');
+          menuIcon.setAttribute("name", "material-symbols:close");
         } else {
-          menuIcon.setAttribute('name', 'material-symbols:menu-rounded');
+          menuIcon.setAttribute("name", "material-symbols:menu-rounded");
         }
       });
-      observer.observe(panelEl, { attributes: true, attributeFilter: ['class'] });
+      observer.observe(panelEl, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
     }
   }
 
   // ── 全局：点击外部收起所有面板（document 上只需绑定一次） ──
   if (!window.__navbar_outside) {
     window.__navbar_outside = true;
-    document.addEventListener('click', () => {
-      document.getElementById('display-setting')?.classList.add('float-panel-closed');
-      document.querySelectorAll('[data-dropdown-menu]').forEach((m) => m.classList.add('hidden'));
-      document.querySelectorAll('[data-dropdown-arrow]').forEach((a) => a.classList.remove('rotate-180'));
+    document.addEventListener("click", () => {
+      document
+        .getElementById("display-setting")
+        ?.classList.add("float-panel-closed");
+      document
+        .querySelectorAll("[data-dropdown-menu]")
+        .forEach((m) => m.classList.add("hidden"));
+      document
+        .querySelectorAll("[data-dropdown-arrow]")
+        .forEach((a) => a.classList.remove("rotate-180"));
     });
   }
 
   // 首次加载绑定
   bindNavbarButtons();
   // View Transitions 导航后重新绑定
-  document.addEventListener('astro:after-swap', bindNavbarButtons);
+  document.addEventListener("astro:after-swap", bindNavbarButtons);
 
   function updateProfileLink() {
     try {
-      const saved = localStorage.getItem('lkm-auth-store');
+      const saved = localStorage.getItem("lkm-auth-store");
       if (!saved) return;
       const data = JSON.parse(saved);
       const username = data.user?.username;
       if (!username) return;
-      document.querySelectorAll('a').forEach((a) => {
-        if ((a.textContent || '').trim() === '个人主页') {
-          const base = window.__BASE_URL__ || '/';
-          a.setAttribute('href', base.replace(/\/$/, '') + `/user/${username}`);
+      document.querySelectorAll("a").forEach((a) => {
+        if ((a.textContent || "").trim() === "个人主页") {
+          const base = window.__BASE_URL__ || "/";
+          a.setAttribute("href", base.replace(/\/$/, "") + `/user/${username}`);
         }
       });
     } catch {
@@ -277,14 +322,14 @@ const links: NavBarLink[] = Astro.props.links;
     }
   }
   updateProfileLink();
-  document.addEventListener('astro:after-swap', updateProfileLink);
+  document.addEventListener("astro:after-swap", updateProfileLink);
 </script>
 
 {
   import.meta.env.PROD && (
     <script
       is:inline
-      define:vars={{ scriptUrl: url('/pagefind/pagefind.js') }}
+      define:vars={{ scriptUrl: url("/pagefind/pagefind.js") }}
       set:html={`async function loadPagefind() {
     try {
         // eslint-disable-next-line no-restricted-globals

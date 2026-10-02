@@ -54,6 +54,8 @@
   --color-deep-text: var(--deep-text);
   --color-text-muted: var(--text-muted);
   --color-primary: var(--primary);
+  --color-primary-readable: var(--primary-readable);
+  --color-primary-action: var(--primary-action);
   --color-on-primary: var(--on-primary);
   --color-secondary: var(--secondary);
   --color-on-secondary: var(--on-secondary);

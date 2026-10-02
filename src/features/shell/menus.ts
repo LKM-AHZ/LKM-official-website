@@ -1,5 +1,4 @@
 import type { NavBarLink } from "~/types/config";
-import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
 
 /**
  * 顶栏默认一级菜单，供无显式 navItems 的布局兜底。
@@ -25,13 +24,12 @@ const competitionItem: NavBarLink = {
  * 全站统一导航菜单池（原 config.yaml fuwari.navbar 与 fuwari.navbarCommunity 合并）。
  * 页面用 navItems 白名单（name，即 i18n key）从该池中挑选要显示的一级菜单。
  * 渲染层通过 t(name) 显示本地化文本。
- * 已扁平化：去掉 /official 与 /community 前缀；官方主页转到独立静态站。
+ * 已扁平化：去掉 /official 与 /community 前缀。
  */
 export const allMenuItems: NavBarLink[] = [
   {
     name: "nav.home",
-    url: OFFICIAL_SITE_URL,
-    external: true,
+    url: "/",
   },
   {
     name: "nav.community",
