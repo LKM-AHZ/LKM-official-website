@@ -3,6 +3,7 @@ import { Icon } from "astro-icon/components";
 import Layout from "~/layouts/PageLayout.astro";
 import heroImage from "~/assets/images/hero-image.png";
 import { getPermalink } from "~/lib/utils/permalinks";
+import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
 
 const paths = {
   forum: getPermalink("/forum"),
@@ -107,6 +108,16 @@ const moreDestinations = [
           >
             探索资源 <Icon
               name="tabler:arrow-right"
+              class="h-5 w-5"
+              aria-hidden="true"
+            />
+          </a>
+          <a
+            href={OFFICIAL_SITE_URL}
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-surface-3 bg-card-bg px-6 font-semibold text-deep-text transition hover:border-primary/50 hover:text-primary-readable focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
+          >
+            前往官网 <Icon
+              name="tabler:arrow-up-right"
               class="h-5 w-5"
               aria-hidden="true"
             />

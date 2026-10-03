@@ -3129,6 +3129,7 @@ export const zhFlat = {
   "theme.color": "主题色",
   "theme.dark": "暗色",
   "theme.displaySettings": "显示设置",
+  "theme.language": "语言",
   "theme.light": "亮色",
   "theme.lightDarkMode": "亮色/暗色模式",
   "theme.resetToDefault": "重置为默认",

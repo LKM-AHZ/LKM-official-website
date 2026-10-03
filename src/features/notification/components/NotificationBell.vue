@@ -6,6 +6,17 @@ import {
   type MockNotification,
 } from "../data/mock-notifications";
 import { t } from "~/lib/i18n";
+import { useAuthStore } from "~/stores/auth";
+
+const props = withDefaults(defineProps<{ mobile?: boolean }>(), {
+  mobile: false,
+});
+const root = ref<HTMLElement | null>(null);
+const panelId = props.mobile
+  ? "notification-panel-mobile"
+  : "notification-panel-desktop";
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => authStore.isLoggedIn);
 
 const isOpen = ref(false);
 // 复制一份：直接持有模块级 mock 数组会让本组件与所有引用方共享同一份状态，
@@ -65,9 +76,7 @@ function timeAgo(dateStr: string): string {
 }
 
 function handleClickOutside(e: MouseEvent) {
-  const target = e.target as HTMLElement;
-  const bell = document.getElementById("notification-bell");
-  if (bell && !bell.contains(target)) {
+  if (root.value && !root.value.contains(e.target as Node)) {
     isOpen.value = false;
   }
 }
@@ -78,6 +87,7 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  authStore.restoreFromStorage();
   document.addEventListener("click", handleClickOutside);
   document.addEventListener("keydown", handleKeydown);
 });
@@ -89,25 +99,37 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="notification-bell" class="relative">
+  <div
+    v-if="isLoggedIn"
+    ref="root"
+    class="relative"
+    :class="{ 'w-full': mobile }"
+  >
     <!-- 铃铛触发按钮 -->
     <button
       type="button"
       :aria-label="t('notification.title')"
       aria-haspopup="true"
       :aria-expanded="isOpen"
-      aria-controls="notification-panel"
-      class="scale-animation rounded-lg w-11 h-11 active:scale-90 relative flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+      :aria-controls="panelId"
+      class="scale-animation relative flex items-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+      :class="
+        mobile
+          ? 'w-full gap-3 px-5 py-3 text-left font-semibold'
+          : 'rounded-lg w-11 h-11 justify-center active:scale-90'
+      "
       @click="toggle"
     >
       <Icon
         icon="material-symbols:notifications-outline"
         class="text-[1.25rem]"
       />
+      <span v-if="mobile">{{ t("notification.title") }}</span>
       <!-- 未读红点角标 -->
       <span
         v-if="unreadCount > 0"
-        class="absolute top-1.5 right-1.5 min-w-[1.125rem] h-[1.125rem] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow-sm"
+        class="min-w-[1.125rem] h-[1.125rem] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow-sm"
+        :class="mobile ? 'ml-auto' : 'absolute top-1.5 right-1.5'"
       >
         {{ unreadCount > 9 ? "9+" : unreadCount }}
       </span>
@@ -115,9 +137,10 @@ onUnmounted(() => {
 
     <!-- 下拉通知面板 -->
     <div
-      id="notification-panel"
+      :id="panelId"
       v-if="isOpen"
-      class="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] float-panel p-2 z-50 shadow-xl dark:shadow-2xl transition-all"
+      class="max-h-96 overflow-y-auto bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] float-panel p-2 z-50 shadow-xl dark:shadow-2xl transition-all"
+      :class="mobile ? 'mx-3 mb-3' : 'absolute right-0 top-full mt-2 w-80'"
       @click.stop
     >
       <!-- 面板头部 -->

@@ -1039,6 +1039,7 @@ export const en = {
 
   theme: {
     color: "Theme Color",
+    language: "Language",
     light: "Light",
     dark: "Dark",
     system: "System",

@@ -668,3 +668,40 @@
   font-size: 0.75rem;
   color: color-mix(in oklab, var(--base-content) 60%, transparent);
 }
+
+/* 偏好设置复用原主题色滑条外观。 */
+@layer components {
+  .preferences-hue {
+    -webkit-appearance: none;
+    height: 1.5rem;
+    background-image: var(--color-selection-bar);
+    transition: background-image 0.15s ease-in-out;
+  }
+  .preferences-hue::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 1rem;
+    width: 0.5rem;
+    border-radius: 0.125rem;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: none;
+  }
+  .preferences-hue::-webkit-slider-thumb:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+  .preferences-hue::-webkit-slider-thumb:active {
+    background: rgba(255, 255, 255, 0.6);
+  }
+  .preferences-hue::-moz-range-thumb {
+    -moz-appearance: none;
+    height: 1rem;
+    width: 0.5rem;
+    border-radius: 0.125rem;
+    border-width: 0;
+  }
+  .preferences-hue::-moz-range-thumb:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+  .preferences-hue::-moz-range-thumb:active {
+    background: rgba(255, 255, 255, 0.6);
+  }
+}

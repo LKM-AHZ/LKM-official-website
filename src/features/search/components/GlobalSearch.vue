@@ -4,6 +4,8 @@ import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 import { buildUrl } from "~/lib/utils/paths";
 
+withDefaults(defineProps<{ compact?: boolean }>(), { compact: false });
+
 interface SearchResultItem {
   type: "post" | "file" | "user";
   title: string;
@@ -188,8 +190,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- 桌面端搜索框 -->
+  <!-- 桌面端搜索框，顶栏使用紧凑图标模式 -->
   <div
+    v-if="!compact"
     id="global-search-btn"
     class="hidden lg:flex transition-all items-center h-11 mr-2 rounded-lg bg-black/[0.04] hover:bg-black/[0.06] focus-within:bg-black/[0.06] dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10 cursor-pointer"
     @click="toggle"
@@ -207,8 +210,19 @@ onUnmounted(() => {
     >
   </div>
 
-  <!-- 移动端搜索按钮 -->
+  <!-- 紧凑模式在所有宽度下可见 -->
   <button
+    v-if="compact"
+    :aria-label="t('common.search')"
+    class="btn-plain scale-animation flex items-center justify-center rounded-lg w-11 h-11 active:scale-90 text-neutral-700 dark:text-neutral-200 hover:text-primary hover:bg-black/5 dark:hover:bg-white/10"
+    id="global-search-mobile-btn"
+    @click="toggle"
+  >
+    <Icon icon="material-symbols:search" class="text-[1.25rem]" />
+  </button>
+
+  <button
+    v-else
     :aria-label="t('common.search')"
     class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90"
     id="global-search-mobile-btn"

@@ -4,26 +4,15 @@ import { siteConfig } from "~/lib/config";
 import type { NavBarLink } from "~/types/config";
 import { url } from "~/lib/utils/url-utils";
 import { t } from "~/lib/i18n";
-import LightDarkSwitch from "~/features/shell/components/LightDarkSwitch.vue";
-import LanguageSwitcher from "~/features/shell/components/LanguageSwitcher.vue";
+import PreferencesMenu from "~/features/shell/components/PreferencesMenu.vue";
 import { SearchGlobalSearch } from "~/features/search";
-import DisplaySettings from "~/features/shell/components/widget/DisplaySettings.vue";
 import { NotificationBell } from "~/features/notification";
 import UserAvatarMenu from "~/features/shell/components/user/UserAvatarMenu.vue";
-import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
 
 interface Props {
   class?: string;
   links: NavBarLink[];
-  module?: "official" | "community";
 }
-
-const moduleType = Astro.props.module || "official";
-// 社区与独立静态官网之间切换。
-const switchHref =
-  moduleType === "official" ? url("/forum") : OFFICIAL_SITE_URL;
-const switchText =
-  moduleType === "official" ? t("shell.community") : t("shell.official");
 
 const className = Astro.props.class;
 const navInnerClass = [
@@ -42,7 +31,7 @@ const links: NavBarLink[] = Astro.props.links;
   >
   </div>
   <div class={navInnerClass}>
-    <!-- 左侧：首页与切换按钮 -->
+    <!-- 左侧：首页入口 -->
     <div class="flex min-w-0 items-center gap-1 justify-self-start">
       <a
         href={url("/")}
@@ -55,16 +44,6 @@ const links: NavBarLink[] = Astro.props.links;
           />
           {siteConfig.title}
         </div>
-      </a>
-      <a
-        href={switchHref}
-        class="hidden xl:flex scale-animation rounded-lg h-11 px-3 font-bold active:scale-95 items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-      >
-        <Icon
-          name="material-symbols:swap-horiz-rounded"
-          class="text-[1.125rem]"
-        />
-        {switchText}
       </a>
     </div>
 
@@ -133,24 +112,11 @@ const links: NavBarLink[] = Astro.props.links;
 
     <!-- 右侧：功能按钮组 -->
     <div class="flex justify-self-end items-center gap-1">
-      <div class="hidden xl:block"><SearchGlobalSearch client:load /></div>
-      {
-        !siteConfig.themeColor.fixed && (
-          <button
-            aria-label="Display Settings"
-            class="hidden xl:flex scale-animation rounded-lg h-11 w-11 active:scale-90 items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-            id="display-settings-switch"
-          >
-            <Icon
-              name="material-symbols:palette-outline"
-              class="text-[1.25rem]"
-            />
-          </button>
-        )
-      }
-      <LightDarkSwitch client:load />
-      <div class="hidden xl:block"><LanguageSwitcher client:load /></div>
+      <SearchGlobalSearch client:load compact />
       <div class="hidden xl:block"><NotificationBell client:idle /></div>
+      <div class="hidden xl:block">
+        <PreferencesMenu client:load allowColor={!siteConfig.themeColor.fixed} />
+      </div>
       <UserAvatarMenu client:idle base={url("/")} />
       <button
         aria-label="Menu"
@@ -165,7 +131,6 @@ const links: NavBarLink[] = Astro.props.links;
         />
       </button>
     </div>
-    <DisplaySettings client:idle />
   </div>
 </div>
 <!-- Extracted reference: src/features/shell/scripts/navbar.ts (navbar scripts) -->
@@ -187,30 +152,6 @@ const links: NavBarLink[] = Astro.props.links;
   }
 
   function bindNavbarButtons() {
-    // ── display-setting 面板 ──
-    const settingBtn = document.getElementById("display-settings-switch");
-    if (settingBtn && !bound(settingBtn)) {
-      mark(settingBtn);
-      settingBtn.addEventListener("click", function dsHandler(e) {
-        e.stopPropagation();
-        const panel = document.getElementById("display-setting");
-        if (!panel) return;
-        const willOpen = panel.classList.contains("float-panel-closed");
-        // 先关闭所有，再决定展开
-        document
-          .querySelectorAll("[data-dropdown-menu]")
-          .forEach((m) => m.classList.add("hidden"));
-        document
-          .querySelectorAll("[data-dropdown-arrow]")
-          .forEach((a) => a.classList.remove("rotate-180"));
-        if (willOpen) {
-          panel.classList.remove("float-panel-closed");
-        } else {
-          panel.classList.add("float-panel-closed");
-        }
-      });
-    }
-
     // ── nav-menu 面板（移动端） ──
     const menuBtn = document.getElementById("nav-menu-switch");
     const menuIcon = menuBtn?.querySelector("[data-menu-icon]");
@@ -218,9 +159,6 @@ const links: NavBarLink[] = Astro.props.links;
       mark(menuBtn);
       menuBtn.addEventListener("click", function nmHandler(e) {
         e.stopPropagation();
-        document
-          .getElementById("display-setting")
-          ?.classList.add("float-panel-closed");
         document
           .querySelectorAll("[data-dropdown-menu]")
           .forEach((m) => m.classList.add("hidden"));
@@ -253,9 +191,6 @@ const links: NavBarLink[] = Astro.props.links;
         document
           .querySelectorAll("[data-dropdown-arrow]")
           .forEach((a) => a.classList.remove("rotate-180"));
-        document
-          .getElementById("display-setting")
-          ?.classList.add("float-panel-closed");
         if (!isOpen) {
           menu.classList.remove("hidden");
           if (arrow) arrow.classList.add("rotate-180");
@@ -287,9 +222,6 @@ const links: NavBarLink[] = Astro.props.links;
   if (!window.__navbar_outside) {
     window.__navbar_outside = true;
     document.addEventListener("click", () => {
-      document
-        .getElementById("display-setting")
-        ?.classList.add("float-panel-closed");
       document
         .querySelectorAll("[data-dropdown-menu]")
         .forEach((m) => m.classList.add("hidden"));
@@ -324,36 +256,3 @@ const links: NavBarLink[] = Astro.props.links;
   updateProfileLink();
   document.addEventListener("astro:after-swap", updateProfileLink);
 </script>
-
-{
-  import.meta.env.PROD && (
-    <script
-      is:inline
-      define:vars={{ scriptUrl: url("/pagefind/pagefind.js") }}
-      set:html={`async function loadPagefind() {
-    try {
-        // eslint-disable-next-line no-restricted-globals
-        var response = await fetch(scriptUrl, { method: 'HEAD' });
-        if (!response.ok) {
-            throw new Error('Pagefind script not found: ' + response.status);
-        }
-        var pagefind = await import(scriptUrl);
-        await pagefind.options({ excerptLength: 20 });
-        window.pagefind = pagefind;
-        document.dispatchEvent(new CustomEvent('pagefindready'));
-        // Pagefind loaded successfully
-    } catch (error) {
-        console.error('Failed to load Pagefind:', error);
-        window.pagefind = { search: function() { return Promise.resolve({ results: [] }); }, options: function() { return Promise.resolve(); } };
-        document.dispatchEvent(new CustomEvent('pagefindloaderror'));
-        // Pagefind fallback activated
-    }
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadPagefind);
-} else {
-    loadPagefind();
-}`}
-    />
-  )
-}

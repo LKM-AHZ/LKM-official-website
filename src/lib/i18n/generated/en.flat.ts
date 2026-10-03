@@ -3358,6 +3358,7 @@ export const enFlat = {
   "theme.color": "Theme Color",
   "theme.dark": "Dark",
   "theme.displaySettings": "Display Settings",
+  "theme.language": "Language",
   "theme.light": "Light",
   "theme.lightDarkMode": "Light/Dark Mode",
   "theme.resetToDefault": "Reset to Default",

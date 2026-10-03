@@ -121,7 +121,7 @@ const navbarLinks: NavBarLink[] = navbarLinksProp ?? filterNavbarByNames(allMenu
     <slot />
 
     <slot name="body-end" />
-    <MobileNavPanel id="mobile-nav-fuwari" title={t('nav.navigation')} links={navbarLinks} />
+    <MobileNavPanel id="mobile-nav-fuwari" title={t('nav.navigation')} links={navbarLinks} showUtilities />
 
     <BasicScripts />
 
