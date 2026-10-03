@@ -506,19 +506,31 @@ export const enFlat = {
   "community.fileLibrary.cancel": "Cancel",
   "community.fileLibrary.cardView": "Card view",
   "community.fileLibrary.categoryLabel": "Category",
+  "community.fileLibrary.classificationLabel": "Classification",
   "community.fileLibrary.clearSearch": "Clear search",
+  "community.fileLibrary.confidential": "Confidential",
   "community.fileLibrary.descriptionLabel": "Description",
   "community.fileLibrary.descriptionPlaceholder":
     "Briefly describe the file...",
+  "community.fileLibrary.documentCode": "Document code",
   "community.fileLibrary.download": "Download",
   "community.fileLibrary.downloadCount": "{count} downloads",
   "community.fileLibrary.fileCount": "{count} files",
+  "community.fileLibrary.fileUnavailable":
+    "The file is unavailable or you do not have access.",
+  "community.fileLibrary.internal": "Internal",
   "community.fileLibrary.listView": "List view",
+  "community.fileLibrary.newVersion": "Upload a new version",
   "community.fileLibrary.noMatchingFiles": "No files match your criteria",
   "community.fileLibrary.noSubcategories":
     "No subcategories under this category",
   "community.fileLibrary.otherType": "Other",
   "community.fileLibrary.preview": "Preview",
+  "community.fileLibrary.previewFailed":
+    "Preview is unavailable. Please try again later.",
+  "community.fileLibrary.projectIdLabel": "Linked project",
+  "community.fileLibrary.projectIdPlaceholder": "No linked project",
+  "community.fileLibrary.public": "Public",
   "community.fileLibrary.searchPlaceholder": "Search files…",
   "community.fileLibrary.searchResults":
     'Searching for "{query}" — {count} files',
@@ -530,12 +542,18 @@ export const enFlat = {
   "community.fileLibrary.statusPending": "Reviewing",
   "community.fileLibrary.statusRejected": "Rejected ✗",
   "community.fileLibrary.submitUpload": "Submit Upload",
+  "community.fileLibrary.submitVersion": "Submit version",
   "community.fileLibrary.title": "File Library",
   "community.fileLibrary.uploadDropHint": "Click or drag files here",
-  "community.fileLibrary.uploadFormats": "PDF, ZIP and more, up to 500MB",
+  "community.fileLibrary.uploadFormats":
+    "Any format, up to 100MB; PDF, Word and PowerPoint previews",
   "community.fileLibrary.uploadSubmitted":
     "Your file has been submitted and entered the manual review and plagiarism-check queue. You will be notified once approved.",
   "community.fileLibrary.uploadTitle": "Upload File",
+  "community.fileLibrary.version": "Version",
+  "community.fileLibrary.versionHistory": "Version history",
+  "community.fileLibrary.versionUploadFailed":
+    "Version upload failed. Check access and try again.",
   "community.fileLibrary.view": "View",
   "community.fileLibrary.viewDetails": "View details →",
   "community.fileLibrary.zipType": "Archive",

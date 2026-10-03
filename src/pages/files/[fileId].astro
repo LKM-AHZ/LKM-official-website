@@ -1,23 +1,24 @@
 ---
-import CommunitySidebarLayout from '~/layouts/CommunitySidebarLayout.astro';
-import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
-import { Icon } from 'astro-icon/components';
-import { fileLibraryApi } from '~/lib/api';
-import FileDownloadButton from '~/features/file-library/components/FileDownloadButton.vue';
-import { getPermalink } from '~/lib/utils/permalinks';
-import { t, getLocale } from '~/lib/i18n';
+import CommunitySidebarLayout from "~/layouts/CommunitySidebarLayout.astro";
+import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
+import { Icon } from "astro-icon/components";
+import { fileLibraryApi } from "~/lib/api";
+import FileDownloadButton from "~/features/file-library/components/FileDownloadButton.vue";
+import FilePreviewButton from "~/features/file-library/components/FilePreviewButton.vue";
+import FileVersionUploader from "~/features/file-library/components/FileVersionUploader.vue";
+import AuthenticatedFileDetail from "~/features/file-library/components/AuthenticatedFileDetail.vue";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { t, getLocale } from "~/lib/i18n";
 
 // 归一化一次并显式判空：别用 `fileId || ''` 把「参数缺失」悄悄变成空字符串再去查库
-const fileId = Astro.params.fileId?.trim() ?? '';
+const fileId = Astro.params.fileId?.trim() ?? "";
 if (!fileId) {
-  return Astro.redirect(getPermalink('/files'));
+  return Astro.redirect(getPermalink("/files"));
 }
 
 const file = await fileLibraryApi.getFile(fileId);
 
-if (!file) {
-  return Astro.redirect(getPermalink('/files'));
-}
+const versions = file ? await fileLibraryApi.getVersions(fileId) : [];
 
 function formatSize(bytes: number): string {
   if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
@@ -30,133 +31,239 @@ const locale = getLocale();
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   // 时间戳缺失/非法时不要渲染 "Invalid Date"：直接显示占位
-  if (Number.isNaN(d.getTime())) return '—';
+  if (Number.isNaN(d.getTime())) return "—";
   // 语言跟随当前 locale（原来写死 zh-CN，英文站点也会出中文日期）
-  return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+  return d.toLocaleDateString(locale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 function fileIcon(mime: string): string {
-  if (mime === 'application/pdf') return '📄';
-  if (mime === 'application/zip') return '📦';
-  return '📁';
+  if (mime === "application/pdf") return "📄";
+  if (mime === "application/zip") return "📦";
+  return "📁";
 }
 
 function statusBadge(status: string): { text: string; cls: string } {
   switch (status) {
-    case 'approved':
+    case "approved":
       return {
-        text: t('page.communityDetail.files.statusApproved'),
-        cls: 'text-green-500 bg-green-50 dark:bg-green-950/20',
+        text: t("page.communityDetail.files.statusApproved"),
+        cls: "text-green-500 bg-green-50 dark:bg-green-950/20",
       };
-    case 'pending':
+    case "pending":
       return {
-        text: t('page.communityDetail.files.statusPending'),
-        cls: 'text-yellow-500 bg-yellow-50 dark:bg-yellow-950/20',
+        text: t("page.communityDetail.files.statusPending"),
+        cls: "text-yellow-500 bg-yellow-50 dark:bg-yellow-950/20",
       };
-    case 'rejected':
-      return { text: t('page.communityDetail.files.statusRejected'), cls: 'text-red-500 bg-red-50 dark:bg-red-950/20' };
+    case "rejected":
+      return {
+        text: t("page.communityDetail.files.statusRejected"),
+        cls: "text-red-500 bg-red-50 dark:bg-red-950/20",
+      };
     default:
-      return { text: status, cls: '' };
+      return { text: status, cls: "" };
   }
 }
 
 // 只算一次：原来模板里 cls/text 各调一次 statusBadge()，既重复执行又可能两处不一致
-const badge = statusBadge(file.status);
+const badge = statusBadge(file?.status ?? "");
 
-const metadata = { title: `${file.originalName} —— LKM` };
+const metadata = {
+  title: `${file?.originalName ?? t("community.fileLibrary.title")} —— LKM`,
+};
 ---
 
 <CommunitySidebarLayout
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={Astro.url.pathname}
-  navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}
+  navItems={["nav.community", "nav.blog", "nav.resources", "nav.mine"]}
 >
-  <div class="space-y-6">
-    <!-- 面包屑 -->
-    <div class="flex items-center gap-2 text-sm text-text-muted/60">
-      <a href={getPermalink('/files')} class="hover:text-primary transition-colors">
-        {t('page.communityDetail.files.fileLibrary')}
-      </a>
-      <Icon name="tabler:chevron-right" class="w-3.5 h-3.5" />
-      <span class="text-text-muted truncate">{file.originalName}</span>
-    </div>
+  {
+    file ? (
+      <div class="space-y-6">
+        <div class="flex items-center gap-2 text-sm text-text-muted/60">
+          <a
+            href={getPermalink("/files")}
+            class="hover:text-primary transition-colors"
+          >
+            {t("page.communityDetail.files.fileLibrary")}
+          </a>
+          <Icon name="tabler:chevron-right" class="w-3.5 h-3.5" />
+          <span class="text-text-muted truncate">{file.originalName}</span>
+        </div>
 
-    <!-- 预览区 -->
-    <div class="bg-card-bg border border-surface-3 rounded-2xl p-8 text-center">
-      <span class="text-6xl">{fileIcon(file.mimeType)}</span>
-      <h1 class="text-xl font-bold text-deep-text mt-4">{file.originalName}</h1>
-      <p class="text-sm text-text-muted mt-2">{file.description}</p>
-    </div>
+        <div class="bg-card-bg border border-surface-3 rounded-2xl p-8 text-center">
+          <span class="text-6xl">{fileIcon(file.mimeType)}</span>
+          <h1 class="text-xl font-bold text-deep-text mt-4">
+            {file.originalName}
+          </h1>
+          <p class="text-sm text-text-muted mt-2">{file.description}</p>
+        </div>
 
-    <!-- 文件信息 -->
-    <div class="bg-card-bg border border-surface-3 rounded-2xl p-6">
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-        <div>
-          <span class="text-text-muted/60">{t('page.communityDetail.files.uploader')}</span><p
-            class="text-deep-text font-medium mt-0.5"
-          >
-            {file.uploaderName}
-          </p>
-        </div>
-        <div>
-          <span class="text-text-muted/60">{t('page.communityDetail.files.fileSize')}</span><p
-            class="text-deep-text font-medium mt-0.5"
-          >
-            {formatSize(file.size)}
-          </p>
-        </div>
-        <div>
-          <span class="text-text-muted/60">{t('page.communityDetail.files.uploadTime')}</span><p
-            class="text-deep-text font-medium mt-0.5"
-          >
-            {formatDate(file.createdAt)}
-          </p>
-        </div>
-        <div>
-          <span class="text-text-muted/60">{t('page.communityDetail.files.downloads')}</span><p
-            class="text-deep-text font-medium mt-0.5"
-          >
-            {t('page.communityDetail.files.times', { count: file.downloadCount })}
-          </p>
-        </div>
-      </div>
-      <div class="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-surface-3">
-        <span class="text-sm text-text-muted/60">{t('page.communityDetail.files.status')}</span>
-        <span class="text-xs px-2.5 py-1 rounded-full font-medium {badge.cls}">{badge.text}</span>
-        <span class="text-sm text-text-muted/60"
-          >{t('page.communityDetail.files.category', { name: file.categoryName })}</span
-        >
-        <div class="flex flex-wrap gap-1">
+        <div class="bg-card-bg border border-surface-3 rounded-2xl p-6">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span class="text-text-muted/60">
+                {t("community.fileLibrary.documentCode")}
+              </span>
+              <p class="text-deep-text font-medium mt-0.5">
+                {file.documentCode ?? "—"}
+              </p>
+            </div>
+            <div>
+              <span class="text-text-muted/60">
+                {t("community.fileLibrary.version")}
+              </span>
+              <p class="text-deep-text font-medium mt-0.5">
+                v{file.version ?? 1}
+              </p>
+            </div>
+            <div>
+              <span class="text-text-muted/60">
+                {t("community.fileLibrary.classificationLabel")}
+              </span>
+              <p class="text-deep-text font-medium mt-0.5">
+                {t(`community.fileLibrary.${file.classification ?? "public"}`)}
+              </p>
+            </div>
+            <div>
+              <span class="text-text-muted/60">
+                {t("community.fileLibrary.projectIdLabel")}
+              </span>
+              <p class="text-deep-text font-medium mt-0.5">
+                {file.projectId ? (
+                  <a href={getPermalink(`/projects/${file.projectId}`)}>
+                    {file.projectId}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </p>
+            </div>
+            <div>
+              <>
+                <span class="text-text-muted/60">
+                  {t("page.communityDetail.files.uploader")}
+                </span>
+                <p class="text-deep-text font-medium mt-0.5">
+                  {file.uploaderName}
+                </p>
+              </>
+            </div>
+            <div>
+              <>
+                <span class="text-text-muted/60">
+                  {t("page.communityDetail.files.fileSize")}
+                </span>
+                <p class="text-deep-text font-medium mt-0.5">
+                  {formatSize(file.size)}
+                </p>
+              </>
+            </div>
+            <div>
+              <>
+                <span class="text-text-muted/60">
+                  {t("page.communityDetail.files.uploadTime")}
+                </span>
+                <p class="text-deep-text font-medium mt-0.5">
+                  {formatDate(file.createdAt)}
+                </p>
+              </>
+            </div>
+            <div>
+              <>
+                <span class="text-text-muted/60">
+                  {t("page.communityDetail.files.downloads")}
+                </span>
+                <p class="text-deep-text font-medium mt-0.5">
+                  {t("page.communityDetail.files.times", {
+                    count: file.downloadCount,
+                  })}
+                </p>
+              </>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-surface-3">
+            <span class="text-sm text-text-muted/60">
+              {t("page.communityDetail.files.status")}
+            </span>
+            <span class="text-xs px-2.5 py-1 rounded-full font-medium {badge.cls}">
+              {badge.text}
+            </span>
+            <span class="text-sm text-text-muted/60">
+              {t("page.communityDetail.files.category", {
+                name: file.categoryName,
+              })}
+            </span>
+            <div class="flex flex-wrap gap-1">
+              {file.tags.map((tag) => (
+                <span class="text-xs px-2 py-0.5 rounded-full bg-surface-3 text-text-muted">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+          {file.reviewComment && (
+            <div class="mt-3 px-3 py-2 bg-surface-3/50 rounded-lg text-sm text-text-muted">
+              {t("page.communityDetail.files.reviewComment", {
+                comment: file.reviewComment,
+              })}
+            </div>
+          )}
           {
-            file.tags.map((tag) => (
-              <span class="text-xs px-2 py-0.5 rounded-full bg-surface-3 text-text-muted">{tag}</span>
-            ))
+            /* 只有审核通过的文件才提供下载入口（pending/rejected 的内容不该从详情页拿走） */
+            file.status === "approved" && (
+              <div class="flex gap-3 mt-4">
+                <FileDownloadButton
+                  client:load
+                  fileId={file.id}
+                  fileName={file.originalName}
+                />
+                <FilePreviewButton client:load fileId={file.id} />
+              </div>
+            )
           }
         </div>
-      </div>
-      {
-        file.reviewComment && (
-          <div class="mt-3 px-3 py-2 bg-surface-3/50 rounded-lg text-sm text-text-muted">
-            {t('page.communityDetail.files.reviewComment', { comment: file.reviewComment })}
-          </div>
-        )
-      }
-      {
-        /* 只有审核通过的文件才提供下载入口（pending/rejected 的内容不该从详情页拿走） */
-        file.status === 'approved' && (
-          <div class="flex gap-3 mt-4">
-            <FileDownloadButton client:load fileId={file.id} fileName={file.originalName} />
-          </div>
-        )
-      }
-    </div>
 
-    <!-- 版权免责 -->
-    <div
-      class="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800/30 rounded-xl p-4 text-sm text-yellow-800 dark:text-yellow-200 leading-relaxed"
-    >
-      <strong>{t('page.communityDetail.files.disclaimerTitle')}</strong>{t('page.communityDetail.files.disclaimer')}
-    </div>
-  </div>
+        <div class="bg-card-bg border border-surface-3 rounded-2xl p-6 space-y-3">
+          <h2 class="font-semibold text-deep-text">
+            {t("community.fileLibrary.versionHistory")}
+          </h2>
+          <ul class="space-y-2 text-sm">
+            {versions.map((version) => (
+              <li>
+                <a
+                  class="text-primary hover:underline"
+                  href={getPermalink(`/files/${version.id}`)}
+                >
+                  v{version.version ?? 1} · {version.originalName}
+                </a>
+                <span class="ml-2 text-text-muted">
+                  {formatDate(version.createdAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {file.uploaderId && (
+            <FileVersionUploader
+              client:load
+              fileId={file.id}
+              uploaderId={file.uploaderId}
+            />
+          )}
+        </div>
+
+        <div class="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800/30 rounded-xl p-4 text-sm text-yellow-800 dark:text-yellow-200 leading-relaxed">
+          <strong>{t("page.communityDetail.files.disclaimerTitle")}</strong>
+          {t("page.communityDetail.files.disclaimer")}
+        </div>
+      </div>
+    ) : (
+      <AuthenticatedFileDetail client:load fileId={fileId} />
+    )
+  }
 </CommunitySidebarLayout>

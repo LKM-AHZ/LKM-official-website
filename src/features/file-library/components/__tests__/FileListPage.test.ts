@@ -11,6 +11,9 @@ vi.mock("~/lib/api", () => ({
   fileLibraryApi: {
     getFiles: vi.fn(),
     getContentBlob: vi.fn(),
+    getPreviewBlob: vi.fn(),
+    searchFiles: vi.fn(),
+    getUploadProjects: vi.fn().mockResolvedValue([]),
   },
 }));
 vi.mock("~/lib/i18n", () => ({ t: (key: string) => key }));
@@ -42,7 +45,7 @@ afterEach(() => {
 describe("FileListPage", () => {
   it("opens an approved file preview after navigating to its folder", async () => {
     vi.mocked(fileLibraryApi.getFiles).mockResolvedValue([file]);
-    vi.mocked(fileLibraryApi.getContentBlob).mockResolvedValue(
+    vi.mocked(fileLibraryApi.getPreviewBlob).mockResolvedValue(
       new Blob(["pdf bytes"]),
     );
     const previewWindow = { location: { href: "" }, close: vi.fn() };
@@ -86,7 +89,7 @@ describe("FileListPage", () => {
     await preview!.trigger("click");
     await flushPromises();
 
-    expect(fileLibraryApi.getContentBlob).toHaveBeenCalledWith("file-1");
+    expect(fileLibraryApi.getPreviewBlob).toHaveBeenCalledWith("file-1");
     expect(previewWindow.location.href).toBe("blob:preview-file-1");
     wrapper.unmount();
   });

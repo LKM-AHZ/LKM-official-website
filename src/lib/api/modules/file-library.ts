@@ -12,6 +12,7 @@ export type { PaginatedResponse } from "../types";
 export interface FileEntry {
   id: string;
   originalName: string;
+  uploaderId?: string;
   uploaderName: string;
   mimeType: string;
   size: number;
@@ -24,6 +25,12 @@ export interface FileEntry {
   downloadCount: number;
   viewCount: number;
   createdAt: string;
+  documentCode?: string | null;
+  classification?: "public" | "internal" | "confidential";
+  projectId?: string | null;
+  version?: number;
+  rootFileId?: string | null;
+  archiveState?: string;
 }
 
 interface BackendFile {
@@ -42,6 +49,12 @@ interface BackendFile {
   download_count: number;
   view_count: number;
   created_at: string;
+  document_code?: string | null;
+  classification?: "public" | "internal" | "confidential";
+  project_id?: string | null;
+  version?: number;
+  root_file_id?: string | null;
+  archive_state?: string;
 }
 
 /** 上传初始化响应（camelCase，由后端 UploadInitResp 映射而来）。 */
@@ -78,6 +91,7 @@ function mapFile(f: BackendFile): FileEntry {
   return {
     id: f.id,
     originalName: f.original_name,
+    uploaderId: f.uploader_id,
     uploaderName: f.uploader_name,
     mimeType: f.mime_type,
     size: f.size,
@@ -90,10 +104,37 @@ function mapFile(f: BackendFile): FileEntry {
     downloadCount: f.download_count,
     viewCount: f.view_count,
     createdAt: f.created_at,
+    documentCode: f.document_code ?? null,
+    classification: f.classification ?? "public",
+    projectId: f.project_id ?? null,
+    version: f.version ?? 1,
+    rootFileId: f.root_file_id ?? null,
+    archiveState: f.archive_state ?? "active",
   };
 }
 
 export const fileLibraryApi = {
+  getUploadProjects: async (): Promise<{ id: string; title: string }[]> => {
+    const res = await get<{ id: string; title: string }[]>(
+      "/api/v1/files/upload-projects",
+    );
+    return res.isErr() ? [] : res.value;
+  },
+  searchFiles: async (query: string): Promise<FileEntry[]> => {
+    const hits = await get<PaginatedResponse<{ id: string }>>(
+      "/api/v1/search",
+      {
+        q: query,
+        content_type: "library_file",
+        limit: 100,
+      },
+    );
+    if (hits.isErr()) return [];
+    const files = await Promise.all(
+      (hits.value.items ?? []).map((hit) => fileLibraryApi.getFile(hit.id)),
+    );
+    return files.filter((file): file is FileEntry => file !== null);
+  },
   getFiles: async (page = 1, limit = 20): Promise<FileEntry[]> => {
     const res = await get<PaginatedResponse<BackendFile>>("/api/v1/files", {
       page,
@@ -109,10 +150,14 @@ export const fileLibraryApi = {
     return mapFile(res.value);
   },
 
+  getVersions: async (id: string): Promise<FileEntry[]> => {
+    const res = await get<BackendFile[]>(`/api/v1/files/${id}/versions`);
+    if (res.isErr()) return [];
+    return (res.value ?? []).map(mapFile);
+  },
+
   getDownloadUrl: async (id: string): Promise<DownloadUrlInfo> => {
-    // 后端该端点由 get_current_user 保护，只认 Bearer 头；generic get() 的
-    // needsAuth 白名单未含 /api/v1/files/，这里手动附加 token 经 apiFetch 发起，
-    // 与 getContentBlob 保持一致，避免依赖会随白名单变化而失效。
+    // 下载地址需要 Bearer 权限；显式附加 token 以保持与流式下载一致。
     const token = getHttpAccessToken();
     const result = await apiFetch(`/api/v1/files/${id}/download/url`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -146,13 +191,20 @@ export const fileLibraryApi = {
     return res.blob();
   },
 
-  // 原 getPreviewUrl 返回裸 URL 供 <img src> 直接用，但 /api/v1/files/* 只认 Bearer 头
-  //（needsAuth 白名单不含该前缀），以 img/iframe 加载必然 401；且全仓库无人调用。
-  // 预览场景请走 getContentBlob + URL.createObjectURL（已鉴权），故删除这个误导性入口。
+  getPreviewBlob: async (id: string): Promise<Blob> => {
+    const token = getHttpAccessToken();
+    const result = await apiFetch(`/api/v1/files/${id}/preview`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (result.isErr()) throw new Error(`预览失败 ${result.error.message}`);
+    if (!result.value.ok) throw new Error(`预览失败 ${result.value.status}`);
+    return result.value.blob();
+  },
+
+  // 私有文件预览需要 Bearer 头，因此页面用 getPreviewBlob + object URL 展示。
 
   // ── 上传（Phase 2-B）──
-  // 该链路由 /files 相关端点保护，只认 Bearer 头；generic get() 的
-  // needsAuth 白名单未含 /api/v1/files/，故此处全部手动带 token 发起请求。
+  // 上传链路需要 Bearer 头；此处显式附加 token。
   // upload-init 只回元数据，不发文件字节：
 
   /** 初始化上传：后端判定 S3→direct（返 presigned_url, 需后续 confirm）或 Local→sync（无 presign, 走 multipart 回退）。 */
@@ -162,6 +214,9 @@ export const fileLibraryApi = {
     categoryId: string;
     description: string;
     tags: string[];
+    classification?: "public" | "internal" | "confidential";
+    projectId?: string | null;
+    versionOf?: string | null;
   }): Promise<UploadInitResp> => {
     const token = getHttpAccessToken();
     const result = await apiFetch("/api/v1/files/upload-init", {
@@ -176,6 +231,9 @@ export const fileLibraryApi = {
         category_id: info.categoryId,
         description: info.description,
         tags: info.tags,
+        classification: info.classification ?? "public",
+        project_id: info.projectId || null,
+        version_of: info.versionOf || null,
       }),
     });
     if (result.isErr()) {
@@ -211,7 +269,13 @@ export const fileLibraryApi = {
   /** L-b：Local（无 presign）回退同步 multipart POST /files（既有后端端点）。 */
   uploadSyncFromFile: async (
     file: File,
-    meta: { categoryId: string; description: string; tags: string[] },
+    meta: {
+      categoryId: string;
+      description: string;
+      tags: string[];
+      classification?: "public" | "internal" | "confidential";
+      projectId?: string | null;
+    },
   ): Promise<FileEntry> => {
     const token = getHttpAccessToken();
     const fd = new FormData();
@@ -219,6 +283,8 @@ export const fileLibraryApi = {
     fd.append("category_id", meta.categoryId);
     fd.append("description", meta.description);
     fd.append("tags", JSON.stringify(meta.tags));
+    fd.append("classification", meta.classification ?? "public");
+    if (meta.projectId) fd.append("project_id", meta.projectId);
     const result = await apiFetch("/api/v1/files", {
       method: "POST",
       ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
@@ -231,5 +297,20 @@ export const fileLibraryApi = {
     if (!res.ok) throw new Error(`上传失败 ${res.status}`);
     const b = (await res.json())["data"] as BackendFile;
     return mapFile(b);
+  },
+
+  uploadVersion: async (id: string, file: File): Promise<FileEntry> => {
+    const token = getHttpAccessToken();
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await apiFetch(`/api/v1/files/${id}/versions`, {
+      method: "POST",
+      ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+      body: fd,
+    });
+    if (result.isErr()) throw new Error(`上传版本失败 ${result.error.message}`);
+    if (!result.value.ok)
+      throw new Error(`上传版本失败 ${result.value.status}`);
+    return mapFile((await result.value.json())["data"] as BackendFile);
   },
 };

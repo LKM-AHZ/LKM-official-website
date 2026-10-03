@@ -141,6 +141,9 @@
                 class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-text-muted/60"
               >
                 <span>{{ file.uploaderName }}</span>
+                <span v-if="file.documentCode"
+                  >{{ file.documentCode }} · v{{ file.version }}</span
+                >
                 <span>{{ formatSize(file.size) }}</span>
                 <span>{{
                   t("community.fileLibrary.downloadCount", {
@@ -309,6 +312,45 @@
             </p>
             <div>
               <label class="block text-sm font-medium text-deep-text mb-1">{{
+                t("community.fileLibrary.classificationLabel")
+              }}</label>
+              <select
+                v-model="uploadClassification"
+                class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text"
+              >
+                <option value="public">
+                  {{ t("community.fileLibrary.public") }}
+                </option>
+                <option value="internal">
+                  {{ t("community.fileLibrary.internal") }}
+                </option>
+                <option value="confidential">
+                  {{ t("community.fileLibrary.confidential") }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-deep-text mb-1">{{
+                t("community.fileLibrary.projectIdLabel")
+              }}</label>
+              <select
+                v-model="uploadProjectId"
+                class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text"
+              >
+                <option value="">
+                  {{ t("community.fileLibrary.projectIdPlaceholder") }}
+                </option>
+                <option
+                  v-for="project in uploadProjects"
+                  :key="project.id"
+                  :value="project.id"
+                >
+                  {{ project.title }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-deep-text mb-1">{{
                 t("community.fileLibrary.categoryLabel")
               }}</label>
               <select
@@ -361,7 +403,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import { fileLibraryApi } from "~/lib/api";
 import type { FileEntry } from "~/lib/api/modules/file-library";
@@ -391,6 +433,11 @@ const showUpload = ref(false);
 const mounted = ref(false);
 const uploadCategory = ref("");
 const uploadDesc = ref("");
+const uploadClassification = ref<"public" | "internal" | "confidential">(
+  "public",
+);
+const uploadProjectId = ref("");
+const uploadProjects = ref<{ id: string; title: string }[]>([]);
 // 上传态：所选文件 + 上传中标志（用于禁用/提示）
 const selectedFile = ref<File | null>(null);
 const uploading = ref(false);
@@ -420,20 +467,43 @@ async function loadFiles() {
 
 onMounted(async () => {
   mounted.value = true;
-  await loadFiles();
+  const [projects] = await Promise.all([
+    fileLibraryApi.getUploadProjects(),
+    loadFiles(),
+  ]);
+  uploadProjects.value = projects;
 });
 
 onBeforeUnmount(() => {
   // 卸载后定时器再动 blob URL 已无意义，清掉避免悬空回调
   if (previewRevokeTimer !== null) window.clearTimeout(previewRevokeTimer);
+  if (searchTimer) clearTimeout(searchTimer);
 });
 
 // 顶部常驻搜索栏
 const searchQuery = ref("");
 const isSearching = computed(() => searchQuery.value.trim() !== "");
-const searchResults = computed(() =>
-  searchFiles(files.value, searchQuery.value),
-);
+const searchResults = ref<FileEntry[]>([]);
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+watch(searchQuery, (query) => {
+  if (searchTimer) clearTimeout(searchTimer);
+  if (!query.trim()) {
+    searchResults.value = [];
+    return;
+  }
+  searchTimer = setTimeout(async () => {
+    const matches = await fileLibraryApi.searchFiles(query.trim());
+    if (searchQuery.value.trim() !== query.trim()) return;
+    const local = searchFiles(
+      files.value.filter((f) => f.status !== "approved"),
+      query,
+    );
+    searchResults.value = [
+      ...matches,
+      ...local.filter((f) => !matches.some((m) => m.id === f.id)),
+    ];
+  }, 250);
+});
 
 const categories = forumCategories.filter((c) => !c.parentId);
 
@@ -538,6 +608,8 @@ function closeUpload() {
   showUpload.value = false;
   selectedFile.value = null;
   uploadDesc.value = "";
+  uploadClassification.value = "public";
+  uploadProjectId.value = "";
   if (fileInputEl.value) fileInputEl.value.value = "";
 }
 
@@ -557,6 +629,8 @@ async function doUpload() {
       categoryId: uploadCategory.value,
       description: uploadDesc.value,
       tags: [],
+      classification: uploadClassification.value,
+      projectId: uploadProjectId.value.trim() || null,
     });
     if (init.mode === "sync") {
       // Local：无预签名，直接 multipart 同步上传
@@ -564,6 +638,8 @@ async function doUpload() {
         categoryId: uploadCategory.value,
         description: uploadDesc.value,
         tags: [],
+        classification: uploadClassification.value,
+        projectId: uploadProjectId.value.trim() || null,
       });
     } else {
       // S3：先 PUT 字节到预签名 URL。Phase 2-C 起**不再调 confirmUpload** —— 登记改由
@@ -625,7 +701,7 @@ async function previewFile(file: FileEntry) {
   // 原实现表现为「点了预览没反应」
   const win = window.open("", "_blank");
   try {
-    const blob = await fileLibraryApi.getContentBlob(file.id);
+    const blob = await fileLibraryApi.getPreviewBlob(file.id);
     const blobUrl = URL.createObjectURL(blob);
     if (!win) {
       // 被拦截/弹窗被禁用：释放 blob 并留日志（本文件暂缺对应 i18n key，故不弹提示）
