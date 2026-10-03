@@ -1,0 +1,264 @@
+---
+import { Icon } from "astro-icon/components";
+import Layout from "~/layouts/PageLayout.astro";
+import { get } from "~/lib/http/client";
+import { contentApi } from "~/lib/api/modules/content";
+import { mockQuestions } from "~/features/competition/data/mock-competitions";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { t } from "~/lib/i18n";
+
+interface SearchHit {
+  id: string;
+  content_type: string;
+  title: string;
+  excerpt: string;
+  author_name: string;
+  like_count: number;
+  view_count: number;
+  document_code: string | null;
+}
+interface SearchPage {
+  items: SearchHit[];
+  total: number;
+}
+const allowedTypes = ["all", "posts", "columns", "files", "questions"] as const;
+type SearchType = (typeof allowedTypes)[number];
+const rawType = Astro.url.searchParams.get("type");
+const type: SearchType = allowedTypes.includes(rawType as SearchType)
+  ? (rawType as SearchType)
+  : "all";
+const q = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 200);
+const searchPath = getPermalink("/search");
+const tabs: { value: SearchType; label: string }[] = [
+  { value: "all", label: "全部" },
+  { value: "posts", label: "帖子" },
+  { value: "columns", label: "专栏" },
+  { value: "files", label: "文件库" },
+  { value: "questions", label: "题库" },
+];
+const contentType =
+  type === "posts"
+    ? "discussion"
+    : type === "columns"
+      ? "column_post"
+      : type === "files"
+        ? "library_file"
+        : undefined;
+let hits: SearchHit[] = [];
+let failed = false;
+if (q && type !== "questions") {
+  const response = await get<SearchPage>("/api/v1/search", {
+    q,
+    limit: 40,
+    ...(contentType ? { content_type: contentType } : {}),
+  });
+  if (response.isOk()) hits = response.value.items ?? [];
+  else failed = true;
+}
+if (!q && type === "columns") {
+  const response = await contentApi.listItems({
+    content_type: "column_post",
+    limit: 20,
+  });
+  if (response.isOk()) {
+    hits = response.value.items
+      .filter((item) => item.status === "published")
+      .map((item) => ({
+        id: item.id,
+        content_type: "column_post",
+        title: item.title,
+        excerpt: item.excerpt,
+        author_name: item.author_name,
+        like_count: item.like_count,
+        view_count: item.view_count,
+        document_code: null,
+      }));
+  } else failed = true;
+}
+const questionHits =
+  q && (type === "all" || type === "questions")
+    ? mockQuestions.filter((item) =>
+        [item.stem, item.explanation, ...item.options].some((key) =>
+          t(key).toLocaleLowerCase().includes(q.toLocaleLowerCase()),
+        ),
+      )
+    : [];
+const visibleHits = hits.filter(
+  (hit) =>
+    type !== "all" ||
+    [
+      "discussion",
+      "article",
+      "column_post",
+      "blog_post",
+      "library_file",
+    ].includes(hit.content_type),
+);
+function hitHref(hit: SearchHit) {
+  return hit.content_type === "library_file"
+    ? getPermalink(`/files/${encodeURIComponent(hit.id)}`)
+    : getPermalink(`/forum/post/${encodeURIComponent(hit.id)}`);
+}
+function hitLabel(hit: SearchHit) {
+  if (hit.content_type === "library_file") return "文件库";
+  if (hit.content_type === "column_post") return "专栏";
+  if (hit.content_type === "article") return "文章";
+  if (hit.content_type === "blog_post") return "博客";
+  return "帖子";
+}
+function tabHref(value: SearchType) {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (value !== "all") params.set("type", value);
+  const suffix = params.toString();
+  return suffix ? `${searchPath}?${suffix}` : searchPath;
+}
+---
+
+<Layout
+  metadata={{
+    title: q ? `搜索「${q}」 · 理科迷` : "全站搜索 · 理科迷",
+    description: "搜索理科迷的帖子、专栏、文件库与题库。",
+  }}
+>
+  <section class="mx-auto min-h-[70vh] max-w-5xl px-4 py-12 sm:px-6 md:py-16">
+    <p class="text-xs font-bold tracking-[0.16em] text-primary-readable">
+      SEARCH LKM
+    </p>
+    <h1 class="mt-2 font-heading text-3xl font-bold text-deep-text sm:text-4xl">
+      全站搜索
+    </h1>
+    <p class="mt-2 text-text-muted">
+      一个入口，找到讨论、专栏文章、公开资料和赛后练习题。
+    </p>
+    <form
+      action={searchPath}
+      method="get"
+      role="search"
+      class="mt-7 flex items-center gap-2 rounded-2xl border border-surface-3 bg-card-bg p-2 shadow-sm focus-within:border-primary"
+    >
+      <Icon
+        name="tabler:search"
+        class="ml-3 h-5 w-5 text-primary"
+        aria-hidden="true"
+      />
+      <label for="search-query" class="sr-only">关键词</label>
+      <input
+        id="search-query"
+        name="q"
+        type="search"
+        maxlength="200"
+        value={q}
+        placeholder="输入关键词搜索…"
+        class="min-w-0 flex-1 bg-transparent px-2 py-3 text-deep-text outline-none"
+      />
+      {type !== "all" && <input type="hidden" name="type" value={type} />}
+      <button
+        type="submit"
+        class="rounded-xl bg-primary-action px-5 py-3 text-sm font-bold text-white hover:opacity-90"
+        >搜索</button
+      >
+    </form>
+    <nav
+      class="mt-7 flex gap-2 overflow-x-auto border-b border-surface-3 pb-3"
+      aria-label="搜索范围"
+    >
+      {
+        tabs.map((tab) => (
+          <a
+            href={tabHref(tab.value)}
+            aria-current={type === tab.value ? "page" : undefined}
+            class:list={[
+              "whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition",
+              type === tab.value
+                ? "bg-primary-action text-white"
+                : "bg-card-bg text-text-muted hover:text-primary-readable",
+            ]}
+          >
+            {tab.label}
+          </a>
+        ))
+      }
+    </nav>
+    {
+      failed && (
+        <p class="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          内容检索暂时不可用，请稍后重试。
+        </p>
+      )
+    }
+    {
+      !q && type !== "columns" && (
+        <p class="mt-10 text-center text-sm text-text-muted">
+          输入关键词，开始探索社区知识。
+        </p>
+      )
+    }
+    {
+      !q && type === "columns" && (
+        <h2 class="mt-8 text-lg font-bold text-deep-text">近期专栏文章</h2>
+      )
+    }
+    {
+      (q || type === "columns") &&
+        !failed &&
+        visibleHits.length === 0 &&
+        questionHits.length === 0 && (
+          <p class="mt-10 rounded-2xl border border-surface-3 bg-card-bg p-8 text-center text-sm text-text-muted">
+            暂时没有找到相关内容，试试更短的关键词。
+          </p>
+        )
+    }
+    <div class="mt-6 space-y-3">
+      {
+        visibleHits.map((hit) => (
+          <a
+            href={hitHref(hit)}
+            class="group block rounded-2xl border border-surface-3 bg-card-bg p-5 transition hover:border-primary/40 hover:shadow-sm"
+          >
+            <div class="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+              <span class="rounded-full bg-primary/10 px-2.5 py-1 font-bold text-primary-readable">
+                {hitLabel(hit)}
+              </span>
+              {hit.author_name && <span>{hit.author_name}</span>}
+              {hit.document_code && <span>{hit.document_code}</span>}
+            </div>
+            <h2 class="mt-2 text-lg font-bold text-deep-text group-hover:text-primary-readable">
+              {hit.title}
+            </h2>
+            {hit.excerpt && (
+              <p class="mt-1 line-clamp-2 text-sm leading-6 text-text-muted">
+                {hit.excerpt}
+              </p>
+            )}
+            <p class="mt-3 text-xs text-text-muted">
+              {hit.content_type === "library_file"
+                ? `${hit.view_count} 次浏览`
+                : `${hit.like_count} 赞 · ${hit.view_count} 次阅读`}
+            </p>
+          </a>
+        ))
+      }
+      {
+        questionHits.map((item) => (
+          <a
+            href={getPermalink("/competition/bank")}
+            class="group block rounded-2xl border border-surface-3 bg-card-bg p-5 transition hover:border-primary/40 hover:shadow-sm"
+          >
+            <>
+              <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
+                赛后题库
+              </span>
+              <h2 class="mt-3 text-lg font-bold text-deep-text group-hover:text-primary-readable">
+                {t(item.stem)}
+              </h2>
+              <p class="mt-2 text-xs text-text-muted">
+                进入题库查看答案与解析 →
+              </p>
+            </>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</Layout>

@@ -1,365 +1,519 @@
 ---
 import { Icon } from "astro-icon/components";
 import Layout from "~/layouts/PageLayout.astro";
-import heroImage from "~/assets/images/hero-image.png";
+import { contentApi } from "~/lib/api/modules/content";
+import { projectApi } from "~/lib/api/modules/projects";
+import { qaApi } from "~/lib/api/modules/qa";
+import {
+  mockCompetitions,
+  mockQuestions,
+} from "~/features/competition/data/mock-competitions";
 import { getPermalink } from "~/lib/utils/permalinks";
-import { OFFICIAL_SITE_URL } from "~/lib/constants/site-urls";
+import { t } from "~/lib/i18n";
 
 const paths = {
   forum: getPermalink("/forum"),
+  projects: getPermalink("/projects"),
   files: getPermalink("/files"),
   qa: getPermalink("/qa"),
-  projects: getPermalink("/projects"),
   competition: getPermalink("/competition"),
-  apps: getPermalink("/apps"),
+  bank: getPermalink("/competition/bank"),
+  search: getPermalink("/search"),
 };
 
-const destinations = [
+// 模块独立降级：一个服务暂不可用时仍能展示其他社区内容。
+const [questionResult, projectResult, columnResult] = await Promise.allSettled([
+  qaApi.listQuestions("help", 1, 12, "bounty"),
+  projectApi.listProjects(),
+  contentApi.listItems({ content_type: "column_post", limit: 12 }),
+]);
+const questions =
+  questionResult.status === "fulfilled" ? questionResult.value : [];
+const projects =
+  projectResult.status === "fulfilled" ? projectResult.value : [];
+const columnResponse =
+  columnResult.status === "fulfilled" ? columnResult.value : null;
+const columns = columnResponse?.isOk() ? columnResponse.value.items : [];
+const featuredQuestions = questions
+  .filter(
+    (q) =>
+      q.status === "open" &&
+      q.bountyTotal > 0 &&
+      (!q.bountyExpiresAt || Date.parse(q.bountyExpiresAt) > Date.now()),
+  )
+  .sort((a, b) => b.bountyTotal - a.bountyTotal)
+  .slice(0, 3);
+const recruitingProjects = projects
+  .filter((project) => project.isRecruiting)
+  .sort(
+    (a, b) =>
+      Number(b.isPinned) - Number(a.isPinned) || b.progress - a.progress,
+  )
+  .slice(0, 3);
+const featuredColumns = columns
+  .filter((item) => item.status === "published")
+  .sort(
+    (a, b) =>
+      Number(b.is_featured) - Number(a.is_featured) ||
+      b.like_count - a.like_count ||
+      Date.parse(b.published_at ?? b.created_at) -
+        Date.parse(a.published_at ?? a.created_at),
+  )
+  .slice(0, 3);
+const upcomingCompetition = mockCompetitions
+  .filter((item) => item.status === "upcoming" || item.status === "ongoing")
+  .sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate))[0];
+const daysUntil =
+  upcomingCompetition?.status === "upcoming"
+    ? Math.max(
+        0,
+        Math.ceil(
+          (Date.parse(`${upcomingCompetition.startDate}T00:00:00`) -
+            Date.now()) /
+            86_400_000,
+        ),
+      )
+    : null;
+const dailyQuestion =
+  mockQuestions[Math.floor(Date.now() / 86_400_000) % mockQuestions.length];
+const nav = [
+  { label: "首页", href: getPermalink("/"), icon: "tabler:home" },
+  { label: "发现", href: paths.forum, icon: "tabler:compass" },
+  { label: "项目", href: paths.projects, icon: "tabler:rocket" },
   {
-    number: "01",
-    icon: "tabler:messages",
-    title: "社区论坛",
-    description: "从一个好问题开始，和同好一起讨论科学与技术。",
-    href: paths.forum,
-    action: "进入论坛",
+    label: "专栏",
+    href: `${paths.search}?type=columns`,
+    icon: "tabler:article",
   },
-  {
-    number: "02",
-    icon: "tabler:folder-open",
-    title: "共享资源",
-    description: "发现、整理和分享学习资料，让知识更容易抵达。",
-    href: paths.files,
-    action: "浏览文件库",
-  },
-  {
-    number: "03",
-    icon: "tabler:bulb",
-    title: "问答交流",
-    description: "把还没想明白的事情提出来，和大家一起寻找答案。",
-    href: paths.qa,
-    action: "去提问题",
-  },
-];
-
-const moreDestinations = [
-  {
-    icon: "tabler:rocket",
-    title: "项目",
-    description: "看看社区里正在发生的创作",
-    href: paths.projects,
-  },
-  {
-    icon: "tabler:trophy",
-    title: "竞赛",
-    description: "在挑战中检验灵感与积累",
-    href: paths.competition,
-  },
-  {
-    icon: "tabler:apps",
-    title: "更多应用",
-    description: "探索理科迷的其他角落",
-    href: paths.apps,
-  },
+  { label: "文件库", href: paths.files, icon: "tabler:folder" },
+  { label: "竞赛 / 题库", href: paths.competition, icon: "tabler:trophy" },
 ];
 ---
 
 <Layout
   metadata={{
-    title: "理科迷 · 让科学回归每一个人",
+    title: "理科迷 · 发现问题，找到同行",
     description:
-      "理科迷是创立于 2014 年的科技爱好者社区。在这里探索科学、分享知识、结识同好。",
+      "搜索理科社区的讨论、专栏、资料与题库，发现悬赏求助、项目招募和竞赛。",
   }}
 >
-  <div class="overflow-hidden">
-    <section
-      class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-16 sm:px-6 md:pb-28 md:pt-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:pt-28"
-    >
-      <div class="relative z-10 max-w-2xl">
-        <div
-          class="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-2 text-xs font-semibold tracking-wide text-primary-readable"
+  <div class="min-h-screen bg-page-bg pb-20">
+    <div class="border-b border-surface-3 bg-card-bg/80">
+      <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+        <nav
+          class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
+          aria-label="社区主要入口"
         >
-          <span class="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true"
-          ></span>
-          从好奇出发，向世界提问
-        </div>
-        <h1
-          class="font-heading text-[clamp(2.9rem,6vw,5.5rem)] font-bold leading-[1.13] tracking-tight text-deep-text"
-        >
-          好奇有方向，<br />
-          <span class="text-primary-readable">探索无边界。</span>
-        </h1>
-        <p class="mt-7 max-w-xl text-base leading-8 text-text-muted sm:text-lg">
-          理科迷是一个由科技爱好者组成的社区。无论你热爱数学、自然科学，还是喜欢动手创造，都能在这里找到一起思考的人。
-        </p>
-        <div class="mt-9 flex flex-wrap gap-3">
-          <a
-            href={paths.forum}
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary-action px-6 font-semibold text-white shadow-sm transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
-          >
-            进入社区 <Icon
-              name="tabler:arrow-up-right"
-              class="h-5 w-5"
+          {
+            nav.map((link, index) => (
+              <a
+                href={link.href}
+                aria-current={index === 0 ? "page" : undefined}
+                class:list={[
+                  "inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-primary",
+                  index === 0
+                    ? "bg-primary/10 text-primary-readable"
+                    : "text-text-muted hover:bg-primary/10 hover:text-deep-text",
+                ]}
+              >
+                <Icon name={link.icon} class="h-4 w-4" aria-hidden="true" />
+                {link.label}
+              </a>
+            ))
+          }
+        </nav>
+        <details class="group relative shrink-0">
+          <summary
+            class="flex cursor-pointer list-none items-center gap-2 rounded-xl bg-primary-action px-4 py-2 text-sm font-bold text-white hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
+            ><Icon
+              name="tabler:plus"
+              class="h-4 w-4"
               aria-hidden="true"
-            />
-          </a>
-          <a
-            href={paths.files}
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-surface-3 bg-card-bg px-6 font-semibold text-deep-text transition hover:border-primary/50 hover:text-primary-readable focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
-          >
-            探索资源 <Icon
-              name="tabler:arrow-right"
-              class="h-5 w-5"
+            />发布<Icon
+              name="tabler:chevron-down"
+              class="h-4 w-4"
               aria-hidden="true"
-            />
-          </a>
-          <a
-            href={OFFICIAL_SITE_URL}
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-surface-3 bg-card-bg px-6 font-semibold text-deep-text transition hover:border-primary/50 hover:text-primary-readable focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
+            /></summary
           >
-            前往官网 <Icon
-              name="tabler:arrow-up-right"
-              class="h-5 w-5"
-              aria-hidden="true"
-            />
-          </a>
-        </div>
-        <div
-          class="mt-11 flex items-center gap-4 border-t border-surface-3 pt-6 text-sm text-text-muted"
-        >
-          <span
-            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+          <div
+            class="absolute right-0 top-full z-30 mt-2 w-44 rounded-xl border border-surface-3 bg-card-bg p-1.5 shadow-xl"
           >
-            <Icon name="tabler:atom" class="h-6 w-6" aria-hidden="true" />
-          </span>
-          <span>始于 2014 年 · 让科学回归每一个人</span>
-        </div>
+            <a
+              href={paths.forum}
+              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+              >发帖 · 选择板块</a
+            >
+            <a
+              href={`${paths.files}#upload`}
+              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+              >发文件</a
+            >
+            <a
+              href={`${paths.projects}#create`}
+              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+              >发起项目</a
+            >
+            <a
+              href={paths.qa}
+              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+              >发起求助</a
+            >
+          </div>
+        </details>
       </div>
+    </div>
 
+    <section
+      class="relative overflow-hidden border-b border-surface-3 bg-gradient-to-br from-primary/15 via-page-bg to-amber-100/30 px-4 py-16 sm:px-6 md:py-24"
+      aria-labelledby="home-title"
+    >
       <div
-        class="relative isolate mx-auto flex min-h-[400px] w-full max-w-[560px] items-center justify-center sm:min-h-[500px]"
+        class="pointer-events-none absolute -right-24 -top-48 h-[34rem] w-[34rem] rounded-full border border-primary/15"
         aria-hidden="true"
       >
-        <div class="absolute inset-[8%] rounded-full bg-primary/10 blur-3xl">
+      </div>
+      <div
+        class="pointer-events-none absolute -right-10 -top-32 h-[25rem] w-[25rem] rounded-full border border-primary/15"
+        aria-hidden="true"
+      >
+      </div>
+      <div class="relative mx-auto max-w-7xl">
+        <div
+          class="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card-bg/75 px-3 py-1.5 text-xs font-bold text-primary-readable"
+        >
+          <Icon name="tabler:atom" class="h-4 w-4" aria-hidden="true" /> 理科迷 ·
+          科学与创造者社区
         </div>
-        <div class="absolute inset-[9%] rounded-full border border-primary/15">
+        <h1
+          id="home-title"
+          class="max-w-3xl font-heading text-[clamp(2.5rem,6vw,5rem)] font-bold leading-[1.14] tracking-tight text-deep-text"
+        >
+          从一个问题出发，<br /><span class="text-primary-readable"
+            >找到整个理科社区。</span
+          >
+        </h1>
+        <p
+          class="mt-6 max-w-2xl text-base leading-8 text-text-muted sm:text-lg"
+        >
+          搜索讨论、专栏和学习资料；找到愿意一起解题、做项目、参加竞赛的同好。
+        </p>
+        <form
+          action={paths.search}
+          method="get"
+          role="search"
+          class="mt-9 flex max-w-3xl items-center gap-2 rounded-2xl border border-surface-3 bg-card-bg p-2 shadow-xl shadow-primary/5 focus-within:border-primary"
+        >
+          <Icon
+            name="tabler:search"
+            class="ml-3 h-6 w-6 shrink-0 text-primary"
+            aria-hidden="true"
+          />
+          <label for="home-search" class="sr-only">全站搜索</label>
+          <input
+            id="home-search"
+            name="q"
+            type="search"
+            required
+            maxlength="200"
+            placeholder="搜索帖子、专栏、文件库和题库…"
+            class="min-w-0 flex-1 bg-transparent px-2 py-3 text-base text-deep-text outline-none placeholder:text-text-muted/70"
+          />
+          <button
+            type="submit"
+            class="rounded-xl bg-primary-action px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 sm:px-7"
+            >搜索</button
+          >
+        </form>
+        <div
+          class="mt-4 flex flex-wrap items-center gap-2 text-sm text-text-muted"
+        >
+          <span>快速开始</span><a
+            href={paths.qa}
+            class="rounded-full border border-surface-3 bg-card-bg/70 px-3 py-1.5 hover:text-primary-readable"
+            >悬赏求助</a
+          ><a
+            href={paths.projects}
+            class="rounded-full border border-surface-3 bg-card-bg/70 px-3 py-1.5 hover:text-primary-readable"
+            >寻找项目</a
+          ><a
+            href={paths.bank}
+            class="rounded-full border border-surface-3 bg-card-bg/70 px-3 py-1.5 hover:text-primary-readable"
+            >赛后题库</a
+          >
         </div>
-        <div class="absolute inset-[19%] rounded-full border border-primary/20">
-        </div>
-        <div class="absolute inset-[29%] rounded-full border border-primary/20">
+      </div>
+    </section>
+
+    <section
+      class="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20"
+      aria-labelledby="pulse-heading"
+    >
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold tracking-[0.16em] text-primary-readable">
+            COMMUNITY PULSE
+          </p><h2
+            id="pulse-heading"
+            class="mt-2 font-heading text-3xl font-bold text-deep-text sm:text-4xl"
+          >
+            此刻值得关注
+          </h2><p class="mt-2 text-text-muted">
+            有待解决的问题、正在招募的队伍，以及值得细读的文章。
+          </p>
+        </div><a
+          href={paths.forum}
+          class="text-sm font-bold text-primary-readable hover:underline"
+          >探索社区 →</a
+        >
+      </div>
+      <div class="grid gap-5 lg:grid-cols-3">
+        <div
+          class="rounded-3xl border border-amber-300/35 bg-card-bg p-6 shadow-sm"
+        >
+          <div class="flex items-center justify-between">
+            <div
+              class="flex items-center gap-2 text-amber-700 dark:text-amber-400"
+            >
+              <Icon name="tabler:coin" class="h-5 w-5" /><h3 class="font-bold">
+                悬赏求助精选
+              </h3>
+            </div><a
+              href={paths.qa}
+              class="text-xs font-semibold text-primary-readable hover:underline"
+              >全部求助 →</a
+            >
+          </div><div class="mt-5 space-y-3">
+            {
+              featuredQuestions.length ? (
+                featuredQuestions.map((q) => (
+                  <a
+                    href={getPermalink(`/qa/${q.id}`)}
+                    class="group block rounded-2xl border border-surface-3 bg-page-bg p-4 transition hover:border-amber-400 hover:shadow-sm"
+                  >
+                    <>
+                      <div class="mb-2 flex items-center justify-between gap-2">
+                        <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
+                          💰 悬赏 {q.bountyTotal} 积分
+                        </span>
+                        {q.urgent && (
+                          <span class="text-xs font-bold text-red-500">
+                            加急
+                          </span>
+                        )}
+                      </div>
+                      <h4 class="line-clamp-2 font-semibold leading-6 text-deep-text group-hover:text-primary-readable">
+                        {q.title}
+                      </h4>
+                      <p class="mt-2 text-xs text-text-muted">
+                        {q.answerCount} 个回答 · {q.authorName || "社区成员"}
+                      </p>
+                    </>
+                  </a>
+                ))
+              ) : (
+                <p class="rounded-2xl bg-page-bg p-5 text-sm leading-6 text-text-muted">
+                  暂时没有开放中的悬赏。你可以提出第一个问题。
+                </p>
+              )
+            }
+          </div>
         </div>
         <div
-          class="absolute left-[6%] top-[17%] h-3 w-3 rounded-full bg-primary/45"
+          class="rounded-3xl border border-sky-300/35 bg-card-bg p-6 shadow-sm"
         >
-        </div>
-        <div
-          class="absolute bottom-[14%] right-[13%] h-2.5 w-2.5 rounded-full bg-primary/60"
-        >
-        </div>
-        <img
-          src={heroImage.src}
-          width={heroImage.width}
-          height={heroImage.height}
-          alt=""
-          fetchpriority="high"
-          class="relative z-10 w-[115%] max-w-none drop-shadow-2xl"
-        />
-        <div
-          class="absolute bottom-[8%] left-[2%] z-20 rounded-2xl border border-surface-3 bg-card-bg/95 px-4 py-3 shadow-lg backdrop-blur-sm sm:left-[5%]"
-        >
-          <div class="flex items-center gap-3">
-            <Icon name="tabler:flask-2" class="h-6 w-6 text-primary" />
-            <div>
-              <strong class="block text-sm text-deep-text">保持好奇</strong
-              ><span class="text-xs text-text-muted"
-                >每一个发现都从这里开始</span
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sky-700 dark:text-sky-400">
+              <Icon name="tabler:rocket" class="h-5 w-5" /><h3
+                class="font-bold"
               >
-            </div>
+                热门项目招募
+              </h3>
+            </div><a
+              href={paths.projects}
+              class="text-xs font-semibold text-primary-readable hover:underline"
+              >项目大厅 →</a
+            >
+          </div><div class="mt-5 space-y-3">
+            {
+              recruitingProjects.length ? (
+                recruitingProjects.map((project) => (
+                  <a
+                    href={getPermalink(`/projects/${project.id}`)}
+                    class="group block rounded-2xl border border-surface-3 bg-page-bg p-4 transition hover:border-sky-400 hover:shadow-sm"
+                  >
+                    <>
+                      <div class="mb-2 flex items-center justify-between">
+                        <>
+                          <span class="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-bold text-sky-800">
+                            招募中
+                          </span>
+                          <span class="text-xs text-text-muted">
+                            进度 {project.progress}%
+                          </span>
+                        </>
+                      </div>
+                      <h4 class="line-clamp-1 font-semibold text-deep-text group-hover:text-primary-readable">
+                        {project.title}
+                      </h4>
+                      <p class="mt-1 line-clamp-2 text-xs leading-5 text-text-muted">
+                        {project.summary}
+                      </p>
+                      <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-3">
+                        <div
+                          class="h-full rounded-full bg-sky-500"
+                          style={`width: ${Math.max(0, Math.min(100, project.progress))}%`}
+                        />
+                      </div>
+                    </>
+                  </a>
+                ))
+              ) : (
+                <p class="rounded-2xl bg-page-bg p-5 text-sm leading-6 text-text-muted">
+                  目前没有开放招募的项目。去项目大厅看看新的创作。
+                </p>
+              )
+            }
+          </div>
+        </div>
+        <div
+          class="rounded-3xl border border-violet-300/35 bg-card-bg p-6 shadow-sm"
+        >
+          <div class="flex items-center justify-between">
+            <div
+              class="flex items-center gap-2 text-violet-700 dark:text-violet-400"
+            >
+              <Icon name="tabler:book-2" class="h-5 w-5" /><h3
+                class="font-bold"
+              >
+                专栏好文推荐
+              </h3>
+            </div><a
+              href={`${paths.search}?type=columns`}
+              class="text-xs font-semibold text-primary-readable hover:underline"
+              >搜索专栏 →</a
+            >
+          </div><div class="mt-5 space-y-3">
+            {
+              featuredColumns.length ? (
+                featuredColumns.map((item) => (
+                  <a
+                    href={getPermalink(`/forum/post/${item.id}`)}
+                    class="group block rounded-2xl border border-surface-3 bg-page-bg p-4 transition hover:border-violet-400 hover:shadow-sm"
+                  >
+                    <>
+                      <span class="text-xs font-bold text-violet-600 dark:text-violet-400">
+                        {item.column_title || "理科专栏"}
+                      </span>
+                      <h4 class="mt-2 line-clamp-2 font-semibold leading-6 text-deep-text group-hover:text-primary-readable">
+                        {item.title}
+                      </h4>
+                      <p class="mt-2 text-xs text-text-muted">
+                        {item.like_count} 赞 · {item.view_count} 次阅读
+                      </p>
+                    </>
+                  </a>
+                ))
+              ) : (
+                <p class="rounded-2xl bg-page-bg p-5 text-sm leading-6 text-text-muted">
+                  近期还没有已发布的专栏文章。先去发现社区讨论。
+                </p>
+              )
+            }
           </div>
         </div>
       </div>
     </section>
 
     <section
-      class="border-y border-surface-3 bg-card-bg/70 px-4 py-12 sm:px-6"
-      aria-label="社区学科"
-    >
-      <div
-        class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5"
-      >
-        <p class="text-sm font-semibold text-text-muted">
-          在理科迷，尽情探索你感兴趣的领域
-        </p>
-        <div
-          class="flex flex-wrap gap-2 text-xs font-semibold text-deep-text sm:text-sm"
-        >
-          {
-            ["数学", "物理", "化学", "生物", "信息技术"].map((subject) => (
-              <span class="rounded-full border border-surface-3 bg-page-bg px-3.5 py-2">
-                {subject}
-              </span>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <section
-      class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28"
-      aria-labelledby="explore-heading"
-    >
-      <div class="mb-9 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p
-            class="mb-3 text-xs font-bold tracking-[0.16em] text-primary-readable"
-          >
-            EXPLORE LKM
-          </p>
-          <h2
-            id="explore-heading"
-            class="font-heading text-3xl font-bold tracking-tight text-deep-text sm:text-4xl"
-          >
-            从这里开始探索
-          </h2>
-          <p class="mt-3 max-w-xl leading-7 text-text-muted">
-            交流想法、积累知识、一起把兴趣变成新的发现。
-          </p>
-        </div>
-        <a
-          href={paths.apps}
-          class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-readable hover:underline"
-          >查看全部入口 <Icon
-            name="tabler:arrow-right"
-            class="h-4 w-4"
-            aria-hidden="true"
-          /></a
-        >
-      </div>
-      <div class="grid gap-4 md:grid-cols-3">
-        {
-          destinations.map((item) => (
-            <a
-              href={item.href}
-              class="group flex min-h-[260px] flex-col rounded-2xl border border-surface-3 bg-card-bg p-6 transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            >
-              <div class="flex items-start justify-between">
-                <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon name={item.icon} class="h-6 w-6" aria-hidden="true" />
-                </span>
-                <span class="font-mono text-xs text-text-muted dark:text-slate-400">
-                  {item.number} / 03
-                </span>
-              </div>
-              <h3 class="mt-8 text-xl font-bold text-deep-text group-hover:text-primary-readable">
-                {item.title}
-              </h3>
-              <p class="mt-2 flex-1 text-sm leading-7 text-text-muted dark:text-slate-400">
-                {item.description}
-              </p>
-              <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-readable">
-                {item.action}
-                <Icon
-                  name="tabler:arrow-up-right"
-                  class="h-4 w-4"
-                  aria-hidden="true"
-                />
-              </span>
-            </a>
-          ))
-        }
-      </div>
-    </section>
-
-    <section
-      class="bg-card-bg px-4 py-20 sm:px-6 md:py-24"
-      aria-labelledby="more-heading"
+      class="border-y border-surface-3 bg-card-bg/60 px-4 py-16 sm:px-6 md:py-20"
+      aria-labelledby="competition-heading"
     >
       <div class="mx-auto max-w-7xl">
         <div class="mb-8">
-          <p
-            class="mb-3 text-xs font-bold tracking-[0.16em] text-primary-readable"
+          <p class="text-xs font-bold tracking-[0.16em] text-primary-readable">
+            LEARN BY DOING
+          </p><h2
+            id="competition-heading"
+            class="mt-2 font-heading text-3xl font-bold text-deep-text sm:text-4xl"
           >
-            MORE TO DISCOVER
-          </p>
-          <h2
-            id="more-heading"
-            class="font-heading text-3xl font-bold text-deep-text sm:text-4xl"
-          >
-            把热爱带到更远的地方
+            以赛促学，每天进步一点
           </h2>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-3">
-          {
-            moreDestinations.map((item) => (
-              <a
-                href={item.href}
-                class="group flex items-center gap-4 rounded-2xl border border-surface-3 bg-page-bg p-5 transition hover:border-primary/40 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon name={item.icon} class="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span class="min-w-0 flex-1">
-                  <>
-                    <strong class="block text-sm text-deep-text group-hover:text-primary-readable">
-                      {item.title}
-                    </strong>
-                    <small class="mt-1 block text-xs leading-5 text-text-muted">
-                      {item.description}
-                    </small>
-                  </>
-                </span>
-                <Icon
-                  name="tabler:arrow-up-right"
-                  class="h-4 w-4 shrink-0 text-text-muted group-hover:text-primary"
-                  aria-hidden="true"
-                />
-              </a>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <section
-      class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28"
-      aria-labelledby="join-heading"
-    >
-      <div
-        class="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/10 px-6 py-14 text-center sm:px-12 md:py-20"
-      >
-        <div
-          class="absolute -left-24 -top-24 h-64 w-64 rounded-full border border-primary/20"
-          aria-hidden="true"
-        >
-        </div>
-        <div
-          class="absolute -bottom-32 -right-16 h-80 w-80 rounded-full border border-primary/20"
-          aria-hidden="true"
-        >
-        </div>
-        <div class="relative mx-auto max-w-2xl">
-          <p
-            class="mb-3 text-xs font-bold tracking-[0.16em] text-primary-readable"
+        </div><div class="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+          <div
+            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-800 to-indigo-900 p-7 text-white sm:p-9"
           >
-            JOIN THE CONVERSATION
-          </p>
-          <h2
-            id="join-heading"
-            class="font-heading text-3xl font-bold leading-tight text-deep-text sm:text-4xl"
-          >
-            下一次精彩的讨论，<br class="hidden sm:block" />从你的好奇开始。
-          </h2>
-          <p class="mt-5 leading-7 text-text-muted">
-            来社区分享一个发现，提出一个问题，或认识志同道合的朋友。
-          </p>
-          <a
-            href={paths.forum}
-            class="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary-action px-6 font-semibold text-white transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
-            >走进理科迷 <Icon
-              name="tabler:arrow-right"
-              class="h-5 w-5"
+            <div
+              class="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/20"
               aria-hidden="true"
-            /></a
+            >
+            </div><div class="relative">
+              <span
+                class="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold"
+                >{
+                  upcomingCompetition
+                    ? upcomingCompetition.status === "ongoing"
+                      ? "正在进行"
+                      : "即将开始"
+                    : "竞赛大厅"
+                }</span
+              ><h3 class="mt-6 max-w-lg text-2xl font-bold sm:text-3xl">
+                {
+                  upcomingCompetition
+                    ? t(upcomingCompetition.title)
+                    : "下一场挑战，从这里开始"
+                }
+              </h3><p class="mt-3 max-w-lg text-sm leading-7 text-sky-100">
+                {
+                  upcomingCompetition
+                    ? t(upcomingCompetition.description)
+                    : "浏览赛事安排，与同好一起迎接下一场理科挑战。"
+                }
+              </p>{
+                upcomingCompetition && (
+                  <p class="mt-5 text-sm font-semibold text-white">
+                    {daysUntil === null
+                      ? "赛事进行中"
+                      : `${daysUntil} 天后开始`}{" "}
+                    · {upcomingCompetition.startDate}
+                  </p>
+                )
+              }<a
+                href={upcomingCompetition
+                  ? getPermalink(`/competition/${upcomingCompetition.id}`)
+                  : paths.competition}
+                class="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-sky-900 hover:bg-sky-50"
+                >{upcomingCompetition ? "查看赛事" : "查看竞赛大厅"}<Icon
+                  name="tabler:arrow-up-right"
+                  class="h-4 w-4"
+                /></a
+              >
+            </div>
+          </div><div
+            class="rounded-3xl border border-surface-3 bg-card-bg p-7 sm:p-9"
           >
+            <span
+              class="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary-readable"
+              >今日练习 · 赛后题库</span
+            ><h3 class="mt-5 text-xl font-bold text-deep-text">
+              用一道题，保持思考的手感。
+            </h3><p class="mt-3 line-clamp-2 text-sm leading-7 text-text-muted">
+              {
+                dailyQuestion
+                  ? t(dailyQuestion.stem)
+                  : "从题库选择感兴趣的学科，开始练习。"
+              }
+            </p><div class="mt-8 flex flex-wrap gap-3">
+              <a
+                href={paths.bank}
+                class="inline-flex items-center gap-2 rounded-xl bg-primary-action px-5 py-3 text-sm font-bold text-white hover:opacity-90"
+                >进入题库 <Icon name="tabler:arrow-right" class="h-4 w-4" /></a
+              ><a
+                href={paths.competition}
+                class="inline-flex items-center rounded-xl border border-surface-3 px-5 py-3 text-sm font-semibold text-deep-text hover:border-primary/40"
+                >全部竞赛</a
+              >
+            </div>
+          </div>
         </div>
       </div>
     </section>

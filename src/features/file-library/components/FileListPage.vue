@@ -467,6 +467,7 @@ async function loadFiles() {
 
 onMounted(async () => {
   mounted.value = true;
+  if (window.location.hash === "#upload") showUpload.value = true;
   const [projects] = await Promise.all([
     fileLibraryApi.getUploadProjects(),
     loadFiles(),

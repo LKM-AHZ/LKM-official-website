@@ -536,6 +536,7 @@ const allProjects = ref<Project[]>([]);
 const loading = ref(true);
 
 onMounted(async () => {
+  if (window.location.hash === "#create") openProjectModal();
   allProjects.value = await projectApi.listProjects();
   loading.value = false;
 });
