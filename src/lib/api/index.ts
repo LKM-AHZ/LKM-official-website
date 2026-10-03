@@ -15,6 +15,8 @@ export type {
 export { fileLibraryApi } from "./modules/file-library";
 export { authApi } from "./modules/auth";
 export { pointsApi } from "./modules/points";
+export { notificationApi } from "./modules/notification";
+export type { SiteNotification } from "./modules/notification";
 export type * from "./modules/points";
 export { followApi } from "./modules/follow";
 export type * from "./modules/follow";

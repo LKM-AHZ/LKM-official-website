@@ -36,12 +36,21 @@
           </div>
 
           <div class="px-6 py-5 space-y-4 overflow-y-auto">
+            <p v-if="createdQuestionId" class="text-sm text-primary">
+              {{ t("page.qa.imagesPending") }}
+              <a
+                :href="buildUrl(`/qa/${createdQuestionId}`)"
+                class="underline"
+                >{{ t("page.qa.viewQuestion") }}</a
+              >
+            </p>
             <div>
               <label class="block text-sm font-medium text-deep-text mb-1.5">{{
                 t("page.qa.titleLabel")
               }}</label>
               <input
                 v-model="formModel.title"
+                :disabled="!!createdQuestionId"
                 class="qa-input"
                 :placeholder="t('page.qa.titlePlaceholder')"
                 @input="clearError('title')"
@@ -57,6 +66,7 @@
               }}</label>
               <textarea
                 v-model="formModel.situation"
+                :disabled="!!createdQuestionId"
                 rows="3"
                 class="qa-input resize-none"
                 :placeholder="t('page.qa.situationPlaceholder')"
@@ -73,6 +83,7 @@
               }}</label>
               <textarea
                 v-model="formModel.detail"
+                :disabled="!!createdQuestionId"
                 rows="5"
                 class="qa-input resize-none"
                 :placeholder="t('page.qa.detailPlaceholder')"
@@ -87,6 +98,7 @@
 
               <button
                 type="button"
+                :disabled="!!createdQuestionId"
                 class="btn btn-ghost btn-sm mt-2"
                 @click="triggerFilePicker"
               >
@@ -127,7 +139,18 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <label
+              v-if="!createdQuestionId"
+              class="flex items-center gap-2 text-sm font-medium text-deep-text"
+            >
+              <input v-model="formModel.bountyEnabled" type="checkbox" />
+              {{ t("page.qa.bountyEnableLabel") }}
+            </label>
+
+            <div
+              v-if="formModel.bountyEnabled && !createdQuestionId"
+              class="grid grid-cols-2 gap-4"
+            >
               <div>
                 <label
                   class="block text-sm font-medium text-deep-text mb-1.5"
@@ -169,7 +192,49 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-between text-sm pt-1">
+            <div
+              v-if="formModel.bountyEnabled && !createdQuestionId"
+              class="space-y-3"
+            >
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="amount in [10, 50, 100]"
+                  :key="amount"
+                  type="button"
+                  class="btn btn-ghost btn-sm"
+                  @click="formModel.bountyPerPerson = amount"
+                >
+                  {{ amount }} {{ t("page.qa.points") }}
+                </button>
+              </div>
+              <label class="block text-sm text-deep-text">
+                {{ t("page.qa.bountyDaysLabel") }}
+                <select
+                  v-model.number="formModel.bountyDays"
+                  class="qa-input mt-1"
+                >
+                  <option :value="7">7</option>
+                  <option :value="14">14</option>
+                  <option :value="30">30</option>
+                  <option :value="90">90</option>
+                </select>
+              </label>
+              <label
+                v-if="formModel.bountyDays === 7"
+                class="flex items-center gap-2 text-sm text-deep-text"
+              >
+                <input v-model="formModel.urgent" type="checkbox" />
+                {{ t("page.qa.urgentLabel") }}
+              </label>
+              <p class="text-xs text-text-muted">
+                {{ t("page.qa.bountyMaxHint") }}
+              </p>
+            </div>
+
+            <div
+              v-if="formModel.bountyEnabled && !createdQuestionId"
+              class="flex items-center justify-between text-sm pt-1"
+            >
               <span class="text-text-muted">{{
                 t("page.qa.totalBountyLabel")
               }}</span>
@@ -177,12 +242,26 @@
                 >{{ totalBounty }} {{ t("page.qa.points") }}</span
               >
             </div>
+            <p
+              v-if="
+                formModel.bountyEnabled &&
+                !createdQuestionId &&
+                balance !== null
+              "
+              class="text-xs text-text-muted"
+            >
+              {{ t("page.qa.availablePoints", { count: balance }) }}
+            </p>
+            <p v-if="bountyError" class="text-xs text-error" role="alert">
+              {{ bountyError }}
+            </p>
           </div>
 
           <div
             class="flex justify-end gap-3 px-6 py-4 border-t border-surface-3 shrink-0"
           >
             <button
+              v-if="!createdQuestionId"
               type="button"
               class="btn btn-ghost"
               @click="handleSaveDraft"
@@ -192,9 +271,14 @@
             <button
               type="button"
               class="btn btn-primary"
+              :disabled="publishing || !!bountyError"
               @click="handlePublish"
             >
-              {{ t("common.publish") }}
+              {{
+                createdQuestionId
+                  ? t("page.qa.finishImages")
+                  : t("common.publish")
+              }}
             </button>
           </div>
         </div>
@@ -250,6 +334,8 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { t } from "~/lib/i18n";
 import { qaApi } from "~/lib/api/modules/qa";
+import { pointsApi } from "~/lib/api/modules/points";
+import { buildUrl } from "~/lib/utils/paths";
 import {
   QA_DRAFT_STORAGE_KEY,
   computeTotalBounty,
@@ -259,6 +345,7 @@ import {
 import type { QaDraft } from "../lib/draft";
 import {
   deleteImageBlobs,
+  getImageBlob,
   resolveImageSrc,
   saveImageBlob,
 } from "../../editor/persistence/image-store";
@@ -276,13 +363,17 @@ type FieldKey = keyof QaDraft;
 
 const MAX_IMAGES = 6;
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
+const QA_PENDING_QUESTION_KEY = "lkm-qa-pending-question";
 
 const formModel = reactive<QaDraft>({
   title: "",
   situation: "",
   detail: "",
+  bountyEnabled: false,
   bountyPeople: null,
   bountyPerPerson: null,
+  bountyDays: 7,
+  urgent: false,
   images: [],
 });
 
@@ -290,8 +381,11 @@ const errors = reactive<Record<FieldKey, string>>({
   title: "",
   situation: "",
   detail: "",
+  bountyEnabled: "",
   bountyPeople: "",
   bountyPerPerson: "",
+  bountyDays: "",
+  urgent: "",
   images: "",
 });
 
@@ -304,10 +398,28 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const confirmOpen = ref(false);
 const toast = ref<string | null>(null);
 const mounted = ref(false);
+const publishing = ref(false);
+const createdQuestionId = ref<string | null>(null);
+const balance = ref<number | null>(null);
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 const totalBounty = computed<number>(() =>
-  computeTotalBounty(formModel.bountyPeople, formModel.bountyPerPerson),
+  formModel.bountyEnabled
+    ? computeTotalBounty(formModel.bountyPeople, formModel.bountyPerPerson)
+    : 0,
+);
+const bountyError = computed(() => {
+  if (!formModel.bountyEnabled || createdQuestionId.value) return "";
+  if (totalBounty.value > 1000) return t("page.qa.bountyTooHigh");
+  if (balance.value !== null && totalBounty.value > balance.value)
+    return t("page.qa.insufficientPoints");
+  return "";
+});
+watch(
+  () => formModel.bountyDays,
+  (days) => {
+    if (days !== 7) formModel.urgent = false;
+  },
 );
 
 // 打开前的 body overflow 先存下来：直接置 "" 会连带解掉同页其它浮层的滚动锁
@@ -324,13 +436,19 @@ watch(
   () => props.show,
   (open) => {
     if (open) {
+      void loadBalance();
       clearErrors();
-      const draft = loadDraft();
-      if (draft) {
-        Object.assign(formModel, draft);
-        void refreshImageUrls();
-      } else {
-        resetForm();
+      if (!createdQuestionId.value) {
+        const draft = loadDraft();
+        if (draft) {
+          const pending = localStorage.getItem(QA_PENDING_QUESTION_KEY);
+          if (pending && /^[0-9a-f-]{36}$/i.test(pending))
+            createdQuestionId.value = pending;
+          Object.assign(formModel, draft);
+          void refreshImageUrls();
+        } else {
+          resetForm();
+        }
       }
       if (!bodyLocked) {
         prevBodyOverflow = document.body.style.overflow;
@@ -366,14 +484,22 @@ function onKeydown(e: KeyboardEvent): void {
   }
 }
 
+async function loadBalance(): Promise<void> {
+  const result = await pointsApi.getBalance();
+  balance.value = result.isOk() ? result.value.balance : null;
+}
+
 function resetForm(): void {
   // 让进行中的 refreshImageUrls 作废，避免它把旧条目写回已清空的表单
   refreshToken++;
   formModel.title = "";
   formModel.situation = "";
   formModel.detail = "";
+  formModel.bountyEnabled = false;
   formModel.bountyPeople = null;
   formModel.bountyPerPerson = null;
+  formModel.bountyDays = 7;
+  formModel.urgent = false;
   formModel.images = [];
   Object.keys(imageUrls).forEach((key) => delete imageUrls[key]);
   clearErrors();
@@ -424,14 +550,19 @@ function isPositiveInt(value: number | null): boolean {
 
 function validate(): boolean {
   clearErrors();
-  if (!formModel.title.trim()) errors.title = t("page.qa.titleRequired");
-  if (!formModel.situation.trim())
-    errors.situation = t("page.qa.situationRequired");
-  if (!formModel.detail.trim()) errors.detail = t("page.qa.detailRequired");
-  if (!isPositiveInt(formModel.bountyPeople))
-    errors.bountyPeople = t("page.qa.bountyPeopleInvalid");
-  if (!isPositiveInt(formModel.bountyPerPerson))
-    errors.bountyPerPerson = t("page.qa.bountyPerPersonInvalid");
+  if (!createdQuestionId.value) {
+    if (!formModel.title.trim()) errors.title = t("page.qa.titleRequired");
+    if (!formModel.situation.trim())
+      errors.situation = t("page.qa.situationRequired");
+    if (!formModel.detail.trim()) errors.detail = t("page.qa.detailRequired");
+  }
+  if (formModel.bountyEnabled && !createdQuestionId.value) {
+    if (!isPositiveInt(formModel.bountyPeople) || formModel.bountyPeople! > 10)
+      errors.bountyPeople = t("page.qa.bountyPeopleInvalid");
+    if (!isPositiveInt(formModel.bountyPerPerson))
+      errors.bountyPerPerson = t("page.qa.bountyPerPersonInvalid");
+    if (bountyError.value) errors.bountyPerPerson = bountyError.value;
+  }
   return Object.values(errors).every((message) => message === "");
 }
 
@@ -489,6 +620,7 @@ function validateImageFile(file: File): string | null {
 }
 
 async function addImageFile(file: File): Promise<void> {
+  if (createdQuestionId.value) return;
   try {
     const ref = await saveImageBlob(file);
     const url = await resolveImageSrc(ref);
@@ -537,37 +669,72 @@ function handleSaveDraft(): void {
 }
 
 async function handlePublish(): Promise<void> {
-  if (!validate()) return;
+  if (publishing.value || !validate()) return;
+  publishing.value = true;
   const refs = [...formModel.images];
-  type CreatedQuestion = Awaited<ReturnType<typeof qaApi.createQuestion>>;
-  let created: CreatedQuestion = null;
   try {
-    created = await qaApi.createQuestion({
-      title: formModel.title,
-      situation: formModel.situation,
-      content: formModel.detail,
-      category: props.category ?? "help",
-      bountyPeople: formModel.bountyPeople ?? 1,
-      bountyPerPerson: formModel.bountyPerPerson ?? 0,
-    });
+    if (!createdQuestionId.value) {
+      const created = await qaApi.createQuestion({
+        title: formModel.title,
+        situation: formModel.situation,
+        content: formModel.detail,
+        category: props.category ?? "help",
+        bountyPeople: formModel.bountyEnabled
+          ? (formModel.bountyPeople ?? 1)
+          : 1,
+        bountyPerPerson: formModel.bountyEnabled
+          ? (formModel.bountyPerPerson ?? 0)
+          : 0,
+        bountyDays: formModel.bountyDays,
+        urgent: formModel.bountyEnabled && formModel.urgent,
+      });
+      if (!created) throw new Error("question creation failed");
+      createdQuestionId.value = created.id;
+      localStorage.setItem(QA_PENDING_QUESTION_KEY, created.id);
+      saveDraft();
+    }
+    const uploaded: string[] = [];
+    for (const ref of refs) {
+      try {
+        const blob = await getImageBlob(ref);
+        if (
+          blob &&
+          (await qaApi.uploadImage(createdQuestionId.value, ref.slice(4), blob))
+        )
+          uploaded.push(ref);
+      } catch {
+        // Keep the local image for a retry; the question itself is already published.
+      }
+    }
+    formModel.images = refs.filter((ref) => !uploaded.includes(ref));
+    await deleteImageBlobs(uploaded).catch(() => {});
+    if (formModel.images.length) {
+      saveDraft();
+      emit("published");
+      showToast(t("page.qa.imageUploadFailed"));
+      return;
+    }
   } catch (e) {
-    // 网络层 reject 不能变成未处理拒绝，且必须按失败处理
     console.warn("[AskQuestionModal] 发布失败:", e);
-  }
-  if (!created) {
-    // 失败时不能先清草稿/表单：用户的输入会连带丢光，只弹一句「加载失败」很不负责
-    showToast(t("common.loadFailed"));
+    showToast(t("page.qa.actionFailed"));
     return;
+  } finally {
+    publishing.value = false;
   }
+  createdQuestionId.value = null;
+  localStorage.removeItem(QA_PENDING_QUESTION_KEY);
   clearDraft();
   resetForm();
   showToast(t("page.qa.publishedToast"));
   emit("published");
   emit("update:show", false);
-  await deleteImageBlobs(refs);
 }
 
 function requestClose(): void {
+  if (createdQuestionId.value) {
+    emit("update:show", false);
+    return;
+  }
   confirmOpen.value = true;
 }
 

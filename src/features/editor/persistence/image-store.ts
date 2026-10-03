@@ -93,6 +93,13 @@ export async function saveImageBlob(
   return BLOB_REF_PREFIX + id;
 }
 
+/** QA 发布时读取本地草稿图片的原始 Blob，供上传到后端。 */
+export async function getImageBlob(src: string): Promise<Blob | null> {
+  const id = parseBlobRefId(src);
+  if (!id) return null;
+  return (await imageDb().images.get(id))?.blob ?? null;
+}
+
 const objectUrlCache = new Map<string, string>();
 // 正在生成 ObjectURL 的并发调用：同一 id 被多个渲染 effect 同时请求时，
 // 各自都会 createObjectURL 并 set，后写的覆盖先写的 → 前一个 URL 永久泄漏

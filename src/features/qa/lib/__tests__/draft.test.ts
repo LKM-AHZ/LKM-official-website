@@ -20,8 +20,11 @@ describe("parseDraft", () => {
       title: "t",
       situation: "",
       detail: "",
+      bountyEnabled: false,
       bountyPeople: null,
       bountyPerPerson: null,
+      bountyDays: 7,
+      urgent: false,
       images: [],
     });
   });
@@ -31,8 +34,11 @@ describe("parseDraft", () => {
       title: "",
       situation: "",
       detail: "",
+      bountyEnabled: false,
       bountyPeople: null,
       bountyPerPerson: null,
+      bountyDays: 7,
+      urgent: false,
       images: ["blob:a", "blob:b"],
     });
   });
@@ -44,8 +50,11 @@ describe("serializeDraft", () => {
       title: "t",
       situation: "s",
       detail: "d",
+      bountyEnabled: true,
       bountyPeople: 3,
       bountyPerPerson: 10,
+      bountyDays: 14,
+      urgent: false,
       images: ["blob:a", "blob:b"],
     };
     expect(parseDraft(serializeDraft(draft))).toEqual(draft);

@@ -28,6 +28,16 @@
       </button>
     </div>
 
+    <div class="flex justify-end">
+      <select
+        v-model="sortBy"
+        class="rounded-lg border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text"
+      >
+        <option value="newest">{{ t("page.qa.sortNewest") }}</option>
+        <option value="bounty">{{ t("page.qa.sortBounty") }}</option>
+      </select>
+    </div>
+
     <div v-if="loading" class="text-sm text-text-muted py-8 text-center">
       {{ t("common.loading") }}
     </div>
@@ -51,8 +61,16 @@
               {{
                 q.status === "accepted"
                   ? t("page.qa.resolved")
-                  : t("page.qa.unresolved")
+                  : q.status === "closed"
+                    ? t("page.qa.closed")
+                    : t("page.qa.unresolved")
               }}
+            </span>
+            <span
+              v-if="q.status === 'open' && q.urgent"
+              class="text-xs font-medium text-red-500"
+            >
+              {{ t("page.qa.urgentBadge") }}
             </span>
             <span
               v-if="q.bountyTotal > 0"
@@ -85,6 +103,13 @@
       >
         {{ t("page.qa.empty") }}
       </div>
+      <button
+        v-if="hasMore"
+        class="btn btn-ghost mx-auto block"
+        @click="loadMore"
+      >
+        {{ t("page.qa.loadMore") }}
+      </button>
     </div>
 
     <AskQuestionModal
@@ -98,7 +123,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { t } from "~/lib/i18n";
-import { qaApi, type QuestionSummary } from "~/lib/api/modules/qa";
+import { qaApi, type QaSort, type QuestionSummary } from "~/lib/api/modules/qa";
 import { buildUrl } from "~/lib/utils/paths";
 import AskQuestionModal from "./AskQuestionModal.vue";
 
@@ -113,22 +138,51 @@ const activeTab = ref<"help" | "volunteer">("help");
 const askModalOpen = ref(false);
 const loading = ref(true);
 const questions = ref<QuestionSummary[]>([]);
+const sortBy = ref<QaSort>("newest");
+const page = ref(1);
+const hasMore = ref(false);
+let requestToken = 0;
 const tabs = [
   { key: "help" as const, label: "page.qa.tabHelp" },
   { key: "volunteer" as const, label: "page.qa.tabVolunteer" },
 ];
 
-// 首页固定取 50 条；列表目前没有分页 UI，超出的问题暂时看不到（要支持时按 total/hasMore 加「加载更多」）
 const PAGE_SIZE = 50;
 
 async function load() {
+  const token = ++requestToken;
   loading.value = true;
-  questions.value = await qaApi.listQuestions(activeTab.value, 1, PAGE_SIZE);
+  const rows = await qaApi.listQuestions(
+    activeTab.value,
+    1,
+    PAGE_SIZE,
+    sortBy.value,
+  );
+  if (token !== requestToken) return;
+  questions.value = rows;
+  page.value = 1;
+  hasMore.value = rows.length === PAGE_SIZE;
   loading.value = false;
+}
+
+async function loadMore() {
+  const token = requestToken;
+  const next = page.value + 1;
+  const rows = await qaApi.listQuestions(
+    activeTab.value,
+    next,
+    PAGE_SIZE,
+    sortBy.value,
+  );
+  if (token !== requestToken) return;
+  questions.value.push(...rows);
+  page.value = next;
+  hasMore.value = rows.length === PAGE_SIZE;
 }
 
 onMounted(load);
 watch(activeTab, load);
+watch(sortBy, load);
 
 function formatTime(dateStr: string): string {
   const date = new Date(dateStr);

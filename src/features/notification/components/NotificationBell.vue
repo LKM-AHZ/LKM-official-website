@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue";
-import {
-  mockNotifications,
-  type MockNotification,
-} from "../data/mock-notifications";
+import { notificationApi, type SiteNotification } from "~/lib/api";
 import { t } from "~/lib/i18n";
+import { buildUrl } from "~/lib/utils/paths";
 import { useAuthStore } from "~/stores/auth";
 
 const props = withDefaults(defineProps<{ mobile?: boolean }>(), {
@@ -19,48 +17,102 @@ const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 
 const isOpen = ref(false);
-// 复制一份：直接持有模块级 mock 数组会让本组件与所有引用方共享同一份状态，
-// 将来任何原地修改都会泄漏到别的实例
-const notifications = ref<MockNotification[]>([...mockNotifications]);
+const notifications = ref<SiteNotification[]>([]);
+const unreadCount = ref(0);
+const loadFailed = ref(false);
+let refreshTimer: ReturnType<typeof setInterval> | undefined;
 
-const unreadCount = computed(
-  () => notifications.value.filter((n) => !n.isRead).length,
-);
+async function refresh() {
+  if (!isLoggedIn.value) return;
+  const [list, count] = await Promise.all([
+    notificationApi.list(),
+    notificationApi.unreadCount(),
+  ]);
+  if (!isLoggedIn.value) return;
+  loadFailed.value = list.isErr() || count.isErr();
+  if (list.isOk()) notifications.value = list.value.items;
+  if (count.isOk()) unreadCount.value = count.value.unread;
+}
+
+watch(isLoggedIn, (loggedIn) => {
+  if (loggedIn) void refresh();
+  else {
+    notifications.value = [];
+    unreadCount.value = 0;
+    isOpen.value = false;
+  }
+});
 
 function toggle() {
   isOpen.value = !isOpen.value;
+  if (isOpen.value) void refresh();
 }
 
-function markAsRead(id: string) {
-  notifications.value = notifications.value.map((n) =>
-    n.id === id ? { ...n, isRead: true } : n,
-  );
+async function markAsRead(notification: SiteNotification) {
+  if (!notification.read_at) {
+    const result = await notificationApi.markRead([notification.id]);
+    if (result.isOk()) {
+      notification.read_at = new Date().toISOString();
+      unreadCount.value = Math.max(0, unreadCount.value - 1);
+    }
+  }
+  const url = notification.payload.url;
+  if (
+    typeof url === "string" &&
+    url.startsWith("/") &&
+    !url.startsWith("//") &&
+    !url.includes("\\")
+  ) {
+    window.location.assign(buildUrl(url));
+  }
 }
 
-function markAllAsRead() {
+async function markAllAsRead() {
+  const result = await notificationApi.markRead([], true);
+  if (result.isErr()) return;
+  const now = new Date().toISOString();
   notifications.value = notifications.value.map((n) => ({
     ...n,
-    isRead: true,
+    read_at: n.read_at ?? now,
   }));
+  unreadCount.value = 0;
 }
 
-function getIcon(type: MockNotification["type"]): string {
+function getIcon(type: string): string {
   switch (type) {
-    case "reply":
+    case "content_commented":
+    case "comment_replied":
       return "material-symbols:chat-bubble-outline";
-    case "like":
+    case "content_liked":
       return "material-symbols:favorite-outline";
-    case "follow":
-      return "material-symbols:person-add-outline";
-    case "system":
-      return "material-symbols:campaign-outline";
-    case "file_approved":
+    case "qa_answer_accepted":
       return "material-symbols:check-circle-outline";
-    case "file_rejected":
-      return "material-symbols:cancel-outline";
     default:
       return "material-symbols:notifications-outline";
   }
+}
+
+function getTitle(type: string): string {
+  switch (type) {
+    case "content_liked":
+      return t("notification.contentLiked");
+    case "content_commented":
+      return t("notification.contentCommented");
+    case "comment_replied":
+      return t("notification.commentReplied");
+    case "qa_answer_accepted":
+      return t("notification.qaAccepted");
+    default:
+      return t("notification.system");
+  }
+}
+
+function getContent(n: SiteNotification): string {
+  const title = typeof n.payload.title === "string" ? n.payload.title : "";
+  if (n.type === "qa_answer_accepted" && typeof n.payload.points === "number") {
+    return `${title} · ${t("notification.qaAcceptedPoints", { count: n.payload.points })}`;
+  }
+  return title;
 }
 
 function timeAgo(dateStr: string): string {
@@ -88,11 +140,14 @@ function handleKeydown(e: KeyboardEvent) {
 
 onMounted(() => {
   authStore.restoreFromStorage();
+  if (isLoggedIn.value) void refresh();
+  refreshTimer = setInterval(() => void refresh(), 60_000);
   document.addEventListener("click", handleClickOutside);
   document.addEventListener("keydown", handleKeydown);
 });
 
 onUnmounted(() => {
+  if (refreshTimer) clearInterval(refreshTimer);
   document.removeEventListener("click", handleClickOutside);
   document.removeEventListener("keydown", handleKeydown);
 });
@@ -163,7 +218,13 @@ onUnmounted(() => {
 
       <!-- 无通知状态 -->
       <div
-        v-if="notifications.length === 0"
+        v-if="loadFailed && notifications.length === 0"
+        class="px-3 py-6 text-center text-sm text-neutral-400 dark:text-neutral-500"
+      >
+        {{ t("notification.loadFailed") }}
+      </div>
+      <div
+        v-else-if="notifications.length === 0"
         class="px-3 py-6 text-center text-sm text-neutral-400 dark:text-neutral-500"
       >
         {{ t("notification.empty") }}
@@ -175,14 +236,14 @@ onUnmounted(() => {
         :key="n.id"
         type="button"
         class="w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors group mb-0.5"
-        :class="{ 'opacity-60': n.isRead }"
-        @click="markAsRead(n.id)"
+        :class="{ 'opacity-60': n.read_at }"
+        @click="markAsRead(n)"
       >
         <!-- 图标容器 -->
         <span
           class="shrink-0 mt-0.5 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
           :class="
-            n.isRead
+            n.read_at
               ? 'bg-neutral-100 dark:bg-white/10 text-neutral-400 dark:text-neutral-400'
               : 'bg-primary/10 text-primary'
           "
@@ -195,12 +256,12 @@ onUnmounted(() => {
           <div
             class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate group-hover:text-primary transition-colors"
           >
-            {{ t(n.title) }}
+            {{ getTitle(n.type) }}
           </div>
           <div
             class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 line-clamp-2 leading-relaxed"
           >
-            {{ t(n.content) }}
+            {{ getContent(n) }}
           </div>
           <div class="text-xs text-neutral-400 dark:text-neutral-500/80 mt-1">
             {{ timeAgo(n.createdAt) }}
@@ -209,7 +270,7 @@ onUnmounted(() => {
 
         <!-- 未读原点提示 -->
         <span
-          v-if="!n.isRead"
+          v-if="!n.read_at"
           class="shrink-0 w-2 h-2 rounded-full bg-primary mt-2"
         ></span>
       </button>

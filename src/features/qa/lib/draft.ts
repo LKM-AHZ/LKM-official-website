@@ -2,8 +2,11 @@ export interface QaDraft {
   title: string;
   situation: string;
   detail: string;
+  bountyEnabled: boolean;
   bountyPeople: number | null;
   bountyPerPerson: number | null;
+  bountyDays: number;
+  urgent: boolean;
   images: string[];
 }
 
@@ -29,11 +32,24 @@ export function parseDraft(raw: string | null): QaDraft | null {
       title: typeof value.title === "string" ? value.title : "",
       situation: typeof value.situation === "string" ? value.situation : "",
       detail: typeof value.detail === "string" ? value.detail : "",
+      bountyEnabled:
+        typeof value.bountyEnabled === "boolean"
+          ? value.bountyEnabled
+          : nonNegativeNumber(value.bountyPerPerson) !== null &&
+            Number(value.bountyPerPerson) > 0,
       bountyPeople: (() => {
         const n = nonNegativeNumber(value.bountyPeople);
         return n === null ? null : Math.floor(n);
       })(),
       bountyPerPerson: nonNegativeNumber(value.bountyPerPerson),
+      bountyDays:
+        typeof value.bountyDays === "number" &&
+        Number.isInteger(value.bountyDays) &&
+        value.bountyDays >= 7 &&
+        value.bountyDays <= 90
+          ? value.bountyDays
+          : 7,
+      urgent: value.urgent === true,
       images: Array.isArray(value.images)
         ? value.images.filter(
             (item): item is string => typeof item === "string",

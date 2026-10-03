@@ -3,16 +3,19 @@
 // 后端 QuestionOut 为 snake_case 字段，这里在客户端层映射为 UI 使用的 camelCase 形状。
 // 读走通用 `get`（返回解包 ApiResp.data 的 Result），写走 `get/post`。
 
-import { get, post } from "../../http/client";
+import { get, getHttpAccessToken, post } from "../../http/client";
+import { apiFetch } from "../fetch";
 import type { PaginatedResponse } from "../types";
 
 export type { PaginatedResponse } from "../types";
 
 export type QaCategory = "help" | "volunteer";
+export type QaSort = "newest" | "bounty";
 
 /** 提问列表项展示形状（camelCase）。 */
 export interface QuestionSummary {
   id: string;
+  authorId: string;
   authorName: string;
   title: string;
   content: string;
@@ -22,6 +25,8 @@ export interface QuestionSummary {
   bountyPerPerson: number;
   bountyTotal: number;
   bountyDistributed: number;
+  bountyExpiresAt: string | null;
+  urgent: boolean;
   acceptedAnswerId: string | null;
   answerCount: number;
   createdAt: string;
@@ -49,6 +54,8 @@ export interface QuestionCreateInput {
   category?: QaCategory;
   bountyPeople: number;
   bountyPerPerson: number;
+  bountyDays: number;
+  urgent: boolean;
 }
 
 /** 后端 QuestionOut / QuestionDetail 的 snake_case 形状。 */
@@ -63,6 +70,8 @@ interface BackendQuestion {
   bounty_per_person: number;
   bounty_total: number;
   bounty_distributed: number;
+  bounty_expires_at: string | null;
+  urgent: boolean;
   status: string;
   category: QaCategory;
   accepted_answer_id: string | null;
@@ -100,6 +109,7 @@ function mapAnswer(a: BackendAnswer): QaAnswer {
 function mapQuestion(b: BackendQuestion): QuestionSummary {
   return {
     id: b.id,
+    authorId: b.author_id,
     authorName: b.author_name,
     title: b.title,
     content: b.content,
@@ -109,6 +119,8 @@ function mapQuestion(b: BackendQuestion): QuestionSummary {
     bountyPerPerson: b.bounty_per_person,
     bountyTotal: b.bounty_total,
     bountyDistributed: b.bounty_distributed,
+    bountyExpiresAt: b.bounty_expires_at ?? null,
+    urgent: b.urgent ?? false,
     acceptedAnswerId: b.accepted_answer_id,
     answerCount: b.answer_count,
     createdAt: b.created_at,
@@ -130,12 +142,14 @@ export const qaApi = {
     category?: QaCategory,
     page = 1,
     limit = 20,
+    sort: QaSort = "newest",
   ): Promise<QuestionSummary[]> {
     const res = await get<PaginatedResponse<BackendQuestion>>(
       "/api/v1/content/qa/questions",
       {
         page,
         limit,
+        sort,
         ...(category ? { category } : {}),
       },
     );
@@ -163,6 +177,8 @@ export const qaApi = {
       category: input.category ?? "help",
       bounty_people: input.bountyPeople,
       bounty_per_person: input.bountyPerPerson,
+      bounty_days: input.bountyDays,
+      urgent: input.urgent,
       images: [],
     });
     if (res.isErr()) return null;
@@ -180,5 +196,49 @@ export const qaApi = {
     );
     if (res.isErr()) return null;
     return mapAnswer(res.value);
+  },
+
+  async acceptAnswer(
+    questionId: string,
+    answerId: string,
+  ): Promise<QaAnswer | null> {
+    const res = await post<BackendAnswer>(
+      `/api/v1/content/qa/questions/${questionId}/accept`,
+      { answer_id: answerId },
+    );
+    return res.isOk() ? mapAnswer(res.value) : null;
+  },
+
+  async closeQuestion(questionId: string): Promise<QuestionSummary | null> {
+    const res = await post<BackendQuestion>(
+      `/api/v1/content/qa/questions/${questionId}/close`,
+      {},
+    );
+    return res.isOk() ? mapQuestion(res.value) : null;
+  },
+
+  async uploadImage(
+    questionId: string,
+    imageId: string,
+    image: Blob,
+  ): Promise<string | null> {
+    const form = new FormData();
+    form.append("file", image, "question-image");
+    form.append("image_id", imageId);
+    const token = getHttpAccessToken();
+    const response = await apiFetch(
+      `/api/v1/content/qa/questions/${questionId}/images`,
+      {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form,
+        timeout: 60_000,
+      },
+    );
+    if (response.isErr() || !response.value.ok) return null;
+    const payload = (await response.value.json()) as {
+      data?: { url?: string };
+    };
+    return payload.data?.url ?? null;
   },
 };
