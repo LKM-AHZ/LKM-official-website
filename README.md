@@ -36,6 +36,7 @@
 - [关于后端](#关于后端)
 - [安装后端](#安装后端)
 - [启动后端](#启动后端)
+- [关于postgresql](#关于postgresql)
 - [关于lkm-ahzlkm-official-static与其安装教程](#关于lkm-ahzlkm-official-static与其安装教程)
 
 ---
@@ -45,13 +46,17 @@
 理科迷（`LKM`）的官网基于 Astro 架构搭建，目前处于测试阶段，部分功能尚有不完善之处。若你有兴趣参与网站建设，欢迎加入技术委员会（QQ 群 `1104277319`）以更深入地交流。
 
 - 总仓库地址：[LKM-AHZ/LKM-official-website](https://github.com/LKM-AHZ/LKM-official-website)
+
 - 后端仓库地址：[LKM-AHZ/LKM-service: backend](https://github.com/LKM-AHZ/LKM-service)
 
 不过自2026/9/28日以来，官网被**笨蛋千寻**和**笨笨狐狸**拆了个稀碎，目前而言，网站分为如下六大板块，其余四个板块分别为：
 
 - 理科迷开发公约文档 : [LKM-AHZ/LKM-Documents](https://github.com/LKM-AHZ/LKM-Documents)
+
 - `LKM`适用于`VScode`的插件: [LKM-AHZ/LKM-on-VSCode](https://github.com/LKM-AHZ/LKM-on-VSCode)
-- 后独立于`LKM-official-website`的`http://127.0.0.1:4321`端口: [LKM-AHZ/LKM-official-static](https://github.com/LKM-AHZ/LKM-official-static)
+
+- 后独立于`LKM-official-website`的`http://127.0.0.1:4321`端口,也称作社区前端: [LKM-AHZ/LKM-official-static](https://github.com/LKM-AHZ/LKM-official-static)
+
 - `LKM`网站的本地开发与部署编排仓库：[LKM-AHZ/LKM-Website](https://github.com/LKM-AHZ/LKM-Website)
 
 如下，我介绍对网站的部署和开发。
@@ -115,6 +120,8 @@ pnpm run dev
 
 此时会输出 `$ astro dev`。随后打开浏览器（默认为 `Edge`）访问 <http://localhost:4321/> 即可看到目前的官网。
 
+- [返回标题](#lkm-新手指南--从零搭建并加入开发)
+
 ## 开发工具部署
 
 通常情况下我们选用 [VSCode](https://code.visualstudio.com/Download?_exp_download=fb315fc982) 进行开发。安装完 VSCode 后，需要在 VSCode 的插件商店中下载如下组件：
@@ -175,6 +182,8 @@ pnpm config set registry https://registry.npmmirror.com
 pnpm store prune
 pnpm install --network-concurrency=2 --fetch-timeout=60000
 ```
+
+- [返回标题](#lkm-新手指南--从零搭建并加入开发)
 
 ## 更新pnpm v12.6.0后遇到的错误
 
@@ -277,11 +286,13 @@ pnpm dev
 
 这是因为端口`http://127.0.0.1:4321`端口已从`LKM-AHZ/LKM-official-static`中独立拆分了出去，目前的官网并没有这份内容。
 
+- [返回标题](#lkm-新手指南--从零搭建并加入开发)
+
 ## 熟悉网站架构
 
 建议先熟悉一下项目的基本架构。例如要编写起始页的信息，具体位置在：
 
-`LKM-official-website\src\pages\official\index.astro`
+`LKM-official-website\src\pages\index.astro`
 
 ## 正式加入
 
@@ -353,6 +364,8 @@ pnpm exec prettier --write .
 （如果只是想单个统一，输入 `pnpm exec prettier --write (具体的文件路径)`）
 
 在全程无报错的情况下即可上传至仓库。
+
+- [返回标题](#lkm-新手指南--从零搭建并加入开发)
 
 ## 外置链接
 
@@ -493,6 +506,8 @@ uv run pytest -v
 
 则说明安装成功
 
+- [返回标题](#lkm-新手指南--从零搭建并加入开发)
+
 ## 启动后端
 
 如果你输入
@@ -574,6 +589,41 @@ cd LKM-official-website
 （就目前而言，后端貌似没什么作用）
 
 退出后端程序按`Ctrl+C`即可。
+
+## 关于`postgresql`
+
+如果你需要安装`postgresql`，`postgresql`的官方网址为
+
+[官网](www.postgresql.org)
+
+进入后，点击下方的`Download→`按钮
+
+在`PostgreSQL Downloads`标题下面的`Packages and Installers`下选择
+
+`Windows`
+
+然后你会看见`Windows installers`
+
+下面的第一个子标题`Interactive installer by EDB`
+
+第一段`Download the installer`单击后进入
+
+https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+
+页面
+
+在`Windows x86-64`页面单击那个蓝色的小图标即可开始下载
+具体的教程参见
+
+https://www.runoob.com/postgresql/windows-install-postgresql.html
+
+此外，如果你中途不小心把向导关闭了
+
+启动应用程序的文件在`pgAdmin 4\runtime\pgAdmin4.exe` 处
+
+或者你直接在开始菜单中搜索pgAdmin4也行。
+
+- [返回标题](#lkm-新手指南--从零搭建并加入开发)
 
 ## 关于`LKM-AHZ/LKM-official-static`与其安装教程
 
