@@ -27,6 +27,7 @@
 - [下载过程中易遇到的问题](#下载过程中易遇到的问题)
 - [更新pnpm v12.6.0后遇到的错误](#更新pnpm-v1260后遇到的错误)
 - [关于后续的更新](#关于后续的更新)
+- [关于合并分支时冲突的情况](#关于合并分支时冲突的情况)
 - [启动开发平台](#启动开发平台)
 - [熟悉网站架构](#熟悉网站架构)
 - [正式加入](#正式加入)
@@ -271,7 +272,7 @@ Merge branch 'main' of github.com:LKM-AHZ/LKM-official-website
 #
 # Lines starting with '#' will be ignored, and an empty message aborts
 # the commit.
-~                                                               ......                                                              
+~                                                               ......
 ```
 
 这是 `Git `在让你填写这次合并提交`merge commit`的说明，默认用 `Vim` 打开，你可以在下方的输入栏中输入如下指令
@@ -285,9 +286,12 @@ Merge branch 'main' of github.com:LKM-AHZ/LKM-official-website
 ```cmd
 :q!
 ```
+
 取消这次合并,不保存退出
 
 一般而言我们建议选择前者。
+
+完成后退出重新提交即可。
 
 ## 启动开发平台
 
