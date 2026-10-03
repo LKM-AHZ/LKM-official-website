@@ -260,6 +260,35 @@ pnpm install --network-concurrency=2 --fetch-timeout=60000
 
 如看到类似的输出 `Already up to date`，则说明更新已完成。
 
+## 关于合并分支时冲突的情况
+
+在你更改完并选择提交到仓库的途中，如果在这期间有其他人比你先一步完成了对仓库的提交，则仓库会驳回你的提交，此时你再想提交，就会进入这个页面
+
+```cmd
+Merge branch 'main' of github.com:LKM-AHZ/LKM-official-website
+# Please enter a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+~                                                               ......                                                              
+```
+
+这是 `Git `在让你填写这次合并提交`merge commit`的说明，默认用 `Vim` 打开，你可以在下方的输入栏中输入如下指令
+
+```cmd
+:wq
+```
+
+保留这次合并,保存并退出
+
+```cmd
+:q!
+```
+取消这次合并,不保存退出
+
+一般而言我们建议选择前者。
+
 ## 启动开发平台
 
 确保完成上述**所有**步骤后，重新启用一个终端，输入并执行：
