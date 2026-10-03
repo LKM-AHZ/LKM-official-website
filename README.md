@@ -39,6 +39,7 @@
 - [启动后端](#启动后端)
 - [关于postgresql](#关于postgresql)
 - [关于lkm-ahzlkm-official-static与其安装教程](#关于lkm-ahzlkm-official-static与其安装教程)
+- [关于如何完整地访问目前网站的内容](#关于如何完整地访问目前网站的内容)
 
 ---
 
@@ -317,7 +318,9 @@ pnpm dev
 (Use `node --trace-warnings ...` to show where the warning was created)
 ```
 
-这是因为端口`http://127.0.0.1:4321`端口已从`LKM-AHZ/LKM-official-static`中独立拆分了出去，目前的官网并没有这份内容。
+这是因为端口`http://127.0.0.1:4321`端口已从`LKM-AHZ/LKM-official-static`中独立拆分了出去
+
+目前的官网并没有这份内容。有关进一步的说明，详见[关于如何完整地访问目前网站的内容](#关于如何完整地访问目前网站的内容)
 
 - [返回标题](#lkm-新手指南--从零搭建并加入开发)
 
@@ -684,3 +687,31 @@ pnpm dev
 即可，`pnpm dev`就是启动开发平台的命令，不过别忘了，如果嫌下载太慢，别忘了在`pnpm install`后面加参数`--network-concurrency=2 --fetch-timeout=60000`
 
 对于LKM-AHZ/LKM-official-static，如果在启动开发平台的途中遇到错误，请联系笨笨狐狸`QQ 3674887670`或是在群里`1104277319`反馈。
+
+## 关于如何完整地访问目前网站的内容
+
+截止至目前为止，如果你想在本地体验完整的网站内容
+
+除去后端的因素，确保你按照本教程成功**安装**并**验证**了
+
+- [LKM-official-website](#启动开发平台)和 [LKM-official-static](#关于lkm-ahzlkm-official-static与其安装教程)   后
+
+我们注意到
+
+如果只启动`LKM-official-website`
+
+那么在你所打开的`http://127.0.0.1:4321`中的任何页面的交互是没有任何响应的
+
+如果只启动LKM-official-static并访问`http://127.0.0.1:4321`
+
+会显示
+
+http://localhost:4321   拒绝访问
+
+那么真相就只有一个了
+
+你需要先启动`LKM-official-static`
+
+再启动`LKM-official-website`   即可访问到完整的内容
+
+后续的开发工作将基于此进行。
