@@ -51,12 +51,20 @@ const SaveStatusIndicator = memo(function SaveStatusIndicator({
   return (
     <div className="flex items-center gap-2 text-xs px-1">
       {wordCount !== undefined && (
-        <span>{t("editor.saveStatus.words", { count: wordCount })}</span>
+        <span className="rte-stat-count">
+          {t("editor.saveStatus.words", { count: wordCount })}
+        </span>
       )}
       {charCount !== undefined && (
-        <span>{t("editor.saveStatus.chars", { count: charCount })}</span>
+        <span className="rte-stat-count">
+          {t("editor.saveStatus.chars", { count: charCount })}
+        </span>
       )}
-      <span className={`rte-save-status ${config.className} gap-1`}>
+      <span
+        className={`rte-save-status ${config.className} gap-1`}
+        role="status"
+        aria-live="polite"
+      >
         {config.dot && (
           <span
             className={`inline-block w-1.5 h-1.5 rounded-full bg-current ${config.dot}`}

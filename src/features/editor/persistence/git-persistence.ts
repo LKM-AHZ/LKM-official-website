@@ -84,6 +84,9 @@ export function createGitPersistence(
   // 新建文档的 filepath 只在首次保存时确定、之后复用：
   // 若每次都重新派生，第二次自动保存会因为上一版文件已存在而再取一个新名字，产生一堆重复文件。
   let newDocFilepath: string | null = null;
+  // Git 文件接口不返回文档修订号；编辑会话内跟踪已成功保存的版本，
+  // 避免每次 loadDocument 都回 1，令下一次自动保存误报版本冲突。
+  const sessionVersions = new Map<string, number>();
 
   return {
     // id 即 series 内 filepath；从内容首行 "# " 取 title
@@ -110,7 +113,7 @@ export function createGitPersistence(
         updatedAt: now,
         lastModified: now,
         status: "published",
-        version: 1,
+        version: sessionVersions.get(id) ?? 1,
       } as DocumentData;
     },
 
@@ -143,6 +146,7 @@ export function createGitPersistence(
           );
           return false;
         }
+        sessionVersions.set(doc.id, doc.version);
         return true;
       } catch (err) {
         // 网络层 reject 不能逃逸成未处理拒绝
