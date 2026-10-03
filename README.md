@@ -694,7 +694,7 @@ pnpm dev
 
 除去后端的因素，确保你按照本教程成功**安装**并**验证**了
 
-- [LKM-official-website](#启动开发平台)和 [LKM-official-static](#关于lkm-ahzlkm-official-static与其安装教程)   后
+- [LKM-official-website](#启动开发平台)和 [LKM-official-static](#关于lkm-ahzlkm-official-static与其安装教程) 后
 
 我们注意到
 
@@ -706,12 +706,12 @@ pnpm dev
 
 会显示
 
-http://localhost:4321   拒绝访问
+http://localhost:4321 拒绝访问
 
 那么真相就只有一个了
 
 你需要先启动`LKM-official-static`
 
-再启动`LKM-official-website`   即可访问到完整的内容
+再启动`LKM-official-website` 即可访问到完整的内容
 
 后续的开发工作将基于此进行。
