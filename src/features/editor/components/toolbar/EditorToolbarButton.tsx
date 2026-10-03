@@ -7,6 +7,7 @@ interface EditorToolbarButtonProps {
   title: string;
   /** 可选：纯动作按钮（插表格/图片等）不传，避免被读屏当成「未按下的切换键」 */
   isActive?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
@@ -15,6 +16,7 @@ const EditorToolbarButton = memo(function EditorToolbarButton({
   label,
   title,
   isActive,
+  disabled,
   onClick,
 }: EditorToolbarButtonProps) {
   return (
@@ -28,6 +30,7 @@ const EditorToolbarButton = memo(function EditorToolbarButton({
       onClick={onClick}
       aria-label={label}
       aria-pressed={isActive}
+      disabled={disabled}
     >
       {icon}
     </button>

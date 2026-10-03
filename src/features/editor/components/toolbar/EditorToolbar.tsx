@@ -1,11 +1,12 @@
-import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
-import type { ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, memo, useId } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { Icon } from "@iconify/react";
 import type { Editor } from "@tiptap/core";
 import EditorToolbarButton from "./EditorToolbarButton";
 import MathEditor from "../nodes/MathEditor";
 import ImageUrlPopover from "../dialogs/ImageUrlPopover";
 import LinkEditPopover from "../dialogs/LinkEditPopover";
+import TableInsertMenu from "../dialogs/TableInsertMenu";
 import { t } from "~/lib/i18n";
 
 interface MathDraft {
@@ -280,34 +281,50 @@ function buildToolbarItems(): ToolbarItemDef[] {
 }
 
 const ITEMS = buildToolbarItems();
-const GROUPS = [
-  "heading",
+const HEADING_ITEMS = ITEMS.filter((item) => item.group === "heading");
+const INSERT_ITEMS = ITEMS.filter(
+  (item) => item.group === "insert" || item.group === "component",
+);
+const MOBILE_KEYS = new Set(["bold", "italic", "link", "bulletList", "undo"]);
+const TOGGLE_KEYS = new Set([
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "code",
+  "link",
+  "blockquote",
+  "bulletList",
+  "orderedList",
+  "taskList",
+  "codeBlock",
+]);
+const MOBILE_MORE_GROUPS = [
   "format",
-  "insert",
-  "block",
   "list",
+  "block",
+  "insert",
   "component",
   "history",
 ] as const;
-// Groups that go into "more" menu on small screens
-const MORE_GROUPS = new Set(["component", "history"]);
 
 interface EditorToolbarProps {
   editor: Editor;
 }
 
 export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<
+    "heading" | "insert" | "more" | null
+  >(null);
   const [mathDraft, setMathDraft] = useState<MathDraft | null>(null);
   const [imageOpen, setImageOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
-  const mobileBarRef = useRef<HTMLDivElement>(null);
-  const moreBtnRef = useRef<HTMLDivElement>(null);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const [tableOpen, setTableOpen] = useState(false);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
   // 本组件被 memo 包裹且 editor 引用稳定，选区/内容变化不会触发重渲染，
-  // isActive 会停留在挂载或上次点击时的状态。订阅 editor 事务并用 tick 参与 memo 依赖，
-  // 按钮高亮与移动端自动滚动才能跟随光标。
+  // isActive 会停留在挂载或上次点击时的状态，订阅事务后才能跟随光标。
   const [renderTick, setRenderTick] = useState(0);
   useEffect(() => {
     const rerender = (): void => setRenderTick((n) => n + 1);
@@ -331,31 +348,35 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
         }
       } else if (item.key === "image") {
         setImageOpen(true);
+      } else if (item.key === "table") {
+        setTableOpen(true);
       } else {
         item.action(editor);
       }
-      // 移动端「更多」菜单：执行完动作要收起，否则弹层一直盖住正文
-      setMoreOpen(false);
+      setOpenMenu(null);
     },
     [editor],
   );
 
-  // 「更多」菜单的收起：点击触发器/菜单以外的区域或按 Escape 都要关
+  const toggleMenu = (menu: "heading" | "insert" | "more"): void => {
+    setTableOpen(false);
+    setOpenMenu(openMenu === menu ? null : menu);
+  };
+
+  // 点击工具栏以外或按 Escape 收起菜单，避免菜单挡住正文。
   useEffect(() => {
-    if (!moreOpen) return;
+    if (!openMenu && !tableOpen) return;
     const onPointerDown = (e: MouseEvent): void => {
-      const target = e.target as Node;
-      // 触发器与菜单是两个容器（见下方布局注释），都算「内部」
-      if (
-        moreBtnRef.current?.contains(target) ||
-        moreMenuRef.current?.contains(target)
-      ) {
-        return;
+      if (!toolbarRef.current?.contains(e.target as Node)) {
+        setOpenMenu(null);
+        setTableOpen(false);
       }
-      setMoreOpen(false);
     };
     const onKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") setMoreOpen(false);
+      if (e.key === "Escape") {
+        setOpenMenu(null);
+        setTableOpen(false);
+      }
     };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -363,134 +384,191 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [moreOpen]);
+  }, [openMenu, tableOpen]);
 
-  // 移动端：当前激活按钮变化时自动滚动到可视区域（rAF + 卸载时取消上一次）
-  useEffect(() => {
-    const bar = mobileBarRef.current;
-    if (!bar || window.innerWidth >= 768) return;
-    const scrollActive = (): void => {
-      const activeBtn = bar.querySelector(".is-active") as HTMLElement | null;
-      if (activeBtn) {
-        activeBtn.scrollIntoView({
-          block: "nearest",
-          inline: "nearest",
-          behavior: "smooth",
-        });
+  const currentHeading = HEADING_ITEMS.find((item) => item.isActive(editor));
+  // renderTick 由 editor 事务更新，确保选区变化后菜单和按钮状态同步。
+  void renderTick;
+
+  const renderButton = (item: ToolbarItemDef): ReactElement => (
+    <EditorToolbarButton
+      key={item.key}
+      icon={item.icon}
+      label={item.label}
+      title={item.title}
+      isActive={TOGGLE_KEYS.has(item.key) ? item.isActive(editor) : undefined}
+      disabled={
+        item.key === "undo"
+          ? !editor.can().undo()
+          : item.key === "redo"
+            ? !editor.can().redo()
+            : false
       }
-    };
-    const raf = requestAnimationFrame(scrollActive);
-    return () => cancelAnimationFrame(raf);
-  }, [editor.state.selection]);
-
-  const desktopContent = useMemo(
-    () =>
-      GROUPS.map((group) => {
-        const items = ITEMS.filter((i) => i.group === group);
-        if (items.length === 0) return null;
-        return (
-          <div
-            key={group}
-            className="flex items-center gap-0.5 border-r border-surface-3 pr-1 mr-1 last:border-r-0 last:pr-0 last:mr-0"
-          >
-            {items.map((item) => (
-              <EditorToolbarButton
-                key={item.key}
-                icon={item.icon}
-                label={item.label}
-                title={item.title}
-                isActive={item.isActive(editor)}
-                onClick={() => dispatchAction(item)}
-              />
-            ))}
-          </div>
-        );
-      }),
-    [editor, dispatchAction, renderTick],
+      onClick={() => dispatchAction(item)}
+    />
   );
 
-  const mobileContent = useMemo(
-    () =>
-      GROUPS.filter((g) => !MORE_GROUPS.has(g)).map((group) => {
-        const items = ITEMS.filter((i) => i.group === group);
-        if (items.length === 0) return null;
-        return (
-          <div
-            key={group}
-            className="flex items-center gap-0.5 shrink-0 border-r border-surface-3 pr-0.5 mr-0.5 last:border-r-0 last:pr-0 last:mr-0"
-          >
-            {items.map((item) => (
-              <EditorToolbarButton
-                key={item.key}
-                icon={item.icon}
-                label={item.label}
-                title={item.title}
-                isActive={item.isActive(editor)}
-                onClick={() => dispatchAction(item)}
-              />
-            ))}
-          </div>
-        );
-      }),
-    [editor, dispatchAction, renderTick],
-  );
-
-  const moreItems = useMemo(
-    () =>
-      GROUPS.filter((g) => MORE_GROUPS.has(g)).map((group) => (
-        <div key={group} className="mb-1 last:mb-0">
-          <div className="text-xs text-deep-text/50 px-1 mb-0.5">
-            {group === "component" ? t("editor.component") : t("editor.action")}
-          </div>
-          <div className="flex flex-wrap gap-0.5">
-            {ITEMS.filter((i) => i.group === group).map((item) => (
-              <EditorToolbarButton
-                key={item.key}
-                icon={item.icon}
-                label={item.label}
-                title={item.title}
-                isActive={item.isActive(editor)}
-                onClick={() => dispatchAction(item)}
-              />
-            ))}
-          </div>
-        </div>
-      )),
-    [editor, dispatchAction, renderTick],
+  const renderMenuItem = (item: ToolbarItemDef): ReactElement => (
+    <button
+      key={item.key}
+      type="button"
+      className={`rte-toolbar-menu-item ${item.isActive(editor) ? "is-active" : ""}`}
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => dispatchAction(item)}
+      aria-pressed={
+        item.group === "heading" || TOGGLE_KEYS.has(item.key)
+          ? item.isActive(editor)
+          : undefined
+      }
+      disabled={
+        item.key === "redo"
+          ? !editor.can().redo()
+          : item.key === "undo"
+            ? !editor.can().undo()
+            : false
+      }
+    >
+      {item.icon}
+      <span>{item.label}</span>
+    </button>
   );
 
   return (
-    <div className="rte-toolbar relative">
-      <div className="hidden md:flex flex-wrap items-center gap-x-1 gap-y-0.5 p-2">
-        {desktopContent}
-      </div>
-
-      <div
-        ref={mobileBarRef}
-        className="flex md:hidden items-center gap-x-0.5 p-1.5 overflow-x-auto scrollbar-none"
-      >
-        {mobileContent}
-        <div ref={moreBtnRef} className="relative shrink-0">
+    <div ref={toolbarRef} className="rte-toolbar">
+      <div className="rte-toolbar-primary">
+        <button
+          type="button"
+          className={`rte-toolbar-select ${currentHeading ? "is-active" : ""}`}
+          aria-label={t("editor.textStyle")}
+          aria-haspopup="true"
+          aria-expanded={openMenu === "heading"}
+          aria-controls={`${menuId}-heading`}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => toggleMenu("heading")}
+        >
+          <span>{currentHeading?.label ?? t("editor.paragraph")}</span>
+          {icon16("lucide:chevron-down")}
+        </button>
+        <div className="rte-toolbar-group rte-toolbar-desktop">
+          {ITEMS.filter((item) => item.group === "format").map(renderButton)}
+        </div>
+        <div className="rte-toolbar-group rte-toolbar-mobile">
+          {ITEMS.filter(
+            (item) => MOBILE_KEYS.has(item.key) && item.group === "format",
+          ).map(renderButton)}
+        </div>
+        <div className="rte-toolbar-group rte-toolbar-desktop">
+          {ITEMS.filter((item) => item.group === "list").map(renderButton)}
+          {ITEMS.filter((item) => item.group === "block").map(renderButton)}
+        </div>
+        <div className="rte-toolbar-group rte-toolbar-mobile">
+          {ITEMS.filter(
+            (item) => MOBILE_KEYS.has(item.key) && item.group === "list",
+          ).map(renderButton)}
+        </div>
+        <div className="rte-toolbar-group rte-toolbar-desktop">
+          {renderButton(ITEMS.find((item) => item.key === "link")!)}
           <button
             type="button"
-            className={`rte-btn rte-btn--ghost rte-btn--sm gap-1 ${moreOpen ? "is-active" : ""}`}
+            className="rte-toolbar-select rte-toolbar-insert"
+            aria-haspopup="true"
+            aria-expanded={openMenu === "insert"}
+            aria-controls={`${menuId}-insert`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => toggleMenu("insert")}
+          >
+            {icon16("lucide:plus")}
+            <span>{t("editor.insert")}</span>
+            {icon16("lucide:chevron-down")}
+          </button>
+        </div>
+        <div className="rte-toolbar-group rte-toolbar-desktop">
+          {ITEMS.filter((item) => item.group === "history").map(renderButton)}
+        </div>
+        <div className="rte-toolbar-group rte-toolbar-mobile">
+          {ITEMS.filter(
+            (item) =>
+              MOBILE_KEYS.has(item.key) &&
+              (item.group === "insert" || item.group === "history"),
+          ).map(renderButton)}
+          <button
+            type="button"
+            className="rte-toolbar-btn"
             aria-label={t("common.more")}
             aria-haspopup="true"
-            aria-expanded={moreOpen}
-            onClick={() => setMoreOpen(!moreOpen)}
+            aria-expanded={openMenu === "more"}
+            aria-controls={`${menuId}-more`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => toggleMenu("more")}
           >
             {icon16("lucide:ellipsis")}
           </button>
         </div>
       </div>
-      {/* 「更多」菜单必须是滚动容器的兄弟节点：父级 overflow-x-auto 会把 overflow-y 也算成
-          auto，菜单留在里面会被裁剪/跟着横滚，浮不到工具栏下方 */}
-      {moreOpen && (
+      {openMenu === "heading" && (
         <div
-          ref={moreMenuRef}
-          className="absolute top-full right-2 mt-1 z-40 bg-page-bg border border-surface-3 rounded-lg shadow-lg p-2 min-w-[200px] rte-dropdown md:hidden"
+          id={`${menuId}-heading`}
+          className="rte-toolbar-popover rte-toolbar-popover--heading rte-dropdown"
         >
-          {moreItems}
+          <button
+            type="button"
+            className={`rte-toolbar-menu-item ${!currentHeading ? "is-active" : ""}`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              editor.chain().focus().setParagraph().run();
+              setOpenMenu(null);
+            }}
+            aria-pressed={!currentHeading}
+          >
+            {icon16("lucide:type")}
+            <span>{t("editor.paragraph")}</span>
+          </button>
+          {HEADING_ITEMS.map(renderMenuItem)}
+        </div>
+      )}
+      {openMenu === "insert" && (
+        <div
+          id={`${menuId}-insert`}
+          className="rte-toolbar-popover rte-toolbar-popover--insert rte-dropdown"
+        >
+          {INSERT_ITEMS.filter((item) => item.key !== "link").map(
+            renderMenuItem,
+          )}
+        </div>
+      )}
+      {openMenu === "more" && (
+        <div
+          id={`${menuId}-more`}
+          className="rte-toolbar-popover rte-toolbar-popover--more rte-dropdown"
+        >
+          {MOBILE_MORE_GROUPS.map((group) => {
+            const items = ITEMS.filter(
+              (item) => item.group === group && !MOBILE_KEYS.has(item.key),
+            );
+            if (!items.length) return null;
+            return (
+              <div key={group} className="rte-toolbar-menu-section">
+                <span className="rte-toolbar-menu-heading">
+                  {t(`editor.toolbarGroup.${group}`)}
+                </span>
+                {items.map(renderMenuItem)}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {tableOpen && (
+        <div className="rte-toolbar-popover rte-toolbar-popover--table rte-dropdown">
+          <TableInsertMenu
+            onInsert={(rows, cols) =>
+              editor
+                .chain()
+                .focus()
+                .insertTable({ rows, cols, withHeaderRow: true })
+                .run()
+            }
+            onClose={() => setTableOpen(false)}
+          />
         </div>
       )}
       {mathDraft && (

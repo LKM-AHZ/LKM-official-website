@@ -105,6 +105,25 @@ describe("document-store slug 贯通", () => {
     expect("slug" in s).toBe(true);
   });
 
+  it("本地适配器连续保存时保留递增版本号", async () => {
+    const { createDocument } = await import("../document-store");
+    const { createLocalPersistence } = await import("../index");
+    const created = createDocument("连续编辑");
+    if (!created.isOk()) return;
+    const adapter = createLocalPersistence();
+    const first = { ...created.value, version: 2, contentMdx: "AB" };
+
+    expect(await adapter.saveDocument(first)).toBe(true);
+    expect((await adapter.loadDocument(first.id))?.version).toBe(2);
+
+    const second = { ...first, version: 3, contentMdx: "A" };
+    expect(await adapter.saveDocument(second)).toBe(true);
+    expect(await adapter.loadDocument(first.id)).toMatchObject({
+      version: 3,
+      contentMdx: "A",
+    });
+  });
+
   async function updateWithSlug(id: string, slug: string): Promise<void> {
     const { updateDocument } = await import("../document-store");
     updateDocument(id, { slug, status: "published" });

@@ -11,7 +11,6 @@ import type {
 import {
   getDocument,
   listDocuments as listDocumentsFromStore,
-  updateDocument,
   upsertDocument,
   deleteDocument as deleteDocumentFromStore,
 } from "./document-store";
@@ -47,13 +46,8 @@ export function createLocalPersistence(): PersistenceAdapter {
     // 未预期的异常若以 reject 冒出去，调用方只等 boolean，就变成未处理拒绝
     saveDocument: async (doc: DocumentData): Promise<boolean> => {
       try {
-        const existing = getDocument(doc.id);
-        if (existing) {
-          const result = updateDocument(doc.id, doc);
-          return result.isOk();
-        }
-        // 文档不存在时必须按调用方给的 id 落库（含正文/编辑器 JSON/版本），
-        // 否则调用方 id 被丢弃、正文全丢，却仍返回 true 让上层以为保存成功。
+        // 这里保存的是完整文档（包括自动保存递增后的 version）。
+        // updateDocument 是局部 patch，会故意忽略 version，导致第二次编辑误报版本冲突。
         const result = upsertDocument(doc);
         return result.isOk();
       } catch (e) {

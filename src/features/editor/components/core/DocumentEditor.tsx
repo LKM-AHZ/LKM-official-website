@@ -66,6 +66,7 @@ interface DocumentEditorProps {
 }
 
 import { computeTextMetrics } from "../../engine/text-metrics";
+import { tableFromTsv } from "../../engine/paste-table";
 import {
   findImageByOrgName,
   saveImageBlob,
@@ -228,33 +229,10 @@ export default function DocumentEditor({
         // TSV 粘贴
         const text = event.clipboardData?.getData("text/plain");
         if (text && text.includes("\t")) {
-          const rows = text
-            .trim()
-            .split("\n")
-            .map((r) => r.split("\t"));
-          if (rows.length > 1 && rows[0].length > 1) {
-            const { insertTable } = view.state.schema.nodes;
-            if (insertTable) {
-              view.dispatch(
-                view.state.tr.replaceSelectionWith(
-                  insertTable.create(
-                    null,
-                    Array.from({ length: rows.length }, (_, r) =>
-                      view.state.schema.nodes.tableRow.create(
-                        null,
-                        rows[r].map((cell) =>
-                          view.state.schema.nodes.tableCell.create(
-                            null,
-                            view.state.schema.text(cell),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-              return true;
-            }
+          const table = tableFromTsv(view.state.schema, text);
+          if (table) {
+            view.dispatch(view.state.tr.replaceSelectionWith(table));
+            return true;
           }
         }
         return false;
@@ -485,8 +463,9 @@ export default function DocumentEditor({
   useEffect(() => {
     if (!editor || !docId || documentId === "new") return;
     (async () => {
-      const loaded = await adapter.loadDocument(docId);
-      const doc: DocumentData | null = loaded ?? (await loadDraft());
+      // loadDraft 同时初始化自动保存使用的 baseVersion；直接调用 adapter 会让
+      // 已有文档仍以初始版本 1 保存，从而把首次修改误判为冲突。
+      const doc: DocumentData | null = await loadDraft();
       if (!doc) return;
 
       if (doc.contentMdx && doc.contentMdx.trim().length > 0) {
@@ -808,7 +787,7 @@ export default function DocumentEditor({
             charCount={mode === "richtext" ? charCount : undefined}
             wordCount={mode === "richtext" ? wordCount : undefined}
           />
-          <div className="flex items-center gap-1 md:gap-2">
+          <div className="rte-status-actions flex items-center gap-1 md:gap-2">
             {editor && <ExportMenu editor={editor} />}
             {docId && <BackupMenu adapter={adapter} />}
             {editor && (

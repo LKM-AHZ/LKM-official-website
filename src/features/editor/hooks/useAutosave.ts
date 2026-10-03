@@ -83,10 +83,15 @@ export function useAutoSave(
       fallback && typeof fallback === "object"
         ? (fallback as { content?: Record<string, unknown> }).content
         : null;
-    if (fallbackContent && doc.editorJson) {
+    if (fallbackContent) {
       console.info("[autosave] 从兜底备份恢复文档:", documentId);
-      clearFallback(documentId);
-      return { ...doc, editorJson: fallbackContent };
+      const fallbackMdx = (fallback as { mdxContent?: unknown }).mdxContent;
+      return {
+        ...doc,
+        editorJson: fallbackContent,
+        // 源码模式的兜底含 MDX；普通编辑若只剩 JSON，则优先恢复 JSON。
+        contentMdx: typeof fallbackMdx === "string" ? fallbackMdx : "",
+      };
     }
     return doc;
   }, [documentId, adapter]);
@@ -160,16 +165,21 @@ export function useAutoSave(
           contentMdx: mdxContent,
           editorJson: content,
           status: existing?.status ?? "draft",
+          slug: existing?.slug,
           version: newVersion,
           lastModified: now,
           createdAt: existing?.createdAt ?? now,
           updatedAt: now,
         };
 
-        await adapter.saveDocument(doc);
+        const saved = await adapter.saveDocument(doc);
+        if (saved === false) {
+          throw new Error("saveDocument 未成功");
+        }
 
         baseVersionRef.current = newVersion;
         lastSavedJsonHashRef.current = saveKey;
+        clearFallback(documentId);
         setSaveStatus("saved");
         hasUnsavedRef.current = false;
         savedCallbackRef.current?.();
