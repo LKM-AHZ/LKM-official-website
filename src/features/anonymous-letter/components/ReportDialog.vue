@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { addReported } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { t } from "~/lib/i18n";
 
 const props = defineProps({
@@ -74,9 +75,20 @@ watch(
   },
 );
 
-function submit() {
+async function submit() {
   // 调用方漏绑 :target-id 时不得写入空 id 的举报记录（required 只校验「传了」，挡不住空串）
   if (!props.targetId) return;
+  try {
+    await treeholeApi.report(
+      props.targetType as "letter" | "bottle" | "wish",
+      props.targetId,
+      selected.value,
+      detail.value,
+    );
+  } catch (error) {
+    showTreeholeError(error);
+    return;
+  }
   addReported(props.targetId);
   emit("reported");
   emit("update:modelValue", false);

@@ -97,12 +97,7 @@
       <!-- 瀑布流信件广场 -->
       <section v-if="filtered.length" class="masonry">
         <div v-for="l in filtered" :key="l.id" class="masonry-col">
-          <LetterCard
-            :letter="l"
-            @like="onLike"
-            @fav="onFav"
-            @same-type="onSameType"
-          />
+          <LetterCard :letter="l" @like="onLike" @same-type="onSameType" />
         </div>
       </section>
       <EmptyState
@@ -145,7 +140,7 @@ import {
   randomQuote,
   moodKey,
 } from "../stores/constants";
-import { getLetters, toggleFavorite } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { buildUrl } from "~/lib/utils/paths";
 import { t } from "~/lib/i18n";
 
@@ -173,23 +168,23 @@ function typeLoop() {
   }
 }
 
-function load() {
-  const all = getLetters();
-  allLetters.value = all.filter(
-    (l) => l.status === "published" && l.privacy === "public",
-  );
+async function load() {
+  try {
+    allLetters.value = await treeholeApi.letters("public");
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 
-// 跨标签页同步。swup 换页时 document 是复用的，不在卸载时摘掉监听会每次导航漏一个
-// （闭包还持有本组件的 ref，等于把已卸载的组件一直留在内存里）
+// 回到标签页时刷新服务端广场。
 onMounted(() => {
   load();
   typeLoop();
-  window.addEventListener("storage", load);
+  window.addEventListener("focus", load);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("storage", load);
+  window.removeEventListener("focus", load);
 });
 
 // 每封信只分配一次随机权重（本次会话内不再变），保证「随机」排序稳定、不随重算抖动
@@ -260,15 +255,13 @@ function onSameType(cat) {
   activeMood.value = "";
 }
 
-function onLike(letter) {
-  letter.liked = !letter.liked;
-  letter.likes = Math.max(0, (letter.likes || 0) + (letter.liked ? 1 : -1));
-  load();
-}
-function onFav({ letter }) {
-  const added = toggleFavorite(letter.id);
-  letter.favorites = Math.max(0, (letter.favorites || 0) + (added ? 1 : -1));
-  load();
+async function onLike(letter) {
+  try {
+    const result = await treeholeApi.react(letter.id, "like");
+    Object.assign(letter, result.letter);
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 </script>
 

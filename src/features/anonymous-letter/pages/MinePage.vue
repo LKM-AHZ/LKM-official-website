@@ -85,6 +85,14 @@
           :title="t('treehole.mine.emptyLettersTitle')"
           :sub="t('treehole.mine.emptyLettersSub')"
         />
+        <div v-if="legacyLetters.length" class="legacy-letters glass">
+          <b>{{ t("treehole.mine.legacyTitle") }}</b>
+          <p>{{ t("treehole.mine.legacyDesc") }}</p>
+          <div v-for="l in legacyLetters" :key="l.id" class="item">
+            <p class="item-content">{{ l.content }}</p>
+            <small>{{ timeText(l.createdAt) }}</small>
+          </div>
+        </div>
       </section>
 
       <!-- 收藏夹 -->
@@ -155,13 +163,12 @@ import EmptyState from "../components/EmptyState.vue";
 import BackupPanel from "../components/BackupPanel.vue";
 import { getCategory } from "../stores/constants";
 import {
-  getLetters,
-  getFavorites,
   getDrafts,
-  deleteLetter,
+  getLetters as getLegacyLetters,
   deleteDraft,
   resetDrafts,
 } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { buildUrl } from "~/lib/utils/paths";
 import { t } from "~/lib/i18n";
 
@@ -169,19 +176,21 @@ const tab = ref("letters");
 const letters = ref([]);
 const favList = ref([]);
 const drafts = ref([]);
+const legacyLetters = ref([]);
 
-function load() {
-  const all = getLetters();
-  letters.value = all;
-  const favIds = getFavorites();
-  // 复用同一次读取结果：原实现再 getLetters() 一次会把整份列表从 localStorage 重新解析一遍
-  favList.value = all.filter(
-    (l) =>
-      favIds.includes(l.id) &&
-      l.status === "published" &&
-      l.privacy === "public",
-  );
+async function load() {
+  try {
+    const [mine, publicLetters] = await Promise.all([
+      treeholeApi.letters("mine"),
+      treeholeApi.letters("public"),
+    ]);
+    letters.value = mine;
+    favList.value = publicLetters.filter((l) => l.favorited);
+  } catch (error) {
+    showTreeholeError(error);
+  }
   drafts.value = getDrafts();
+  legacyLetters.value = getLegacyLetters();
 }
 
 onMounted(() => {
@@ -217,10 +226,14 @@ function timeText(ts) {
   });
 }
 
-function removeLetter(l) {
+async function removeLetter(l) {
   if (confirm(t("treehole.mine.confirmDeleteLetter"))) {
-    deleteLetter(l.id);
-    load();
+    try {
+      await treeholeApi.deleteLetter(l.id);
+      await load();
+    } catch (error) {
+      showTreeholeError(error);
+    }
   }
 }
 
@@ -432,6 +445,18 @@ function resetDraftsConfirm() {
 }
 
 /* ---------- 响应式 ---------- */
+.legacy-letters {
+  margin-top: 20px;
+  padding: 18px;
+}
+.legacy-letters > p {
+  color: var(--text-sub);
+  font-size: 13px;
+  margin: 6px 0 14px;
+}
+.legacy-letters .item + .item {
+  margin-top: 8px;
+}
 @media (max-width: 1024px) {
   .masonry {
     columns: 2;

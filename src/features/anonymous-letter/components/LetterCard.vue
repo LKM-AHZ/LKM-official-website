@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { getCategory, getPaper, getTag, moodKey } from "../stores/constants";
-import { toggleFavorite, getFavorites } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import ReportDialog from "./ReportDialog.vue";
 import { t } from "~/lib/i18n";
 
@@ -114,7 +114,7 @@ function tagEmoji(k) {
 const expanded = ref(false);
 const isLong = computed(() => (props.letter.content || "").length > 90);
 
-const isFav = ref(getFavorites().includes(props.letter.id));
+const isFav = computed(() => !!props.letter.favorited);
 // 收藏数单一来源：onFav 已经同步了 props.letter.favorites，这里不能再叠加 isFav（会 +2）
 const favCount = computed(() => props.letter.favorites || 0);
 
@@ -164,13 +164,14 @@ function onLike() {
     });
   }
 }
-function onFav() {
-  const added = toggleFavorite(props.letter.id);
-  isFav.value = added;
-  props.letter.favorites = Math.max(
-    0,
-    (props.letter.favorites || 0) + (added ? 1 : -1),
-  );
+async function onFav() {
+  try {
+    const result = await treeholeApi.react(props.letter.id, "favorite");
+    Object.assign(props.letter, result.letter);
+    emit("fav", { letter: props.letter, added: result.active });
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 async function onCopy() {
   const text = `${t("treehole.letterCard.sharePrefix")}${t(category.value.label)} · ${props.letter.codename}\n${props.letter.content}`;

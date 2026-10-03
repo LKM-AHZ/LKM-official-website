@@ -348,15 +348,13 @@ import {
   moodKey,
 } from "../stores/constants";
 import {
-  addLetter,
-  updateLetter,
   saveDraft,
-  getLetters,
   canPost,
   logPost,
   logMood,
   saveSketch,
 } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { randomCodename } from "../utils/codename";
 import { useApp } from "../stores/app";
 import { buildUrl } from "~/lib/utils/paths";
@@ -564,7 +562,7 @@ function buildLetter() {
 }
 
 // ---------- 提交 ----------
-function submitLetter() {
+async function submitLetter() {
   if (!validate()) return;
   submitting.value = true;
 
@@ -575,9 +573,9 @@ function submitLetter() {
 
   try {
     if (editId.value) {
-      updateLetter(editId.value, letter);
+      await treeholeApi.editLetter(editId.value, letter);
     } else {
-      addLetter(letter);
+      await treeholeApi.createLetter(letter);
       logPost();
     }
 
@@ -594,8 +592,8 @@ function submitLetter() {
         : t("treehole.write.publishedTip2");
 
     showSuccess.value = true;
-  } catch {
-    alert(t("treehole.write.submitFail"));
+  } catch (error) {
+    showTreeholeError(error);
   } finally {
     submitting.value = false;
   }
@@ -634,7 +632,7 @@ function writeAnother() {
 }
 
 // ---------- 初始化 ----------
-onMounted(() => {
+onMounted(async () => {
   genCaptcha();
 
   // 尝试从 URL 参数加载编辑的信件
@@ -642,8 +640,13 @@ onMounted(() => {
     const params = new URLSearchParams(window.location.search);
     const letterId = params.get("edit");
     if (letterId) {
-      const letters = getLetters();
-      const found = letters.find((l) => l.id === letterId);
+      let found;
+      try {
+        const letters = await treeholeApi.letters("mine");
+        found = letters.find((l) => l.id === letterId);
+      } catch (error) {
+        showTreeholeError(error);
+      }
       if (found) {
         editId.value = found.id;
         content.value = found.content || "";

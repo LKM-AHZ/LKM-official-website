@@ -132,7 +132,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
-import { getWishes, addWish, lightWish, saveWishes } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { t } from "~/lib/i18n";
 
 const wishes = ref([]);
@@ -142,27 +142,34 @@ const editDialogOpen = ref(false);
 const editText = ref("");
 const editId = ref("");
 
-function loadWishes() {
-  wishes.value = getWishes();
+async function loadWishes() {
+  try {
+    wishes.value = await treeholeApi.wishes();
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 
-function onMake() {
+async function onMake() {
   if (!makeText.value.trim()) return;
-  addWish({
-    id: "wish_" + Date.now(),
-    text: makeText.value.trim(),
-    lights: 0,
-    createdAt: Date.now(),
-    ownerId: "me_local",
-  });
+  try {
+    await treeholeApi.createWish(makeText.value.trim());
+  } catch (error) {
+    showTreeholeError(error);
+    return;
+  }
   makeText.value = "";
   makeDialogOpen.value = false;
-  loadWishes();
+  await loadWishes();
 }
 
-function onLight(w) {
-  lightWish(w.id);
-  loadWishes();
+async function onLight(w) {
+  try {
+    await treeholeApi.lightWish(w.id);
+    await loadWishes();
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 
 function openEdit(w) {
@@ -171,25 +178,28 @@ function openEdit(w) {
   editDialogOpen.value = true;
 }
 
-function onSaveEdit() {
+async function onSaveEdit() {
   if (!editText.value.trim()) return;
-  const list = getWishes();
-  const idx = list.findIndex((w) => w.id === editId.value);
-  if (idx > -1) {
-    list[idx].text = editText.value.trim();
-    saveWishes(list);
+  try {
+    await treeholeApi.editWish(editId.value, editText.value.trim());
+  } catch (error) {
+    showTreeholeError(error);
+    return;
   }
   editDialogOpen.value = false;
   editText.value = "";
   editId.value = "";
-  loadWishes();
+  await loadWishes();
 }
 
-function onDelete(w) {
+async function onDelete(w) {
   if (!confirm(t("treehole.wish.confirmDeleteWish"))) return;
-  const list = getWishes().filter((x) => x.id !== w.id);
-  saveWishes(list);
-  loadWishes();
+  try {
+    await treeholeApi.deleteWish(w.id);
+    await loadWishes();
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 
 function formatDate(ts) {
@@ -222,19 +232,18 @@ function cardColor(id) {
   return COLORS[Math.abs(hash) % COLORS.length];
 }
 
-// 跨标签页同步：storage 事件只在**其它**标签页改写 localStorage 时触发，本地写入不触发（无回环）。
-// 不做 key 过滤：本页只读愿望列表，多读一次代价可忽略，过滤反而会因 key 前缀变化而失效
-function onStorage() {
+// 回到标签页时刷新服务端愿望。
+function onFocus() {
   loadWishes();
 }
 
 onMounted(() => {
   loadWishes();
-  window.addEventListener("storage", onStorage);
+  window.addEventListener("focus", onFocus);
 });
 
 onUnmounted(() => {
-  window.removeEventListener("storage", onStorage);
+  window.removeEventListener("focus", onFocus);
 });
 </script>
 

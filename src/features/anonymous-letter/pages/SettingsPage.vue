@@ -178,7 +178,7 @@
           </div>
           <div class="rate-pick">
             <button
-              v-for="n in [1, 2, 3, 5, 10]"
+              v-for="n in [1, 2, 3]"
               :key="n"
               class="theme-opt"
               :class="{ active: state.settings.rateLimit === n }"

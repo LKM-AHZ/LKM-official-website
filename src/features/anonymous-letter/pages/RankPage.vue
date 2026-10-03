@@ -54,14 +54,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { getCategory } from "../stores/constants";
-import { getLetters } from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { t } from "~/lib/i18n";
 
 const range = ref("today");
+const letters = ref([]);
+onMounted(async () => {
+  try {
+    letters.value = await treeholeApi.letters("public");
+  } catch (error) {
+    showTreeholeError(error);
+  }
+});
 
 const rankList = computed(() => {
   const now = Date.now();
@@ -69,7 +77,7 @@ const rankList = computed(() => {
   // 每次重算都重新读存储：onMounted 快照在「同会话内别处改了信件」后不会更新，
   // 榜单会长期停在打开页面那一刻的数据（storage 非响应式，只能按需重读）。
   return (
-    getLetters()
+    letters.value
       .filter((l) => l.status === "published" && l.privacy === "public")
       .filter((l) => {
         // createdAt 可能缺失（编辑已有信件时 WritePage 会写入 undefined），

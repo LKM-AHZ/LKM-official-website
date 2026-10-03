@@ -3392,13 +3392,13 @@ export const enFlat = {
   "treehole.audio.rainLabel": "White noise · rain",
   "treehole.backToSite": "Back to main site",
   "treehole.backup.desc":
-    "Export all local data as a JSON file, which can be imported on this device or another browser to restore.",
+    "Backs up local drafts, settings and older browser data only; new server posts are not included.",
   "treehole.backup.exportBtn": "⬇️ Export backup",
   "treehole.backup.exported": "Backup file exported ✅",
   "treehole.backup.importBtn": "⬆️ Import backup",
   "treehole.backup.importFail": "Import failed: incorrect file format ❌",
   "treehole.backup.importSuccess":
-    "Import successful, effective after page refresh ✅",
+    "Local data imported; refresh to apply. It is not uploaded to the server ✅",
   "treehole.backup.title": "💾 Data backup",
   "treehole.bottle.cancel": "Cancel",
   "treehole.bottle.from": "—— {name}",
@@ -3510,6 +3510,9 @@ export const enFlat = {
   "treehole.mine.emptyLettersSub":
     "Go to the write page and send your first anonymous letter~",
   "treehole.mine.emptyLettersTitle": "No letters published yet",
+  "treehole.mine.legacyDesc":
+    "These letters remain in this browser and can be exported below; they are not uploaded automatically.",
+  "treehole.mine.legacyTitle": "Older browser-only letters",
   "treehole.mine.statDrafts": "Local drafts",
   "treehole.mine.statFavs": "Favorite treeholes",
   "treehole.mine.statLetters": "Published letters",
@@ -3520,11 +3523,11 @@ export const enFlat = {
   "treehole.mine.statusScheduled": "Scheduled",
   "treehole.mine.statusSealed": "Sealed",
   "treehole.mine.subtitle":
-    "All your published letters, favorites and drafts, stored in your local browser.",
+    "Letters and favorites are stored on the server for this anonymous session; drafts stay in this browser.",
   "treehole.mine.tabDrafts": "Local drafts",
   "treehole.mine.tabFavs": "Favorites",
   "treehole.mine.tabLetters": "My letters",
-  "treehole.mine.title": "🌙 My Local Treehole",
+  "treehole.mine.title": "🌙 My Treehole",
   "treehole.moodChart.emptySub":
     "Pick a mood tag while writing to enable stats",
   "treehole.moodChart.emptyTitle": "No mood records this month",
@@ -3551,13 +3554,13 @@ export const enFlat = {
   "treehole.privacy.li1Prefix": "Your letters are stored in the ",
   "treehole.privacy.li1Suffix":
     ", with a randomly generated anonymous codename",
-  "treehole.privacy.li2Bold": "not collect any real personal information",
-  "treehole.privacy.li2Prefix": "The system does ",
-  "treehole.privacy.li2Suffix": "; login is optional",
-  "treehole.privacy.li3Bold": "admin review",
-  "treehole.privacy.li3Prefix":
-    "All submissions are shown publicly only after ",
-  "treehole.privacy.li3Suffix": "",
+  "treehole.privacy.li2Bold": "name or account",
+  "treehole.privacy.li2Prefix": "No ",
+  "treehole.privacy.li2Suffix":
+    " is required; this browser manages posts through an anonymous session",
+  "treehole.privacy.li3Bold": "immediately",
+  "treehole.privacy.li3Prefix": "Public letters appear ",
+  "treehole.privacy.li3Suffix": "; you can report inappropriate content",
   "treehole.privacy.li4Bold": "mutually anonymous",
   "treehole.privacy.li4Prefix": "Random treehole and replies are ",
   "treehole.privacy.li4Suffix": ", no identity is exposed",
@@ -3578,7 +3581,7 @@ export const enFlat = {
   "treehole.random.poolHint2": "{count} public letters are waiting to meet you",
   "treehole.random.replyLabel": "Write an anonymous reply to {name}",
   "treehole.random.replyNote":
-    "🌿 Mutually anonymous: neither side sees the other's true identity; the reply arrives randomly in the other's local inbox.",
+    "🌿 Mutually anonymous: neither side sees the other's identity; replies arrive in both anonymous sessions.",
   "treehole.random.replyPlaceholder":
     "Your reply is also anonymous and won't reveal your identity…",
   "treehole.random.replySent": "Your reply has been delivered anonymously 💌",
@@ -3617,9 +3620,9 @@ export const enFlat = {
   "treehole.settings.fontSizeDesc": "Three levels, applied site-wide",
   "treehole.settings.fontSmall": "Small",
   "treehole.settings.footNote":
-    "Data is stored on the server (anonymous + optional login); posts are shown after review.",
+    "Letters, replies, bottles and wishes are stored on the server; drafts and display settings stay in this browser.",
   "treehole.settings.footNoteLocal":
-    "Data is stored in your local browser (anonymous); posts are published to the server database.",
+    "Letters, replies, bottles and wishes are stored on the server; drafts and display settings stay in this browser.",
   "treehole.settings.highContrast": "👁️ High-contrast eye-care mode",
   "treehole.settings.highContrastDesc":
     "Deepen text contrast to relieve eye strain",
@@ -3630,9 +3633,11 @@ export const enFlat = {
   "treehole.settings.muteDesc":
     "Pause floating particles and transition animations",
   "treehole.settings.privacy": "🔒 Privacy statement",
-  "treehole.settings.privacyDesc": "View how your data is stored locally",
-  "treehole.settings.rateLimit": "🚦 Submission rate limit (custom)",
-  "treehole.settings.rateLimitDesc": "Up to {count} letters per minute",
+  "treehole.settings.privacyDesc":
+    "View how anonymous posts and data are stored",
+  "treehole.settings.rateLimit": "🚦 Local posting reminder",
+  "treehole.settings.rateLimitDesc":
+    "Up to {count} per minute locally; server limit is 3",
   "treehole.settings.subtitle": "Personalize your treehole experience.",
   "treehole.settings.themeDay": "☀️ Day",
   "treehole.settings.themeMode": "🌗 Theme mode",

@@ -116,14 +116,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
-import {
-  getBottles,
-  addBottle,
-  pickBottle,
-  markBottlePicked,
-} from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { t } from "~/lib/i18n";
 
 const allBottles = ref([]);
@@ -135,22 +130,35 @@ const throwDialogOpen = ref(false);
 const throwText = ref("");
 
 const bottleCount = computed(() => {
-  // 与 storage.pickBottle() 的过滤口径一致（自己扔的瓶子不算可捞）：否则会出现
-  // 「计数 > 0、按钮可点，点下去 pickBottle() 返回 null、界面毫无反应」
+  // 自己扔的瓶子不算可捞。
   return allBottles.value.filter((b) => !b.picked && b.ownerId !== "me_local")
     .length;
 });
 
-function loadBottles() {
-  allBottles.value = getBottles();
+async function loadBottles() {
+  try {
+    allBottles.value = await treeholeApi.bottles();
+    return true;
+  } catch (error) {
+    showTreeholeError(error);
+    return false;
+  }
 }
 
-function pickBottleHandler() {
+async function pickBottleHandler() {
+  if (picking.value) return;
   picking.value = true;
+  if (!(await loadBottles())) {
+    picking.value = false;
+    return;
+  }
   replyText.value = "";
   replyOk.value = false;
   setTimeout(() => {
-    const bottle = pickBottle();
+    const pool = allBottles.value.filter(
+      (b) => !b.picked && b.ownerId !== "me_local",
+    );
+    const bottle = pool[Math.floor(Math.random() * pool.length)] || null;
     currentBottle.value = bottle;
     picking.value = false;
     // 竞态下可能已无可捞的瓶子：重载列表把计数与禁用态拉回真实值（面向用户的提示文案需新增
@@ -159,11 +167,21 @@ function pickBottleHandler() {
   }, 500);
 }
 
-function sendBottleReply() {
+async function sendBottleReply() {
   if (!currentBottle.value || !replyText.value.trim()) return;
-  markBottlePicked(currentBottle.value.id, replyText.value.trim());
+  try {
+    await treeholeApi.replyBottle(
+      currentBottle.value.id,
+      replyText.value.trim(),
+    );
+  } catch (error) {
+    showTreeholeError(error);
+    await loadBottles();
+    currentBottle.value = null;
+    return;
+  }
   replyOk.value = true;
-  loadBottles();
+  await loadBottles();
   setTimeout(() => {
     currentBottle.value = null;
     replyText.value = "";
@@ -177,19 +195,17 @@ function closeThrowDialog() {
   throwText.value = "";
 }
 
-function throwBottle() {
+async function throwBottle() {
   if (!throwText.value.trim()) return;
-  addBottle({
-    id: "bottle_" + Date.now(),
-    text: throwText.value.trim(),
-    from: t("treehole.bottle.stranger"),
-    createdAt: Date.now(),
-    picked: false,
-    ownerId: "me_local",
-  });
+  try {
+    await treeholeApi.createBottle(throwText.value.trim());
+  } catch (error) {
+    showTreeholeError(error);
+    return;
+  }
   throwText.value = "";
   throwDialogOpen.value = false;
-  loadBottles();
+  await loadBottles();
 }
 
 function formatDate(ts) {
@@ -204,7 +220,9 @@ function formatDate(ts) {
 
 onMounted(() => {
   loadBottles();
+  window.addEventListener("focus", loadBottles);
 });
+onBeforeUnmount(() => window.removeEventListener("focus", loadBottles));
 </script>
 
 <style scoped>

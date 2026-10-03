@@ -130,17 +130,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import EmptyState from "../components/EmptyState.vue";
-import {
-  getReplies,
-  appendMessage,
-  recallMessage,
-  blockConversation,
-  clearConversation,
-  deleteConversation,
-} from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { t } from "~/lib/i18n";
 
 const conversations = ref([]);
@@ -152,10 +145,25 @@ const active = computed(
   () => conversations.value.find((c) => c.id === activeId.value) || null,
 );
 
+async function loadConversations(silent = false) {
+  try {
+    conversations.value = await treeholeApi.conversations();
+    if (!conversations.value.some((c) => c.id === activeId.value)) {
+      activeId.value = conversations.value[0]?.id || "";
+    }
+  } catch (error) {
+    if (!silent) showTreeholeError(error);
+  }
+}
+
+let refreshTimer;
 onMounted(() => {
-  conversations.value = getReplies();
-  if (conversations.value.length) activeId.value = conversations.value[0].id;
+  loadConversations();
+  refreshTimer = setInterval(() => {
+    if (!document.hidden) loadConversations(true);
+  }, 10000);
 });
+onBeforeUnmount(() => clearInterval(refreshTimer));
 
 function lastMsg(c) {
   // 导入的备份只校验到「是数组」这一层，历史 schema 的会话可能缺 messages/peerCodename
@@ -186,45 +194,58 @@ function onEnter() {
   send();
 }
 
-function send() {
+async function send() {
   if (!text.value.trim() || !active.value) return;
-  const msg = {
-    // 同毫秒内连发两条会撞 id（Date.now + 两位随机数的空间太小），重复 id 会破坏查找/编辑/撤回
-    id: `m_${crypto.randomUUID()}`,
-    from: "me",
-    text: text.value.trim(),
-    at: Date.now(),
-  };
-  appendMessage(activeId.value, msg);
-  conversations.value = getReplies();
+  try {
+    await treeholeApi.sendMessage(activeId.value, text.value.trim());
+    await loadConversations();
+  } catch (error) {
+    showTreeholeError(error);
+    return;
+  }
   text.value = "";
   nextTick(scrollBottom);
 }
 
-function recall(convId, msg) {
-  recallMessage(convId, msg.id);
-  conversations.value = getReplies();
+async function recall(convId, msg) {
+  try {
+    await treeholeApi.recallMessage(convId, msg.id);
+    await loadConversations();
+  } catch (error) {
+    showTreeholeError(error);
+  }
 }
 
-function blockConv() {
+async function blockConv() {
   if (confirm(t("treehole.messages.confirmBlock"))) {
-    blockConversation(activeId.value);
-    conversations.value = getReplies();
+    try {
+      await treeholeApi.blockConversation(activeId.value);
+      await loadConversations();
+    } catch (error) {
+      showTreeholeError(error);
+    }
   }
 }
 
-function clearConvConfirm() {
+async function clearConvConfirm() {
   if (confirm(t("treehole.messages.confirmClear"))) {
-    clearConversation(activeId.value);
-    conversations.value = getReplies();
+    try {
+      await treeholeApi.clearConversation(activeId.value);
+      await loadConversations();
+    } catch (error) {
+      showTreeholeError(error);
+    }
   }
 }
 
-function delConvConfirm() {
+async function delConvConfirm() {
   if (confirm(t("treehole.messages.confirmDelete"))) {
-    deleteConversation(activeId.value);
-    conversations.value = getReplies();
-    activeId.value = conversations.value[0]?.id || "";
+    try {
+      await treeholeApi.deleteConversation(activeId.value);
+      await loadConversations();
+    } catch (error) {
+      showTreeholeError(error);
+    }
   }
 }
 

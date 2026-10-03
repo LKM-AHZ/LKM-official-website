@@ -110,14 +110,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import { getCategory, getPaper, moodKey } from "../stores/constants";
-import {
-  getLetters,
-  getOrCreateConversation,
-  appendMessage,
-} from "../stores/storage";
+import { treeholeApi, showTreeholeError } from "../stores/api";
 import { useApp } from "../stores/app";
 import { t, getLocale } from "~/lib/i18n";
 
@@ -129,16 +125,26 @@ const replyText = ref("");
 const replyFontLarge = ref(false);
 const replySent = ref(false);
 
-// 数据源做成 ref：原写法 computed 里直接读 localStorage（无响应式依赖），Vue 会永久缓存首次结果，
-// 池子大小与空态提示不会再随数据变化重算；改成依赖 ref 后每次挂载/替换数据都会重算
-const letters = ref(getLetters());
+// 服务端信件池保持响应式，抽取时重新加载。
+const letters = ref([]);
+async function loadLetters() {
+  try {
+    const [publicLetters, randomLetters] = await Promise.all([
+      treeholeApi.letters("public"),
+      treeholeApi.letters("random"),
+    ]);
+    letters.value = [...publicLetters, ...randomLetters].filter(
+      (l) => !l.isMine,
+    );
+    return true;
+  } catch (error) {
+    showTreeholeError(error);
+    return false;
+  }
+}
+onMounted(loadLetters);
 
-const poolCount = computed(
-  () =>
-    letters.value.filter(
-      (l) => l.status === "published" && l.privacy === "public",
-    ).length,
-);
+const poolCount = computed(() => letters.value.length);
 
 const catInfo = computed(() => {
   if (!current.value) return { emoji: "💌", label: "" };
@@ -163,18 +169,20 @@ const replyFontSize = computed(() => {
 let pickTimer = null;
 let replySentTimer = null;
 
-function pickRandom() {
+async function pickRandom() {
   // 防重入：「换一封」等入口没有 disabled 保护，连点会让多个定时器竞态覆盖 current
   if (picking.value) return;
-  const all = getLetters();
-  const pool = all.filter(
-    (l) => l.status === "published" && l.privacy === "public",
-  );
-  if (!pool.length) {
-    current.value = null;
+  picking.value = true;
+  if (!(await loadLetters())) {
+    picking.value = false;
     return;
   }
-  picking.value = true;
+  const pool = letters.value;
+  if (!pool.length) {
+    current.value = null;
+    picking.value = false;
+    return;
+  }
   replyText.value = "";
   replySent.value = false;
   // slight delay for animation feel
@@ -189,19 +197,14 @@ function toggleReplyFont() {
   replyFontLarge.value = !replyFontLarge.value;
 }
 
-function sendReply() {
+async function sendReply() {
   if (!current.value || !replyText.value.trim()) return;
-  const conv = getOrCreateConversation(
-    "random_" + current.value.id,
-    current.value.codename || t("treehole.anonymous"),
-    current.value.id,
-  );
-  appendMessage(conv.id, {
-    id: "msg_" + Date.now(),
-    text: replyText.value.trim(),
-    from: "me",
-    createdAt: Date.now(),
-  });
+  try {
+    await treeholeApi.replyLetter(current.value.id, replyText.value.trim());
+  } catch (error) {
+    showTreeholeError(error);
+    return;
+  }
   replyText.value = "";
   replySent.value = true;
   clearTimeout(replySentTimer);

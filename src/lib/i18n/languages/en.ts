@@ -2418,15 +2418,15 @@ export const en = {
       lowPerfDesc: "Disable heavy effects and particles for smoothness",
       mute: "🔕 Mute site-wide animations",
       muteDesc: "Pause floating particles and transition animations",
-      rateLimit: "🚦 Submission rate limit (custom)",
-      rateLimitDesc: "Up to {count} letters per minute",
+      rateLimit: "🚦 Local posting reminder",
+      rateLimitDesc: "Up to {count} per minute locally; server limit is 3",
       privacy: "🔒 Privacy statement",
-      privacyDesc: "View how your data is stored locally",
+      privacyDesc: "View how anonymous posts and data are stored",
       view: "View",
       footNote:
-        "Data is stored on the server (anonymous + optional login); posts are shown after review.",
+        "Letters, replies, bottles and wishes are stored on the server; drafts and display settings stay in this browser.",
       footNoteLocal:
-        "Data is stored in your local browser (anonymous); posts are published to the server database.",
+        "Letters, replies, bottles and wishes are stored on the server; drafts and display settings stay in this browser.",
     },
 
     privacy: {
@@ -2438,12 +2438,13 @@ export const en = {
       li1Prefix: "Your letters are stored in the ",
       li1Bold: "server database",
       li1Suffix: ", with a randomly generated anonymous codename",
-      li2Prefix: "The system does ",
-      li2Bold: "not collect any real personal information",
-      li2Suffix: "; login is optional",
-      li3Prefix: "All submissions are shown publicly only after ",
-      li3Bold: "admin review",
-      li3Suffix: "",
+      li2Prefix: "No ",
+      li2Bold: "name or account",
+      li2Suffix:
+        " is required; this browser manages posts through an anonymous session",
+      li3Prefix: "Public letters appear ",
+      li3Bold: "immediately",
+      li3Suffix: "; you can report inappropriate content",
       li4Prefix: "Random treehole and replies are ",
       li4Bold: "mutually anonymous",
       li4Suffix: ", no identity is exposed",
@@ -2520,9 +2521,12 @@ export const en = {
     },
 
     mine: {
-      title: "🌙 My Local Treehole",
+      title: "🌙 My Treehole",
       subtitle:
-        "All your published letters, favorites and drafts, stored in your local browser.",
+        "Letters and favorites are stored on the server for this anonymous session; drafts stay in this browser.",
+      legacyTitle: "Older browser-only letters",
+      legacyDesc:
+        "These letters remain in this browser and can be exported below; they are not uploaded automatically.",
       statLetters: "Published letters",
       statFavs: "Favorite treeholes",
       statDrafts: "Local drafts",
@@ -2565,11 +2569,12 @@ export const en = {
 
     backup: {
       title: "💾 Data backup",
-      desc: "Export all local data as a JSON file, which can be imported on this device or another browser to restore.",
+      desc: "Backs up local drafts, settings and older browser data only; new server posts are not included.",
       exportBtn: "⬇️ Export backup",
       importBtn: "⬆️ Import backup",
       exported: "Backup file exported ✅",
-      importSuccess: "Import successful, effective after page refresh ✅",
+      importSuccess:
+        "Local data imported; refresh to apply. It is not uploaded to the server ✅",
       importFail: "Import failed: incorrect file format ❌",
     },
 
@@ -2595,7 +2600,7 @@ export const en = {
         "Your reply is also anonymous and won't reveal your identity…",
       sendReply: "📨 Send reply",
       replyNote:
-        "🌿 Mutually anonymous: neither side sees the other's true identity; the reply arrives randomly in the other's local inbox.",
+        "🌿 Mutually anonymous: neither side sees the other's identity; replies arrive in both anonymous sessions.",
       noLetters: "No public letters to draw right now",
       replySent: "Your reply has been delivered anonymously 💌",
       picking: "✨ Drawing...",

@@ -1,5 +1,5 @@
 <template>
-  <!-- 隐私声明弹窗：明确数据仅本地存储不上传 -->
+  <!-- 匿名会话、服务器内容与本地草稿的隐私说明 -->
   <div v-if="modelValue" class="dialog-overlay">
     <div class="dialog glass">
       <div class="privacy">

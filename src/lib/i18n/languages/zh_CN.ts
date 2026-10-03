@@ -2313,13 +2313,15 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       lowPerfDesc: "关闭重特效与粒子，更流畅",
       mute: "🔕 全站动效静音",
       muteDesc: "暂停漂浮粒子与过渡动画",
-      rateLimit: "🚦 投稿限流（自定义）",
-      rateLimitDesc: "每分钟最多可投稿 {count} 封",
+      rateLimit: "🚦 本地投稿提醒",
+      rateLimitDesc: "本地每分钟最多 {count} 封；服务器上限为 3 封",
       privacy: "🔒 隐私声明",
-      privacyDesc: "查看数据本地存储说明",
+      privacyDesc: "查看匿名投稿与数据保存说明",
       view: "查看",
-      footNote: "数据保存在服务器（匿名 + 可选登录），投稿经审核后展示。",
-      footNoteLocal: "数据保存于本地浏览器（匿名），投稿发布至服务器数据库。",
+      footNote:
+        "信件、回信、漂流瓶和愿望保存于服务器，草稿与外观设置保存在本机。",
+      footNoteLocal:
+        "信件、回信、漂流瓶和愿望保存于服务器，草稿与外观设置保存在本机。",
     },
 
     privacy: {
@@ -2331,12 +2333,12 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       li1Prefix: "你发布的信件保存在 ",
       li1Bold: "服务器数据库",
       li1Suffix: "，匿名代号随机生成",
-      li2Prefix: "系统 ",
-      li2Bold: "不收集任何真实个人信息",
-      li2Suffix: "，账号可选登录",
-      li3Prefix: "所有投稿需经 ",
-      li3Bold: "管理员审核",
-      li3Suffix: " 通过后才公开展示",
+      li2Prefix: "无需提供 ",
+      li2Bold: "姓名或账号",
+      li2Suffix: "，浏览器通过匿名会话管理你的投稿",
+      li3Prefix: "公开信件会 ",
+      li3Bold: "立即展示",
+      li3Suffix: "，发现不当内容可举报",
       li4Prefix: "随机树洞与回信均为 ",
       li4Bold: "双向匿名",
       li4Suffix: "，不暴露身份",
@@ -2412,8 +2414,11 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     },
 
     mine: {
-      title: "🌙 我的本地树洞",
-      subtitle: "这里展示你发布的所有信件、收藏与草稿，数据保存在本地浏览器。",
+      title: "🌙 我的树洞",
+      subtitle: "信件与收藏由匿名会话保存在服务器，草稿保存在本地浏览器。",
+      legacyTitle: "旧版仅本机信件",
+      legacyDesc:
+        "这些信件仍保存在此浏览器，可通过下方备份导出；不会自动上传到服务器。",
       statLetters: "发布信件",
       statFavs: "收藏树洞",
       statDrafts: "本地草稿",
@@ -2454,11 +2459,11 @@ export const zh_CN: DeepStringRecord<typeof en> = {
 
     backup: {
       title: "💾 数据备份",
-      desc: "导出全部本地数据为 JSON 文件，可在本机或其他浏览器导入恢复。",
+      desc: "仅备份本地草稿、设置和旧版浏览器数据；服务器上的新投稿不在此文件中。",
       exportBtn: "⬇️ 导出备份",
       importBtn: "⬆️ 导入备份",
       exported: "已导出备份文件 ✅",
-      importSuccess: "导入成功，刷新页面后生效 ✅",
+      importSuccess: "本地数据已导入，刷新后生效；不会自动上传到服务器 ✅",
       importFail: "导入失败：文件格式不正确 ❌",
     },
 
@@ -2482,7 +2487,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       replyPlaceholder: "你的回信同样匿名，不会暴露身份…",
       sendReply: "📨 发送回信",
       replyNote:
-        "🌿 双向匿名：你与对方都不会看到真实身份，回信将随机送达对方的本地收件箱。",
+        "🌿 双向匿名：你与对方都不会看到真实身份，回信会送达双方的匿名会话。",
       noLetters: "暂时没有可抽取的公开信件",
       replySent: "回信已匿名送达 💌",
       picking: "✨ 抽取中...",
