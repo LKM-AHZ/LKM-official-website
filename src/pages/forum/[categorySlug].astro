@@ -207,6 +207,6 @@ const recentItems = allItems.slice(0, 48);
       </div>
     </section>
 
-    {board && <CreatePostDialog client:load />}
+    {board && <CreatePostDialog client:load boardId={board.id} />}
   </div>
 </Layout>

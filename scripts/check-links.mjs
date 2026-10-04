@@ -35,14 +35,14 @@ const KEY_PAGES = ["/", "/login/", "/register/"];
 /**
  * 探测 GraphQL 后端是否可达。
  * 只要端口在监听，即使返回 400/405 也算可达；ECONNREFUSED / DNS 失败才算不在。
- * 地址与 [graphql] 的回退规则保持一致：未配 API_URL 时用 localhost:8000/graphql。
+ * 未配 API_URL 时探测 localhost:8000/graphql/v1。
  * 为了方便过CI，这里采取两种方案：
  * 在 check-links.mjs 里加一个探测函数并修改const ok判定
  * 在 CI workflow 里给真后端：加 service container，在 job 的 env: 里注入指向预发环境的 API_UR
  * 2026/9/28   清汉
  */
 async function backendReachable() {
-  const url = process.env.API_URL || "http://localhost:8000/graphql";
+  const url = process.env.API_URL || "http://localhost:8000/graphql/v1";
   try {
     await fetch(url, { method: "GET" });
     return true;

@@ -313,7 +313,7 @@ pnpm dev
 
 ```cmd
 [graphql] ......
-未配置 API_URL，SSR 回退到 http://localhost:8000/graphql
+未配置 API_URL，SSR 回退到 http://localhost:8000/graphql/v1
 (node:1236) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
 ```

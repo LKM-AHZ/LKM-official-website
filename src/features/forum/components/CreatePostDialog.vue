@@ -42,6 +42,7 @@
                 :key="root.id"
                 :label="root.title"
               >
+                <option :value="root.id">{{ root.title }}</option>
                 <option
                   v-for="child in childrenOf(root.id)"
                   :key="child.id"
@@ -63,7 +64,7 @@
               type="text"
               class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary focus:ring-1 focus:ring-primary outline-none"
               :placeholder="t('community.forum.titlePlaceholder')"
-              maxlength="100"
+              maxlength="200"
             />
           </div>
 
@@ -101,10 +102,18 @@
             <textarea
               v-model="content"
               rows="10"
+              maxlength="200000"
               class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none font-mono"
               :placeholder="t('community.forum.bodyPlaceholder')"
             ></textarea>
           </div>
+          <p
+            v-if="errorMessage"
+            role="alert"
+            class="text-sm text-red-600 dark:text-red-400"
+          >
+            {{ errorMessage }}
+          </p>
         </div>
 
         <!-- Footer -->
@@ -142,6 +151,10 @@ import { Icon } from "@iconify/vue";
 import { contentApi, type BoardItem } from "~/lib/api/modules/content";
 import { useAuthStore } from "~/stores/auth";
 import { t } from "~/lib/i18n";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { dispatchOpenLoginModal } from "~/features/shell/common/shell-events";
+
+const props = defineProps<{ boardId?: string }>();
 
 const visible = ref(false);
 const selectedCategory = ref("");
@@ -150,13 +163,14 @@ const content = ref("");
 const tags = ref<string[]>([]);
 const tagInput = ref("");
 const submitting = ref(false);
+const errorMessage = ref("");
 
 const auth = useAuthStore();
 const boards = ref<BoardItem[]>([]);
 
 const canSubmit = computed(
   () =>
-    selectedCategory.value &&
+    boards.value.some((b) => b.id === selectedCategory.value) &&
     title.value.trim() &&
     content.value.trim() &&
     !submitting.value,
@@ -178,11 +192,20 @@ function addTag() {
 }
 
 async function open() {
+  errorMessage.value = "";
+  boards.value = [];
+  visible.value = true;
   const res = await contentApi.listBoards();
   if (res.isOk()) {
-    boards.value = res.value?.items ?? [];
+    boards.value = (res.value?.items ?? []).filter(
+      (b) => b.status === "active",
+    );
+    if (props.boardId && boards.value.some((b) => b.id === props.boardId)) {
+      selectedCategory.value = props.boardId;
+    }
+  } else {
+    errorMessage.value = res.error.message;
   }
-  visible.value = true;
 }
 
 function close() {
@@ -191,10 +214,14 @@ function close() {
 
 async function submit() {
   if (!canSubmit.value) return;
+  auth.restoreFromStorage();
   if (!auth.isLoggedIn) {
-    alert(t("community.forum.loginRequired"));
+    visible.value = false;
+    dispatchOpenLoginModal();
     return;
   }
+  addTag();
+  errorMessage.value = "";
   submitting.value = true;
   const res = await contentApi.createItem({
     content_type: "discussion",
@@ -212,9 +239,10 @@ async function submit() {
     tags.value = [];
     tagInput.value = "";
     visible.value = false;
-    window.location.href = `/forum/post/${res.value.id}`;
+    window.location.href = getPermalink(`/forum/post/${res.value.id}`);
   } else {
-    alert(t("community.forum.publishFailed"));
+    errorMessage.value =
+      res.error.message || t("community.forum.publishFailed");
   }
 }
 

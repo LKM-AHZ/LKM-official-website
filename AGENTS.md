@@ -184,4 +184,4 @@ import { getPermalink } from "~/lib/utils/permalinks";
 4. `pnpm run test:auth` 通过（认证前端测试）
 5. `pnpm run test:smoke` 和 `pnpm run test:a11y` 通过（Playwright E2E）
 6. 浏览器验证：首页、论坛、暗色模式、移动端菜单
-7. GraphQL 端点：`{API_URL}/graphql` → GraphiQL 可交互（需真实后端就绪）
+7. GraphQL 端点：`{API_URL}/graphql/v1` → GraphiQL 可交互（需真实后端就绪）
