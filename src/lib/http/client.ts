@@ -152,7 +152,7 @@ function needsAuth(url: string): boolean {
     url.startsWith("/api/v1/blog/") ||
     url.startsWith("/api/v1/files") ||
     url.startsWith("/api/v1/content/") ||
-    url.startsWith("/graphql")
+    /^\/graphql\/v[1-9]\d*(?:[/?#]|$)/.test(url)
   );
 }
 

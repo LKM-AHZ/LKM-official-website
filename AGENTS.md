@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-LKM 官方网站，基于 **Astro v7 server 模式**、**Vue 3**、**React**（仅编辑器）和 **Tailwind CSS v4** 构建。仓库仅含前端，后端为**独立部署的真实服务**，通过 Astro 中间件反向代理 `/api/*` 与 `/graphql` 到由 `API_URL` 指定的真实后端。
+LKM 官方网站，基于 **Astro v7 server 模式**、**Vue 3**、**React**（仅编辑器）和 **Tailwind CSS v4** 构建。仓库仅含前端，后端为**独立部署的真实服务**，通过 Astro 中间件反向代理 `/api/*` 与 `/graphql/vN` 到由 `API_URL` 指定的真实后端。
 
 **技术栈：** Astro v7 server | Vue 3 + Composition API | React（编辑器）| Tailwind CSS v4 | TypeScript
 
@@ -42,7 +42,7 @@ lkm-official-website/
 │   ├── stores/           # Pinia 状态仓库（auth.ts 等）
 │   ├── types/            # TypeScript 类型声明
 │   ├── data/             # 配置文件（config.yaml 等）
-│   ├── middleware.ts     # 反向代理 /api/* 与 /graphql → 真实后端
+│   ├── middleware.ts     # 反向代理 /api/* 与 /graphql/vN → 真实后端
 │   └── content.config.ts # 当前导出空集合；生产内容来自后端
 ├── scripts/              # 构建/检查脚本
 ├── Dockerfile            # Astro SSR 部署镜像
@@ -56,7 +56,7 @@ lkm-official-website/
 Astro 从 `static` 切换到 `server`：
 
 - Astro SSR 负责页面路由和模板渲染
-- `src/middleware.ts` 反向代理 `/api/*` 与 `/graphql` 到真实后端（目标由 `API_URL` 指定）
+- `src/middleware.ts` 反向代理 `/api/*` 与 `/graphql/vN` 到真实后端（目标由 `API_URL` 指定）
 - Vue 3 为主交互框架（Shell 组件、StarHope 模块、社区平台）
 - React 仅用于编辑器后台（TipTap 3 编辑器组件，内联在 `features/editor/`）
 - **已卸载 Svelte**（源码中无 `.svelte` 文件，全部迁移到 Vue）

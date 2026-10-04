@@ -1,6 +1,6 @@
-// Astro 中间件 — 反向代理 /api/* 和 /graphql 到真实后端
+// Astro 中间件 — 反向代理 /api/* 和 /graphql/vN 到真实后端
 //
-// SSR 时 Astro 服务端拦截 /api/* 和 /graphql 请求，
+// SSR 时 Astro 服务端拦截 /api/* 和 /graphql/vN 请求，
 // 转发到由 API_URL 指向的真实后端，
 // 并转发客户端 Cookie 实现同域认证。
 //
@@ -57,12 +57,9 @@ const RESPONSE_ONLY_DROP_HEADERS = new Set(["content-encoding"]);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
-  // /graphql 必须精确匹配或带路径分隔符：startsWith("/graphql") 会把 /graphqlql、
-  // /graphql-docs 之类的前端路由也转发给后端，页面再也渲染不出来
+  // 只代理版本化 GraphQL 端点；裸 /graphql 已由后端移除。
   const isProxyPath =
-    pathname.startsWith("/api/") ||
-    pathname === "/graphql" ||
-    pathname.startsWith("/graphql/");
+    pathname.startsWith("/api/") || /^\/graphql\/v[1-9]\d*\/?$/.test(pathname);
 
   // 非代理路径：建立 SSR 请求上下文，供页面 SSR 数据获取转发 Cookie
   if (!isProxyPath) {

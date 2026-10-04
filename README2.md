@@ -87,7 +87,7 @@ src/
 ├── stores/                # Pinia 状态
 ├── styles/                # Tailwind 入口、变量和全局样式
 ├── types/                 # TypeScript 类型
-└── middleware.ts          # `/api/*`、`/graphql` 代理
+└── middleware.ts          # `/api/*`、`/graphql/vN` 代理
 ```
 
 ### 数据访问
