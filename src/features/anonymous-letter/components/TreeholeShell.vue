@@ -5,6 +5,14 @@
         <div
           class="th-app"
           :class="{ 'low-perf': lowPerf, 'high-contrast': highContrast }"
+          :style="{
+            '--font-scale':
+              app.state.settings.fontScale === 'small'
+                ? '0.9'
+                : app.state.settings.fontScale === 'large'
+                  ? '1.15'
+                  : '1',
+          }"
         >
           <div class="app-root">
             <!-- 背景层 -->
@@ -283,7 +291,7 @@ onMounted(forceSync);
 
 /* ---------- 根容器 ---------- */
 .th-app {
-  min-height: 100vh;
+  min-height: calc(100dvh - 4.5rem);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -292,14 +300,14 @@ onMounted(forceSync);
 .app-root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: calc(100dvh - 4.5rem);
   position: relative;
 }
 
 /* ---------- 顶部导航栏 ---------- */
 .top-nav {
   position: fixed;
-  top: 0;
+  top: 4.5rem;
   left: 0;
   right: 0;
   z-index: 100;
@@ -443,7 +451,7 @@ onMounted(forceSync);
 /* ---------- 移动端下拉菜单 ---------- */
 .mobile-menu {
   position: fixed;
-  top: 56px;
+  top: calc(4.5rem + 56px);
   left: 0;
   right: 0;
   z-index: 99;
@@ -550,6 +558,9 @@ onMounted(forceSync);
 
 /* ---------- 响应式 ---------- */
 @media (max-width: 768px) {
+  .mobile-menu {
+    top: calc(4.5rem + 50px);
+  }
   .main-content {
     padding-top: 66px;
     padding-bottom: 100px;

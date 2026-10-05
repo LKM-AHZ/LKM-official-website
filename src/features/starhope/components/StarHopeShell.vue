@@ -55,7 +55,7 @@ watch(
 </script>
 
 <template>
-  <div class="starhope-app min-h-screen bg-page-bg text-default">
+  <div class="starhope-app min-h-[calc(100dvh-4.5rem)] bg-page-bg text-default">
     <StarHopeLayout>
       <StarHopeRouter />
     </StarHopeLayout>

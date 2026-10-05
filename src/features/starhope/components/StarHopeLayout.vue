@@ -2,6 +2,7 @@
 import { useAuthStore } from "../stores/auth";
 import { useNavigationStore } from "../stores/navigation";
 import { t } from "~/lib/i18n";
+import { buildUrl } from "~/lib/utils/paths";
 
 const { navItems, currentRoute, navigate } = useNavigationStore();
 const { currentUser, logout } = useAuthStore();
@@ -18,10 +19,16 @@ async function handleLogout(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col lg:flex-row">
+  <div class="flex min-h-[calc(100dvh-4.5rem)] flex-col lg:flex-row">
     <aside
-      class="sticky top-0 z-30 flex w-full shrink-0 flex-col border-b border-surface-3 bg-card-bg p-3 lg:h-screen lg:w-60 lg:border-b-0 lg:border-r lg:p-5"
+      class="sticky top-[4.5rem] z-30 flex w-full shrink-0 flex-col border-b border-surface-3 bg-card-bg p-3 lg:h-[calc(100dvh-4.5rem)] lg:w-60 lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-5"
     >
+      <a
+        :href="buildUrl('/apps')"
+        class="mb-3 hidden items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-text-muted hover:bg-btn-plain-bg-hover hover:text-primary-readable lg:flex"
+      >
+        <span aria-hidden="true">←</span>{{ t("page.apps.title") }}
+      </a>
       <div class="mb-3 flex items-center justify-between px-2 lg:mb-8 lg:block">
         <h1 class="text-lg font-bold text-primary">
           {{ t("starhope.appName") }}
@@ -30,6 +37,7 @@ async function handleLogout(): Promise<void> {
           {{ t("starhope.tagline") }}
         </p>
         <button
+          v-if="currentUser"
           type="button"
           @click="handleLogout"
           class="rounded-full px-3 py-1.5 text-xs text-text-muted hover:bg-surface-3 lg:hidden"
@@ -76,6 +84,7 @@ async function handleLogout(): Promise<void> {
           </div>
         </div>
         <button
+          v-if="currentUser"
           type="button"
           @click="handleLogout"
           class="w-full text-left px-3 py-2 text-xs text-text-muted hover:text-red-500 rounded-lg hover:bg-surface-3 transition-colors block"

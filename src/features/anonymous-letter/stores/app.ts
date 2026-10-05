@@ -66,20 +66,6 @@ export function useApp(): AppApi {
   );
   const highContrast = computed(() => state.settings.highContrast);
 
-  // 字体大小 -> 写入根节点 css 变量
-  watch(
-    () => state.settings.fontScale,
-    (s) => {
-      if (isClient) {
-        document.documentElement.style.setProperty(
-          "--font-scale",
-          s === "small" ? "0.9" : s === "large" ? "1.15" : "1",
-        );
-      }
-    },
-    { immediate: true },
-  );
-
   // 高对比度护眼模式
   watch(
     () => state.settings.highContrast,

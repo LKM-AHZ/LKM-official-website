@@ -12,8 +12,6 @@
 }
 
 :root {
-  --font-scale: 1;
-
   /* ── 桥接主站变量到树洞命名 ── */
   --accent: var(--primary);
   --accent-2: oklch(0.6 0.12 calc(var(--hue) + 40));
@@ -168,6 +166,7 @@ body {
 }
 
 .th-app {
+  --font-scale: 1;
   --radius: 20px;
   --radius-sm: 14px;
   --radius-xs: 10px;
