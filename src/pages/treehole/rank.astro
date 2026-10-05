@@ -1,27 +1,27 @@
 ---
-import Layout from '~/layouts/BaseLayout.astro';
-import RankPage from '~/features/anonymous-letter/pages/RankPage.vue';
-import '~/features/anonymous-letter/styles/global.css';
-import { allMenuItems } from '~/features/shell/menus';
-import { filterNavbarByNames } from '~/lib/navigation';
-import { t } from '~/lib/i18n';
-import type { MetaData } from '~/types/core';
+import Layout from "~/layouts/BaseLayout.astro";
+import RankPage from "~/features/anonymous-letter/pages/RankPage.vue";
+import "~/features/anonymous-letter/styles/global.css";
+import { t } from "~/lib/i18n";
+import type { MetaData } from "~/types/core";
 const metadata: MetaData = {
-  title: t('page.treehole.rankTitle'),
-  description: t('page.treehole.rankDescription'),
+  title: t("page.treehole.rankTitle"),
+  description: t("page.treehole.rankDescription"),
 };
 ---
 
-<Layout metadata={metadata} navbarLinks={filterNavbarByNames(allMenuItems, ['nav.community', 'nav.blog', 'nav.resources', 'nav.mine'])}
+<Layout metadata={metadata}
   ><div style="min-height: 400px"><RankPage client:load /></div></Layout
 >
 
 <script is:inline>
   (function () {
     const theme = localStorage.theme;
-    const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    document.documentElement.classList.toggle('dark', isDark);
-    const hue = localStorage.getItem('hue');
-    if (hue) document.documentElement.style.setProperty('--hue', hue);
+    const isDark =
+      theme === "dark" ||
+      (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList.toggle("dark", isDark);
+    const hue = localStorage.getItem("hue");
+    if (hue) document.documentElement.style.setProperty("--hue", hue);
   })();
 </script>

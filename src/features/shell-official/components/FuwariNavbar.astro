@@ -84,21 +84,49 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
               </a>
             );
           }
+          const isCurrent =
+            currentPath ===
+              (url(l.url).split("?")[0].replace(/\/$/, "") || "/") ||
+            l.children!.some(
+              (child) =>
+                currentPath ===
+                (url(child.url).split("?")[0].replace(/\/$/, "") || "/"),
+            );
           return (
             <div class="relative dropdown" data-nav-dropdown={idx}>
-              <button
-                type="button"
-                aria-label={t(l.name)}
-                class="flex h-10 items-center gap-1 rounded-full px-4 text-sm font-medium text-text-muted transition-colors hover:bg-btn-plain-bg-hover hover:text-deep-text focus-visible:outline-2 focus-visible:outline-primary"
-                data-dropdown-trigger
+              <div
+                class:list={[
+                  "flex h-10 items-center rounded-full text-sm font-medium transition-colors hover:bg-btn-plain-bg-hover",
+                  isCurrent
+                    ? "bg-btn-regular-bg text-primary-readable"
+                    : "text-text-muted hover:text-deep-text",
+                ]}
               >
-                {t(l.name)}
-                <Icon
-                  name="material-symbols:keyboard-arrow-down-rounded"
-                  class="text-[1rem] text-text-muted transition-transform"
-                  data-dropdown-arrow
-                />
-              </button>
+                <a
+                  href={url(l.url)}
+                  aria-current={
+                    currentPath === (url(l.url).replace(/\/$/, "") || "/")
+                      ? "page"
+                      : undefined
+                  }
+                  class="flex h-10 items-center rounded-l-full pl-4 pr-1 focus-visible:outline-2 focus-visible:outline-primary"
+                >
+                  {t(l.name)}
+                </a>
+                <button
+                  type="button"
+                  aria-label={`${t(l.name)}：${t("nav.navigation")}`}
+                  aria-expanded="false"
+                  class="flex h-10 w-7 items-center justify-center rounded-r-full focus-visible:outline-2 focus-visible:outline-primary"
+                  data-dropdown-trigger
+                >
+                  <Icon
+                    name="material-symbols:keyboard-arrow-down-rounded"
+                    class="text-[1rem] transition-transform"
+                    data-dropdown-arrow
+                  />
+                </button>
+              </div>
               <div
                 class="absolute left-0 top-full pt-2 hidden z-50"
                 data-dropdown-menu
@@ -181,6 +209,9 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
           .querySelectorAll("[data-dropdown-menu]")
           .forEach((m) => m.classList.add("hidden"));
         document
+          .querySelectorAll("[data-dropdown-trigger]")
+          .forEach((b) => b.setAttribute("aria-expanded", "false"));
+        document
           .querySelectorAll("[data-dropdown-arrow]")
           .forEach((a) => a.classList.remove("rotate-180"));
         document
@@ -207,10 +238,14 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
           .querySelectorAll("[data-dropdown-menu]")
           .forEach((m) => m.classList.add("hidden"));
         document
+          .querySelectorAll("[data-dropdown-trigger]")
+          .forEach((b) => b.setAttribute("aria-expanded", "false"));
+        document
           .querySelectorAll("[data-dropdown-arrow]")
           .forEach((a) => a.classList.remove("rotate-180"));
         if (!isOpen) {
           menu.classList.remove("hidden");
+          trigger.setAttribute("aria-expanded", "true");
           if (arrow) arrow.classList.add("rotate-180");
         }
       });
@@ -243,6 +278,9 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
       document
         .querySelectorAll("[data-dropdown-menu]")
         .forEach((m) => m.classList.add("hidden"));
+      document
+        .querySelectorAll("[data-dropdown-trigger]")
+        .forEach((b) => b.setAttribute("aria-expanded", "false"));
       document
         .querySelectorAll("[data-dropdown-arrow]")
         .forEach((a) => a.classList.remove("rotate-180"));

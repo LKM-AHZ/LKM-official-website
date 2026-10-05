@@ -74,19 +74,29 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
             return (
               <li>
                 {hasChildren ? (
-                  <div>
-                    <button
-                      type="button"
-                      data-nav-accordion-trigger
-                      class="flex min-h-12 w-full items-center justify-between rounded-full px-4 text-left font-medium text-deep-text transition-colors hover:bg-btn-plain-bg-hover"
-                    >
-                      <span>{t(link.name)}</span>
-                      <Icon
-                        name="material-symbols:keyboard-arrow-down-rounded"
-                        class="text-[1.25rem] text-text-muted transition-transform duration-200"
-                        data-nav-accordion-arrow
-                      />
-                    </button>
+                  <div data-nav-group>
+                    <div class="flex min-h-12 items-center rounded-full text-deep-text transition-colors hover:bg-btn-plain-bg-hover">
+                      <a
+                        href={url(link.url)}
+                        class="flex min-h-12 flex-1 items-center rounded-l-full px-4 font-medium"
+                        data-nav-link
+                      >
+                        {t(link.name)}
+                      </a>
+                      <button
+                        type="button"
+                        data-nav-accordion-trigger
+                        aria-label={`${t(link.name)}：${t("nav.navigation")}`}
+                        aria-expanded="false"
+                        class="flex h-12 w-12 items-center justify-center rounded-r-full"
+                      >
+                        <Icon
+                          name="material-symbols:keyboard-arrow-down-rounded"
+                          class="text-[1.25rem] text-text-muted transition-transform duration-200"
+                          data-nav-accordion-arrow
+                        />
+                      </button>
+                    </div>
                     <ul data-nav-accordion-content class="hidden pl-3 pt-1">
                       {link.children!.map((child) => (
                         <li>
@@ -265,15 +275,17 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
           trigger.addEventListener("click", function () {
             const arrow = trigger.querySelector("[data-nav-accordion-arrow]");
             // 用显式 hook 而非 nextElementSibling：模板一旦在触发器与内容间插入节点就会静默失效
-            const content = trigger.parentElement?.querySelector(
-              "[data-nav-accordion-content]",
-            );
+            const content = trigger
+              .closest("[data-nav-group]")
+              ?.querySelector("[data-nav-accordion-content]");
             if (!content) return;
             if (content.classList.contains("hidden")) {
               content.classList.remove("hidden");
+              trigger.setAttribute("aria-expanded", "true");
               if (arrow) arrow.classList.add("rotate-180");
             } else {
               content.classList.add("hidden");
+              trigger.setAttribute("aria-expanded", "false");
               if (arrow) arrow.classList.remove("rotate-180");
             }
           });

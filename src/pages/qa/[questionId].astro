@@ -14,7 +14,6 @@ const metadata = { title: `${t("page.qa.title")} —— LKM` };
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={getPermalink(`/qa/${questionId}`)}
-  navItems={["nav.home", "nav.news", "nav.team", "nav.resources"]}
 >
   <QuestionDetail client:load questionId={questionId ?? ""} />
 </Layout>

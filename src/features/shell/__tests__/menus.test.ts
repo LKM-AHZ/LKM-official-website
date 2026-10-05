@@ -1,41 +1,48 @@
-import { describe, it, expect } from "vitest";
-import { allMenuItems } from "../menus";
+import { describe, expect, it } from "vitest";
+import { allMenuItems, officialDefaultNavItems } from "../menus";
 
-describe("menus", () => {
-  it("统一菜单池含 4 个一级项（news/help/blog 已并入论坛入口 nav.community）", () => {
-    expect(allMenuItems.length).toBe(4);
-  });
-
-  it("一级 name 全部唯一（主页与社区主页已区分）", () => {
+describe("site navigation", () => {
+  it("shows the same ordered categories on every page", () => {
     const names = allMenuItems.map((item) => item.name);
-    expect(new Set(names).size).toBe(names.length);
+    expect(names).toEqual([
+      "nav.home",
+      "nav.community",
+      "nav.projects",
+      "nav.resources",
+      "nav.moreApps",
+      "nav.mine",
+    ]);
+    expect(officialDefaultNavItems).toEqual(names);
   });
 
-  it("站内一级项有子菜单，主页入口直达站内首页", () => {
-    allMenuItems.forEach((item) => {
-      expect(item.url).toBeTruthy();
-      if (item.name !== "nav.home") {
-        expect(Array.isArray(item.children)).toBe(true);
-      }
-    });
-    const home = allMenuItems.find((item) => item.name === "nav.home");
-    expect(home).toMatchObject({ url: "/" });
-    expect(home?.external).toBeFalsy();
-    expect(home?.children).toBeUndefined();
-  });
+  it("gives each category a destination and exposes the main sections", () => {
+    expect(allMenuItems.map((item) => item.url)).toEqual([
+      "/",
+      "/forum",
+      "/projects",
+      "/files",
+      "/apps",
+      "/account",
+    ]);
 
-  it("nav.community 是唯一内容入口（/forum）", () => {
-    const community = allMenuItems.find(
-      (item) => item.name === "nav.community",
+    const destinations = new Set(
+      allMenuItems.flatMap((item) => [
+        item.url,
+        ...(item.children ?? []).map((child) => child.url),
+      ]),
     );
-    expect(community).toBeTruthy();
-    expect(community!.url).toBe("/forum");
-  });
-
-  it("内容区（news/help/blog）已不在顶级菜单", () => {
-    const names = allMenuItems.map((item) => item.name);
-    expect(names).not.toContain("nav.news");
-    expect(names).not.toContain("nav.help");
-    expect(names).not.toContain("nav.blog");
+    for (const path of [
+      "/qa",
+      "/timeline",
+      "/search?type=columns",
+      "/competition",
+      "/competition/bank",
+      "/starhope",
+      "/treehole",
+      "/follow",
+      "/contribution",
+    ]) {
+      expect(destinations.has(path), path).toBe(true);
+    }
   });
 });

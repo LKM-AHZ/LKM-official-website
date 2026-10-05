@@ -16,7 +16,6 @@ const metadata = { title: `${t("page.projects.title")} —— LKM` };
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={getPermalink(`/projects/${projectId}`)}
-  navItems={["nav.home", "nav.news", "nav.team", "nav.resources"]}
 >
   <ProjectDetail client:load projectId={projectId ?? ""} />
 </Layout>

@@ -43,9 +43,7 @@ const sentryDsn = (
   (import.meta.env.PUBLIC_SENTRY_DSN as string | undefined) ?? ""
 ).trim();
 
-// 未传入 navbarLinks 时，兜底为官网默认菜单（当前 officialDefaultNavItems 是 3 项：
-// nav.home/nav.community/nav.resources；历史注释与 menus.ts 里同款注释写作「4 项」，
-// 是否补回 nav.mine 属产品决定，未在本轮改）
+// 未传入 navbarLinks 时使用全站统一导航。
 const navbarLinks: NavBarLink[] =
   navbarLinksProp ?? filterNavbarByNames(allMenuItems, officialDefaultNavItems);
 ---

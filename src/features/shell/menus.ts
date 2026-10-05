@@ -7,18 +7,11 @@ import type { NavBarLink } from "~/types/config";
 export const officialDefaultNavItems: string[] = [
   "nav.home",
   "nav.community",
+  "nav.projects",
   "nav.resources",
+  "nav.moreApps",
+  "nav.mine",
 ];
-
-// nav.community 与 nav.resources 共用的四个子项（名称/地址完全一致）。
-// 抽成常量复用：否则新增站点时容易只改一处，两个菜单就悄悄漂移了。
-const forumItem: NavBarLink = { name: "nav.forum", url: "/forum" };
-const fileLibraryItem: NavBarLink = { name: "nav.fileLibrary", url: "/files" };
-const qaItem: NavBarLink = { name: "nav.qa", url: "/qa" };
-const competitionItem: NavBarLink = {
-  name: "nav.competition",
-  url: "/competition",
-};
 
 /**
  * 全站统一导航菜单池（原 config.yaml fuwari.navbar 与 fuwari.navbarCommunity 合并）。
@@ -34,18 +27,32 @@ export const allMenuItems: NavBarLink[] = [
   {
     name: "nav.community",
     url: "/forum",
-    children: [forumItem, fileLibraryItem, qaItem, competitionItem],
+    children: [
+      { name: "nav.forum", url: "/forum" },
+      { name: "nav.qa", url: "/qa" },
+      { name: "nav.feedTimeline", url: "/timeline" },
+    ],
+  },
+  {
+    name: "nav.projects",
+    url: "/projects",
   },
   {
     name: "nav.resources",
-    url: "/forum",
+    url: "/files",
     children: [
-      forumItem,
-      fileLibraryItem,
-      qaItem,
-      { name: "nav.projects", url: "/projects" },
-      competitionItem,
-      { name: "nav.moreApps", url: "/apps" },
+      { name: "nav.fileLibrary", url: "/files" },
+      { name: "nav.columns", url: "/search?type=columns" },
+      { name: "nav.competition", url: "/competition" },
+      { name: "nav.bank", url: "/competition/bank" },
+    ],
+  },
+  {
+    name: "nav.moreApps",
+    url: "/apps",
+    children: [
+      { name: "nav.starHope", url: "/starhope" },
+      { name: "nav.treehole", url: "/treehole" },
     ],
   },
   {
@@ -53,8 +60,8 @@ export const allMenuItems: NavBarLink[] = [
     url: "/account",
     children: [
       { name: "nav.profile", url: "/account" },
+      { name: "nav.follow", url: "/follow" },
       { name: "nav.contribution", url: "/contribution" },
-      { name: "nav.settings", url: "/account" },
     ],
   },
 ];

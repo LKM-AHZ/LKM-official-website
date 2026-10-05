@@ -2,8 +2,6 @@
 import Layout from "~/layouts/BaseLayout.astro";
 import HomePage from "~/features/anonymous-letter/pages/HomePage.vue";
 import "~/features/anonymous-letter/styles/global.css";
-import { allMenuItems } from "~/features/shell/menus";
-import { filterNavbarByNames } from "~/lib/navigation";
 import { t } from "~/lib/i18n";
 import type { MetaData } from "~/types/core";
 
@@ -13,15 +11,7 @@ const metadata: MetaData = {
 };
 ---
 
-<Layout
-  metadata={metadata}
-  navbarLinks={filterNavbarByNames(allMenuItems, [
-    "nav.community",
-    "nav.blog",
-    "nav.resources",
-    "nav.mine",
-  ])}
->
+<Layout metadata={metadata}>
   <div style="min-height: 400px"><HomePage client:load /></div>
 </Layout>
 
