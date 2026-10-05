@@ -1,19 +1,23 @@
 ---
-import { BackToTop } from '~/components/primitives';
-import Image from '~/components/primitives/Image.astro';
-import Footer from '~/features/shell/components/FuwariFooter.astro';
-import SideBar from '~/features/shell/components/BlogSidePanel.astro';
-import type { MarkdownHeading } from 'astro';
-import { Icon } from 'astro-icon/components';
-import TOC from '~/features/shell/components/TOC.astro';
-import SiteNavbar from '~/features/shell-official/components/SiteNavbar.astro';
-import { allMenuItems } from '~/features/shell/menus';
-import { filterNavbarByNames } from '~/lib/navigation';
-import { siteConfig } from '~/lib/config';
-import { t } from '~/lib/i18n';
-import type { NavBarLink } from '~/types/config';
-import { BANNER_HEIGHT, BANNER_HEIGHT_EXTEND, MAIN_PANEL_OVERLAPS_BANNER_HEIGHT } from '~/lib/constants/constants';
-import Layout from './BlogLayout.astro';
+import { BackToTop } from "~/components/primitives";
+import Image from "~/components/primitives/Image.astro";
+import Footer from "~/features/shell/components/FuwariFooter.astro";
+import SideBar from "~/features/shell/components/BlogSidePanel.astro";
+import type { MarkdownHeading } from "astro";
+import { Icon } from "astro-icon/components";
+import TOC from "~/features/shell/components/TOC.astro";
+import SiteNavbar from "~/features/shell-official/components/SiteNavbar.astro";
+import { allMenuItems } from "~/features/shell/menus";
+import { filterNavbarByNames } from "~/lib/navigation";
+import { siteConfig } from "~/lib/config";
+import { t } from "~/lib/i18n";
+import type { NavBarLink } from "~/types/config";
+import {
+  BANNER_HEIGHT,
+  BANNER_HEIGHT_EXTEND,
+  MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
+} from "~/lib/constants/constants";
+import Layout from "./BlogLayout.astro";
 
 interface Props {
   title?: string;
@@ -26,7 +30,16 @@ interface Props {
   navItems?: string[];
 }
 
-const { title, banner, description, lang, setOGTypeArticle, headings = [], username, navItems } = Astro.props;
+const {
+  title,
+  banner,
+  description,
+  lang,
+  setOGTypeArticle,
+  headings = [],
+  username,
+  navItems,
+} = Astro.props;
 // 必须同时要求 credit.url 非空：否则会渲染出 href="" + target="_blank" 的空链接
 const hasBannerCredit =
   siteConfig.banner.enable &&
@@ -36,7 +49,7 @@ const hasBannerLink = !!siteConfig.banner.credit.url;
 
 const mainPanelTop = siteConfig.banner.enable
   ? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
-  : '5.5rem';
+  : "5.5rem";
 
 // 博客网格顶栏：从统一菜单池用 navItems 白名单挑选（桌面 SiteNavbar），并向底层 BlogLayout 透传（移动端）
 const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
@@ -45,7 +58,7 @@ const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
 // 没有任何链接的导航栏，且不报错。开发期显式告警，避免上线后才发现。
 if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
   console.warn(
-    `[BlogMainGridLayout] navItems 全部未匹配到菜单项（导航栏为空）: ${navItems.join(', ')}`,
+    `[BlogMainGridLayout] navItems 全部未匹配到菜单项（导航栏为空）: ${navItems.join(", ")}`,
   );
 }
 ---
@@ -73,8 +86,8 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
         <div id="banner" class="overflow-hidden relative w-full h-full">
           <Image
             id="banner-img"
-            alt={t('blog.bannerAlt')}
-            src={`~/assets/images/${String(siteConfig.banner.src).replace(/^assets\/images\//, '')}`}
+            alt={t("blog.bannerAlt")}
+            src={`~/assets/images/${String(siteConfig.banner.src).replace(/^assets\/images\//, "")}`}
             layout="cover"
             class="object-cover h-full w-full transition duration-700 opacity-0 scale-105"
             style={`object-position: ${siteConfig.banner.position}`}
@@ -87,13 +100,15 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
   }
 
   <!-- Main content -->
-  <div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
+  <div
+    class="absolute w-full z-30 pointer-events-none"
+    style={`top: ${mainPanelTop}`}
+  >
     <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
     <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
       <div
         id="main-grid"
-        class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
-    mx-auto gap-4 px-0 md:px-4"
+        class="transition duration-700 w-full left-0 right-0 grid grid-cols-1 lg:grid-cols-[15rem_minmax(0,1fr)] mx-auto gap-5 px-4"
       >
         <!-- Banner image credit -->
         {
@@ -103,19 +118,24 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
               id="banner-credit"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={t('blog.imageSourceLabel')}
+              aria-label={t("blog.imageSourceLabel")}
               class:list={[
-                'group onload-animation transition-all absolute flex justify-center items-center rounded-full ' +
-                  'px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9',
-                { 'hover:pr-9 active:bg-black/80': hasBannerLink },
+                "group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
+                  "px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9",
+                { "hover:pr-9 active:bg-black/80": hasBannerLink },
               ]}
             >
-              <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:copyright-outline-rounded" />
-              <div class="text-white/75 text-xs">{siteConfig.banner.credit.text}</div>
+              <Icon
+                class="text-white/75 text-[1.25rem] mr-1"
+                name="material-symbols:copyright-outline-rounded"
+              />
+              <div class="text-white/75 text-xs">
+                {siteConfig.banner.credit.text}
+              </div>
               <Icon
                 class:list={[
-                  'transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0',
-                  { 'group-hover:opacity-100': hasBannerLink },
+                  "transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
+                  { "group-hover:opacity-100": hasBannerLink },
                 ]}
                 name="fa6-solid:arrow-up-right-from-square"
               />
@@ -124,12 +144,15 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
         }
 
         <SideBar
-          class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem]"
+          class="order-2 lg:order-1 lg:col-start-1 lg:max-w-[15rem]"
           headings={headings}
           username={username}
         />
 
-        <main id="main-container" class="col-span-2 lg:col-span-1 overflow-hidden">
+        <main
+          id="main-container"
+          class="order-1 min-w-0 overflow-hidden lg:order-2 lg:col-start-2"
+        >
           <div id="content-wrapper" class="onload-animation">
             <!-- the overflow-hidden here prevent long text break the layout-->
             <slot />
@@ -139,7 +162,7 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
           </div>
         </main>
 
-        <div class="footer col-span-2 onload-animation block lg:hidden">
+        <div class="footer order-3 onload-animation block lg:hidden">
           <Footer />
         </div>
       </div>
@@ -157,8 +180,8 @@ if (import.meta.env.DEV && navItems?.length && navbarLinks.length === 0) {
           <div
             id="toc-wrapper"
             class:list={[
-              'hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center',
-              { 'toc-hide': siteConfig.banner.enable },
+              "hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center",
+              { "toc-hide": siteConfig.banner.enable },
             ]}
           >
             <div

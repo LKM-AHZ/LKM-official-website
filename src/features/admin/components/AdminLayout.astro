@@ -1,8 +1,9 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { getPermalink } from '~/lib/utils/permalinks';
-import { t } from '~/lib/i18n';
-import { buildAdminNav, isActive } from '../nav';
+import { Icon } from "astro-icon/components";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { t } from "~/lib/i18n";
+import { buildAdminNav, isActive } from "../nav";
+import BaseLayout from "~/layouts/BaseLayout.astro";
 
 interface Props {
   /** 内容区去掉内边距并占满视口高度（供全高 iframe，如「机器人」各页）。 */
@@ -14,55 +15,76 @@ const groups = buildAdminNav();
 const currentPath = Astro.url.pathname;
 const itemClass = (href: string) =>
   [
-    'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
     // isActive 比的是逻辑路径，而 pathname 带 site.base（子路径部署时如 /blog/admin/users），
     // 这里把 href 也过一遍 getPermalink，保证两侧同为「带 base」的形态
     isActive(currentPath, getPermalink(href))
-      ? 'bg-surface-3 text-primary font-medium'
-      : 'text-text-muted hover:bg-surface-3',
-  ].join(' ');
+      ? "bg-surface-3 text-primary font-medium"
+      : "text-text-muted hover:bg-surface-3",
+  ].join(" ");
 ---
 
-<div class="min-h-screen bg-page-bg flex">
-  <!-- 侧边栏 -->
-  <aside class="w-56 shrink-0 bg-card-bg border-r border-surface-3 min-h-screen hidden md:block">
-    <div class="p-4 border-b border-surface-3">
-      <a href={getPermalink('/admin')} class="text-lg font-bold text-primary">{t('admin.title')}</a>
-    </div>
-    <nav class="p-2 space-y-1">
-      {
-        groups.map((group) => (
-          <>
-            {group.titleKey && (
-              <div class="px-3 pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-text-muted">
-                {t(group.titleKey)}
-              </div>
-            )}
-            {group.items.map((item) => (
-              <a href={getPermalink(item.href)} class={itemClass(item.href)}>
-                <Icon name={item.icon} class="w-4 h-4" />
-                {t(item.textKey)}
-              </a>
-            ))}
-          </>
-        ))
-      }
-      <div class="border-t border-surface-3 my-2"></div>
-      <a
-        href={getPermalink('/')}
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
+<BaseLayout metadata={{ title: t("admin.title") }}>
+  <div class="min-h-screen bg-page-bg flex flex-col lg:flex-row">
+    <aside
+      class="sticky top-0 z-40 flex w-full shrink-0 flex-col border-b border-surface-3 bg-card-bg lg:h-screen lg:w-60 lg:border-b-0 lg:border-r"
+    >
+      <div class="hidden p-5 lg:block">
+        <a
+          href={getPermalink("/admin")}
+          class="text-lg font-semibold text-primary-readable"
+          >{t("admin.title")}</a
+        >
+      </div>
+      <nav
+        class="flex gap-1 overflow-x-auto p-2 lg:block lg:space-y-1 lg:overflow-y-auto lg:px-3"
+        aria-label={t("admin.title")}
       >
-        <Icon name="tabler:arrow-left" class="w-4 h-4" />
-        {t('admin.backToSite')}
-      </a>
-    </nav>
-  </aside>
+        {
+          groups.map((group) => (
+            <>
+              {group.titleKey && (
+                <div class="hidden px-3 pt-4 pb-1 text-xs font-medium uppercase tracking-wide text-text-muted lg:block">
+                  {t(group.titleKey)}
+                </div>
+              )}
+              {group.items.map((item) => (
+                <a
+                  href={getPermalink(item.href)}
+                  class={`${itemClass(item.href)} shrink-0 whitespace-nowrap`}
+                >
+                  <Icon name={item.icon} class="w-4 h-4" />
+                  {t(item.textKey)}
+                </a>
+              ))}
+            </>
+          ))
+        }
+        <div class="hidden border-t border-surface-3 my-2 lg:block"></div>
+        <a
+          href={getPermalink("/")}
+          class="flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-3"
+        >
+          <Icon name="tabler:arrow-left" class="w-4 h-4" />
+          {t("admin.backToSite")}
+        </a>
+      </nav>
+    </aside>
 
-  <!-- 主内容区 -->
-  <div class={flush ? 'flex-1 min-w-0 h-screen flex flex-col' : 'flex-1 min-w-0'}>
-    {flush ? <slot /> : <div class="p-6"><slot /></div>}
+    <!-- 主内容区 -->
+    <main class={flush ? "flex min-w-0 flex-1 flex-col" : "min-w-0 flex-1"}>
+      {
+        flush ? (
+          <slot />
+        ) : (
+          <div class="mx-auto w-full max-w-[1320px] px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+            <slot />
+          </div>
+        )
+      }
+    </main>
   </div>
-</div>
+</BaseLayout>
 
 <script>
   // 后台页面访问守卫：校验 cookie 会话，未登录/失效则跳登录页。
@@ -70,11 +92,11 @@ const itemClass = (href: string) =>
   // 直接复用 lib/api/admin 的 bootAdminSession：它共享 adminFetch 的 401/403 跳转守卫
   // （含防重入锁与 2FA 识别）。先前这里自己写了一份跳转逻辑，两套跳转在并发 401 时
   // 会互相竞争，还会漏掉「先清重入锁」这一步。
-  import { bootAdminSession } from '~/lib/api/admin';
+  import { bootAdminSession } from "~/lib/api/admin";
 
   (async () => {
     // 已是登录页则不再校验（跳转守卫本身也会跳过登录页，这里省掉一次无谓请求）
-    if (window.location.pathname.startsWith('/admin/login')) return;
+    if (window.location.pathname.startsWith("/admin/login")) return;
     // 网络/超时/5xx 时返回 null，不强行跳转，避免打不开后台业务页
     await bootAdminSession();
   })();

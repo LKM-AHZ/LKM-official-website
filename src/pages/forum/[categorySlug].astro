@@ -1,37 +1,53 @@
 ---
-import Layout from '~/layouts/CommunitySidebarLayout.astro';
-import { Icon } from 'astro-icon/components';
-import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
-import ContentCard from '~/features/content/components/ContentCard.astro';
-import CreatePostDialog from '~/features/forum/components/CreatePostDialog.vue';
-import { FollowButton } from '~/features/follow';
-import { contentApi, type BoardItem, type ContentItem } from '~/lib/api/modules/content';
-import { getCategoryBySlug, getChildCategories } from '~/features/forum/data/categories';
-import { getPermalink } from '~/lib/utils/permalinks';
-import { t } from '~/lib/i18n';
+import Layout from "~/layouts/SidebarLayout.astro";
+import { Icon } from "astro-icon/components";
+import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
+import ContentCard from "~/features/content/components/ContentCard.astro";
+import CreatePostDialog from "~/features/forum/components/CreatePostDialog.vue";
+import { FollowButton } from "~/features/follow";
+import {
+  contentApi,
+  type BoardItem,
+  type ContentItem,
+} from "~/lib/api/modules/content";
+import {
+  getCategoryBySlug,
+  getChildCategories,
+} from "~/features/forum/data/categories";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { t } from "~/lib/i18n";
 
 const { categorySlug } = Astro.params;
 
 // 板块详情：从后端解析真实板块（按 slug），并拉取其统一内容（讨论/官方/专栏/博客）
 const boardsRes = await contentApi.listBoards();
 if (boardsRes.isErr()) {
-  console.error('[forum/[categorySlug]] listBoards 失败:', boardsRes.error);
+  console.error("[forum/[categorySlug]] listBoards 失败:", boardsRes.error);
 }
-const boards: BoardItem[] = boardsRes.isOk() ? (boardsRes.value?.items ?? []) : [];
+const boards: BoardItem[] = boardsRes.isOk()
+  ? (boardsRes.value?.items ?? [])
+  : [];
 const board = boards.find((b) => b.slug === categorySlug);
 // 广场在后端尚无板块时会展示静态分类；详情也必须能打开同一分类，
 // 否则每张卡片点进去就立即跳回广场，看起来像按钮失效。
-const fallbackCategory = !board ? getCategoryBySlug(categorySlug ?? '') : undefined;
+const fallbackCategory = !board
+  ? getCategoryBySlug(categorySlug ?? "")
+  : undefined;
 
 if (!board && !fallbackCategory) {
-  return Astro.redirect(getPermalink('/forum'));
+  return Astro.redirect(getPermalink("/forum"));
 }
 
 // 子板块（父板块展示） + 本板块id
-const realChildren = board ? boards.filter((b) => b.parent_id === board.id) : [];
+const realChildren = board
+  ? boards.filter((b) => b.parent_id === board.id)
+  : [];
 const children = board
   ? realChildren.map((child) => ({ slug: child.slug, title: child.title }))
-  : getChildCategories(fallbackCategory!.id).map((child) => ({ slug: child.slug, title: t(child.name) }));
+  : getChildCategories(fallbackCategory!.id).map((child) => ({
+      slug: child.slug,
+      title: t(child.name),
+    }));
 const boardIds = board
   ? board.parent_id == null
     ? [board.id, ...realChildren.map((c) => c.id)]
@@ -61,7 +77,9 @@ allItems.sort((a, b) => {
 });
 
 const boardTitle = board?.title ?? t(fallbackCategory!.name);
-const boardDesc = board?.description || (fallbackCategory ? t(fallbackCategory.description) : '');
+const boardDesc =
+  board?.description ||
+  (fallbackCategory ? t(fallbackCategory.description) : "");
 const boardLabel = boardTitle;
 const metadata = { title: `${boardLabel} —— LKM` };
 
@@ -84,25 +102,38 @@ const recentItems = allItems.slice(0, 48);
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={getPermalink(`/forum/${categorySlug}`)}
-  navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}
+  navItems={["nav.community", "nav.blog", "nav.resources", "nav.mine"]}
 >
   <div class="space-y-6">
     <!-- 面包屑 / 返回板块广场 -->
     <div class="flex items-center gap-2 text-sm text-text-muted">
-      <a href={getPermalink('/forum')} class="hover:text-primary transition-colors">
-        {t('page.communityDetail.forum.backToSquare')}
+      <a
+        href={getPermalink("/forum")}
+        class="hover:text-primary transition-colors"
+      >
+        {t("page.communityDetail.forum.backToSquare")}
       </a>
       <span>/</span>
       <span class="text-deep-text font-medium">{boardLabel}</span>
     </div>
 
     <!-- 板块头部 -->
-    <div class="relative overflow-hidden rounded-2xl bg-card-bg border border-surface-3">
-      <div class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/5"></div>
+    <div
+      class="relative overflow-hidden rounded-2xl bg-card-bg border border-surface-3"
+    >
+      <div
+        class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/5"
+      >
+      </div>
       <div class="relative p-5 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Icon name="tabler:building-community" class="w-8 h-8 text-primary" />
+          <div
+            class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0"
+          >
+            <Icon
+              name="tabler:building-community"
+              class="w-8 h-8 text-primary"
+            />
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
@@ -110,20 +141,27 @@ const recentItems = allItems.slice(0, 48);
             </div>
             <p class="text-sm text-text-muted line-clamp-2 mt-2">{boardDesc}</p>
           </div>
-          {board && (
-            <div class="flex items-center gap-2 shrink-0">
-              <FollowButton client:load targetType="board" targetId={board.id} variant="primary" />
-              <button
-                type="button"
-                id="create-post-btn"
-                class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5"
-                onclick="window.dispatchEvent(new CustomEvent('lkm:open-create-post'))"
-              >
-                <Icon name="tabler:pencil-plus" class="w-4 h-4" />
-                {t('page.communityDetail.forum.createPost')}
-              </button>
-            </div>
-          )}
+          {
+            board && (
+              <div class="flex items-center gap-2 shrink-0">
+                <FollowButton
+                  client:load
+                  targetType="board"
+                  targetId={board.id}
+                  variant="primary"
+                />
+                <button
+                  type="button"
+                  id="create-post-btn"
+                  class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5"
+                  onclick="window.dispatchEvent(new CustomEvent('lkm:open-create-post'))"
+                >
+                  <Icon name="tabler:pencil-plus" class="w-4 h-4" />
+                  {t("page.communityDetail.forum.createPost")}
+                </button>
+              </div>
+            )
+          }
         </div>
       </div>
     </div>
@@ -134,7 +172,9 @@ const recentItems = allItems.slice(0, 48);
         <section class="bg-card-bg border border-surface-3 rounded-2xl p-5">
           <div class="flex items-center gap-2 mb-3">
             <Icon name="tabler:category-2" class="w-4 h-4 text-primary" />
-            <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.subcategoriesTitle')}</h2>
+            <h2 class="font-semibold text-deep-text">
+              {t("page.communityDetail.forum.subcategoriesTitle")}
+            </h2>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {children.map((child) => (
@@ -142,8 +182,13 @@ const recentItems = allItems.slice(0, 48);
                 href={getPermalink(`/forum/${encodeURIComponent(child.slug)}`)}
                 class="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-3/50 hover:bg-primary/10 transition-colors text-sm"
               >
-                <Icon name="tabler:building-community" class="w-4 h-4 text-primary shrink-0" />
-                <span class="text-deep-text font-medium truncate flex-1">{child.title}</span>
+                <Icon
+                  name="tabler:building-community"
+                  class="w-4 h-4 text-primary shrink-0"
+                />
+                <span class="text-deep-text font-medium truncate flex-1">
+                  {child.title}
+                </span>
               </a>
             ))}
           </div>
@@ -155,7 +200,9 @@ const recentItems = allItems.slice(0, 48);
     <section class="bg-card-bg border border-surface-3 rounded-2xl p-5">
       <div class="flex items-center gap-2 mb-3">
         <Icon name="tabler:info-circle" class="w-4 h-4 text-primary" />
-        <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.introTitle')}</h2>
+        <h2 class="font-semibold text-deep-text">
+          {t("page.communityDetail.forum.introTitle")}
+        </h2>
       </div>
       <p class="text-sm text-text-muted leading-relaxed">{boardDesc}</p>
     </section>
@@ -166,10 +213,14 @@ const recentItems = allItems.slice(0, 48);
         <section>
           <div class="flex items-center gap-2 mb-3">
             <Icon name="tabler:flame" class="w-4 h-4 text-orange-500" />
-            <h2 class="font-semibold text-deep-text">{t('page.communityDetail.forum.hotPosts')}</h2>
+            <h2 class="font-semibold text-deep-text">
+              {t("page.communityDetail.forum.hotPosts")}
+            </h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {hotItems.map((item) => <ContentCard post={item} />)}
+            {hotItems.map((item) => (
+              <ContentCard post={item} />
+            ))}
           </div>
         </section>
       )
@@ -179,9 +230,15 @@ const recentItems = allItems.slice(0, 48);
     <section>
       <div class="flex items-center gap-2 mb-3">
         <Icon name="tabler:news" class="w-4 h-4 text-primary" />
-        <h2 class="font-semibold text-deep-text">{t('community.forum.latestPosts')}</h2>
+        <h2 class="font-semibold text-deep-text">
+          {t("community.forum.latestPosts")}
+        </h2>
         <span class="text-xs text-text-muted ml-auto">
-          {t('page.communityDetail.forum.postsShort', { count: recentItems.length })}
+          {
+            t("page.communityDetail.forum.postsShort", {
+              count: recentItems.length,
+            })
+          }
         </span>
       </div>
       <div class="space-y-3">
@@ -190,15 +247,20 @@ const recentItems = allItems.slice(0, 48);
             recentItems.map((item) => <ContentCard post={item} />)
           ) : (
             <div class="bg-card-bg border border-surface-3 rounded-xl p-12 text-center">
-              <Icon name="tabler:article-off" class="w-12 h-12 text-text-muted/30 mx-auto mb-3" />
-              <p class="text-text-muted">{t('page.communityDetail.forum.emptyPosts')}</p>
+              <Icon
+                name="tabler:article-off"
+                class="w-12 h-12 text-text-muted/30 mx-auto mb-3"
+              />
+              <p class="text-text-muted">
+                {t("page.communityDetail.forum.emptyPosts")}
+              </p>
               {board && (
                 <button
                   type="button"
                   class="mt-3 btn-primary px-4 py-2 rounded-lg text-sm"
                   onclick="window.dispatchEvent(new CustomEvent('lkm:open-create-post'))"
                 >
-                  {t('page.communityDetail.forum.createFirst')}
+                  {t("page.communityDetail.forum.createFirst")}
                 </button>
               )}
             </div>

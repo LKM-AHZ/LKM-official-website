@@ -1,12 +1,12 @@
 ---
-import Layout from './BaseLayout.astro';
-import SiteNavbar from '~/features/shell-official/components/SiteNavbar.astro';
-import Footer from '~/features/shell/components/Footer.astro';
+import Layout from "./BaseLayout.astro";
+import SiteNavbar from "~/features/shell-official/components/SiteNavbar.astro";
+import Footer from "~/features/shell/components/Footer.astro";
 
-import { allMenuItems, officialDefaultNavItems } from '~/features/shell/menus';
-import { footerData, filterNavbarByNames } from '~/lib/navigation';
-import type { NavBarLink } from '~/types/config';
-import type { MetaData } from '~/types/core';
+import { allMenuItems, officialDefaultNavItems } from "~/features/shell/menus";
+import { footerData, filterNavbarByNames } from "~/lib/navigation";
+import type { NavBarLink } from "~/types/config";
+import type { MetaData } from "~/types/core";
 
 export interface Props {
   metadata?: MetaData;
@@ -29,7 +29,7 @@ const navbarLinks: NavBarLink[] = filterNavbarByNames(allMenuItems, navItems);
   <div id="sidebar-wrapper">
     <slot name="sidebar" />
   </div>
-  <main>
+  <main class="site-page" data-page-main>
     <slot />
   </main>
   {

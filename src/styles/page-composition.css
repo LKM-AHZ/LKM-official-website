@@ -1,0 +1,50 @@
+[data-page-main] {
+  min-height: calc(100dvh - 72px);
+  background: var(--page-bg);
+}
+
+[data-main-content] {
+  min-width: 0;
+  min-height: calc(100dvh - 72px);
+  transition: padding-left 200ms ease;
+}
+
+.site-content-frame {
+  box-sizing: border-box;
+  width: min(100%, 1320px);
+  margin-inline: auto;
+  padding: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 48px) 88px;
+}
+
+.site-content-frame > :first-child {
+  min-width: 0;
+}
+
+.site-content-frame h1 {
+  max-width: 32ch;
+  font-size: clamp(1.65rem, 2.4vw, 2.15rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.site-content-frame h1 + p {
+  max-width: 68ch;
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+}
+
+.site-content-frame :is(.profile-card, .card-hover) {
+  border-radius: 20px;
+}
+
+.site-content-frame :is(input, select, textarea):focus-visible,
+.site-content-frame :is(button, a):focus-visible {
+  outline: 2px solid var(--primary-action);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .site-content-frame {
+    padding: 24px 16px 72px;
+  }
+}

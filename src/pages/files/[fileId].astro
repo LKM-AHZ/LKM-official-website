@@ -1,5 +1,5 @@
 ---
-import CommunitySidebarLayout from "~/layouts/CommunitySidebarLayout.astro";
+import SidebarLayout from "~/layouts/SidebarLayout.astro";
 import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import { Icon } from "astro-icon/components";
 import { fileLibraryApi } from "~/lib/api";
@@ -76,7 +76,7 @@ const metadata = {
 };
 ---
 
-<CommunitySidebarLayout
+<SidebarLayout
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={Astro.url.pathname}
@@ -266,4 +266,4 @@ const metadata = {
       <AuthenticatedFileDetail client:load fileId={fileId} />
     )
   }
-</CommunitySidebarLayout>
+</SidebarLayout>

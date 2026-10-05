@@ -164,7 +164,7 @@ const nav = [
     </div>
 
     <section
-      class="relative overflow-hidden bg-card-bg px-4 py-20 sm:px-6 md:py-28"
+      class="relative overflow-hidden bg-card-bg px-4 py-14 sm:px-6 md:py-20"
       aria-labelledby="home-title"
     >
       <div
@@ -173,71 +173,100 @@ const nav = [
       >
       </div>
       <div
-        class="relative mx-auto flex max-w-7xl flex-col items-center text-center"
+        class="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,0.6fr)] lg:gap-16"
       >
-        <div
-          class="mb-6 inline-flex items-center gap-2 rounded-full bg-btn-regular-bg px-4 py-2 text-sm font-medium text-primary-readable"
-        >
-          <Icon name="tabler:atom" class="h-4 w-4" aria-hidden="true" /> 理科迷 ·
-          科学与创造者社区
+        <div class="min-w-0">
+          <div
+            class="mb-6 inline-flex items-center gap-2 rounded-full bg-btn-regular-bg px-4 py-2 text-sm font-medium text-primary-readable"
+          >
+            <Icon name="tabler:atom" class="h-4 w-4" aria-hidden="true" /> 理科迷
+            · 科学与创造者社区
+          </div>
+          <h1
+            id="home-title"
+            class="max-w-4xl font-heading text-[clamp(2.4rem,5vw,4.25rem)] font-semibold leading-[1.16] tracking-tight text-deep-text"
+          >
+            从一个问题出发，<br /><span class="text-primary-readable"
+              >找到整个理科社区。</span
+            >
+          </h1>
+          <p class="mt-6 max-w-2xl text-base leading-7 text-text-muted">
+            搜索讨论、专栏和学习资料；找到愿意一起解题、做项目、参加竞赛的同好。
+          </p>
+          <form
+            action={paths.search}
+            method="get"
+            role="search"
+            class="mt-9 flex w-full max-w-2xl items-center gap-2 rounded-full border border-surface-3 bg-page-bg p-2 shadow-sm transition focus-within:border-primary focus-within:shadow-md"
+          >
+            <Icon
+              name="tabler:search"
+              class="ml-3 h-6 w-6 shrink-0 text-text-muted"
+              aria-hidden="true"
+            />
+            <label for="home-search" class="sr-only">全站搜索</label>
+            <input
+              id="home-search"
+              name="q"
+              type="search"
+              required
+              maxlength="200"
+              placeholder="搜索帖子、专栏、文件库和题库…"
+              class="min-w-0 flex-1 bg-transparent px-2 py-3 text-base text-deep-text outline-none placeholder:text-text-muted/70"
+            />
+            <button
+              type="submit"
+              class="rounded-full bg-primary-action px-6 py-3 text-sm font-medium text-white transition hover:shadow-md sm:px-8"
+              >搜索</button
+            >
+          </form>
         </div>
-        <h1
-          id="home-title"
-          class="max-w-4xl font-heading text-[clamp(2.7rem,6vw,5.25rem)] font-semibold leading-[1.16] tracking-tight text-deep-text"
+        <aside
+          class="rounded-[28px] border border-surface-3 bg-page-bg p-6 shadow-sm sm:p-8"
+          aria-label="快速开始"
         >
-          从一个问题出发，<br /><span class="text-primary-readable"
-            >找到整个理科社区。</span
+          <span
+            class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-btn-regular-bg text-primary-readable"
+            ><Icon
+              name="tabler:compass"
+              class="h-6 w-6"
+              aria-hidden="true"
+            /></span
           >
-        </h1>
-        <p
-          class="mt-6 max-w-2xl text-base leading-8 text-text-muted sm:text-lg"
-        >
-          搜索讨论、专栏和学习资料；找到愿意一起解题、做项目、参加竞赛的同好。
-        </p>
-        <form
-          action={paths.search}
-          method="get"
-          role="search"
-          class="mt-9 flex w-full max-w-2xl items-center gap-2 rounded-full border border-surface-3 bg-page-bg p-2 shadow-sm transition focus-within:border-primary focus-within:shadow-md"
-        >
-          <Icon
-            name="tabler:search"
-            class="ml-3 h-6 w-6 shrink-0 text-text-muted"
-            aria-hidden="true"
-          />
-          <label for="home-search" class="sr-only">全站搜索</label>
-          <input
-            id="home-search"
-            name="q"
-            type="search"
-            required
-            maxlength="200"
-            placeholder="搜索帖子、专栏、文件库和题库…"
-            class="min-w-0 flex-1 bg-transparent px-2 py-3 text-base text-deep-text outline-none placeholder:text-text-muted/70"
-          />
-          <button
-            type="submit"
-            class="rounded-full bg-primary-action px-6 py-3 text-sm font-medium text-white transition hover:shadow-md sm:px-8"
-            >搜索</button
-          >
-        </form>
-        <div
-          class="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm text-text-muted"
-        >
-          <span>快速开始</span><a
-            href={paths.qa}
-            class="rounded-full border border-surface-3 bg-card-bg px-4 py-1.5 transition hover:bg-btn-regular-bg hover:text-primary-readable"
-            >悬赏求助</a
-          ><a
-            href={paths.projects}
-            class="rounded-full border border-surface-3 bg-card-bg px-4 py-1.5 transition hover:bg-btn-regular-bg hover:text-primary-readable"
-            >寻找项目</a
-          ><a
-            href={paths.bank}
-            class="rounded-full border border-surface-3 bg-card-bg px-4 py-1.5 transition hover:bg-btn-regular-bg hover:text-primary-readable"
-            >赛后题库</a
-          >
-        </div>
+          <h2 class="mt-5 text-xl font-semibold text-deep-text">从这里开始</h2>
+          <p class="mt-2 text-sm leading-6 text-text-muted">
+            选一个方向，继续探索理科迷。
+          </p>
+          <div class="mt-6 grid gap-2">
+            <a
+              href={paths.qa}
+              class="flex items-center justify-between rounded-2xl bg-card-bg px-4 py-3 text-sm font-medium text-deep-text hover:bg-btn-regular-bg hover:text-primary-readable"
+              >悬赏求助 <Icon
+                name="tabler:arrow-up-right"
+                class="h-4 w-4"
+                aria-hidden="true"
+              /></a
+            >
+            <a
+              href={paths.projects}
+              class="flex items-center justify-between rounded-2xl bg-card-bg px-4 py-3 text-sm font-medium text-deep-text hover:bg-btn-regular-bg hover:text-primary-readable"
+              >寻找项目 <Icon
+                name="tabler:arrow-up-right"
+                class="h-4 w-4"
+                aria-hidden="true"
+              /></a
+            >
+            <a
+              href={paths.bank}
+              class="flex items-center justify-between rounded-2xl bg-card-bg px-4 py-3 text-sm font-medium text-deep-text hover:bg-btn-regular-bg hover:text-primary-readable"
+              >赛后题库 <Icon
+                name="tabler:arrow-up-right"
+                class="h-4 w-4"
+                aria-hidden="true"
+              /></a
+            >
+          </div>
+        </aside>
       </div>
     </section>
 

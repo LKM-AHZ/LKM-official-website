@@ -1,9 +1,9 @@
 ---
-import Layout from '~/layouts/CommunitySidebarLayout.astro';
-import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
-import { mockCompetitions } from '~/features/competition/data/mock-competitions';
-import { getPermalink } from '~/lib/utils/permalinks';
-import { t } from '~/lib/i18n';
+import Layout from "~/layouts/SidebarLayout.astro";
+import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
+import { mockCompetitions } from "~/features/competition/data/mock-competitions";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { t } from "~/lib/i18n";
 
 // server 模式：params 从 URL 直接解析
 const { id } = Astro.params;
@@ -14,14 +14,18 @@ if (!comp) {
   Astro.response.status = 404;
 }
 
-const metadata = { title: comp ? `${t(comp.title)} —— LKM` : t('page.communityDetail.competition.metaTitle') };
+const metadata = {
+  title: comp
+    ? `${t(comp.title)} —— LKM`
+    : t("page.communityDetail.competition.metaTitle"),
+};
 ---
 
 <Layout
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={getPermalink(`/competition/${id}`)}
-  navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}
+  navItems={["nav.community", "nav.blog", "nav.resources", "nav.mine"]}
 >
   {
     comp ? (
@@ -30,44 +34,56 @@ const metadata = { title: comp ? `${t(comp.title)} —— LKM` : t('page.communi
         <p class="text-text-muted">{t(comp.description)}</p>
         <div class="bg-card-bg border border-surface-3 rounded-xl p-5 space-y-2 text-sm">
           <div>
-            <span class="text-text-muted/60">{t('page.communityDetail.competition.startsAt')}</span>
+            <span class="text-text-muted/60">
+              {t("page.communityDetail.competition.startsAt")}
+            </span>
             {comp.startDate}
           </div>
           <div>
-            <span class="text-text-muted/60">{t('page.communityDetail.competition.endsAt')}</span>
+            <span class="text-text-muted/60">
+              {t("page.communityDetail.competition.endsAt")}
+            </span>
             {comp.endDate}
           </div>
           <div>
-            <span class="text-text-muted/60">{t('page.communityDetail.competition.duration')}</span>
-            {t('page.communityDetail.competition.durationMinutes', { count: comp.duration })}
+            <span class="text-text-muted/60">
+              {t("page.communityDetail.competition.duration")}
+            </span>
+            {t("page.communityDetail.competition.durationMinutes", {
+              count: comp.duration,
+            })}
           </div>
           <div>
-            <span class="text-text-muted/60">{t('page.communityDetail.competition.status')}</span>
-            {comp.status === 'ongoing'
-              ? t('page.communityDetail.competition.ongoing')
-              : comp.status === 'upcoming'
-                ? t('page.communityDetail.competition.upcoming')
-                : t('page.communityDetail.competition.ended')}
+            <span class="text-text-muted/60">
+              {t("page.communityDetail.competition.status")}
+            </span>
+            {comp.status === "ongoing"
+              ? t("page.communityDetail.competition.ongoing")
+              : comp.status === "upcoming"
+                ? t("page.communityDetail.competition.upcoming")
+                : t("page.communityDetail.competition.ended")}
           </div>
           <div>
-            <span class="text-text-muted/60">{t('page.communityDetail.competition.participants')}</span>
+            <span class="text-text-muted/60">
+              {t("page.communityDetail.competition.participants")}
+            </span>
             {/* 不能用 `||`：报名人数 0 是合法值，只有未开始的比赛才显示"待定" */}
-            {comp.participantCount > 0 || comp.status !== 'upcoming'
+            {comp.participantCount > 0 || comp.status !== "upcoming"
               ? comp.participantCount
-              : t('page.communityDetail.competition.pending')}
+              : t("page.communityDetail.competition.pending")}
           </div>
         </div>
-        {comp.status === 'ongoing' && (
+        {comp.status === "ongoing" && (
           <a
             href={getPermalink(`/competition/${id}/exam`)}
             class="btn-primary px-6 py-3 rounded-lg text-base font-semibold inline-block"
           >
-            {t('page.communityDetail.competition.enterExam')}
+            {t("page.communityDetail.competition.enterExam")}
           </a>
         )}
       </div>
     ) : (
-      <p>{t('page.communityDetail.competition.notFound')}</p>
+      <p>{t("page.communityDetail.competition.notFound")}</p>
     )
   }
 </Layout>

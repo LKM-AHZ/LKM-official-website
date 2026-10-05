@@ -18,22 +18,34 @@ async function handleLogout(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex min-h-screen">
+  <div class="flex min-h-screen flex-col lg:flex-row">
     <aside
-      class="w-56 shrink-0 border-r border-surface-3 bg-card-bg min-h-screen p-4 flex flex-col"
+      class="sticky top-0 z-30 flex w-full shrink-0 flex-col border-b border-surface-3 bg-card-bg p-3 lg:h-screen lg:w-60 lg:border-b-0 lg:border-r lg:p-5"
     >
-      <div class="mb-6">
+      <div class="mb-3 flex items-center justify-between px-2 lg:mb-8 lg:block">
         <h1 class="text-lg font-bold text-primary">
           {{ t("starhope.appName") }}
         </h1>
-        <p class="text-xs text-text-muted mt-1">{{ t("starhope.tagline") }}</p>
+        <p class="mt-1 hidden text-xs text-text-muted lg:block">
+          {{ t("starhope.tagline") }}
+        </p>
+        <button
+          type="button"
+          @click="handleLogout"
+          class="rounded-full px-3 py-1.5 text-xs text-text-muted hover:bg-surface-3 lg:hidden"
+        >
+          {{ t("starhope.logout") }}
+        </button>
       </div>
-      <nav class="space-y-1">
+      <nav
+        class="flex gap-1 overflow-x-auto lg:block lg:space-y-1"
+        :aria-label="t('starhope.appName')"
+      >
         <button
           v-for="item in navItems"
           :key="item.route"
           @click="navigate(item.route)"
-          class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2"
+          class="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-left text-sm transition-colors lg:w-full"
           :class="
             currentRoute === item.route
               ? 'bg-primary/10 text-primary'
@@ -44,7 +56,7 @@ async function handleLogout(): Promise<void> {
           <span>{{ item.label }}</span>
         </button>
       </nav>
-      <div class="mt-auto pt-4 border-t border-surface-3">
+      <div class="mt-auto hidden border-t border-surface-3 pt-4 lg:block">
         <div v-if="currentUser" class="flex items-center gap-2 px-3 py-2">
           <div
             class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary"
@@ -71,7 +83,7 @@ async function handleLogout(): Promise<void> {
         </button>
       </div>
     </aside>
-    <main class="flex-1 min-w-0">
+    <main class="min-w-0 flex-1 bg-page-bg">
       <slot />
     </main>
   </div>

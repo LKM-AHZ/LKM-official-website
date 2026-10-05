@@ -1,13 +1,16 @@
 ---
-import Layout from '~/layouts/CommunitySidebarLayout.astro';
-import { Icon } from 'astro-icon/components';
-import { getRootCategories, getChildCategories } from '~/features/forum/data/categories';
-import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
-import { contentApi, type BoardItem } from '~/lib/api/modules/content';
-import { getPermalink } from '~/lib/utils/permalinks';
-import { t } from '~/lib/i18n';
+import Layout from "~/layouts/SidebarLayout.astro";
+import { Icon } from "astro-icon/components";
+import {
+  getRootCategories,
+  getChildCategories,
+} from "~/features/forum/data/categories";
+import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
+import { contentApi, type BoardItem } from "~/lib/api/modules/content";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { t } from "~/lib/i18n";
 
-const metadata = { title: `${t('community.forum.title')} —— LKM` };
+const metadata = { title: `${t("community.forum.title")} —— LKM` };
 
 // 板块广场：优先从后端取真实 boards（含父/子层级），失败/空时回退静态 mock。
 interface RenderBoard {
@@ -43,8 +46,8 @@ try {
         return {
           slug: p.slug,
           title: p.title,
-          description: p.description || '',
-          icon: 'tabler:building-community',
+          description: p.description || "",
+          icon: "tabler:building-community",
           // 由真实子板块数推导，原先恒为 true 会让无子板块的根板块也显示「0 成员」角标
           isParent: childCount > 0,
           childCount,
@@ -69,41 +72,53 @@ if (rootBoards.length === 0) {
 // slug 来自后端，空 slug 会生成 /forum 自链接、带 #/?/空格的 slug 会拼出坏 URL：
 // 空的一律不渲染（两个分支都要挡，故放在合并后）
 rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
-
 ---
 
 <Layout
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
-  currentPath={getPermalink('/forum')}
-  navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}
+  currentPath={getPermalink("/forum")}
+  navItems={["nav.community", "nav.blog", "nav.resources", "nav.mine"]}
 >
   <div class="space-y-10">
     <div>
-      <h1 class="text-3xl font-bold text-deep-text">{t('community.forum.title')}</h1>
-      <p class="text-text-muted mt-2">{t('community.forum.subtitle')}</p>
+      <h1 class="text-3xl font-bold text-deep-text">
+        {t("community.forum.title")}
+      </h1>
+      <p class="text-text-muted mt-2">{t("community.forum.subtitle")}</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {/* 板块 slug 必须按路径段编码：空格/#/? 原样拼进 href 会截断或拼坏 URL（详情页会解码回来） */}
-      {rootBoards.map((b) => (
-        <a href={getPermalink(`/forum/${encodeURIComponent(b.slug)}`)} class="profile-card group">
-          <div class="profile-inner p-4 flex flex-col gap-2 h-full">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Icon name={b.icon} class="w-5 h-5 text-primary" />
+      {
+        /* 板块 slug 必须按路径段编码：空格/#/? 原样拼进 href 会截断或拼坏 URL（详情页会解码回来） */
+      }
+      {
+        rootBoards.map((b) => (
+          <a
+            href={getPermalink(`/forum/${encodeURIComponent(b.slug)}`)}
+            class="profile-card group"
+          >
+            <div class="profile-inner p-4 flex flex-col gap-2 h-full">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icon name={b.icon} class="w-5 h-5 text-primary" />
+                </div>
+                <h3 class="font-semibold text-deep-text group-hover:text-primary transition-colors">
+                  {b.title}
+                </h3>
               </div>
-              <h3 class="font-semibold text-deep-text group-hover:text-primary transition-colors">{b.title}</h3>
+              <p class="text-xs text-text-muted line-clamp-2 leading-relaxed flex-1">
+                {b.description}
+              </p>
+              {b.isParent && (
+                <span class="text-xs text-primary/80">
+                  {b.childCount} {t("community.forum.subBoards")}
+                </span>
+              )}
             </div>
-            <p class="text-xs text-text-muted line-clamp-2 leading-relaxed flex-1">{b.description}</p>
-            {b.isParent && (
-              <span class="text-xs text-primary/80">
-                {b.childCount} {t('community.forum.subBoards')}
-              </span>
-            )}
-          </div>
-        </a>
-      ))}
+          </a>
+        ))
+      }
     </div>
   </div>
 </Layout>

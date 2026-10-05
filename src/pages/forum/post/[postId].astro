@@ -1,14 +1,14 @@
 ---
-import Layout from '~/layouts/CommunitySidebarLayout.astro';
-import { Icon } from 'astro-icon/components';
-import { communitySidebarLinks } from '~/features/shell-community/data/community-sidebar';
-import PostInteractions from '~/features/forum/components/PostInteractions.vue';
-import CommentSection from '~/features/forum/components/CommentSection.vue';
-import { getPermalink } from '~/lib/utils/permalinks';
-import { sanitizeHtmlContent } from '~/lib/utils/html-sanitize';
-import { createMarkdownProcessor } from '@astrojs/markdown-remark';
-import { contentApi } from '~/lib/api/modules/content';
-import { t } from '~/lib/i18n';
+import Layout from "~/layouts/SidebarLayout.astro";
+import { Icon } from "astro-icon/components";
+import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
+import PostInteractions from "~/features/forum/components/PostInteractions.vue";
+import CommentSection from "~/features/forum/components/CommentSection.vue";
+import { getPermalink } from "~/lib/utils/permalinks";
+import { sanitizeHtmlContent } from "~/lib/utils/html-sanitize";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { contentApi } from "~/lib/api/modules/content";
+import { t } from "~/lib/i18n";
 
 const { postId } = Astro.params;
 
@@ -18,32 +18,35 @@ const res = await contentApi.getItem(postId ?? "");
 const post = res.isOk() ? res.value : null;
 
 if (!post) {
-  return Astro.redirect(getPermalink('/forum'));
+  return Astro.redirect(getPermalink("/forum"));
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(dateStr).toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
-const authorName = post.author_name || post.publisher || t('page.communityDetail.forum.anonymousUser');
+const authorName =
+  post.author_name ||
+  post.publisher ||
+  t("page.communityDetail.forum.anonymousUser");
 let bodyHtml = post.content;
-if (post.content_type === 'discussion') {
+if (post.content_type === "discussion") {
   const markdown = await createMarkdownProcessor({ syntaxHighlight: false });
   bodyHtml = (await markdown.render(post.content)).code;
 }
 
 // 内容体裁判别（讨论帖不显示标签）
 const TYPE_KEY: Record<string, string> = {
-  article: 'community.forum.typeArticle',
-  column_post: 'community.forum.typeColumnPost',
-  blog_post: 'community.forum.typeBlogPost',
-  qa: 'community.forum.typeQuestion',
+  article: "community.forum.typeArticle",
+  column_post: "community.forum.typeColumnPost",
+  blog_post: "community.forum.typeBlogPost",
+  qa: "community.forum.typeQuestion",
 };
 const metadata = { title: `${post.title} —— LKM` };
 ---
@@ -52,13 +55,16 @@ const metadata = { title: `${post.title} —— LKM` };
   metadata={metadata}
   sidebarLinks={communitySidebarLinks}
   currentPath={getPermalink(`/forum/post/${postId}`)}
-  navItems={['nav.community', 'nav.blog', 'nav.resources', 'nav.mine']}
+  navItems={["nav.community", "nav.blog", "nav.resources", "nav.mine"]}
 >
   <div class="space-y-6">
     <!-- 面包屑 -->
     <div class="flex items-center gap-2 text-sm text-text-muted/60">
-      <a href={getPermalink('/forum')} class="hover:text-primary transition-colors">
-        {t('page.communityDetail.forum.forum')}
+      <a
+        href={getPermalink("/forum")}
+        class="hover:text-primary transition-colors"
+      >
+        {t("page.communityDetail.forum.forum")}
       </a>
       <Icon name="tabler:chevron-right" class="w-3.5 h-3.5" />
       <span class="text-text-muted truncate">{post.title}</span>
@@ -72,40 +78,50 @@ const metadata = { title: `${post.title} —— LKM` };
           {
             post.is_pinned && (
               <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400">
-                <Icon name="tabler:pin" class="w-3 h-3" /> {t('page.communityDetail.forum.pinned')}
+                <Icon name="tabler:pin" class="w-3 h-3" />{" "}
+                {t("page.communityDetail.forum.pinned")}
               </span>
             )
           }
           {
             post.is_featured && (
               <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400">
-                <Icon name="tabler:star-filled" class="w-3 h-3" /> {t('page.communityDetail.forum.featured')}
+                <Icon name="tabler:star-filled" class="w-3 h-3" />{" "}
+                {t("page.communityDetail.forum.featured")}
               </span>
             )
           }
           {
-            post.content_type !== 'discussion' && (
+            post.content_type !== "discussion" && (
               <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium bg-primary/10 text-primary">
-                {TYPE_KEY[post.content_type] ? t(TYPE_KEY[post.content_type]) : post.content_type}
+                {TYPE_KEY[post.content_type]
+                  ? t(TYPE_KEY[post.content_type])
+                  : post.content_type}
               </span>
             )
           }
         </div>
-        <h1 class="text-2xl md:text-3xl font-bold text-deep-text leading-tight">{post.title}</h1>
-        <div class="flex flex-wrap items-center gap-3 mt-4 text-sm text-text-muted/60">
+        <h1 class="text-2xl md:text-3xl font-bold text-deep-text leading-tight">
+          {post.title}
+        </h1>
+        <div
+          class="flex flex-wrap items-center gap-3 mt-4 text-sm text-text-muted/60"
+        >
           <span>{authorName}</span>
-          {post.department && (
-            <>
-              <span>·</span>
-              <span>{post.department}</span>
-            </>
-          )}
+          {
+            post.department && (
+              <>
+                <span>·</span>
+                <span>{post.department}</span>
+              </>
+            )
+          }
           <span>·</span>
           <span>{formatDate(post.created_at)}</span>
           <span>·</span>
           <span>
             <Icon name="tabler:eye" class="w-4 h-4 inline mr-1" />
-            {t('page.communityDetail.forum.views', { count: post.view_count })}
+            {t("page.communityDetail.forum.views", { count: post.view_count })}
           </span>
         </div>
         {
@@ -113,7 +129,9 @@ const metadata = { title: `${post.title} —— LKM` };
           (post.tags ?? []).length > 0 && (
             <div class="flex flex-wrap gap-1.5 mt-3">
               {(post.tags ?? []).map((tag: string) => (
-                <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{tag}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                  {tag}
+                </span>
               ))}
             </div>
           )
