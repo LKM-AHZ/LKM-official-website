@@ -5,7 +5,6 @@ import {
   getRootCategories,
   getChildCategories,
 } from "~/features/forum/data/categories";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import { contentApi, type BoardItem } from "~/lib/api/modules/content";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
@@ -76,18 +75,24 @@ rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={[
+    { text: "nav.overview", href: "#overview" },
+    { text: "nav.forum", href: "#boards" },
+  ]}
   currentPath={getPermalink("/forum")}
 >
   <div class="space-y-10">
-    <div>
+    <div id="overview">
       <h1 class="text-3xl font-bold text-deep-text">
         {t("community.forum.title")}
       </h1>
       <p class="text-text-muted mt-2">{t("community.forum.subtitle")}</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div
+      id="boards"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    >
       {
         /* 板块 slug 必须按路径段编码：空格/#/? 原样拼进 href 会截断或拼坏 URL（详情页会解码回来） */
       }

@@ -40,4 +40,3 @@ export {
 export * from "~/features/shell/common/shell-events";
 
 // 差异化组件
-export { communitySidebarLinks } from "./data/community-sidebar";

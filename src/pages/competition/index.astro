@@ -1,6 +1,5 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import CompetitionHall from "~/features/competition/components/CompetitionHall.vue";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
@@ -10,14 +9,21 @@ const metadata = { title: `${t("community.competition.title")} —— LKM` };
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={[
+    { text: "nav.overview", href: "#overview" },
+    { text: "nav.competition", href: "#competitions" },
+  ]}
   currentPath={getPermalink("/competition")}
 >
   <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-deep-text">
-      {t("community.competition.title")}
-    </h1>
+    <div id="overview">
+      <h1 class="text-3xl font-bold text-deep-text">
+        {t("community.competition.title")}
+      </h1>
+    </div>
     {/* 竞赛大厅在首屏之下且是点击驱动：进入视口再水合，避免首屏白下整包 Vue */}
-    <div class="min-h-[400px]"><CompetitionHall client:visible /></div>
+    <div id="competitions" class="min-h-[400px]">
+      <CompetitionHall client:visible />
+    </div>
   </div>
 </Layout>

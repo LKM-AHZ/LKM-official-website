@@ -1,6 +1,5 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import { mockCompetitions } from "~/features/competition/data/mock-competitions";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
@@ -23,15 +22,25 @@ const metadata = {
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={comp
+    ? [
+        { text: "nav.overview", href: "#overview" },
+        { text: "nav.details", href: "#details" },
+      ]
+    : []}
   currentPath={getPermalink(`/competition/${id}`)}
 >
   {
     comp ? (
       <div class="space-y-6">
-        <h1 class="text-3xl font-bold text-deep-text">{t(comp.title)}</h1>
-        <p class="text-text-muted">{t(comp.description)}</p>
-        <div class="bg-card-bg border border-surface-3 rounded-xl p-5 space-y-2 text-sm">
+        <div id="overview">
+          <h1 class="text-3xl font-bold text-deep-text">{t(comp.title)}</h1>
+          <p class="text-text-muted">{t(comp.description)}</p>
+        </div>
+        <div
+          id="details"
+          class="bg-card-bg border border-surface-3 rounded-xl p-5 space-y-2 text-sm"
+        >
           <div>
             <span class="text-text-muted/60">
               {t("page.communityDetail.competition.startsAt")}

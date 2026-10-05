@@ -29,10 +29,10 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
     styles.shell,
     "fixed top-[72px] left-0 z-10 h-[calc(100vh-72px)] overflow-hidden border-r border-surface-3 bg-card-bg",
   ]}
-  aria-label={t("nav.navigation")}
+  aria-label={t("nav.onThisPage")}
   data-sidebar
 >
-  <div class={styles.heading}>{t("nav.navigation")}</div>
+  <div class={styles.heading}>{t("nav.onThisPage")}</div>
   <ul class={styles.nav}>
     {
       logo && (
@@ -52,11 +52,8 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
     }
 
     {
-      groups.map(({ text, href, icon }) => {
-        const linkPath =
-          new URL(href, "https://example.com").pathname.replace(/\/$/, "") ||
-          "/";
-        const isActive = (currentPath.replace(/\/$/, "") || "/") === linkPath;
+      groups.map(({ text, href, icon }, index) => {
+        const isActive = index === 0;
 
         return (
           <li class:list={{ active: isActive }}>
@@ -64,7 +61,7 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
               href={href}
               aria-label={t(text)}
               title={t(text)}
-              aria-current={isActive ? "page" : undefined}
+              aria-current={isActive ? "location" : undefined}
             >
               <div class={styles.icon}>
                 <Icon name={icon} />
@@ -147,30 +144,24 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
       }
     }
 
-    // 依据当前路径+hash 更新 .active。跨页路径高亮由 SSR 渲染，此处仅当存在 hash 锚点
-    // 时按 hash 高亮；无 hash 时保持 SSR 的路径高亮不被误清。
+    // 根据当前锚点高亮；未定位时默认选中本页第一个模块。
     function updateActive() {
       var sidebar = currentSidebar();
       if (!sidebar) return;
       var currentHash = location.hash;
       var currentPath = location.pathname.replace(/\/$/, "");
+      var firstHash = sidebar.querySelector("a[href^='#']")?.hash || "";
       sidebar.querySelectorAll("a[href]").forEach(function (a) {
         var href = a.getAttribute("href");
         if (!href) return;
-        var linkUrl = new URL(href, location.origin);
+        var linkUrl = new URL(href, location.href);
         if (linkUrl.pathname.replace(/\/$/, "") !== currentPath) return;
         var li = a.closest("li");
         if (!li) return;
-        var isActive = linkUrl.hash
-          ? linkUrl.hash === currentHash
-          : !currentHash;
-        if (isActive) {
-          li.classList.add("active");
-        } else if (linkUrl.hash || currentHash) {
-          // 原本只在「无 hash 链接」时清除高亮，锚点链接一旦不匹配就永远留着 active，
-          // 滚动切段后侧栏会同时显示两个高亮项
-          li.classList.remove("active");
-        }
+        var isActive = linkUrl.hash === (currentHash || firstHash);
+        li.classList.toggle("active", isActive);
+        if (isActive) a.setAttribute("aria-current", "location");
+        else a.removeAttribute("aria-current");
       });
     }
 
@@ -192,15 +183,15 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
         if (!link) return;
         var href = link.getAttribute("href");
         if (!href) return;
-        var url = new URL(href, location.origin);
+        var url = new URL(href, location.href);
         var isSamePage =
           url.pathname.replace(/\/$/, "") ===
           location.pathname.replace(/\/$/, "");
         var hash = url.hash;
         if (!hash || !isSamePage) return;
-        e.preventDefault();
         var anchorTarget = document.querySelector(hash);
         if (anchorTarget) {
+          e.preventDefault();
           anchorTarget.scrollIntoView({ behavior: "smooth" });
           history.replaceState(null, "", hash);
           updateActive();
@@ -223,14 +214,14 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
               .call(links, function (a) {
                 var href = a.getAttribute("href");
                 if (!href) return false;
-                var url = new URL(href, location.origin);
+                var url = new URL(href, location.href);
                 return (
                   url.pathname.replace(/\/$/, "") ===
                     location.pathname.replace(/\/$/, "") && url.hash
                 );
               })
               .map(function (a) {
-                var url = new URL(a.getAttribute("href"), location.origin);
+                var url = new URL(a.getAttribute("href"), location.href);
                 return document.querySelector(url.hash);
               })
               .filter(Boolean);
@@ -257,14 +248,15 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
       window
         .matchMedia("(max-width: 767px)")
         .addEventListener("change", syncToggleState);
+
+      document.addEventListener("astro:after-swap", function () {
+        syncToggleState();
+        updateActive();
+      });
     }
 
-    // 首次加载与每次 Swup 导航后：对新 sidebar 节点恢复/同步折叠态，并刷新 hash 高亮。
+    // 首次加载恢复折叠态与当前模块高亮。
     syncToggleState();
     updateActive();
-    document.addEventListener("astro:after-swap", function () {
-      syncToggleState();
-      updateActive();
-    });
   })();
 </script>

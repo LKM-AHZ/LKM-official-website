@@ -6,7 +6,7 @@ import type { MetaData } from "~/types/core";
 
 export interface SidebarLink {
   text: string;
-  href: string;
+  href: `#${string}`;
   icon?: string;
 }
 
@@ -30,7 +30,7 @@ const {
 ---
 
 <PageLayout metadata={metadata} navItems={navItems} showFooter={showFooter}>
-  <!-- 侧边栏走命名插槽 → 渲染进外层 #sidebar-wrapper 独立 Swup 容器（main 外） -->
+  <!-- 侧边栏只接受本页锚点；跨页面导航统一由顶栏负责。 -->
   {
     sidebarLinks.length > 0 && (
       <Sidebar

@@ -94,9 +94,15 @@ test("搜索组件加载后侧边栏仍可展开和收起", async ({ page }) => 
   const content = page.locator("[data-main-content]");
   await expect(sidebar).toBeVisible();
   await expect(content).toHaveCSS("padding-left", "240px");
+  await expect(sidebar.getByRole("link", { name: "概览" })).toHaveAttribute(
+    "aria-current",
+    "location",
+  );
+  await sidebar.getByRole("link", { name: "文件库" }).click();
+  await expect(page).toHaveURL(/#library$/);
   await expect(sidebar.getByRole("link", { name: "文件库" })).toHaveAttribute(
     "aria-current",
-    "page",
+    "location",
   );
 
   await sidebar.getByRole("button", { name: "Toggle sidebar" }).click();
@@ -107,4 +113,25 @@ test("搜索组件加载后侧边栏仍可展开和收起", async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(sidebar).toHaveCSS("width", "50px");
   await expect(content).toHaveCSS("padding-left", "50px");
+});
+
+test("侧边栏只链接当前页面的实际模块", async ({ page }) => {
+  for (const route of [
+    "forum",
+    "files",
+    "qa",
+    "projects",
+    "competition",
+    "competition/bank",
+  ]) {
+    await page.goto(`${BASE_PATH}/${route}/`);
+    const links = page.locator("[data-sidebar] a[href]");
+    expect(await links.count()).toBeGreaterThanOrEqual(2);
+    for (const href of await links.evaluateAll((items) =>
+      items.map((item) => item.getAttribute("href")),
+    )) {
+      expect(href).toMatch(/^#[\w-]+$/);
+      await expect(page.locator(href!)).toHaveCount(1);
+    }
+  }
 });

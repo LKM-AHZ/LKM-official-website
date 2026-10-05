@@ -1,6 +1,5 @@
 ---
 import SidebarLayout from "~/layouts/SidebarLayout.astro";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import FileListPage from "~/features/file-library/components/FileListPage.vue";
 import { t } from "~/lib/i18n";
 
@@ -9,16 +8,19 @@ const metadata = { title: `${t("community.files.title")} —— LKM` };
 
 <SidebarLayout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={[
+    { text: "nav.overview", href: "#overview" },
+    { text: "nav.fileLibrary", href: "#library" },
+  ]}
   currentPath={Astro.url.pathname}
 >
   <div class="space-y-6">
-    <div>
+    <div id="overview">
       <h1 class="text-3xl font-bold text-deep-text">
         {t("community.files.title")}
       </h1>
       <p class="text-text-muted mt-2">{t("community.files.subtitle")}</p>
     </div>
-    <div class="min-h-[400px]"><FileListPage client:load /></div>
+    <div id="library" class="min-h-[400px]"><FileListPage client:load /></div>
   </div>
 </SidebarLayout>

@@ -1,7 +1,6 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
 import { Icon } from "astro-icon/components";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import PostInteractions from "~/features/forum/components/PostInteractions.vue";
 import CommentSection from "~/features/forum/components/CommentSection.vue";
 import { getPermalink } from "~/lib/utils/permalinks";
@@ -53,7 +52,10 @@ const metadata = { title: `${post.title} —— LKM` };
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={[
+    { text: "nav.content", href: "#content" },
+    { text: "nav.comments", href: "#comments" },
+  ]}
   currentPath={getPermalink(`/forum/post/${postId}`)}
 >
   <div class="space-y-6">
@@ -70,7 +72,7 @@ const metadata = { title: `${post.title} —— LKM` };
     </div>
 
     <!-- 正文 -->
-    <article>
+    <article id="content">
       <!-- 标题区 -->
       <div class="mb-6">
         <div class="flex items-center gap-2 mb-2">

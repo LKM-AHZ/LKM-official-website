@@ -1,8 +1,6 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
 import ProjectDetail from "~/features/project-hub/components/ProjectDetail.vue";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
-import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
 
 // 详情数据由客户端 island 从后端 /api/v1/projects/{id} 拉取（真实动态数据，非 SSG 内同步 mock）。
@@ -14,8 +12,13 @@ const metadata = { title: `${t("page.projects.title")} —— LKM` };
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
-  currentPath={getPermalink(`/projects/${projectId}`)}
+  sidebarLinks={[
+    { text: "nav.overview", href: "#overview" },
+    { text: "page.projects.progress", href: "#progress" },
+    { text: "nav.details", href: "#details" },
+  ]}
 >
-  <ProjectDetail client:load projectId={projectId ?? ""} />
+  <div id="overview">
+    <ProjectDetail client:load projectId={projectId ?? ""} />
+  </div>
 </Layout>

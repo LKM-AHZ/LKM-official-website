@@ -197,7 +197,7 @@ function formatDate(dateStr: string): string {
       </div>
 
       <!-- 回答列表 -->
-      <div>
+      <div id="answers">
         <h3 class="font-semibold text-deep-text mb-4">
           {{ t("page.qa.answers", { count: question.answers.length }) }}
         </h3>

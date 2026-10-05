@@ -91,7 +91,10 @@ function revisionLabel(rev: number): string {
       </div>
 
       <!-- 进度条 -->
-      <div class="bg-card-bg border border-surface-3 rounded-xl p-5">
+      <div
+        id="progress"
+        class="bg-card-bg border border-surface-3 rounded-xl p-5"
+      >
         <div class="flex items-center justify-between mb-2 text-sm">
           <span class="text-deep-text font-medium">{{
             t("page.projects.progress")
@@ -108,6 +111,7 @@ function revisionLabel(rev: number): string {
 
       <!-- 详情 -->
       <div
+        id="details"
         class="bg-card-bg border border-surface-3 rounded-xl p-6 space-y-4 text-sm"
       >
         <div v-if="project.background">

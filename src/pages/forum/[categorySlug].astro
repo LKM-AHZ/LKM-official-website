@@ -1,7 +1,6 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
 import { Icon } from "astro-icon/components";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import ContentCard from "~/features/content/components/ContentCard.astro";
 import CreatePostDialog from "~/features/forum/components/CreatePostDialog.vue";
 import { FollowButton } from "~/features/follow";
@@ -100,7 +99,22 @@ const recentItems = allItems.slice(0, 48);
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={[
+    { text: "nav.overview", href: "#overview" },
+    ...(children.length > 0
+      ? [
+          {
+            text: "page.communityDetail.forum.subcategoriesTitle",
+            href: "#subcategories" as const,
+          },
+        ]
+      : []),
+    { text: "page.communityDetail.forum.introTitle", href: "#intro" },
+    ...(hotItems.length > 0
+      ? [{ text: "page.communityDetail.forum.hotPosts", href: "#hot" as const }]
+      : []),
+    { text: "community.forum.latestPosts", href: "#recent" },
+  ]}
   currentPath={getPermalink(`/forum/${categorySlug}`)}
 >
   <div class="space-y-6">
@@ -118,6 +132,7 @@ const recentItems = allItems.slice(0, 48);
 
     <!-- 板块头部 -->
     <div
+      id="overview"
       class="relative overflow-hidden rounded-2xl bg-card-bg border border-surface-3"
     >
       <div
@@ -168,7 +183,10 @@ const recentItems = allItems.slice(0, 48);
     <!-- 子板块导航（一级分类时显示） -->
     {
       children.length > 0 && (
-        <section class="bg-card-bg border border-surface-3 rounded-2xl p-5">
+        <section
+          id="subcategories"
+          class="bg-card-bg border border-surface-3 rounded-2xl p-5"
+        >
           <div class="flex items-center gap-2 mb-3">
             <Icon name="tabler:category-2" class="w-4 h-4 text-primary" />
             <h2 class="font-semibold text-deep-text">
@@ -196,7 +214,10 @@ const recentItems = allItems.slice(0, 48);
     }
 
     <!-- 板块介绍 -->
-    <section class="bg-card-bg border border-surface-3 rounded-2xl p-5">
+    <section
+      id="intro"
+      class="bg-card-bg border border-surface-3 rounded-2xl p-5"
+    >
       <div class="flex items-center gap-2 mb-3">
         <Icon name="tabler:info-circle" class="w-4 h-4 text-primary" />
         <h2 class="font-semibold text-deep-text">
@@ -209,7 +230,7 @@ const recentItems = allItems.slice(0, 48);
     <!-- 热门讨论 -->
     {
       hotItems.length > 0 && (
-        <section>
+        <section id="hot">
           <div class="flex items-center gap-2 mb-3">
             <Icon name="tabler:flame" class="w-4 h-4 text-orange-500" />
             <h2 class="font-semibold text-deep-text">
@@ -226,7 +247,7 @@ const recentItems = allItems.slice(0, 48);
     }
 
     <!-- 全部内容 -->
-    <section>
+    <section id="recent">
       <div class="flex items-center gap-2 mb-3">
         <Icon name="tabler:news" class="w-4 h-4 text-primary" />
         <h2 class="font-semibold text-deep-text">

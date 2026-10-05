@@ -1,6 +1,5 @@
 ---
 import SidebarLayout from "~/layouts/SidebarLayout.astro";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
 import { Icon } from "astro-icon/components";
 import { fileLibraryApi } from "~/lib/api";
 import FileDownloadButton from "~/features/file-library/components/FileDownloadButton.vue";
@@ -78,7 +77,13 @@ const metadata = {
 
 <SidebarLayout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
+  sidebarLinks={file
+    ? [
+        { text: "nav.overview", href: "#overview" },
+        { text: "nav.details", href: "#details" },
+        { text: "community.fileLibrary.versionHistory", href: "#versions" },
+      ]
+    : []}
   currentPath={Astro.url.pathname}
 >
   {
@@ -95,7 +100,10 @@ const metadata = {
           <span class="text-text-muted truncate">{file.originalName}</span>
         </div>
 
-        <div class="bg-card-bg border border-surface-3 rounded-2xl p-8 text-center">
+        <div
+          id="overview"
+          class="bg-card-bg border border-surface-3 rounded-2xl p-8 text-center"
+        >
           <span class="text-6xl">{fileIcon(file.mimeType)}</span>
           <h1 class="text-xl font-bold text-deep-text mt-4">
             {file.originalName}
@@ -103,7 +111,10 @@ const metadata = {
           <p class="text-sm text-text-muted mt-2">{file.description}</p>
         </div>
 
-        <div class="bg-card-bg border border-surface-3 rounded-2xl p-6">
+        <div
+          id="details"
+          class="bg-card-bg border border-surface-3 rounded-2xl p-6"
+        >
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
               <span class="text-text-muted/60">
@@ -228,7 +239,10 @@ const metadata = {
           }
         </div>
 
-        <div class="bg-card-bg border border-surface-3 rounded-2xl p-6 space-y-3">
+        <div
+          id="versions"
+          class="bg-card-bg border border-surface-3 rounded-2xl p-6 space-y-3"
+        >
           <h2 class="font-semibold text-deep-text">
             {t("community.fileLibrary.versionHistory")}
           </h2>

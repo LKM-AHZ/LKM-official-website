@@ -1,8 +1,6 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
 import QuestionDetail from "~/features/qa/components/QuestionDetail.vue";
-import { communitySidebarLinks } from "~/features/shell-community/data/community-sidebar";
-import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
 
 // 详情数据由客户端 island 从后端 /api/v1/content/qa 拉取（真实动态数据，非 SSG 内同步 mock）。
@@ -12,8 +10,12 @@ const metadata = { title: `${t("page.qa.title")} —— LKM` };
 
 <Layout
   metadata={metadata}
-  sidebarLinks={communitySidebarLinks}
-  currentPath={getPermalink(`/qa/${questionId}`)}
+  sidebarLinks={[
+    { text: "nav.overview", href: "#overview" },
+    { text: "nav.answers", href: "#answers" },
+  ]}
 >
-  <QuestionDetail client:load questionId={questionId ?? ""} />
+  <div id="overview">
+    <QuestionDetail client:load questionId={questionId ?? ""} />
+  </div>
 </Layout>
