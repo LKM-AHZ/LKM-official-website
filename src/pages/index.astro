@@ -76,18 +76,6 @@ const daysUntil =
     : null;
 const dailyQuestion =
   mockQuestions[Math.floor(Date.now() / 86_400_000) % mockQuestions.length];
-const nav = [
-  { label: "首页", href: getPermalink("/"), icon: "tabler:home" },
-  { label: "发现", href: paths.forum, icon: "tabler:compass" },
-  { label: "项目", href: paths.projects, icon: "tabler:rocket" },
-  {
-    label: "专栏",
-    href: `${paths.search}?type=columns`,
-    icon: "tabler:article",
-  },
-  { label: "文件库", href: paths.files, icon: "tabler:folder" },
-  { label: "竞赛 / 题库", href: paths.competition, icon: "tabler:trophy" },
-];
 ---
 
 <Layout
@@ -98,71 +86,6 @@ const nav = [
   }}
 >
   <div class="min-h-screen bg-page-bg pb-20">
-    <div class="border-b border-surface-3 bg-card-bg">
-      <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
-        <nav
-          class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
-          aria-label="社区主要入口"
-        >
-          {
-            nav.map((link, index) => (
-              <a
-                href={link.href}
-                aria-current={index === 0 ? "page" : undefined}
-                class:list={[
-                  "inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-primary",
-                  index === 0
-                    ? "bg-btn-regular-bg text-primary-readable"
-                    : "text-text-muted hover:bg-btn-plain-bg-hover hover:text-deep-text",
-                ]}
-              >
-                <Icon name={link.icon} class="h-4 w-4" aria-hidden="true" />
-                {link.label}
-              </a>
-            ))
-          }
-        </nav>
-        <details class="group relative shrink-0">
-          <summary
-            class="flex cursor-pointer list-none items-center gap-2 rounded-full bg-primary-action px-5 py-2 text-sm font-medium text-white transition hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
-            ><Icon
-              name="tabler:plus"
-              class="h-4 w-4"
-              aria-hidden="true"
-            />发布<Icon
-              name="tabler:chevron-down"
-              class="h-4 w-4"
-              aria-hidden="true"
-            /></summary
-          >
-          <div
-            class="absolute right-0 top-full z-30 mt-2 w-44 rounded-2xl border border-surface-3 bg-card-bg p-1.5 shadow-lg"
-          >
-            <a
-              href={paths.forum}
-              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
-              >发帖 · 选择板块</a
-            >
-            <a
-              href={`${paths.files}#upload`}
-              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
-              >发文件</a
-            >
-            <a
-              href={`${paths.projects}#create`}
-              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
-              >发起项目</a
-            >
-            <a
-              href={paths.qa}
-              class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
-              >发起求助</a
-            >
-          </div>
-        </details>
-      </div>
-    </div>
-
     <section
       class="relative overflow-hidden bg-card-bg px-4 py-14 sm:px-6 md:py-20"
       aria-labelledby="home-title"
@@ -266,6 +189,44 @@ const nav = [
               /></a
             >
           </div>
+          <details class="group relative mt-4">
+            <summary
+              class="flex cursor-pointer list-none items-center gap-2 rounded-full bg-primary-action px-5 py-2 text-sm font-medium text-white transition hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
+              ><Icon
+                name="tabler:plus"
+                class="h-4 w-4"
+                aria-hidden="true"
+              />发布<Icon
+                name="tabler:chevron-down"
+                class="h-4 w-4"
+                aria-hidden="true"
+              /></summary
+            >
+            <div
+              class="mt-2 rounded-2xl border border-surface-3 bg-card-bg p-1.5"
+            >
+              <a
+                href={paths.forum}
+                class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+                >发帖 · 选择板块</a
+              >
+              <a
+                href={`${paths.files}#upload`}
+                class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+                >发文件</a
+              >
+              <a
+                href={`${paths.projects}#create`}
+                class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+                >发起项目</a
+              >
+              <a
+                href={paths.qa}
+                class="block rounded-lg px-3 py-2 text-sm text-deep-text hover:bg-primary/10"
+                >发起求助</a
+              >
+            </div>
+          </details>
         </aside>
       </div>
     </section>

@@ -43,6 +43,9 @@ test("字号设置在宽屏与刷新后保持生效", async ({ page }) => {
 
   await page.reload();
   await expect(page.locator("html")).toHaveCSS("font-size", "17px");
+  await navbar
+    .locator('astro-island[component-url*="PreferencesMenu"]:not([ssr])')
+    .waitFor();
   await navbar.getByRole("button", { name: "显示设置" }).click();
   await expect(
     navbar
@@ -118,6 +121,7 @@ test("搜索组件加载后侧边栏仍可展开和收起", async ({ page }) => 
 test("侧边栏只链接当前页面的实际模块", async ({ page }) => {
   for (const route of [
     "forum",
+    "forum/basic-science",
     "files",
     "qa",
     "projects",
