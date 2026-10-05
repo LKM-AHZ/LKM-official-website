@@ -37,7 +37,8 @@ const loginHref = ref(getAuthPath("login"));
 // 在 setup 阶段就发起校验（不是 onMounted）：restoreAndValidate 会同步把 session 置为
 // restoring，首个渲染即命中 spinner 分支，不会先闪一下「请先登录」再切换。
 // 本组件所在页面用 client:only 挂载（见 src/pages/account.astro），不存在水合不一致问题。
-if (!store.isLoggedIn && store.session !== "restoring") {
+// 顶栏可能已经恢复快照，但快照里的 isLoggedIn 不代表会话已校验。
+if (store.session === "anonymous") {
   void store.restoreAndValidate().catch(() => {
     // 兜底：任何异常都回到未登录态，避免永久 spinner + 未处理的 rejection
     store.session = "anonymous";

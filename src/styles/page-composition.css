@@ -11,9 +11,9 @@
 
 .site-content-frame {
   box-sizing: border-box;
-  width: min(100%, 1320px);
+  width: min(100%, 1200px);
   margin-inline: auto;
-  padding: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 48px) 88px;
+  padding: clamp(24px, 3vw, 44px) clamp(20px, 3vw, 40px) 80px;
 }
 
 .site-content-frame > :first-child {
@@ -29,6 +29,7 @@
   font-size: clamp(1.65rem, 2.4vw, 2.15rem);
   line-height: 1.2;
   letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
 }
 
 .site-content-frame h1 + p {
@@ -38,7 +39,66 @@
 }
 
 .site-content-frame :is(.profile-card, .card-hover) {
+  border-radius: 18px;
+}
+
+.page-intro {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 144px;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid var(--surface-3);
+  border-radius: 24px;
+  background: linear-gradient(
+    115deg,
+    var(--card-bg) 65%,
+    var(--btn-regular-bg)
+  );
+}
+
+.page-intro-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.page-intro-eyebrow {
+  margin-bottom: 10px;
+  color: var(--primary-readable);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.page-intro h1 {
+  margin: 0;
+}
+
+.page-intro-description {
+  max-width: 64ch;
+  margin-top: 10px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.page-intro p {
+  margin-bottom: 0;
+}
+
+.page-intro-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  flex: none;
+  place-items: center;
   border-radius: 20px;
+  background: var(--btn-regular-bg);
+  color: var(--primary-readable);
+  font-size: 2rem;
+}
+
+.page-intro + * {
+  margin-top: 24px;
 }
 
 .site-content-frame :is(input, select, textarea):focus-visible,
@@ -49,6 +109,18 @@
 
 @media (max-width: 767px) {
   .site-content-frame {
-    padding: 24px 16px 72px;
+    padding: 20px 16px 64px;
+  }
+
+  .page-intro {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .page-intro-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    font-size: 1.5rem;
   }
 }

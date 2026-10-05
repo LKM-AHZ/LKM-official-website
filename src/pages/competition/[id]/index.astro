@@ -1,5 +1,6 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
 import { mockCompetitions } from "~/features/competition/data/mock-competitions";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
@@ -14,9 +15,7 @@ if (!comp) {
 }
 
 const metadata = {
-  title: comp
-    ? `${t(comp.title)} —— LKM`
-    : t("page.communityDetail.competition.metaTitle"),
+  title: comp ? t(comp.title) : t("page.communityDetail.competition.metaTitle"),
 };
 ---
 
@@ -33,13 +32,14 @@ const metadata = {
   {
     comp ? (
       <div class="space-y-6">
-        <div id="overview">
-          <h1 class="text-3xl font-bold text-deep-text">{t(comp.title)}</h1>
-          <p class="text-text-muted">{t(comp.description)}</p>
-        </div>
+        <PageIntro
+          title={t(comp.title)}
+          description={t(comp.description)}
+          icon="tabler:trophy"
+        />
         <div
           id="details"
-          class="bg-card-bg border border-surface-3 rounded-xl p-5 space-y-2 text-sm"
+          class="grid gap-5 rounded-[18px] border border-surface-3 bg-card-bg p-6 text-sm sm:grid-cols-2"
         >
           <div>
             <span class="text-text-muted/60">
@@ -84,7 +84,7 @@ const metadata = {
         {comp.status === "ongoing" && (
           <a
             href={getPermalink(`/competition/${id}/exam`)}
-            class="btn-primary px-6 py-3 rounded-lg text-base font-semibold inline-block"
+            class="btn-primary px-6 py-3 rounded-full text-sm font-semibold inline-block"
           >
             {t("page.communityDetail.competition.enterExam")}
           </a>

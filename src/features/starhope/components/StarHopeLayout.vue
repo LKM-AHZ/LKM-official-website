@@ -48,9 +48,10 @@ async function handleLogout(): Promise<void> {
           class="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-left text-sm transition-colors lg:w-full"
           :class="
             currentRoute === item.route
-              ? 'bg-primary/10 text-primary'
-              : 'text-text-muted hover:bg-surface-3'
+              ? 'bg-btn-regular-bg text-primary-readable font-medium'
+              : 'text-text-muted hover:bg-btn-plain-bg-hover'
           "
+          :aria-current="currentRoute === item.route ? 'page' : undefined"
         >
           <span class="text-base">{{ item.icon }}</span>
           <span>{{ item.label }}</span>

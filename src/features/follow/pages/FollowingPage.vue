@@ -36,7 +36,9 @@ onMounted(() => void load());
   <div class="space-y-8">
     <div v-if="error" class="text-sm text-red-500">{{ error }}</div>
 
-    <section>
+    <section
+      class="rounded-[18px] border border-surface-3 bg-card-bg p-5 sm:p-6"
+    >
       <h2 class="text-lg font-semibold text-deep-text mb-3">
         {{ t("follow.followingUsers", { count: users.length }) }}
       </h2>
@@ -46,11 +48,11 @@ onMounted(() => void load());
       <div v-else-if="users.length === 0" class="text-sm text-text-muted">
         {{ t("follow.emptyUsers") }}
       </div>
-      <ul v-else class="space-y-2">
+      <ul v-else class="divide-y divide-surface-3">
         <li
           v-for="u in users"
           :key="u.user_id"
-          class="flex items-center justify-between p-3 rounded-lg bg-card-bg border border-surface-3"
+          class="flex items-center justify-between gap-3 py-4"
         >
           <div class="flex items-center gap-3 min-w-0">
             <img
@@ -74,7 +76,9 @@ onMounted(() => void load());
       </ul>
     </section>
 
-    <section>
+    <section
+      class="rounded-[18px] border border-surface-3 bg-card-bg p-5 sm:p-6"
+    >
       <h2 class="text-lg font-semibold text-deep-text mb-3">
         {{ t("follow.followingBoards", { count: boards.length }) }}
       </h2>
@@ -84,13 +88,15 @@ onMounted(() => void load());
       <div v-else-if="boards.length === 0" class="text-sm text-text-muted">
         {{ t("follow.emptyBoards") }}
       </div>
-      <ul v-else class="space-y-2">
+      <ul v-else class="divide-y divide-surface-3">
         <li
           v-for="b in boards"
           :key="b.board_id"
-          class="flex items-center justify-between p-3 rounded-lg bg-card-bg border border-surface-3"
+          class="flex items-center justify-between gap-3 py-4"
         >
-          <span class="font-medium text-deep-text">{{ b.title }}</span>
+          <span class="min-w-0 truncate font-medium text-deep-text">{{
+            b.title
+          }}</span>
           <FollowButton target-type="board" :target-id="b.board_id" />
         </li>
       </ul>

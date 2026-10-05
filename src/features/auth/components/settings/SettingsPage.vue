@@ -1,11 +1,13 @@
 <template>
   <ProtectedRoute>
-    <div class="relative min-h-[calc(100vh-12rem)] px-4 py-8">
-      <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-semibold mb-2">{{ t("settings.title") }}</h1>
-          <p class="text-sm text-text-muted">{{ t("settings.subtitle") }}</p>
-        </div>
+    <div class="site-content-frame relative min-h-[calc(100vh-12rem)]">
+      <div class="max-w-5xl mx-auto">
+        <header class="page-intro mb-6">
+          <div class="page-intro-copy">
+            <h1 class="text-deep-text">{{ t("settings.title") }}</h1>
+            <p class="page-intro-description">{{ t("settings.subtitle") }}</p>
+          </div>
+        </header>
 
         <div v-if="message" class="alert alert-success text-sm mb-6">
           {{ message }}
@@ -31,18 +33,19 @@
           <!-- 桌面左侧导航 -->
           <aside class="hidden md:block w-56 shrink-0">
             <nav
-              class="sticky top-6 space-y-1"
+              class="sticky top-24 space-y-1 rounded-2xl border border-surface-3 bg-card-bg p-2"
               aria-label="Account settings navigation"
             >
               <button
                 v-for="grp in groups"
                 :key="grp.key"
                 type="button"
-                class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium"
+                class="w-full text-left px-4 py-2.5 rounded-full text-sm font-medium transition-colors"
+                :aria-pressed="activeSection === grp.key"
                 :class="
                   activeSection === grp.key
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-text-muted hover:bg-page-bg'
+                    ? 'bg-btn-regular-bg text-primary-readable'
+                    : 'text-text-muted hover:bg-btn-plain-bg-hover'
                 "
                 @click="activeSection = grp.key"
               >
@@ -52,11 +55,11 @@
           </aside>
 
           <!-- 右侧内容卡 -->
-          <main class="flex-1 min-w-0 space-y-6">
+          <div class="flex-1 min-w-0 space-y-6">
             <!-- 个人信息 -->
             <section
               v-show="activeSection === 'profile'"
-              class="rounded-2xl bg-card-bg shadow-xl border border-surface-3 p-6 space-y-4"
+              class="rounded-2xl bg-card-bg border border-surface-3 p-5 sm:p-6 space-y-4"
             >
               <h3 class="text-lg font-semibold">
                 {{ t("settings.profileTitle") }}
@@ -245,7 +248,7 @@
             <!-- 登录与安全 -->
             <section
               v-show="activeSection === 'security'"
-              class="rounded-2xl bg-card-bg shadow-xl border border-surface-3 p-6"
+              class="rounded-2xl bg-card-bg border border-surface-3 p-5 sm:p-6"
             >
               <h3 class="text-lg font-semibold mb-4">
                 {{ t("settings.securityTitle") }}
@@ -270,7 +273,7 @@
             <!-- 账户操作 -->
             <section
               v-show="activeSection === 'account'"
-              class="rounded-2xl bg-card-bg shadow-xl border border-surface-3 p-6 space-y-4"
+              class="rounded-2xl bg-card-bg border border-surface-3 p-5 sm:p-6 space-y-4"
             >
               <h3 class="text-lg font-semibold">
                 {{ t("settings.accountTitle") }}
@@ -307,7 +310,7 @@
                 </button>
               </div>
             </section>
-          </main>
+          </div>
         </div>
       </div>
     </div>

@@ -37,7 +37,7 @@
   --line: var(--line-divider);
   /* --card-bg 直接继承主站 variables.css 的 token；此处自引用会造成循环依赖，整条链路失效 */
   --card-border: var(--line-divider);
-  --card-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   --nav-bg: color-mix(in srgb, var(--base-100) 92%, transparent);
   --mask: rgba(0, 0, 0, 0.18);
   --danger: var(--error);
@@ -59,12 +59,10 @@ body {
   margin: 0;
   padding: 0;
 }
-body {
-  font-family:
-    "PingFang SC", "Noto Sans SC", "Microsoft YaHei", "Helvetica Neue",
-    system-ui, sans-serif;
+.th-app {
+  font-family: var(--font-sans);
   color: var(--text-main);
-  font-size: calc(15px * var(--font-scale));
+  font-size: calc(1rem * var(--font-scale));
   line-height: 1.7;
   background: var(--bg-1);
   overflow-x: hidden;
@@ -161,12 +159,15 @@ body {
     border-color 0.3s;
 }
 .glass-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px var(--glow);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
   border-color: var(--accent);
 }
 
-:root {
+.dark .glass-hover:hover {
+  box-shadow: none;
+}
+
+.th-app {
   --radius: 20px;
   --radius-sm: 14px;
   --radius-xs: 10px;
@@ -283,7 +284,7 @@ body {
   background-clip: padding-box;
 }
 
-.container {
+.th-app .container {
   max-width: 1180px;
   margin: 0 auto;
   padding: 0 18px;
@@ -373,10 +374,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  body {
-    font-size: calc(14px * var(--font-scale));
-  }
-  .container {
+  .th-app .container {
     padding: 0 14px;
   }
 }
@@ -385,36 +383,36 @@ body {
    这里刻意不再在 html 上加 filter：filter 会让根元素成为 fixed 后代的包含块，
    .corner-deco / .bg-flow 这些 position:fixed 装饰会从「视口定位」退化成「文档定位」
    （右下角装饰跑到文档末尾、跟着页面滚）。对比度完全靠下面的 !important token 覆盖实现 */
-html.high-contrast {
+.th-app.high-contrast {
   --text-main: #1a1410 !important;
   --text-sub: #5a4d44 !important;
   --card-bg: #ffffff !important;
   --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
   --glow: rgba(0, 0, 0, 0.2) !important;
 }
-:root.dark.high-contrast {
+.dark .th-app.high-contrast {
   --text-main: #ffffff !important;
   --text-sub: #c9c2e8 !important;
   --card-bg: #181726 !important;
 }
 
 /* 低性能模式 */
-html.low-perf *,
-html.low-perf *::before,
-html.low-perf *::after {
+.th-app.low-perf *,
+.th-app.low-perf *::before,
+.th-app.low-perf *::after {
   animation: none !important;
   transition: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-html.low-perf .bg-flow {
+.th-app.low-perf .bg-flow {
   display: none;
 }
-html.low-perf .particles {
+.th-app.low-perf .particles {
   display: none;
 }
 /* 加载指示是必要反馈：低性能模式只放慢，不能停 */
-html.low-perf .spinner {
+.th-app.low-perf .spinner {
   animation: spinGlow 1.4s linear infinite !important;
 }
 

@@ -48,47 +48,49 @@ function revisionLabel(rev: number): string {
     </div>
     <template v-else>
       <!-- 头部 -->
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <span
-            v-if="project.isPinned"
-            class="text-xs px-2 py-1 rounded font-medium bg-red-100 dark:bg-red-950/30 text-red-600"
-          >
-            {{ t("page.projects.pinned") }}
-          </span>
-          <span
-            v-if="project.isIncubated"
-            class="text-xs px-2 py-1 rounded font-medium bg-amber-100 dark:bg-amber-950/30 text-amber-600"
-          >
-            {{ t("page.projects.incubated") }}
-          </span>
-          <span
-            class="text-xs px-2 py-1 rounded font-medium"
-            :class="
-              project.isRecruiting
-                ? 'bg-green-100 dark:bg-green-950/30 text-green-600'
-                : 'bg-blue-100 dark:bg-blue-950/30 text-blue-600'
-            "
-          >
+      <header class="page-intro">
+        <div class="page-intro-copy">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span
+              v-if="project.isPinned"
+              class="text-xs px-2 py-1 rounded font-medium bg-red-100 dark:bg-red-950/30 text-red-600"
+            >
+              {{ t("page.projects.pinned") }}
+            </span>
+            <span
+              v-if="project.isIncubated"
+              class="text-xs px-2 py-1 rounded font-medium bg-amber-100 dark:bg-amber-950/30 text-amber-600"
+            >
+              {{ t("page.projects.incubated") }}
+            </span>
+            <span
+              class="text-xs px-2 py-1 rounded font-medium"
+              :class="
+                project.isRecruiting
+                  ? 'bg-green-100 dark:bg-green-950/30 text-green-600'
+                  : 'bg-blue-100 dark:bg-blue-950/30 text-blue-600'
+              "
+            >
+              {{
+                project.type === "recruiting"
+                  ? project.isRecruiting
+                    ? t("page.projects.recruiting")
+                    : t("page.projects.recruited")
+                  : t("page.projects.showcase")
+              }}
+            </span>
+          </div>
+          <h1 class="font-semibold text-deep-text">{{ project.title }}</h1>
+          <p class="page-intro-description text-sm">
             {{
-              project.type === "recruiting"
-                ? project.isRecruiting
-                  ? t("page.projects.recruiting")
-                  : t("page.projects.recruited")
-                : t("page.projects.showcase")
+              t("page.projects.initiator", {
+                name: project.applicantName,
+                date: formatDate(project.createdAt),
+              })
             }}
-          </span>
+          </p>
         </div>
-        <h1 class="text-3xl font-bold text-deep-text">{{ project.title }}</h1>
-        <p class="text-sm text-text-muted mt-2">
-          {{
-            t("page.projects.initiator", {
-              name: project.applicantName,
-              date: formatDate(project.createdAt),
-            })
-          }}
-        </p>
-      </div>
+      </header>
 
       <!-- 进度条 -->
       <div
@@ -112,7 +114,7 @@ function revisionLabel(rev: number): string {
       <!-- 详情 -->
       <div
         id="details"
-        class="bg-card-bg border border-surface-3 rounded-xl p-6 space-y-4 text-sm"
+        class="bg-card-bg border border-surface-3 rounded-[18px] p-5 sm:p-6 space-y-6 text-sm"
       >
         <div v-if="project.background">
           <h3 class="font-semibold text-deep-text mb-1">

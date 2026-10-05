@@ -1,5 +1,7 @@
 ---
 import Layout from "~/layouts/PageLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
+import { Icon } from "astro-icon/components";
 import type { MetaData } from "~/types/core";
 import { buildUrl } from "~/lib/utils/paths";
 import { t } from "~/lib/i18n";
@@ -14,40 +16,50 @@ const apps = [
     name: t("page.apps.starHope.name"),
     desc: t("page.apps.starHope.description"),
     href: buildUrl("/starhope"),
-    icon: "📚",
+    icon: "tabler:school",
   },
   {
     name: t("page.apps.treehole.name"),
     desc: t("page.apps.treehole.description"),
     href: buildUrl("/treehole"),
-    icon: "🌙",
+    icon: "tabler:moon-stars",
   },
 ];
 ---
 
 <Layout metadata={metadata}>
-  <div class="max-w-3xl mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-      {t("page.apps.title")}
-    </h1>
-    <p class="text-gray-500 dark:text-gray-400 mb-8">
-      {t("page.apps.subtitle")}
-    </p>
-
-    <div class="grid gap-4 sm:grid-cols-2">
+  <div class="site-content-frame">
+    <PageIntro
+      title={t("page.apps.title")}
+      description={t("page.apps.subtitle")}
+      eyebrow={t("page.ui.appsEyebrow")}
+      icon="tabler:apps"
+    />
+    <div class="mt-6 grid gap-4 sm:grid-cols-2">
       {
         apps.map((app) => (
           <a
             href={app.href}
-            class="block p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-primary/50 hover:shadow-md transition-all"
+            class="group flex min-h-48 flex-col rounded-[20px] border border-surface-3 bg-card-bg p-6 transition-colors hover:border-primary/50 hover:bg-btn-card-bg-hover focus-visible:outline-2 focus-visible:outline-primary"
           >
-            <div class="text-3xl mb-3" aria-hidden="true">{app.icon}</div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            <span
+              class="grid h-12 w-12 place-items-center rounded-2xl bg-btn-regular-bg text-primary-readable"
+              aria-hidden="true"
+            >
+              <Icon name={app.icon} class="h-6 w-6" />
+            </span>
+            <h2 class="mt-5 text-lg font-semibold text-deep-text group-hover:text-primary-readable">
               {app.name}
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              {app.desc}
-            </p>
+            <p class="mt-2 text-sm leading-6 text-text-muted">{app.desc}</p>
+            <span class="mt-auto flex items-center gap-1 pt-5 text-sm font-medium text-primary-readable">
+              {t("page.apps.open")}{" "}
+              <Icon
+                name="tabler:arrow-up-right"
+                class="h-4 w-4"
+                aria-hidden="true"
+              />
+            </span>
           </a>
         ))
       }

@@ -1903,6 +1903,7 @@ export const enFlat = {
   "page.admin.reports.type": "Type",
   "page.admin.users.title": "User Management",
   "page.apps.description": "All application entries of the LKM community.",
+  "page.apps.open": "Open app",
   "page.apps.starHope.description":
     "A local-first cross-platform learning tool. Question bank management, smart practice, AI chat, document reading, exam simulation — an all-in-one learning solution.",
   "page.apps.starHope.name": "StarHope Learning Assistant",
@@ -2577,6 +2578,13 @@ export const enFlat = {
   "page.treehole.writeDescription":
     "Write down your worries, confessions, complaints, or whispers.",
   "page.treehole.writeTitle": "Write a Letter — Treehole",
+  "page.ui.appsEyebrow": "Tools · Explore",
+  "page.ui.bankEyebrow": "Practice · Learn",
+  "page.ui.competitionEyebrow": "Compete · Challenge",
+  "page.ui.filesEyebrow": "Resources · Share",
+  "page.ui.forumEyebrow": "Community · Discussions",
+  "page.ui.projectsEyebrow": "Collaborate · Create",
+  "page.ui.qaEyebrow": "Ask · Answer",
   "primitives.empty": "Nothing here yet",
   "primitives.formStaticWarning":
     "This form is a static demo and cannot be submitted online. Please contact us through other channels.",

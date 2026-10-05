@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import Layout from "~/layouts/PageLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
 import { get } from "~/lib/http/client";
 import { contentApi } from "~/lib/api/modules/content";
 import { mockQuestions } from "~/features/competition/data/mock-competitions";
@@ -121,16 +122,13 @@ function tabHref(value: SearchType) {
     description: "搜索理科迷的帖子、专栏、文件库与题库。",
   }}
 >
-  <section class="mx-auto min-h-[70vh] max-w-5xl px-4 py-12 sm:px-6 md:py-16">
-    <p class="text-xs font-bold tracking-[0.16em] text-primary-readable">
-      SEARCH LKM
-    </p>
-    <h1 class="mt-2 font-heading text-3xl font-bold text-deep-text sm:text-4xl">
-      全站搜索
-    </h1>
-    <p class="mt-2 text-text-muted">
-      一个入口，找到讨论、专栏文章、公开资料和赛后练习题。
-    </p>
+  <section class="site-content-frame max-w-5xl min-h-[70vh]">
+    <PageIntro
+      title="全站搜索"
+      description="一个入口，找到讨论、专栏文章、公开资料和赛后练习题。"
+      eyebrow="SEARCH LKM"
+      icon="tabler:search"
+    />
     <form
       action={searchPath}
       method="get"

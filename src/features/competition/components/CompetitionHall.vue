@@ -14,10 +14,12 @@
         <div
           v-for="comp in group.items"
           :key="comp.id"
-          class="bg-card-bg border border-surface-3 rounded-xl p-5"
+          class="flex h-full flex-col rounded-[18px] border border-surface-3 bg-card-bg p-5"
         >
           <h3 class="font-bold text-lg text-deep-text">{{ t(comp.title) }}</h3>
-          <p class="text-sm text-text-muted mt-1">{{ t(comp.description) }}</p>
+          <p class="mt-2 text-sm leading-6 text-text-muted">
+            {{ t(comp.description) }}
+          </p>
           <div
             class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-text-muted/60"
           >
@@ -37,7 +39,9 @@
               }}</span
             >
           </div>
-          <div class="flex items-center justify-between mt-4">
+          <div
+            class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5"
+          >
             <span
               class="text-sm text-text-muted"
               v-if="comp.participantCount > 0"

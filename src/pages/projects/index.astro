@@ -1,27 +1,32 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
 // 走 feature barrel 而不是深路径：深路径会让 barrel 的再导出无人消费、与真实组件悄悄漂移
 import { ProjectHubProjectHall } from "~/features/project-hub";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
 
-const metadata = { title: `${t("page.projects.title")} —— LKM` };
+const metadata = { title: t("page.projects.title") };
 ---
 
 <Layout
   metadata={metadata}
   sidebarLinks={[
-    { text: "nav.overview", href: "#overview" },
-    { text: "nav.projects", href: "#projects" },
+    {
+      text: "nav.overview",
+      href: "#overview",
+      icon: "tabler:layout-dashboard",
+    },
+    { text: "nav.projects", href: "#projects", icon: "tabler:rocket" },
   ]}
   currentPath={getPermalink("/projects")}
 >
   <div class="space-y-6">
-    <div id="overview">
-      <h1 class="text-3xl font-bold text-deep-text">
-        {t("page.projects.title")}
-      </h1>
-    </div>
+    <PageIntro
+      title={t("page.projects.title")}
+      eyebrow={t("page.ui.projectsEyebrow")}
+      icon="tabler:rocket"
+    />
     <div id="projects" class="min-h-[400px]">
       <ProjectHubProjectHall client:load />
     </div>

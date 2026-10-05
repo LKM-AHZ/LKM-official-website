@@ -210,7 +210,7 @@
     height: calc(var(--size-field, 0.25rem) * 10);
     padding-inline: 0.75rem;
     font-size: 0.875rem;
-    color: color-mix(in oklab, var(--color-base-content) 50%, transparent);
+    color: var(--text-muted);
     cursor: pointer;
     user-select: none;
     border-radius: calc(var(--radius-field) - 2px);
@@ -311,7 +311,7 @@
 
 @layer components {
   .card-base {
-    @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition
+    @apply rounded-[var(--radius-large)] overflow-hidden border border-[var(--surface-3)] bg-[var(--card-bg)] transition
            shadow-sm dark:shadow-none;
   }
   .card-shadow {

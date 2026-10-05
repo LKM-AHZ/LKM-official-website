@@ -3081,10 +3081,20 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       },
     },
 
+    ui: {
+      forumEyebrow: "社区 · 讨论",
+      projectsEyebrow: "协作 · 实践",
+      qaEyebrow: "提问 · 解答",
+      filesEyebrow: "资料 · 分享",
+      competitionEyebrow: "竞赛 · 挑战",
+      bankEyebrow: "练习 · 题库",
+      appsEyebrow: "工具 · 探索",
+    },
     apps: {
       title: "其他应用",
       description: "理科迷社区的全部应用入口。",
       subtitle: "社区的全部应用服务入口。",
+      open: "进入应用",
       starHope: {
         name: "StarHope 学习助手",
         description:

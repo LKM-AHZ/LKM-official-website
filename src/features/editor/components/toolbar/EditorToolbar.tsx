@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, memo, useId } from "react";
 import type { ReactElement, ReactNode } from "react";
-import { Icon } from "@iconify/react";
+import { Icon, addCollection, type IconifyJSON } from "@iconify/react";
+import clientIcons from "~/lib/icons/client-icons.json";
 import type { Editor } from "@tiptap/core";
 import EditorToolbarButton from "./EditorToolbarButton";
 import MathEditor from "../nodes/MathEditor";
@@ -34,31 +35,34 @@ interface ToolbarItemDef {
 const ICON_WIDTH = 16;
 const ICON_HEIGHT = 16;
 
-/** lucide 线性图标统一入口（经 @iconify/react 渲染），替换手写 SVG 样板。 */
+for (const collection of clientIcons)
+  addCollection(collection as unknown as IconifyJSON);
+
+/** 与主站共用本地 Tabler 图标，编辑器离线使用时仍显示工具栏。 */
 const icon16 = (name: string): ReactNode => (
   <Icon icon={name} width={ICON_WIDTH} height={ICON_HEIGHT} />
 );
 
-const B = icon16("lucide:bold");
-const I = icon16("lucide:italic");
-const U = icon16("lucide:underline");
-const S = icon16("lucide:strikethrough");
-const Code = icon16("lucide:code");
-const H1 = icon16("lucide:heading-1");
-const H2 = icon16("lucide:heading-2");
-const H3 = icon16("lucide:heading-3");
-const H4 = icon16("lucide:heading-4");
-const H5 = icon16("lucide:heading-5");
-const H6 = icon16("lucide:heading-6");
-const Blockquote = icon16("lucide:quote");
-const Ul = icon16("lucide:list");
-const Ol = icon16("lucide:list-ordered");
-const TaskList = icon16("lucide:list-checks");
-const Hr = icon16("lucide:minus");
-const CodeBlock = icon16("lucide:square-code");
-const Link = icon16("lucide:link");
-const Undo = icon16("lucide:undo-2");
-const Redo = icon16("lucide:redo-2");
+const B = icon16("tabler:bold");
+const I = icon16("tabler:italic");
+const U = icon16("tabler:underline");
+const S = icon16("tabler:strikethrough");
+const Code = icon16("tabler:code");
+const H1 = icon16("tabler:h-1");
+const H2 = icon16("tabler:h-2");
+const H3 = icon16("tabler:h-3");
+const H4 = icon16("tabler:h-4");
+const H5 = icon16("tabler:h-5");
+const H6 = icon16("tabler:h-6");
+const Blockquote = icon16("tabler:blockquote");
+const Ul = icon16("tabler:list");
+const Ol = icon16("tabler:list-numbers");
+const TaskList = icon16("tabler:list-check");
+const Hr = icon16("tabler:minus");
+const CodeBlock = icon16("tabler:code-dots");
+const Link = icon16("tabler:link");
+const Undo = icon16("tabler:arrow-back-up");
+const Redo = icon16("tabler:arrow-forward-up");
 
 const H_ICONS = [H1, H2, H3, H4, H5, H6];
 
@@ -207,7 +211,7 @@ function buildToolbarItems(): ToolbarItemDef[] {
     },
     {
       key: "image",
-      icon: icon16("lucide:image"),
+      icon: icon16("tabler:photo"),
       label: t("editor.image"),
       title: t("editor.insertImage"),
       group: "insert",
@@ -218,7 +222,7 @@ function buildToolbarItems(): ToolbarItemDef[] {
     },
     {
       key: "inlineMath",
-      icon: icon16("lucide:pi"),
+      icon: icon16("tabler:math-pi"),
       label: t("editor.inlineMath"),
       title: t("editor.insertInlineMath"),
       group: "insert",
@@ -229,7 +233,7 @@ function buildToolbarItems(): ToolbarItemDef[] {
     },
     {
       key: "blockMath",
-      icon: icon16("lucide:sigma"),
+      icon: icon16("tabler:sum"),
       label: t("editor.blockMath"),
       title: t("editor.insertBlockMath"),
       group: "insert",
@@ -240,7 +244,7 @@ function buildToolbarItems(): ToolbarItemDef[] {
     },
     {
       key: "table",
-      icon: icon16("lucide:table"),
+      icon: icon16("tabler:table"),
       label: t("editor.table"),
       title: t("editor.insertTable3x3"),
       group: "insert",
@@ -254,7 +258,7 @@ function buildToolbarItems(): ToolbarItemDef[] {
     },
     {
       key: "callout",
-      icon: icon16("lucide:triangle-alert"),
+      icon: icon16("tabler:alert-triangle"),
       label: "Callout",
       title: t("editor.insertCallout"),
       group: "component",
@@ -268,7 +272,7 @@ function buildToolbarItems(): ToolbarItemDef[] {
     },
     {
       key: "figure",
-      icon: icon16("lucide:image-plus"),
+      icon: icon16("tabler:photo-plus"),
       label: "Figure",
       title: t("editor.insertFigure"),
       group: "component",
@@ -447,7 +451,7 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
           onClick={() => toggleMenu("heading")}
         >
           <span>{currentHeading?.label ?? t("editor.paragraph")}</span>
-          {icon16("lucide:chevron-down")}
+          {icon16("tabler:chevron-down")}
         </button>
         <div className="rte-toolbar-group rte-toolbar-desktop">
           {ITEMS.filter((item) => item.group === "format").map(renderButton)}
@@ -477,9 +481,9 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => toggleMenu("insert")}
           >
-            {icon16("lucide:plus")}
+            {icon16("tabler:plus")}
             <span>{t("editor.insert")}</span>
-            {icon16("lucide:chevron-down")}
+            {icon16("tabler:chevron-down")}
           </button>
         </div>
         <div className="rte-toolbar-group rte-toolbar-desktop">
@@ -501,7 +505,7 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => toggleMenu("more")}
           >
-            {icon16("lucide:ellipsis")}
+            {icon16("tabler:dots")}
           </button>
         </div>
       </div>
@@ -520,7 +524,7 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
             }}
             aria-pressed={!currentHeading}
           >
-            {icon16("lucide:type")}
+            {icon16("tabler:typography")}
             <span>{t("editor.paragraph")}</span>
           </button>
           {HEADING_ITEMS.map(renderMenuItem)}

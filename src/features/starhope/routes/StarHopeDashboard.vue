@@ -71,7 +71,7 @@ const shortcuts = [
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="site-content-frame">
     <h1 class="text-2xl font-bold text-deep-text mb-1">
       {{
         t("starhope.dashboard.greeting", {
@@ -116,22 +116,19 @@ const shortcuts = [
       {{ t("starhope.dashboard.shortcutsTitle") }}
     </h2>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div
+      <button
         v-for="item in shortcuts"
         :key="item.route"
-        class="card-base p-4 cursor-pointer hover:border-primary/30 transition-colors"
-        role="button"
-        tabindex="0"
+        type="button"
+        class="card-base p-4 text-left hover:border-primary/30 transition-colors"
         @click="navigate(item.route)"
-        @keydown.enter="navigate(item.route)"
-        @keydown.space.prevent="navigate(item.route)"
       >
         <div class="text-2xl mb-2">{{ item.icon }}</div>
         <div class="text-sm font-semibold text-deep-text">
           {{ t(item.labelKey) }}
         </div>
         <div class="text-xs text-text-muted mt-1">{{ t(item.descKey) }}</div>
-      </div>
+      </button>
     </div>
   </div>
 </template>

@@ -1,8 +1,8 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { SITE } from '~/lib/config';
-import { t } from '~/lib/i18n';
-import { getHomePermalink } from '~/lib/utils/permalinks';
+import { Icon } from "astro-icon/components";
+import { SITE } from "~/lib/config";
+import { t } from "~/lib/i18n";
+import { getHomePermalink } from "~/lib/utils/permalinks";
 
 interface Link {
   text?: string;
@@ -23,18 +23,27 @@ export interface Props {
   footNote?: string;
 }
 
-const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Astro.props;
+const {
+  socialLinks = [],
+  secondaryLinks = [],
+  links = [],
+  footNote = "",
+} = Astro.props;
 ---
 
-<footer class:list={['relative border-t border-surface-3 not-prose']}>
-  <div class="bg-card-bg absolute inset-0 pointer-events-none" aria-hidden="true">
+<footer class:list={["relative border-t border-surface-3 not-prose"]}>
+  <div
+    class="bg-card-bg absolute inset-0 pointer-events-none"
+    aria-hidden="true"
+  >
   </div>
-  <div class="relative max-w-7xl mx-auto px-4 md:px-6 text-text-muted">
-    <div class="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-[64px]">
+  <div class="relative max-w-[1200px] mx-auto px-4 md:px-6 text-text-muted">
+    <div class="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-10 md:py-12">
       <div class="col-span-12 lg:col-span-4">
         <div class="mb-2">
-          <a class="inline-block text-[17px] font-semibold text-deep-text no-underline" href={getHomePermalink()}
-            >{SITE?.name}</a
+          <a
+            class="inline-block text-[17px] font-semibold text-deep-text no-underline"
+            href={getHomePermalink()}>{SITE?.name}</a
           >
         </div>
         <div class="text-[12px] text-text-muted flex gap-1">
@@ -42,7 +51,7 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
             secondaryLinks.map(({ text, href }, index) => (
               <>
                 {/* 分隔符纯装饰：标 aria-hidden，避免读屏把它念出来 */}
-                {index !== 0 ? <span aria-hidden="true"> · </span> : ''}
+                {index !== 0 ? <span aria-hidden="true"> · </span> : ""}
                 <a
                   class="text-[12px] text-text-muted hover:text-deep-text hover:underline transition duration-150 ease-in-out"
                   href={href}
@@ -55,8 +64,10 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
       </div>
       {
         links.map(({ title, links: groupLinks }) => (
-          <div class="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2">
-            <div class="text-[14px] font-semibold text-deep-text mb-2">{t(title)}</div>
+          <div class="col-span-6 md:col-span-3 lg:col-span-2">
+            <div class="text-[14px] font-semibold text-deep-text mb-2">
+              {t(title)}
+            </div>
             {groupLinks.length > 0 && (
               <ul class="text-[12px] leading-[2.41]">
                 {groupLinks.map(({ text, href, ariaLabel }) => (
@@ -76,7 +87,9 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
         ))
       }
     </div>
-    <div class="md:flex md:items-center md:justify-between py-6 md:py-8 border-t border-surface-3">
+    <div
+      class="md:flex md:items-center md:justify-between py-6 md:py-8 border-t border-surface-3"
+    >
       {
         socialLinks?.length ? (
           <ul class="flex mb-4 md:order-1 -ml-2 md:ml-4 md:mb-0 rtl:ml-0 rtl:-mr-2 rtl:md:ml-0 rtl:md:mr-4">
@@ -87,7 +100,9 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '' } = Ast
                   aria-label={ariaLabel ?? (text ? undefined : icon)}
                   href={href}
                 >
-                  {icon && <Icon name={icon} class="w-5 h-5" aria-hidden="true" />}
+                  {icon && (
+                    <Icon name={icon} class="w-5 h-5" aria-hidden="true" />
+                  )}
                   <Fragment set:html={t(text)} />
                 </a>
               </li>

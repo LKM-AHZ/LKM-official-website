@@ -47,7 +47,7 @@ const TYPE_KEY: Record<string, string> = {
   blog_post: "community.forum.typeBlogPost",
   qa: "community.forum.typeQuestion",
 };
-const metadata = { title: `${post.title} —— LKM` };
+const metadata = { title: post.title };
 ---
 
 <Layout
@@ -58,7 +58,7 @@ const metadata = { title: `${post.title} —— LKM` };
   ]}
   currentPath={getPermalink(`/forum/post/${postId}`)}
 >
-  <div class="space-y-6">
+  <div class="mx-auto max-w-4xl space-y-6">
     <!-- 面包屑 -->
     <div class="flex items-center gap-2 text-sm text-text-muted/60">
       <a
@@ -72,7 +72,10 @@ const metadata = { title: `${post.title} —— LKM` };
     </div>
 
     <!-- 正文 -->
-    <article id="content">
+    <article
+      id="content"
+      class="rounded-[20px] border border-surface-3 bg-card-bg p-5 sm:p-8"
+    >
       <!-- 标题区 -->
       <div class="mb-6">
         <div class="flex items-center gap-2 mb-2">

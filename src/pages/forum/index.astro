@@ -1,5 +1,6 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
 import { Icon } from "astro-icon/components";
 import {
   getRootCategories,
@@ -9,7 +10,7 @@ import { contentApi, type BoardItem } from "~/lib/api/modules/content";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
 
-const metadata = { title: `${t("community.forum.title")} —— LKM` };
+const metadata = { title: t("community.forum.title") };
 
 // 板块广场：优先从后端取真实 boards（含父/子层级），失败/空时回退静态 mock。
 interface RenderBoard {
@@ -76,22 +77,26 @@ rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
 <Layout
   metadata={metadata}
   sidebarLinks={[
-    { text: "nav.overview", href: "#overview" },
-    { text: "nav.forum", href: "#boards" },
+    {
+      text: "nav.overview",
+      href: "#overview",
+      icon: "tabler:layout-dashboard",
+    },
+    { text: "nav.forum", href: "#boards", icon: "tabler:building-community" },
   ]}
   currentPath={getPermalink("/forum")}
 >
-  <div class="space-y-10">
-    <div id="overview">
-      <h1 class="text-3xl font-bold text-deep-text">
-        {t("community.forum.title")}
-      </h1>
-      <p class="text-text-muted mt-2">{t("community.forum.subtitle")}</p>
-    </div>
+  <div class="space-y-8">
+    <PageIntro
+      title={t("community.forum.title")}
+      description={t("community.forum.subtitle")}
+      eyebrow={t("page.ui.forumEyebrow")}
+      icon="tabler:building-community"
+    />
 
     <div
       id="boards"
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
     >
       {
         /* 板块 slug 必须按路径段编码：空格/#/? 原样拼进 href 会截断或拼坏 URL（详情页会解码回来） */
@@ -102,16 +107,16 @@ rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
             href={getPermalink(`/forum/${encodeURIComponent(b.slug)}`)}
             class="profile-card group"
           >
-            <div class="profile-inner p-4 flex flex-col gap-2 h-full">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <div class="profile-inner p-5 flex flex-col gap-3 h-full min-h-36">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Icon name={b.icon} class="w-5 h-5 text-primary" />
                 </div>
                 <h3 class="font-semibold text-deep-text group-hover:text-primary transition-colors">
                   {b.title}
                 </h3>
               </div>
-              <p class="text-xs text-text-muted line-clamp-2 leading-relaxed flex-1">
+              <p class="text-sm text-text-muted line-clamp-2 leading-relaxed flex-1">
                 {b.description}
               </p>
               {b.isParent && (

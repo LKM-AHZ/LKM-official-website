@@ -1,5 +1,10 @@
 import { createPinia } from "pinia";
 import type { App } from "vue";
+import { addCollection, type IconifyJSON } from "@iconify/vue";
+import clientIcons from "~/lib/icons/client-icons.json";
+
+for (const collection of clientIcons)
+  addCollection(collection as unknown as IconifyJSON);
 
 const g = globalThis as Record<string, unknown>;
 // 兜底而已：正常路径由 astro.config.ts 的 vite.define 在编译期把 __VUE_PROD_DEVTOOLS__ 替换掉，

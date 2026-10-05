@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- 顶部用户积分卡片 -->
-    <div class="bg-card-bg border border-surface-3 rounded-2xl p-6">
+    <div class="page-intro">
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div
           class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl"
@@ -12,7 +12,7 @@
           <h1 class="text-xl font-bold text-deep-text">
             {{ t("contribution.title") }}
           </h1>
-          <div class="flex items-center gap-3 mt-1 text-sm">
+          <div class="flex flex-wrap items-center gap-3 mt-2 text-sm">
             <span class="text-text-muted">{{
               t("contribution.currentPoints")
             }}</span>
@@ -36,16 +36,21 @@
 
     <template v-else>
       <!-- Tab 导航 -->
-      <div class="flex gap-1 overflow-x-auto pb-1">
+      <div
+        class="flex gap-1 overflow-x-auto rounded-2xl bg-btn-plain-bg-hover p-1"
+        role="group"
+      >
         <button
           v-for="tab in pageTabs"
           :key="tab.key"
-          class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors shrink-0"
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors shrink-0"
           :class="
             activeTab === tab.key
-              ? 'bg-primary text-on-primary'
-              : 'bg-surface-3 text-text-muted hover:bg-surface-3/70'
+              ? 'bg-card-bg text-primary-readable shadow-sm'
+              : 'text-text-muted hover:text-deep-text'
           "
+          :aria-pressed="activeTab === tab.key"
           @click="activeTab = tab.key"
         >
           <Icon :icon="tab.icon" class="w-4 h-4 inline mr-1" />

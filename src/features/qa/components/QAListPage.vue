@@ -1,27 +1,30 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div class="flex gap-2 border-b border-surface-3 flex-1">
+    <div
+      class="flex flex-col gap-3 border-b border-surface-3 pb-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div
+        class="flex gap-1 rounded-full bg-btn-plain-bg-hover p-1"
+        role="group"
+      >
         <button
           v-for="tab in tabs"
           :key="tab.key"
-          class="px-4 py-3 text-sm font-medium transition-colors relative"
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium transition-colors"
           :class="
             activeTab === tab.key
-              ? 'text-primary'
+              ? 'bg-card-bg text-primary-readable shadow-sm'
               : 'text-text-muted hover:text-deep-text'
           "
+          :aria-pressed="activeTab === tab.key"
           @click="activeTab = tab.key"
         >
           {{ t(tab.label) }}
-          <div
-            v-if="activeTab === tab.key"
-            class="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full"
-          ></div>
         </button>
       </div>
       <button
-        class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold shrink-0"
+        class="btn-primary rounded-full px-4 py-2 text-sm font-semibold shrink-0 self-start"
         @click="askModalOpen = true"
       >
         {{ t("page.qa.ask") }}
@@ -85,7 +88,7 @@
             {{ q.title }}
           </h3>
           <div
-            class="flex items-center justify-between text-xs text-text-muted/60"
+            class="flex flex-wrap items-center justify-between gap-2 text-xs text-text-muted"
           >
             <span
               >{{ q.authorName }} ·

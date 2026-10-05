@@ -10,7 +10,7 @@
         v-model="searchQuery"
         type="search"
         :placeholder="t('community.fileLibrary.searchPlaceholder')"
-        class="w-full pl-10 pr-9 py-2.5 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text placeholder:text-text-muted/60 focus:border-primary outline-none"
+        class="w-full rounded-2xl border border-surface-3 bg-card-bg py-3 pl-11 pr-10 text-sm text-deep-text placeholder:text-text-muted/60 outline-none transition-colors focus:border-primary"
       />
       <button
         v-if="isSearching"
@@ -55,7 +55,7 @@
       <div class="flex flex-wrap items-center gap-3">
         <select
           v-model="filterType"
-          class="px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary outline-none"
+          class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
         >
           <option value="">{{ t("community.fileLibrary.allTypes") }}</option>
           <option value="pdf">PDF</option>
@@ -66,7 +66,7 @@
         </select>
         <select
           v-model="filterStatus"
-          class="px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary outline-none"
+          class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
         >
           <option value="">{{ t("community.fileLibrary.allStatuses") }}</option>
           <option value="approved">
@@ -81,7 +81,7 @@
         </select>
         <select
           v-model="sortBy"
-          class="px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary outline-none"
+          class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
         >
           <option value="newest">
             {{ t("community.fileLibrary.sortNewest") }}
@@ -90,7 +90,7 @@
             {{ t("community.fileLibrary.sortMostDownloaded") }}
           </option>
         </select>
-        <div class="flex gap-1 ml-auto">
+        <div class="ml-auto flex gap-1 rounded-xl bg-btn-plain-bg-hover p-1">
           <button
             class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
             :class="
@@ -127,7 +127,7 @@
           <div
             v-for="file in filteredFiles"
             :key="file.id"
-            class="flex items-center gap-4 px-5 py-4 hover:bg-page-bg transition-colors"
+            class="flex flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-btn-card-bg-hover sm:flex-nowrap sm:gap-4 sm:px-5"
           >
             <span class="text-2xl shrink-0">{{ fileIcon(file.mimeType) }}</span>
             <div class="flex-1 min-w-0">
@@ -153,7 +153,9 @@
                 <span class="text-text-muted">{{ file.createdAt }}</span>
               </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
+            <div
+              class="flex w-full flex-wrap items-center gap-2 pl-10 sm:w-auto sm:shrink-0 sm:pl-0"
+            >
               <span
                 class="text-xs px-2 py-0.5 rounded-full font-medium"
                 :class="statusClass(file.status)"
@@ -211,7 +213,7 @@
           v-for="file in filteredFiles"
           :key="file.id"
           :href="buildUrl(`/files/${file.id}`)"
-          class="bg-card-bg border border-surface-3 rounded-xl p-5 hover:border-primary/30 transition-colors group flex flex-col"
+          class="group flex flex-col rounded-[18px] border border-surface-3 bg-card-bg p-5 transition-colors hover:border-primary/40 hover:bg-btn-card-bg-hover"
         >
           <div class="flex items-start gap-3 mb-3">
             <span class="text-3xl shrink-0">{{ fileIcon(file.mimeType) }}</span>

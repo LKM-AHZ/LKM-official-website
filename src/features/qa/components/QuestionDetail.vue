@@ -104,7 +104,7 @@ function formatDate(dateStr: string): string {
 </script>
 
 <template>
-  <div class="space-y-6 max-w-3xl">
+  <div class="mx-auto max-w-4xl space-y-6">
     <div v-if="loading" class="text-sm text-text-muted py-8 text-center">
       {{ t("common.loading") }}
     </div>
@@ -116,54 +116,62 @@ function formatDate(dateStr: string): string {
     <template v-else>
       <!-- 问题 -->
       <div>
-        <div class="flex items-center gap-2 mb-2">
-          <span
-            class="text-xs px-2 py-0.5 rounded-full font-medium"
-            :class="
-              question.status === 'accepted'
-                ? 'bg-green-100 dark:bg-green-950/30 text-green-500'
-                : 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-500'
-            "
-          >
-            {{
-              question.status === "accepted"
-                ? t("page.qa.resolved")
-                : canInteract
-                  ? t("page.qa.unresolved")
-                  : t("page.qa.closed")
-            }}
-          </span>
-          <span
-            v-if="question.bountyTotal > 0"
-            class="text-xs text-amber-500 font-medium"
-          >
-            {{ t("page.qa.bounty", { count: question.bountyTotal }) }}
-          </span>
-          <span
-            v-if="question.status === 'open' && question.urgent"
-            class="text-xs text-red-500 font-medium"
-          >
-            {{ t("page.qa.urgentBadge") }}
-          </span>
-        </div>
-        <h1 class="text-2xl font-bold text-deep-text">{{ question.title }}</h1>
-        <div class="flex items-center gap-2 mt-2 text-sm text-text-muted/60">
-          <span>{{ question.authorName }}</span>
-          <span>·</span>
-          <span>{{ formatDate(question.createdAt) }}</span>
-          <span>·</span>
-          <span>{{
-            t("page.qa.answers", { count: question.answers.length })
-          }}</span>
-        </div>
+        <header class="page-intro">
+          <div class="page-intro-copy">
+            <div class="flex items-center gap-2 mb-2">
+              <span
+                class="text-xs px-2 py-0.5 rounded-full font-medium"
+                :class="
+                  question.status === 'accepted'
+                    ? 'bg-green-100 dark:bg-green-950/30 text-green-500'
+                    : 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-500'
+                "
+              >
+                {{
+                  question.status === "accepted"
+                    ? t("page.qa.resolved")
+                    : canInteract
+                      ? t("page.qa.unresolved")
+                      : t("page.qa.closed")
+                }}
+              </span>
+              <span
+                v-if="question.bountyTotal > 0"
+                class="text-xs text-amber-500 font-medium"
+              >
+                {{ t("page.qa.bounty", { count: question.bountyTotal }) }}
+              </span>
+              <span
+                v-if="question.status === 'open' && question.urgent"
+                class="text-xs text-red-500 font-medium"
+              >
+                {{ t("page.qa.urgentBadge") }}
+              </span>
+            </div>
+            <h1 class="text-2xl font-bold text-deep-text">
+              {{ question.title }}
+            </h1>
+            <div
+              class="flex flex-wrap items-center gap-2 mt-3 text-sm text-text-muted"
+            >
+              <span>{{ question.authorName }}</span>
+              <span>·</span>
+              <span>{{ formatDate(question.createdAt) }}</span>
+              <span>·</span>
+              <span>{{
+                t("page.qa.answers", { count: question.answers.length })
+              }}</span>
+            </div>
+          </div>
+        </header>
         <div
-          class="mt-4 p-4 bg-card-bg border border-surface-3 rounded-xl text-sm text-deep-text leading-relaxed whitespace-pre-wrap"
+          class="mt-5 p-5 bg-card-bg border border-surface-3 rounded-[18px] text-sm text-deep-text leading-7 whitespace-pre-wrap"
         >
           {{ question.situation }}
         </div>
         <div
           v-if="question.content"
-          class="mt-2 p-4 bg-card-bg border border-surface-3 rounded-xl text-sm text-deep-text leading-relaxed whitespace-pre-wrap"
+          class="mt-3 p-5 bg-card-bg border border-surface-3 rounded-[18px] text-sm text-deep-text leading-7 whitespace-pre-wrap"
         >
           {{ question.content }}
         </div>

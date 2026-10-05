@@ -1,5 +1,6 @@
 ---
 import SidebarLayout from "~/layouts/SidebarLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
 import { Icon } from "astro-icon/components";
 import { fileLibraryApi } from "~/lib/api";
 import FileDownloadButton from "~/features/file-library/components/FileDownloadButton.vue";
@@ -39,12 +40,6 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function fileIcon(mime: string): string {
-  if (mime === "application/pdf") return "📄";
-  if (mime === "application/zip") return "📦";
-  return "📁";
-}
-
 function statusBadge(status: string): { text: string; cls: string } {
   switch (status) {
     case "approved":
@@ -71,7 +66,7 @@ function statusBadge(status: string): { text: string; cls: string } {
 const badge = statusBadge(file?.status ?? "");
 
 const metadata = {
-  title: `${file?.originalName ?? t("community.fileLibrary.title")} —— LKM`,
+  title: file?.originalName ?? t("community.fileLibrary.title"),
 };
 ---
 
@@ -100,16 +95,11 @@ const metadata = {
           <span class="text-text-muted truncate">{file.originalName}</span>
         </div>
 
-        <div
-          id="overview"
-          class="bg-card-bg border border-surface-3 rounded-2xl p-8 text-center"
-        >
-          <span class="text-6xl">{fileIcon(file.mimeType)}</span>
-          <h1 class="text-xl font-bold text-deep-text mt-4">
-            {file.originalName}
-          </h1>
-          <p class="text-sm text-text-muted mt-2">{file.description}</p>
-        </div>
+        <PageIntro
+          title={file.originalName}
+          description={file.description}
+          icon="tabler:file-description"
+        />
 
         <div
           id="details"

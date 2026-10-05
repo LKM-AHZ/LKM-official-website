@@ -69,31 +69,35 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-bold text-deep-text">
-        {{ t("timeline.title") }}
-      </h1>
+    <header class="page-intro mb-6">
+      <div class="page-intro-copy">
+        <h1 class="text-deep-text">{{ t("timeline.title") }}</h1>
+      </div>
       <button
         type="button"
-        class="text-sm text-text-muted hover:text-primary disabled:opacity-40"
+        class="shrink-0 rounded-full border border-surface-3 bg-card-bg px-4 py-2 text-sm text-text-muted hover:text-primary-readable disabled:opacity-40"
         :disabled="loading"
         @click="refresh"
       >
         {{ t("timeline.refresh") }}
       </button>
-    </div>
+    </header>
 
     <!-- 模式切换 -->
-    <div class="flex gap-1 mb-4">
+    <div
+      class="mb-6 flex w-fit gap-1 rounded-full bg-btn-plain-bg-hover p-1"
+      role="group"
+    >
       <button
         type="button"
-        class="px-3 py-1.5 rounded-lg text-sm transition-colors"
+        class="rounded-full px-4 py-2 text-sm transition-colors disabled:opacity-50"
         :class="
           mode === 'follow'
-            ? 'bg-primary text-on-primary'
-            : 'bg-surface-3 text-text-muted hover:bg-surface-3/70'
+            ? 'bg-card-bg text-primary-readable shadow-sm'
+            : 'text-text-muted hover:text-deep-text'
         "
         :disabled="!isLoggedIn"
+        :aria-pressed="mode === 'follow'"
         :title="t('follow.loginToFollow')"
         @click="switchMode('follow')"
       >
@@ -101,12 +105,13 @@ onMounted(() => {
       </button>
       <button
         type="button"
-        class="px-3 py-1.5 rounded-lg text-sm transition-colors"
+        class="rounded-full px-4 py-2 text-sm transition-colors"
         :class="
           mode === 'hot'
-            ? 'bg-primary text-on-primary'
-            : 'bg-surface-3 text-text-muted hover:bg-surface-3/70'
+            ? 'bg-card-bg text-primary-readable shadow-sm'
+            : 'text-text-muted hover:text-deep-text'
         "
+        :aria-pressed="mode === 'hot'"
         @click="switchMode('hot')"
       >
         {{ t("timeline.hot") }}
@@ -136,7 +141,7 @@ onMounted(() => {
       <li
         v-for="item in entries"
         :key="`${item.item_type}-${item.id}`"
-        class="p-4 rounded-xl bg-card-bg border border-surface-3 hover:border-primary/30 transition-colors"
+        class="rounded-[18px] border border-surface-3 bg-card-bg p-5 transition-colors hover:border-primary/40"
       >
         <a
           class="block"

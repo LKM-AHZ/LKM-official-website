@@ -13,36 +13,41 @@
 <template>
   <div class="space-y-6">
     <!-- 头部：标签切换 + 操作按钮 -->
-    <div class="flex items-center gap-2 border-b border-surface-3">
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="px-4 py-3 text-sm font-medium transition-colors relative"
-        :class="
-          activeTab === tab.key
-            ? 'text-primary'
-            : 'text-text-muted hover:text-deep-text'
-        "
-        @click="activeTab = tab.key"
+    <div
+      class="flex flex-col gap-3 border-b border-surface-3 pb-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div
+        class="flex min-w-0 gap-1 rounded-full bg-btn-plain-bg-hover p-1"
+        role="group"
       >
-        {{ t(tab.label) }}
-        <div
-          v-if="activeTab === tab.key"
-          class="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full"
-        />
-      </button>
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium transition-colors"
+          :class="
+            activeTab === tab.key
+              ? 'bg-card-bg text-primary-readable shadow-sm'
+              : 'text-text-muted hover:text-deep-text'
+          "
+          :aria-pressed="activeTab === tab.key"
+          @click="activeTab = tab.key"
+        >
+          {{ t(tab.label) }}
+        </button>
+      </div>
 
-      <div class="ml-auto flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <button
           :aria-label="t('projectHub.applyAria')"
-          class="px-4 py-2 text-sm font-medium rounded-xl backdrop-blur-md bg-white/30 border border-white/40 text-black shadow-md hover:bg-white/50 hover:border-amber-400/70 hover:scale-105 hover:shadow-lg transition-all duration-300"
+          class="rounded-full border border-surface-3 bg-card-bg px-4 py-2 text-sm font-medium text-deep-text transition-colors hover:bg-btn-regular-bg"
           @click="openApplyModal"
         >
           {{ t("projectHub.apply") }}
         </button>
         <button
           :aria-label="t('projectHub.createAria')"
-          class="px-4 py-2 text-sm font-medium rounded-xl backdrop-blur-md bg-white/30 border border-white/40 text-black shadow-md hover:bg-white/50 hover:border-amber-400/70 hover:scale-105 hover:shadow-lg transition-all duration-300"
+          class="rounded-full bg-primary-action px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
           @click="openProjectModal"
         >
           {{ t("projectHub.create") }}
@@ -54,7 +59,7 @@
     <div v-if="loading" class="text-sm text-text-muted py-12 text-center">
       {{ t("common.loading") }}
     </div>
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <a
         v-for="proj in filteredProjects"
         :key="proj.id"

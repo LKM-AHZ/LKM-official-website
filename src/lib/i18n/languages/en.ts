@@ -3216,10 +3216,20 @@ export const en = {
       },
     },
 
+    ui: {
+      forumEyebrow: "Community · Discussions",
+      projectsEyebrow: "Collaborate · Create",
+      qaEyebrow: "Ask · Answer",
+      filesEyebrow: "Resources · Share",
+      competitionEyebrow: "Compete · Challenge",
+      bankEyebrow: "Practice · Learn",
+      appsEyebrow: "Tools · Explore",
+    },
     apps: {
       title: "More Apps",
       description: "All application entries of the LKM community.",
       subtitle: "Entry points for all community apps and services.",
+      open: "Open app",
       starHope: {
         name: "StarHope Learning Assistant",
         description:

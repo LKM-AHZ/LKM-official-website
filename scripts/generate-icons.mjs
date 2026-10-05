@@ -1,9 +1,9 @@
 /**
- * astro-icon include 生成器
+ * 本地图标生成器：Astro include 与 Vue/React 客户端 SVG 集合
  *
  * 扫描 .astro / .ts / .yaml / .json 中 tabler / material-symbols 图标，
  * 生成 src/lib/icons/astro-include.ts 供 astro-icon include 精确引用，
- * 避免 `'*'` 全量打包（6214 个图标）。
+ * 客户端另收集 .vue / .tsx 的引用，避免全量打包与运行时在线加载。
  *
  * 约束：图标名必须写成字面量（`tabler:user`）。本脚本用正则提取引用，
  * 由变量/拼接构造的名字（如 `tabler:${name}`）会被静默漏掉；而 astro.config.ts 用
@@ -14,12 +14,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { glob } from "tinyglobby";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const SRC_DIR = path.join(ROOT, "src");
 const ICONS_DIR = path.join(ROOT, "src", "lib", "icons");
 const INCLUDE_FILE = path.join(ICONS_DIR, "astro-include.ts");
+const CLIENT_FILE = path.join(ICONS_DIR, "client-icons.json");
+const require = createRequire(import.meta.url);
 
 // 扫描用图标前缀（对应本地 @iconify-json 包；astro-icon 运行时仅读这些本地资源）
 const PREFIX_SET = new Set([
@@ -43,7 +46,10 @@ const PREFIX_RE = new RegExp(
 
 /** 收集一组文件中的图标引用：prefix -> Set<name> */
 async function collectIcons(patterns) {
-  const files = await glob(patterns, { cwd: SRC_DIR });
+  const files = await glob(patterns, {
+    cwd: SRC_DIR,
+    ignore: ["**/__tests__/**", "**/*.test.*"],
+  });
   const collected = new Map();
   for (const file of files) {
     const content = fs.readFileSync(path.join(SRC_DIR, file), "utf-8");
@@ -112,6 +118,31 @@ async function main() {
   const incTotal = [...astroMap.values()].reduce((acc, s) => acc + s.size, 0);
 
   console.log(`[icons] astro-include.ts: ${incTotal} 图标`);
+
+  // 客户端组件也使用本地 SVG，避免离线或 CSP 限制时功能按钮只剩空白。
+  const clientIcons = await collectIcons(["**/*.vue", "**/*.ts", "**/*.tsx"]);
+  const collections = [...clientIcons.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([prefix, names]) => {
+      const source = require(`@iconify-json/${prefix}/icons.json`);
+      const icons = Object.fromEntries(
+        [...names].sort().map((name) => {
+          if (!source.icons[name])
+            throw new Error(`图标不存在：${prefix}:${name}`);
+          return [name, source.icons[name]];
+        }),
+      );
+      return { prefix, width: source.width, height: source.height, icons };
+    });
+  const clientContent = JSON.stringify(collections, null, 2) + "\n";
+  const previousClient = fs.existsSync(CLIENT_FILE)
+    ? fs.readFileSync(CLIENT_FILE, "utf-8")
+    : null;
+  if (previousClient !== clientContent)
+    fs.writeFileSync(CLIENT_FILE, clientContent);
+  console.log(
+    `[icons] client-icons.json: ${collections.reduce((sum, c) => sum + Object.keys(c.icons).length, 0)} 图标`,
+  );
 }
 
 main().catch((err) => {

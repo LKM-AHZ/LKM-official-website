@@ -21,7 +21,7 @@ const plugins = [
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="site-content-frame">
     <h1 class="text-2xl font-bold text-deep-text mb-6">
       {{ t("starhope.plugins.title") }}
     </h1>

@@ -15,12 +15,12 @@ const groups = buildAdminNav();
 const currentPath = Astro.url.pathname;
 const itemClass = (href: string) =>
   [
-    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
+    "flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm transition-colors",
     // isActive 比的是逻辑路径，而 pathname 带 site.base（子路径部署时如 /blog/admin/users），
     // 这里把 href 也过一遍 getPermalink，保证两侧同为「带 base」的形态
     isActive(currentPath, getPermalink(href))
-      ? "bg-surface-3 text-primary font-medium"
-      : "text-text-muted hover:bg-surface-3",
+      ? "bg-btn-regular-bg text-primary-readable font-medium"
+      : "text-text-muted hover:bg-btn-plain-bg-hover",
   ].join(" ");
 ---
 
@@ -52,6 +52,11 @@ const itemClass = (href: string) =>
                 <a
                   href={getPermalink(item.href)}
                   class={`${itemClass(item.href)} shrink-0 whitespace-nowrap`}
+                  aria-current={
+                    isActive(currentPath, getPermalink(item.href))
+                      ? "page"
+                      : undefined
+                  }
                 >
                   <Icon name={item.icon} class="w-4 h-4" />
                   {t(item.textKey)}
@@ -77,7 +82,7 @@ const itemClass = (href: string) =>
         flush ? (
           <slot />
         ) : (
-          <div class="mx-auto w-full max-w-[1320px] px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+          <div class="site-content-frame">
             <slot />
           </div>
         )

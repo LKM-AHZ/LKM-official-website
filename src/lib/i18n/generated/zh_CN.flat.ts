@@ -1795,6 +1795,7 @@ export const zhFlat = {
   "page.admin.reports.type": "类型",
   "page.admin.users.title": "用户管理",
   "page.apps.description": "理科迷社区的全部应用入口。",
+  "page.apps.open": "进入应用",
   "page.apps.starHope.description":
     "本地优先的跨平台学习工具。题库管理、智能练习、AI 对话、文档阅读、考试模拟——一站式学习解决方案。",
   "page.apps.starHope.name": "StarHope 学习助手",
@@ -2418,6 +2419,13 @@ export const zhFlat = {
   "page.treehole.wishTitle": "许愿墙 — 拾光树洞",
   "page.treehole.writeDescription": "写下你的心事、表白、吐槽或悄悄话。",
   "page.treehole.writeTitle": "写信 — 拾光树洞",
+  "page.ui.appsEyebrow": "工具 · 探索",
+  "page.ui.bankEyebrow": "练习 · 题库",
+  "page.ui.competitionEyebrow": "竞赛 · 挑战",
+  "page.ui.filesEyebrow": "资料 · 分享",
+  "page.ui.forumEyebrow": "社区 · 讨论",
+  "page.ui.projectsEyebrow": "协作 · 实践",
+  "page.ui.qaEyebrow": "提问 · 解答",
   "primitives.empty": "暂无内容",
   "primitives.formStaticWarning":
     "此表单为静态展示，暂不支持在线提交。请通过其他方式联系我们。",

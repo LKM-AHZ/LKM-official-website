@@ -21,9 +21,12 @@
 
 @theme {
   /* Material 风格的清晰字形，中文由 Noto Sans SC 衔接 */
-  --font-sans: Roboto, "Noto Sans SC", system-ui, "Microsoft YaHei", sans-serif;
+  --font-sans:
+    Roboto, "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC",
+    "Microsoft YaHei", system-ui, sans-serif;
   --font-heading:
-    Roboto, "Noto Sans SC", system-ui, "Microsoft YaHei", sans-serif;
+    Roboto, "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC",
+    "Microsoft YaHei", system-ui, sans-serif;
   --font-mono:
     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     monospace;
@@ -49,6 +52,7 @@
   --color-surface-3: var(--surface-3);
   --color-btn-regular-bg: var(--btn-regular-bg);
   --color-btn-plain-bg-hover: var(--btn-plain-bg-hover);
+  --color-btn-card-bg-hover: var(--btn-card-bg-hover);
   --color-deep-text: var(--deep-text);
   --color-text-muted: var(--text-muted);
   --color-primary: var(--primary);
@@ -134,50 +138,50 @@
   /* 标题系统 */
   h1 {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 600;
-    line-height: 1.07;
+    line-height: 1.25;
     letter-spacing: -0.005em;
   }
 
   h2 {
     font-family: var(--font-heading);
-    font-size: 1.875rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    line-height: 1.1;
+    line-height: 1.35;
     letter-spacing: 0;
   }
 
   h3 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.125rem;
     font-weight: 600;
-    line-height: 1.14;
-    letter-spacing: 0.004em;
+    line-height: 1.45;
+    letter-spacing: 0;
   }
 
   h4 {
     font-family: var(--font-heading);
-    font-size: 1.3125rem;
+    font-size: 1rem;
     font-weight: 600;
-    line-height: 1.19;
-    letter-spacing: 0.011em;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
 
   h5 {
     font-family: var(--font-heading);
-    font-size: 1.0625rem;
+    font-size: 0.9375rem;
     font-weight: 600;
-    line-height: 1.24;
-    letter-spacing: -0.022em;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
 
   h6 {
     font-family: var(--font-heading);
     font-size: 0.875rem;
     font-weight: 600;
-    line-height: 1.29;
-    letter-spacing: -0.016em;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
 }
 
@@ -186,11 +190,10 @@
   .prose li,
   .prose ol,
   .prose ul {
-    letter-spacing: -0.022em !important;
-    line-height: 1.47 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.8 !important;
     color: var(--color-base-content) !important;
-    text-align: justify;
-    text-justify: inter-ideograph;
+    text-align: start;
   }
 
   .prose p {
@@ -222,7 +225,7 @@
 
   .prose blockquote {
     font-style: normal;
-    letter-spacing: -0.022em !important;
+    letter-spacing: 0 !important;
     border-left-width: 4px;
     border-left-color: var(--color-primary) !important;
     background-color: color-mix(in oklab, var(--color-primary) 6%, transparent);
@@ -257,41 +260,33 @@
 @utility profile-card {
   position: relative;
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid var(--surface-3);
-  box-shadow:
-    0 8px 32px 0 color-mix(in srgb, var(--color-primary) 12%, transparent),
-    0 0 0 0px transparent;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.03);
   overflow: hidden;
 }
 
-.profile-card,
-.profile-card .profile-inner,
-.profile-card img {
+.profile-card {
   transition:
-    transform 0.25s var(--ease-out),
-    box-shadow 0.25s var(--ease-out);
-}
-
-.profile-card:hover > .profile-inner {
-  transform: translateY(-5px);
+    border-color 0.2s var(--ease-out),
+    background-color 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
 }
 
 .profile-card:hover {
-  box-shadow:
-    0 16px 48px 0 color-mix(in srgb, var(--color-primary) 25%, transparent),
-    0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--surface-3));
+  background: var(--btn-card-bg-hover);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 0.07);
 }
 
-.profile-card:hover img {
-  box-shadow: 0 0 0 4px
-    color-mix(in srgb, var(--color-primary) 25%, transparent);
-}
-
-/* 暗色模式下统一禁用卡片阴影 */
 .dark .profile-card,
 .dark .profile-card:hover {
   box-shadow: none;
+}
+
+.profile-card:focus-visible {
+  outline: 2px solid var(--primary-action);
+  outline-offset: 2px;
 }
 
 /* 暗色模式下 card-shadow 工具类 */

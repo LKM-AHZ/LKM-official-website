@@ -1,5 +1,7 @@
 <template>
-  <div class="flex min-h-screen w-full items-center justify-center p-4 sm:p-6">
+  <div
+    class="flex min-h-[calc(100dvh-72px)] w-full items-center justify-center px-4 py-10 sm:px-6"
+  >
     <div class="w-full" :style="{ maxWidth: maxWidth }">
       <slot />
     </div>
