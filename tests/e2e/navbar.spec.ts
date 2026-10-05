@@ -34,7 +34,7 @@ test("移动端可搜索并从菜单调整外观", async ({ page }) => {
     .waitFor();
   await page.locator("#navbar").getByRole("button", { name: "搜索" }).click();
   await expect(page.locator("#global-search-input")).toBeVisible();
-  await page.getByRole("button", { name: "ESC" }).click();
+  await page.getByRole("button", { name: "关闭" }).click();
 
   await page.getByRole("button", { name: "Menu" }).click();
   const drawer = page.getByRole("navigation", { name: "移动端导航" });
@@ -44,4 +44,30 @@ test("移动端可搜索并从菜单调整外观", async ({ page }) => {
   await expect(drawer.getByRole("button", { name: "显示设置" })).toBeVisible();
   await drawer.getByRole("button", { name: "显示设置" }).click();
   await expect(drawer.locator("input.preferences-hue")).toBeVisible();
+});
+
+test("搜索组件加载后侧边栏仍可展开和收起", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`${BASE_PATH}/files/`);
+  await expect(
+    page.locator("#navbar").getByRole("button", { name: "搜索" }),
+  ).toBeVisible();
+
+  const sidebar = page.locator("[data-sidebar]");
+  const content = page.locator("[data-main-content]");
+  await expect(sidebar).toBeVisible();
+  await expect(content).toHaveCSS("padding-left", "240px");
+  await expect(sidebar.getByRole("link", { name: "文件库" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+
+  await sidebar.getByRole("button", { name: "Toggle sidebar" }).click();
+  await expect(sidebar).toHaveCSS("width", "67px");
+  await expect(sidebar).toHaveCSS("height", "828px");
+  await expect(content).toHaveCSS("padding-left", "67px");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(sidebar).toHaveCSS("width", "50px");
+  await expect(content).toHaveCSS("padding-left", "50px");
 });

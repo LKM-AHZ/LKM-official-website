@@ -1,10 +1,10 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { t } from '~/lib/i18n';
-import { url } from '~/lib/utils/url-utils';
-import { siteConfig } from '~/lib/config';
-import PreferencesMenu from './PreferencesMenu.vue';
-import { NotificationBell } from '~/features/notification';
+import { Icon } from "astro-icon/components";
+import { t } from "~/lib/i18n";
+import { url } from "~/lib/utils/url-utils";
+import { siteConfig } from "~/lib/config";
+import PreferencesMenu from "./PreferencesMenu.vue";
+import { NotificationBell } from "~/features/notification";
 
 interface MobileMenuLink {
   name: string;
@@ -20,34 +20,54 @@ interface Props {
   showUtilities?: boolean;
 }
 
-const { id, links = [], title = t('nav.navigation'), showUtilities = false } = Astro.props;
+const {
+  id,
+  links = [],
+  title = t("nav.navigation"),
+  showUtilities = false,
+} = Astro.props;
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 
-<div id={id} data-mobile-nav-panel class="fixed inset-0 z-[100] pointer-events-none" aria-hidden="true" inert>
+<div
+  id={id}
+  data-mobile-nav-panel
+  class="fixed inset-0 z-[100] pointer-events-none"
+  aria-hidden="true"
+  inert
+>
   <!-- overlay -->
-  <div data-nav-overlay class="absolute inset-0 bg-black/50 dark:bg-black/70 opacity-0 transition-opacity duration-300">
+  <div
+    data-nav-overlay
+    class="absolute inset-0 bg-black/50 dark:bg-black/70 opacity-0 transition-opacity duration-300"
+  >
   </div>
 
   <!-- panel -->
   <div
     data-nav-panel
-    class="absolute top-0 right-0 h-full w-[85vw] max-w-xs bg-card-bg shadow-2xl transition-transform duration-300 ease-out translate-x-full flex flex-col"
+    class="absolute top-0 right-0 flex h-full w-[85vw] max-w-xs translate-x-full flex-col rounded-l-[28px] bg-card-bg shadow-2xl transition-transform duration-300 ease-out"
   >
     <!-- header -->
-    <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--line-divider)]">
+    <div
+      class="flex items-center justify-between border-b border-surface-3 px-6 py-5"
+    >
       <span class="text-[17px] font-semibold text-deep-text">{title}</span>
       <button
         data-nav-close
-        aria-label={t('nav.closeMenu')}
-        class="btn-plain rounded-lg w-10 h-10 flex items-center justify-center"
+        aria-label={t("nav.closeMenu")}
+        class="btn-plain flex h-10 w-10 items-center justify-center rounded-full"
       >
         <Icon name="material-symbols:close" class="text-[1.25rem]" />
       </button>
     </div>
 
     <!-- links -->
-    <nav class="flex-1 overflow-y-auto py-2" aria-label={t('nav.mobileNav')}>
-      <ul>
+    <nav
+      class="flex-1 overflow-y-auto px-3 py-4"
+      aria-label={t("nav.mobileNav")}
+    >
+      <ul class="space-y-1">
         {
           links.map((link) => {
             const hasChildren = link.children && link.children.length > 0;
@@ -58,7 +78,7 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
                     <button
                       type="button"
                       data-nav-accordion-trigger
-                      class="flex items-center justify-between w-full px-5 py-3 text-left font-semibold text-deep-text hover:bg-[var(--btn-plain-bg-hover)] transition"
+                      class="flex min-h-12 w-full items-center justify-between rounded-full px-4 text-left font-medium text-deep-text transition-colors hover:bg-btn-plain-bg-hover"
                     >
                       <span>{t(link.name)}</span>
                       <Icon
@@ -67,14 +87,26 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
                         data-nav-accordion-arrow
                       />
                     </button>
-                    <ul data-nav-accordion-content class="hidden">
+                    <ul data-nav-accordion-content class="hidden pl-3 pt-1">
                       {link.children!.map((child) => (
                         <li>
                           <a
                             href={child.external ? child.url : url(child.url)}
-                            target={child.external ? '_blank' : undefined}
-                            rel={child.external ? 'noopener' : undefined}
-                            class="flex items-center gap-2 px-8 py-2.5 text-[15px] text-text-muted hover:text-deep-text hover:bg-[var(--btn-plain-bg-hover)] transition"
+                            target={child.external ? "_blank" : undefined}
+                            rel={child.external ? "noopener" : undefined}
+                            aria-current={
+                              currentPath ===
+                              (url(child.url).replace(/\/$/, "") || "/")
+                                ? "page"
+                                : undefined
+                            }
+                            class:list={[
+                              "flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors",
+                              currentPath ===
+                              (url(child.url).replace(/\/$/, "") || "/")
+                                ? "bg-btn-regular-bg text-primary-readable"
+                                : "text-text-muted hover:bg-btn-plain-bg-hover hover:text-deep-text",
+                            ]}
                             data-nav-link
                           >
                             {t(child.name)}
@@ -92,14 +124,27 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
                 ) : (
                   <a
                     href={link.external ? link.url : url(link.url)}
-                    target={link.external ? '_blank' : undefined}
-                    rel={link.external ? 'noopener' : undefined}
-                    class="flex items-center gap-2 px-5 py-3 font-semibold text-deep-text hover:bg-[var(--btn-plain-bg-hover)] transition"
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener" : undefined}
+                    aria-current={
+                      currentPath === (url(link.url).replace(/\/$/, "") || "/")
+                        ? "page"
+                        : undefined
+                    }
+                    class:list={[
+                      "flex min-h-12 items-center gap-2 rounded-full px-4 font-medium transition-colors",
+                      currentPath === (url(link.url).replace(/\/$/, "") || "/")
+                        ? "bg-btn-regular-bg text-primary-readable"
+                        : "text-deep-text hover:bg-btn-plain-bg-hover",
+                    ]}
                     data-nav-link
                   >
                     {t(link.name)}
                     {link.external && (
-                      <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.625rem] text-text-muted" />
+                      <Icon
+                        name="fa6-solid:arrow-up-right-from-square"
+                        class="text-[0.625rem] text-text-muted"
+                      />
                     )}
                   </a>
                 )}
@@ -108,23 +153,29 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
           })
         }
       </ul>
-      {showUtilities && (
-        <div class="mt-2 border-t border-[var(--line-divider)] pt-2">
-          <NotificationBell client:idle mobile />
-          <PreferencesMenu client:load mobile allowColor={!siteConfig.themeColor.fixed} />
-        </div>
-      )}
+      {
+        showUtilities && (
+          <div class="mt-2 border-t border-[var(--line-divider)] pt-2">
+            <NotificationBell client:idle mobile />
+            <PreferencesMenu
+              client:load
+              mobile
+              allowColor={!siteConfig.themeColor.fixed}
+            />
+          </div>
+        )
+      }
     </nav>
   </div>
 </div>
 
 <script is:inline>
   (function () {
-    const openClass = 'mobile-nav-open';
+    const openClass = "mobile-nav-open";
 
     function getPanelElements(panelRoot) {
-      const overlay = panelRoot.querySelector('[data-nav-overlay]');
-      const panel = panelRoot.querySelector('[data-nav-panel]');
+      const overlay = panelRoot.querySelector("[data-nav-overlay]");
+      const panel = panelRoot.querySelector("[data-nav-panel]");
       return { overlay, panel };
     }
 
@@ -132,14 +183,14 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
       const { overlay, panel } = getPanelElements(panelRoot);
       if (!overlay || !panel) return;
 
-      panelRoot.classList.remove('pointer-events-none');
-      panelRoot.removeAttribute('inert');
-      panelRoot.setAttribute('aria-hidden', 'false');
-      overlay.classList.remove('opacity-0');
-      panel.classList.remove('translate-x-full');
+      panelRoot.classList.remove("pointer-events-none");
+      panelRoot.removeAttribute("inert");
+      panelRoot.setAttribute("aria-hidden", "false");
+      overlay.classList.remove("opacity-0");
+      panel.classList.remove("translate-x-full");
       // 记下打开前的行内 overflow，关闭时还原：直接写 '' 会丢掉页面原有的值
       panelRoot.dataset.navPrevOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
       document.body.classList.add(openClass);
     }
 
@@ -147,25 +198,25 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
       const { overlay, panel } = getPanelElements(panelRoot);
       if (!overlay || !panel) return;
 
-      overlay.classList.add('opacity-0');
-      panel.classList.add('translate-x-full');
+      overlay.classList.add("opacity-0");
+      panel.classList.add("translate-x-full");
       document.body.classList.remove(openClass);
       // 仍有别的面板开着就保持锁定；全关才还原，避免第二个面板/弹层还锁着时被提前解锁
       let anyOpen = false;
-      document.querySelectorAll('[data-nav-panel]').forEach(function (p) {
-        if (!p.classList.contains('translate-x-full')) anyOpen = true;
+      document.querySelectorAll("[data-nav-panel]").forEach(function (p) {
+        if (!p.classList.contains("translate-x-full")) anyOpen = true;
       });
       if (!anyOpen) {
-        document.body.style.overflow = panelRoot.dataset.navPrevOverflow ?? '';
+        document.body.style.overflow = panelRoot.dataset.navPrevOverflow ?? "";
       }
 
       setTimeout(function () {
-        if (panel.classList.contains('translate-x-full')) {
-          panelRoot.classList.add('pointer-events-none');
+        if (panel.classList.contains("translate-x-full")) {
+          panelRoot.classList.add("pointer-events-none");
           // 关闭态用 inert 把抽屉内的链接/按钮移出 Tab 序列。
           // 只加 aria-hidden + pointer-events-none 只挡鼠标，键盘仍能 Tab 进不可见内容（WCAG 失败）。
-          panelRoot.setAttribute('inert', '');
-          panelRoot.setAttribute('aria-hidden', 'true');
+          panelRoot.setAttribute("inert", "");
+          panelRoot.setAttribute("aria-hidden", "true");
         }
       }, 300);
     }
@@ -173,7 +224,7 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
     function toggle(panelRoot) {
       const { panel } = getPanelElements(panelRoot);
       if (!panel) return;
-      if (panel.classList.contains('translate-x-full')) {
+      if (panel.classList.contains("translate-x-full")) {
         open(panelRoot);
       } else {
         close(panelRoot);
@@ -183,68 +234,75 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
     // 每个面板只绑定一次。astro:after-swap 后会对新节点重新初始化，
     // 若重复绑定，手风琴触发的 toggle 会被执行偶数次而看似失灵，close() 也会重复执行。
     function initPanel(panelRoot) {
-      if (!panelRoot || panelRoot.dataset.navInit === '1') return;
-      panelRoot.dataset.navInit = '1';
+      if (!panelRoot || panelRoot.dataset.navInit === "1") return;
+      panelRoot.dataset.navInit = "1";
 
-      const overlay = panelRoot.querySelector('[data-nav-overlay]');
+      const overlay = panelRoot.querySelector("[data-nav-overlay]");
       if (overlay) {
-        overlay.addEventListener('click', function () {
+        overlay.addEventListener("click", function () {
           close(panelRoot);
         });
       }
 
-      const closeBtn = panelRoot.querySelector('[data-nav-close]');
+      const closeBtn = panelRoot.querySelector("[data-nav-close]");
       if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
+        closeBtn.addEventListener("click", function () {
           close(panelRoot);
         });
       }
 
-      panelRoot.querySelectorAll('[data-nav-link]').forEach(function (link) {
-        link.addEventListener('click', function () {
+      panelRoot.querySelectorAll("[data-nav-link]").forEach(function (link) {
+        link.addEventListener("click", function () {
           setTimeout(function () {
             close(panelRoot);
           }, 150);
         });
       });
 
-      panelRoot.querySelectorAll('[data-nav-accordion-trigger]').forEach(function (trigger) {
-        trigger.addEventListener('click', function () {
-          const arrow = trigger.querySelector('[data-nav-accordion-arrow]');
-          // 用显式 hook 而非 nextElementSibling：模板一旦在触发器与内容间插入节点就会静默失效
-          const content = trigger.parentElement?.querySelector('[data-nav-accordion-content]');
-          if (!content) return;
-          if (content.classList.contains('hidden')) {
-            content.classList.remove('hidden');
-            if (arrow) arrow.classList.add('rotate-180');
-          } else {
-            content.classList.add('hidden');
-            if (arrow) arrow.classList.remove('rotate-180');
-          }
+      panelRoot
+        .querySelectorAll("[data-nav-accordion-trigger]")
+        .forEach(function (trigger) {
+          trigger.addEventListener("click", function () {
+            const arrow = trigger.querySelector("[data-nav-accordion-arrow]");
+            // 用显式 hook 而非 nextElementSibling：模板一旦在触发器与内容间插入节点就会静默失效
+            const content = trigger.parentElement?.querySelector(
+              "[data-nav-accordion-content]",
+            );
+            if (!content) return;
+            if (content.classList.contains("hidden")) {
+              content.classList.remove("hidden");
+              if (arrow) arrow.classList.add("rotate-180");
+            } else {
+              content.classList.add("hidden");
+              if (arrow) arrow.classList.remove("rotate-180");
+            }
+          });
         });
-      });
 
       // 通过 CustomEvent 暴露面板 API，替代 window.__mobileNavPanel 全局对象
-      panelRoot.addEventListener('mobile-nav:open', function () {
+      panelRoot.addEventListener("mobile-nav:open", function () {
         open(panelRoot);
       });
-      panelRoot.addEventListener('mobile-nav:close', function () {
+      panelRoot.addEventListener("mobile-nav:close", function () {
         close(panelRoot);
       });
-      panelRoot.addEventListener('mobile-nav:toggle', function () {
+      panelRoot.addEventListener("mobile-nav:toggle", function () {
         toggle(panelRoot);
       });
     }
 
     function initAllPanels() {
-      document.querySelectorAll('[data-mobile-nav-panel]').forEach(initPanel);
+      document.querySelectorAll("[data-mobile-nav-panel]").forEach(initPanel);
     }
 
     function closeOpenPanels() {
-      document.querySelectorAll('[data-mobile-nav-panel]').forEach(function (root) {
-        const panel = root.querySelector('[data-nav-panel]');
-        if (panel && !panel.classList.contains('translate-x-full')) close(root);
-      });
+      document
+        .querySelectorAll("[data-mobile-nav-panel]")
+        .forEach(function (root) {
+          const panel = root.querySelector("[data-nav-panel]");
+          if (panel && !panel.classList.contains("translate-x-full"))
+            close(root);
+        });
     }
 
     initAllPanels();
@@ -252,15 +310,15 @@ const { id, links = [], title = t('nav.navigation'), showUtilities = false } = A
     // document 在视图切换（Swup/ClientRouter）之间是复用的，若每次导航都注册，
     // document 上的监听会逐次累积；用 documentElement 标记保证全局只注册一次。
     if (!document.documentElement.dataset.mobileNavHooked) {
-      document.documentElement.dataset.mobileNavHooked = '1';
+      document.documentElement.dataset.mobileNavHooked = "1";
 
-      document.addEventListener('astro:after-swap', function () {
+      document.addEventListener("astro:after-swap", function () {
         // 页面主体被换掉后，旧节点上的监听已随旧 DOM 一并消失，这里对新节点重新绑定
         initAllPanels();
       });
 
-      document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') closeOpenPanels();
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeOpenPanels();
       });
     }
   })();

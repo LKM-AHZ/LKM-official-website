@@ -27,18 +27,19 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
 <nav
   class:list={[
     styles.shell,
-    "fixed top-[72px] left-0 h-[calc(100vh-72px)] bg-base-100 z-10 pl-2 overflow-hidden border-r border-base-300",
+    "fixed top-[72px] left-0 z-10 h-[calc(100vh-72px)] overflow-hidden border-r border-surface-3 bg-card-bg",
   ]}
-  aria-label="Sidebar navigation"
+  aria-label={t("nav.navigation")}
   data-sidebar
 >
+  <div class={styles.heading}>{t("nav.navigation")}</div>
   <ul class={styles.nav}>
     {
       logo && (
         <li
           class:list={[styles.logoItem, { active: currentPath === logo.href }]}
         >
-          <a href={logo.href}>
+          <a href={logo.href} aria-label={logo.text} title={logo.text}>
             <div class={styles.icon}>
               <div class={styles.imageBox}>
                 <img src={logo.src} alt={logo.text} />
@@ -52,15 +53,19 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
 
     {
       groups.map(({ text, href, icon }) => {
-        const isActive = (() => {
-          const linkUrl = new URL(href, "https://example.com");
-          if (linkUrl.hash) return currentPath === linkUrl.pathname;
-          return currentPath === href || currentPath.startsWith(href + "#");
-        })();
+        const linkPath =
+          new URL(href, "https://example.com").pathname.replace(/\/$/, "") ||
+          "/";
+        const isActive = (currentPath.replace(/\/$/, "") || "/") === linkPath;
 
         return (
           <li class:list={{ active: isActive }}>
-            <a href={href}>
+            <a
+              href={href}
+              aria-label={t(text)}
+              title={t(text)}
+              aria-current={isActive ? "page" : undefined}
+            >
               <div class={styles.icon}>
                 <Icon name={icon} />
               </div>
@@ -156,7 +161,9 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
         if (linkUrl.pathname.replace(/\/$/, "") !== currentPath) return;
         var li = a.closest("li");
         if (!li) return;
-        var isActive = linkUrl.hash ? linkUrl.hash === currentHash : !currentHash;
+        var isActive = linkUrl.hash
+          ? linkUrl.hash === currentHash
+          : !currentHash;
         if (isActive) {
           li.classList.add("active");
         } else if (linkUrl.hash || currentHash) {
@@ -179,13 +186,16 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
           setExpanded(sidebar.classList.contains("collapsed"));
           return;
         }
-        var link = target.closest ? target.closest("[data-sidebar] a[href]") : null;
+        var link = target.closest
+          ? target.closest("[data-sidebar] a[href]")
+          : null;
         if (!link) return;
         var href = link.getAttribute("href");
         if (!href) return;
         var url = new URL(href, location.origin);
         var isSamePage =
-          url.pathname.replace(/\/$/, "") === location.pathname.replace(/\/$/, "");
+          url.pathname.replace(/\/$/, "") ===
+          location.pathname.replace(/\/$/, "");
         var hash = url.hash;
         if (!hash || !isSamePage) return;
         e.preventDefault();
@@ -209,15 +219,16 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
             var sidebar = currentSidebar();
             if (!sidebar) return;
             var links = sidebar.querySelectorAll("a[href]");
-            var sections = Array.prototype.filter.call(links, function (a) {
-              var href = a.getAttribute("href");
-              if (!href) return false;
-              var url = new URL(href, location.origin);
-              return (
-                url.pathname.replace(/\/$/, "") ===
-                  location.pathname.replace(/\/$/, "") && url.hash
-              );
-            })
+            var sections = Array.prototype.filter
+              .call(links, function (a) {
+                var href = a.getAttribute("href");
+                if (!href) return false;
+                var url = new URL(href, location.origin);
+                return (
+                  url.pathname.replace(/\/$/, "") ===
+                    location.pathname.replace(/\/$/, "") && url.hash
+                );
+              })
               .map(function (a) {
                 var url = new URL(a.getAttribute("href"), location.origin);
                 return document.querySelector(url.hash);
@@ -239,7 +250,7 @@ const { logo, groups = [], currentPath = "" } = Astro.props;
             }
           });
         },
-        { passive: true }
+        { passive: true },
       );
 
       // 视口断点切换时重新对齐折叠态（读 localStorage 重算）。

@@ -16,7 +16,7 @@ interface Props {
 
 const className = Astro.props.class;
 const navInnerClass = [
-  "border-b border-surface-3 bg-card-bg/95 backdrop-blur-xl grid h-[4.5rem] grid-cols-[minmax(0,1fr)_auto] items-center px-4 sm:px-6 xl:grid-cols-[1fr_auto_1fr]",
+  "grid h-[4.5rem] grid-cols-[minmax(0,1fr)_auto] items-center border-b border-surface-3 bg-card-bg/95 px-4 shadow-[0_1px_3px_rgb(0_0_0_/_0.04)] backdrop-blur-xl sm:px-6 xl:grid-cols-[auto_1fr_auto]",
   className,
 ]
   .filter(Boolean)
@@ -32,7 +32,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
     <div class="flex min-w-0 items-center gap-1 justify-self-start">
       <a
         href={url("/")}
-        class="flex h-12 items-center rounded-full px-2 font-semibold text-deep-text transition-colors hover:bg-btn-regular-bg focus-visible:outline-2 focus-visible:outline-primary sm:px-3"
+        class="flex h-12 items-center rounded-full px-2 font-semibold text-deep-text transition-colors hover:bg-btn-plain-bg-hover focus-visible:outline-2 focus-visible:outline-primary sm:px-3"
       >
         <div class="flex items-center gap-2.5 text-lg tracking-normal">
           <span class="grid h-7 w-7 grid-cols-2 gap-0.5" aria-hidden="true">
@@ -47,7 +47,11 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
     </div>
 
     <!-- 中间：导航链接列表 -->
-    <div class="hidden xl:flex" id="navbar-links">
+    <nav
+      class="hidden items-center gap-1 pl-8 xl:flex"
+      id="navbar-links"
+      aria-label={t("nav.navigation")}
+    >
       {
         links.map((l, idx) => {
           const hasChildren = l.children && l.children.length > 0;
@@ -64,7 +68,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
                     : undefined
                 }
                 class:list={[
-                  "flex h-10 items-center gap-1 rounded-full px-5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary",
+                  "flex h-10 items-center gap-1 rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary",
                   currentPath === (url(l.url).replace(/\/$/, "") || "/")
                     ? "bg-btn-regular-bg text-primary-readable"
                     : "text-text-muted hover:bg-btn-plain-bg-hover hover:text-deep-text",
@@ -85,7 +89,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
               <button
                 type="button"
                 aria-label={t(l.name)}
-                class="flex h-10 items-center gap-1 rounded-full px-5 text-sm font-medium text-text-muted transition-colors hover:bg-btn-plain-bg-hover hover:text-deep-text focus-visible:outline-2 focus-visible:outline-primary"
+                class="flex h-10 items-center gap-1 rounded-full px-4 text-sm font-medium text-text-muted transition-colors hover:bg-btn-plain-bg-hover hover:text-deep-text focus-visible:outline-2 focus-visible:outline-primary"
                 data-dropdown-trigger
               >
                 {t(l.name)}
@@ -117,11 +121,13 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
           );
         })
       }
-    </div>
+    </nav>
 
     <!-- 右侧：功能按钮组 -->
     <div class="flex justify-self-end items-center gap-1">
-      <SearchGlobalSearch client:load compact />
+      <div class="flex h-11 min-w-11 items-center justify-center xl:w-44">
+        <SearchGlobalSearch client:only="vue" compact />
+      </div>
       <div class="hidden xl:block"><NotificationBell client:idle /></div>
       <div class="hidden xl:block">
         <PreferencesMenu

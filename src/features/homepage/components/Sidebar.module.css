@@ -1,19 +1,191 @@
-/* ── 侧边栏容器 ──
-   宽度由 .expanded 状态切换（width），其余壳层定位/背景/边框/内边距/溢出
-   已在 Sidebar.astro 用 Tailwind 原子类实现，此处只保留依赖展开状态的宽度与移动端覆盖。 */
 .shell {
+  box-sizing: border-box;
   width: 240px;
+  height: calc(100vh - 72px);
+  height: calc(100dvh - 72px);
+  padding: 0 8px;
+  transition: width 200ms ease;
 }
 
-/* 收起态判定有两处：.collapsed（Sidebar.astro 的脚本始终与 html 标记同步切换）
-   与 html.sidebar-collapsed（BaseLayout 首帧内联脚本设置，首帧就靠它生效）。
-   html 侧选择器限定到本模块的 .shell，避免影响页面上任何其它带 data-sidebar 的节点。 */
+.heading {
+  display: flex;
+  height: 52px;
+  align-items: end;
+  padding: 0 14px 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.nav {
+  box-sizing: border-box;
+  height: calc(100% - 52px);
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 0 72px;
+  list-style: none;
+}
+
+.nav li {
+  margin: 2px 0;
+}
+
+.nav li a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 14px;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: var(--base-content);
+  text-decoration: none;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.nav li a:hover {
+  background: var(--btn-plain-bg-hover);
+}
+
+.nav li a:focus-visible,
+.toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.nav li:global(.active) a {
+  background: var(--btn-regular-bg);
+  color: var(--btn-content);
+  font-weight: 600;
+}
+
+.nav li:global(.active) a:hover {
+  background: var(--btn-regular-bg-hover);
+}
+
+.icon {
+  display: grid;
+  flex: 0 0 20px;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.text {
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imageBox,
+.imageBox img {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+}
+
+.imageBox img {
+  object-fit: cover;
+}
+
+.logoItem {
+  margin-bottom: 12px !important;
+}
+
+.toggle {
+  position: absolute;
+  right: 8px;
+  bottom: 12px;
+  left: 8px;
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--base-200);
+  color: var(--base-content);
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.toggle:hover {
+  background: var(--btn-plain-bg-hover);
+  color: var(--btn-content);
+}
+
+.toggle svg {
+  width: 18px;
+  height: 18px;
+  transform: rotate(180deg);
+  transition: transform 200ms ease;
+}
+
+.toggleText {
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .shell:global(.collapsed),
 :global(html.sidebar-collapsed) .shell {
   width: 67px;
+  padding: 0 6px;
 }
 
-/* 移动端：侧边栏更窄，顶部位置调整 */
+.shell:global(.collapsed) .heading,
+:global(html.sidebar-collapsed) .shell .heading {
+  height: 20px;
+  padding: 0;
+  visibility: hidden;
+}
+
+.shell:global(.collapsed) .nav,
+:global(html.sidebar-collapsed) .shell .nav {
+  height: calc(100% - 20px);
+}
+
+.shell:global(.collapsed) .nav li a,
+:global(html.sidebar-collapsed) .shell .nav li a {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+.shell:global(.collapsed) .text,
+:global(html.sidebar-collapsed) .shell .text,
+.shell:global(.collapsed) .toggleText,
+:global(html.sidebar-collapsed) .shell .toggleText {
+  display: none;
+}
+
+.shell:global(.collapsed) .toggle svg,
+:global(html.sidebar-collapsed) .shell .toggle svg {
+  transform: none;
+}
+
+@media (min-width: 768px) {
+  [data-main-content] {
+    padding-left: 240px;
+  }
+
+  :global(html.sidebar-collapsed) [data-main-content] {
+    padding-left: 67px;
+  }
+}
+
 @media (max-width: 767px) {
   .shell {
     width: 200px;
@@ -22,249 +194,25 @@
   .shell:global(.collapsed),
   :global(html.sidebar-collapsed) .shell {
     width: 50px;
-    padding-left: 4px;
+    padding: 0 4px;
   }
 
-  /* 移动端主内容偏移：默认收起态 50px，展开态 200px（与 JS 的 getSizes 对齐） */
+  .shell:global(.collapsed) .nav li a,
+  :global(html.sidebar-collapsed) .shell .nav li a {
+    min-height: 42px;
+  }
+
+  .shell:global(.collapsed) .toggle,
+  :global(html.sidebar-collapsed) .shell .toggle {
+    right: 4px;
+    left: 4px;
+  }
+
   [data-main-content] {
     padding-left: 200px;
   }
 
-  html.sidebar-collapsed [data-main-content] {
+  :global(html.sidebar-collapsed) [data-main-content] {
     padding-left: 50px;
   }
-
-  .icon {
-    min-width: 36px;
-    height: 30px;
-  }
-
-  .icon svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .text {
-    height: 30px;
-    font-size: 13px;
-    padding-left: 8px;
-  }
-
-  .nav li:global(.active) .icon::before {
-    width: 24px;
-    height: 24px;
-    border-width: 2px;
-  }
-
-  /* 收起态按钮本体宽 36px 且为圆形，给 svg 设 min-width 会盖过基础规则的 width:16px、
-     把箭头挤出中心；要放大点击区请改 .toggle 本体。 */
-  .toggle {
-    height: 32px;
-  }
-}
-
-/* ── 头像/图片容器 ── */
-.imageBox {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.imageBox img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ── 导航列表 ── */
-.nav {
-  position: relative;
-  /* 72px = 顶部固定栏高度（与 Sidebar.astro 的 top-[72px] 成对）；
-     dvh 优先，移动端地址栏收起时 100vh 会算大导致列表底部被裁。 */
-  height: calc(100vh - 72px);
-  height: calc(100dvh - 72px);
-  list-style: none;
-  margin: 0;
-  /* 外层 shell 是 overflow-hidden：导航项多时必须自己能滚，
-     并在底部留出绝对定位的 .toggle（bottom:8px, 36px 高）的位置，否则末尾条目被压在按钮下 */
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0 0 52px;
-}
-
-.nav li {
-  position: relative;
-  padding: 5px;
-}
-
-.nav li a {
-  position: relative;
-  display: flex;
-  white-space: nowrap;
-  text-decoration: none;
-}
-
-/* ── Logo 项特殊间距 ── */
-.logoItem {
-  margin: 32px 0 80px 0;
-}
-
-/* ── 图标 ── */
-.icon {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 48px;
-  height: 35px;
-  color: var(--color-primary);
-  transition: 0.5s;
-}
-
-.icon svg {
-  width: 16px;
-  height: 16px;
-  z-index: 1;
-}
-
-/* ── 文字 ── */
-.text {
-  position: relative;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: var(--color-base-content);
-  padding-left: 12px;
-  letter-spacing: 0;
-  transition: 0.5s;
-}
-
-/* ── hover 高亮 ── */
-.nav li:hover .icon,
-.nav li:hover .text {
-  color: var(--color-warning);
-}
-
-/* ── Active 状态 — 气泡圆角背景 ── */
-.nav li:global(.active) {
-  background: var(--color-base-200);
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
-}
-
-.nav li:global(.active)::before {
-  content: "";
-  position: absolute;
-  top: -19px;
-  right: 0;
-  width: 19px;
-  height: 19px;
-  border-bottom-right-radius: 16px;
-  box-shadow: 3px 3px 0 3px var(--color-base-200);
-  background: transparent;
-}
-
-.nav li:global(.active)::after {
-  content: "";
-  position: absolute;
-  bottom: -19px;
-  right: 0;
-  width: 19px;
-  height: 19px;
-  border-top-right-radius: 16px;
-  box-shadow: 3px -3px 0 3px var(--color-base-200);
-  background: transparent;
-}
-
-/* ── 底部开合按钮 ── */
-.toggle {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  translate: -50% 0;
-  width: calc(100% - 16px);
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0;
-  border: 1px solid var(--color-base-300);
-  border-radius: 8px;
-  background: var(--color-base-200);
-  color: var(--color-base-content);
-  cursor: pointer;
-  transition:
-    background 0.3s,
-    color 0.3s;
-}
-
-.toggle:hover {
-  background: var(--color-base-300);
-  color: var(--color-primary);
-}
-
-.toggle svg {
-  flex-shrink: 0;
-  width: 16px;
-  transition: transform 0.3s;
-}
-
-.toggleText {
-  white-space: nowrap;
-  font-size: 12px;
-  transition: 0.3s;
-}
-
-/* 展开态（默认）：箭头旋转 180° */
-.shell .toggle svg {
-  transform: rotate(180deg);
-}
-
-.shell:global(.collapsed) .toggle svg {
-  transform: none;
-}
-
-/* 主内容容器偏移，由 html.sidebar-collapsed（BaseLayout 首帧内联脚本在 paint 前设置）驱动，
-   避免 JS 在首帧后改 main 内边距触发 CLS。默认=展开宽度；收起态走 CSS 覆盖。
-   必须限定 min-width：移动端覆盖值（200/50px，见文件顶部的 max-width:767px 块）与这里选择器
-   同权重，而这些规则在源码中更靠后，不限定就会在窄屏也生效，留下 40px/17px 空隙。 */
-@media (min-width: 768px) {
-  [data-main-content] {
-    padding-left: 240px;
-  }
-
-  html.sidebar-collapsed [data-main-content] {
-    padding-left: 67px;
-  }
-}
-
-/* 收起态：居中显示，隐藏文字 */
-.shell:global(.collapsed) .toggle {
-  width: 36px;
-  border-radius: 50%;
-  gap: 0;
-}
-
-.shell:global(.collapsed) .toggleText {
-  display: none;
-}
-
-/* ── Active 图标 — 圆形边框 ── */
-.nav li:global(.active) .icon::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  width: 29px;
-  height: 29px;
-  background: var(--color-base-100);
-  border-radius: 50%;
-  transition: 0.5s;
-  border: 3px solid var(--color-primary);
-  box-sizing: border-box;
 }

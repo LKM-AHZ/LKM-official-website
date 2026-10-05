@@ -37,13 +37,18 @@ onUnmounted(() => document.removeEventListener("keydown", onKeydown));
   <button
     type="button"
     :aria-label="t('common.search')"
-    class="btn-plain scale-animation flex h-11 items-center justify-center gap-2 rounded-lg px-3 text-neutral-700 hover:bg-black/5 hover:text-primary dark:text-neutral-200 dark:hover:bg-white/10"
+    class="flex h-11 w-11 items-center justify-center gap-2 rounded-full text-text-muted transition-colors hover:bg-btn-plain-bg-hover hover:text-deep-text focus-visible:outline-2 focus-visible:outline-primary xl:w-44 xl:justify-start xl:bg-base-200 xl:px-4"
     @click="open"
   >
     <Icon icon="material-symbols:search" class="text-[1.25rem]" />
-    <span v-if="!compact" class="hidden text-sm lg:inline">{{
+    <span class="hidden text-sm font-medium xl:inline">{{
       t("common.search")
     }}</span>
+    <span
+      v-if="compact"
+      class="ml-auto hidden text-xs text-text-muted 2xl:inline"
+      >⌘/Ctrl K</span
+    >
   </button>
 
   <Teleport to="body">
