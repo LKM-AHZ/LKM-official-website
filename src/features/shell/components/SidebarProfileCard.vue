@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none p-3"
+    class="bg-card-bg rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none p-3"
   >
     <!-- 头像 -->
     <div

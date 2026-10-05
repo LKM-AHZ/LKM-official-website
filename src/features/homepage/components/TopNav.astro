@@ -14,7 +14,7 @@ const { tabs = [], currentPath = '' } = Astro.props;
 
 {
   tabs.length > 0 && (
-    <div class="sticky top-[68px] z-20 border-b border-surface-3 bg-white dark:bg-[oklch(0.23_0.015_var(--hue))]">
+    <div class="sticky top-[68px] z-20 border-b border-surface-3 bg-card-bg">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <nav class="flex gap-0 overflow-x-auto" aria-label="Section tabs">
           {tabs.map(({ text, href }) => {

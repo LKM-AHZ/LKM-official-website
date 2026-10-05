@@ -16,32 +16,31 @@ interface Props {
 
 const className = Astro.props.class;
 const navInnerClass = [
-  "bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none transition !overflow-visible h-[4.5rem] !rounded-t-none grid grid-cols-[minmax(0,1fr)_auto] xl:grid-cols-[0.6fr_auto_1fr] items-center px-2 sm:px-4",
+  "border-b border-surface-3 bg-card-bg/95 backdrop-blur-xl grid h-[4.5rem] grid-cols-[minmax(0,1fr)_auto] items-center px-4 sm:px-6 xl:grid-cols-[1fr_auto_1fr]",
   className,
 ]
   .filter(Boolean)
   .join(" ");
 
 const links: NavBarLink[] = Astro.props.links;
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 
 <div id="navbar" class="z-50 onload-animation">
-  <div
-    class="absolute h-8 left-0 right-0 -top-8 bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] transition-colors"
-  >
-  </div>
   <div class={navInnerClass}>
     <!-- 左侧：首页入口 -->
     <div class="flex min-w-0 items-center gap-1 justify-self-start">
       <a
         href={url("/")}
-        class="scale-animation rounded-lg h-[3.25rem] px-2 sm:px-5 font-bold active:scale-95 flex items-center text-neutral-800 dark:text-neutral-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+        class="flex h-12 items-center rounded-full px-2 font-semibold text-deep-text transition-colors hover:bg-btn-regular-bg focus-visible:outline-2 focus-visible:outline-primary sm:px-3"
       >
-        <div class="flex flex-row text-primary items-center text-md">
-          <Icon
-            name="material-symbols:home-outline-rounded"
-            class="text-[1.75rem] mb-1 mr-2"
-          />
+        <div class="flex items-center gap-2.5 text-lg tracking-normal">
+          <span class="grid h-7 w-7 grid-cols-2 gap-0.5" aria-hidden="true">
+            <span class="rounded-[4px] bg-[#4285f4]"></span><span
+              class="rounded-[4px] bg-[#ea4335]"></span>
+            <span class="rounded-[4px] bg-[#fbbc04]"></span><span
+              class="rounded-[4px] bg-[#34a853]"></span>
+          </span>
           {siteConfig.title}
         </div>
       </a>
@@ -59,7 +58,17 @@ const links: NavBarLink[] = Astro.props.links;
                 href={l.external ? l.url : url(l.url)}
                 target={l.external ? "_blank" : null}
                 rel={l.external ? "noopener noreferrer" : null}
-                class="scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 flex items-center gap-1 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                aria-current={
+                  currentPath === (url(l.url).replace(/\/$/, "") || "/")
+                    ? "page"
+                    : undefined
+                }
+                class:list={[
+                  "flex h-10 items-center gap-1 rounded-full px-5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary",
+                  currentPath === (url(l.url).replace(/\/$/, "") || "/")
+                    ? "bg-btn-regular-bg text-primary-readable"
+                    : "text-text-muted hover:bg-btn-plain-bg-hover hover:text-deep-text",
+                ]}
               >
                 {t(l.name)}
                 {l.external && (
@@ -76,13 +85,13 @@ const links: NavBarLink[] = Astro.props.links;
               <button
                 type="button"
                 aria-label={t(l.name)}
-                class="scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 flex items-center gap-1 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                class="flex h-10 items-center gap-1 rounded-full px-5 text-sm font-medium text-text-muted transition-colors hover:bg-btn-plain-bg-hover hover:text-deep-text focus-visible:outline-2 focus-visible:outline-primary"
                 data-dropdown-trigger
               >
                 {t(l.name)}
                 <Icon
                   name="material-symbols:keyboard-arrow-down-rounded"
-                  class="text-[1rem] text-black/30 dark:text-white/40 transition-transform"
+                  class="text-[1rem] text-text-muted transition-transform"
                   data-dropdown-arrow
                 />
               </button>
@@ -90,14 +99,14 @@ const links: NavBarLink[] = Astro.props.links;
                 class="absolute left-0 top-full pt-2 hidden z-50"
                 data-dropdown-menu
               >
-                <div class="bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-md dark:shadow-none border border-black/5 dark:border-white/10 float-panel p-2">
+                <div class="float-panel min-w-48 rounded-2xl border border-surface-3 bg-card-bg p-2 shadow-lg">
                   {l.children!.map((child) => (
                     <a
                       aria-label={t(child.name)}
                       href={child.external ? child.url : url(child.url)}
                       target={child.external ? "_blank" : null}
                       rel={child.external ? "noopener noreferrer" : null}
-                      class="flex transition-colors whitespace-nowrap items-center !justify-start w-full scale-animation rounded-lg h-9 px-3 font-medium active:scale-95 mb-0.5 text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10"
+                      class="mb-0.5 flex h-10 w-full items-center whitespace-nowrap rounded-xl px-3 text-sm font-medium text-deep-text transition-colors hover:bg-btn-plain-bg-hover hover:text-primary-readable"
                     >
                       {t(child.name)}
                     </a>
@@ -115,13 +124,16 @@ const links: NavBarLink[] = Astro.props.links;
       <SearchGlobalSearch client:load compact />
       <div class="hidden xl:block"><NotificationBell client:idle /></div>
       <div class="hidden xl:block">
-        <PreferencesMenu client:load allowColor={!siteConfig.themeColor.fixed} />
+        <PreferencesMenu
+          client:load
+          allowColor={!siteConfig.themeColor.fixed}
+        />
       </div>
       <UserAvatarMenu client:idle base={url("/")} />
       <button
         aria-label="Menu"
         name="Nav Menu"
-        class="scale-animation rounded-lg w-11 h-11 active:scale-90 xl:!hidden flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors group"
+        class="group flex h-11 w-11 items-center justify-center rounded-full text-deep-text transition-colors hover:bg-btn-plain-bg-hover focus-visible:outline-2 focus-visible:outline-primary xl:!hidden"
         id="nav-menu-switch"
       >
         <Icon

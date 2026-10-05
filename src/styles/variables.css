@@ -1,6 +1,6 @@
 /* ===== 基础常量 ===== */
 :root {
-  --radius-large: 1rem;
+  --radius-large: 1.75rem;
   --content-delay: 150ms;
   --page-width: 1280px;
 
@@ -20,33 +20,33 @@
 :root {
   /* 基础语义色 */
   --base-100: #ffffff;
-  --base-200: #f5f5f7;
-  --base-300: #e0e0e0;
-  --base-content: #1d1d1f;
-  --neutral: #7a7a7a;
+  --base-200: #f8fafd;
+  --base-300: #e2e7ee;
+  --base-content: #1f1f1f;
+  --neutral: #5f6368;
   --neutral-content: #ffffff;
   --primary-content: #ffffff;
 
   /* fuwari 原有变量 */
-  --primary: oklch(0.7 0.15 var(--hue, 250));
-  --primary-readable: oklch(0.45 0.15 var(--hue, 250));
-  --primary-action: oklch(0.45 0.15 var(--hue, 250));
-  --page-bg: oklch(0.95 0.01 var(--hue, 250));
-  --card-bg: white;
-  --surface-3: oklch(0.9 0.01 var(--hue, 250));
-  --btn-content: oklch(0.55 0.12 var(--hue, 250));
-  --btn-regular-bg: oklch(0.95 0.025 var(--hue, 250));
-  --btn-regular-bg-hover: oklch(0.9 0.05 var(--hue, 250));
-  --btn-regular-bg-active: oklch(0.85 0.08 var(--hue, 250));
-  --btn-plain-bg-hover: oklch(0.95 0.025 var(--hue, 250));
-  --btn-plain-bg-active: oklch(0.98 0.01 var(--hue, 250));
-  --btn-card-bg-hover: oklch(0.98 0.005 var(--hue, 250));
-  --btn-card-bg-active: oklch(0.9 0.03 var(--hue, 250));
+  --primary: oklch(0.49 0.18 var(--hue, 260));
+  --primary-readable: oklch(0.49 0.18 var(--hue, 260));
+  --primary-action: oklch(0.49 0.18 var(--hue, 260));
+  --page-bg: #f8fafd;
+  --card-bg: #ffffff;
+  --surface-3: #e2e7ee;
+  --btn-content: #0b57d0;
+  --btn-regular-bg: #e8f0fe;
+  --btn-regular-bg-hover: #d3e3fd;
+  --btn-regular-bg-active: #c2dbff;
+  --btn-plain-bg-hover: #f1f5fb;
+  --btn-plain-bg-active: #e8f0fe;
+  --btn-card-bg-hover: #f8fafd;
+  --btn-card-bg-active: #e8f0fe;
   --enter-btn-bg: var(--btn-regular-bg);
   --enter-btn-bg-hover: var(--btn-regular-bg-hover);
   --enter-btn-bg-active: var(--btn-regular-bg-active);
-  --deep-text: oklch(0.25 0.02 var(--hue, 250));
-  --title-active: oklch(0.6 0.1 var(--hue, 250));
+  --deep-text: #1f1f1f;
+  --title-active: #0b57d0;
   --line-divider: rgba(0, 0, 0, 0.08);
   --line-color: rgba(0, 0, 0, 0.1);
   --meta-divider: rgba(0, 0, 0, 0.2);
@@ -106,7 +106,7 @@
   --toc-width: max(0px, calc((100vw - var(--page-width)) / 2 - 1rem));
   --toc-item-active: oklch(0.7 0.13 var(--hue, 250));
 
-  --text-muted: oklch(0.5 0.01 var(--hue, 250));
+  --text-muted: #5f6368;
   --on-primary: #ffffff;
   --secondary: oklch(0.3 0.01 var(--hue, 250));
   --on-secondary: #ffffff;
@@ -118,37 +118,37 @@
   --on-warning: #1d1d1f;
   --error: oklch(0.55 0.22 25);
   --on-error: #ffffff;
-  --radius-box: 0.75rem;
-  --radius-field: 0.5rem;
-  --radius-selector: 0.375rem;
+  --radius-box: 1.5rem;
+  --radius-field: 0.75rem;
+  --radius-selector: 9999px;
 }
 
 /* ===== 深色主题 ===== */
 :root.dark {
   /* 基础语义色（深色） */
-  --base-100: #010102;
-  --base-200: #0f1011;
-  --base-300: #141516;
-  --base-content: #f7f8f8;
-  --neutral: #8a8f98;
-  --neutral-content: #010102;
+  --base-100: #131314;
+  --base-200: #1e1f20;
+  --base-300: #444746;
+  --base-content: #e3e3e3;
+  --neutral: #c4c7c5;
+  --neutral-content: #131314;
   --primary-content: #ffffff;
 
   /* fuwari 原有变量（深色） */
-  --primary: oklch(0.75 0.14 var(--hue, 250));
-  --primary-readable: oklch(0.82 0.1 var(--hue, 250));
-  --primary-action: oklch(0.45 0.15 var(--hue, 250));
-  --page-bg: oklch(0.16 0.014 var(--hue, 250));
-  --card-bg: oklch(0.23 0.015 var(--hue, 250));
-  --surface-3: oklch(0.32 0.02 var(--hue, 250));
-  --btn-content: oklch(0.75 0.1 var(--hue, 250));
-  --btn-regular-bg: oklch(0.33 0.035 var(--hue, 250));
-  --btn-regular-bg-hover: oklch(0.38 0.04 var(--hue, 250));
-  --btn-regular-bg-active: oklch(0.43 0.045 var(--hue, 250));
-  --btn-plain-bg-hover: oklch(0.3 0.035 var(--hue, 250));
-  --btn-plain-bg-active: oklch(0.27 0.025 var(--hue, 250));
-  --btn-card-bg-hover: oklch(0.3 0.03 var(--hue, 250));
-  --btn-card-bg-active: oklch(0.35 0.035 var(--hue, 250));
+  --primary: oklch(0.82 0.07 var(--hue, 260));
+  --primary-readable: oklch(0.82 0.07 var(--hue, 260));
+  --primary-action: oklch(0.49 0.18 var(--hue, 260));
+  --page-bg: #131314;
+  --card-bg: #1e1f20;
+  --surface-3: #444746;
+  --btn-content: #a8c7fa;
+  --btn-regular-bg: #2b3443;
+  --btn-regular-bg-hover: #34435a;
+  --btn-regular-bg-active: #405675;
+  --btn-plain-bg-hover: #2b2c2f;
+  --btn-plain-bg-active: #35363a;
+  --btn-card-bg-hover: #292a2d;
+  --btn-card-bg-active: #34363a;
   --line-divider: rgba(255, 255, 255, 0.08);
   --line-color: rgba(255, 255, 255, 0.1);
   --meta-divider: rgba(255, 255, 255, 0.2);
@@ -189,8 +189,8 @@
   --toc-btn-active: oklch(0.25 0.02 var(--hue, 250));
   --toc-item-active: oklch(0.35 0.07 var(--hue, 250));
 
-  --deep-text: oklch(0.85 0.01 var(--hue, 250));
-  --text-muted: oklch(0.6 0.01 var(--hue, 250));
+  --deep-text: #e3e3e3;
+  --text-muted: #c4c7c5;
   --secondary: oklch(0.75 0.01 var(--hue, 250));
   --on-secondary: oklch(0.16 0.01 var(--hue, 250));
   /* 深色模式里语义色底仍是浅色调（--primary/--info/--success 沿用浅色值），

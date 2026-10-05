@@ -42,7 +42,7 @@ function select(next: Locale) {
       :class="isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'"
     >
       <div
-        class="bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] overflow-hidden shadow-lg dark:shadow-none float-panel p-1.5"
+        class="bg-card-bg border border-surface-3 rounded-[var(--radius-large)] overflow-hidden shadow-lg dark:shadow-none float-panel p-1.5"
       >
         <button
           v-for="opt in options"

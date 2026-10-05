@@ -123,7 +123,7 @@ watchEffect(() => {
 
 <template>
   <div
-    class="bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none px-8 py-6"
+    class="bg-card-bg rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none px-8 py-6"
   >
     <div v-for="group in groups" :key="group.year">
       <div class="flex flex-row w-full items-center h-[3.75rem]">

@@ -3,7 +3,7 @@
 /* 确保 --hue 始终有初始值，防止 daisyui primary 色因 var(--hue) 未定义而失效 */
 @property --hue {
   syntax: "<number>";
-  initial-value: 250;
+  initial-value: 260;
   inherits: true;
 }
 
@@ -12,7 +12,7 @@
 /* 暗色模式下全局文字颜色自动适配 */
 @layer base {
   .dark .text-deep-text {
-    color: oklch(0.85 0.01 var(--hue, 250));
+    color: var(--deep-text);
   }
 }
 
@@ -20,24 +20,20 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* ── 字体系统 ──
-     Apple 优先 SF Pro → 中文保留 Noto Sans SC */
-  --font-sans:
-    "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+  /* Material 风格的清晰字形，中文由 Noto Sans SC 衔接 */
+  --font-sans: Roboto, "Noto Sans SC", system-ui, "Microsoft YaHei", sans-serif;
   --font-heading:
-    "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+    Roboto, "Noto Sans SC", system-ui, "Microsoft YaHei", sans-serif;
   --font-mono:
     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     monospace;
 
-  /* ── 圆角 Linear 阶梯 ── */
-  --radius-xs: 4px; /* 小徽章/chip */
-  --radius-sm: 6px; /* 内联 tag */
-  --radius-md: 8px; /* 按钮、输入框 */
-  --radius-lg: 12px; /* 卡片 */
-  --radius-xl: 16px; /* 大面板/图片 */
+  /* Material 的圆润层级 */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-pill: 9999px;
 
   /* ── 主题色 Token — 让 Tailwind 识别语义化颜色工具类 ── */
@@ -51,6 +47,8 @@
   --color-card-bg: var(--card-bg);
   --color-page-bg: var(--page-bg);
   --color-surface-3: var(--surface-3);
+  --color-btn-regular-bg: var(--btn-regular-bg);
+  --color-btn-plain-bg-hover: var(--btn-plain-bg-hover);
   --color-deep-text: var(--deep-text);
   --color-text-muted: var(--text-muted);
   --color-primary: var(--primary);
@@ -104,24 +102,24 @@
 @layer base {
   html,
   body {
-    letter-spacing: -0.022em;
+    letter-spacing: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: var(--color-base-100);
     color: var(--color-base-content);
   }
 
-  /* Body — 17px 标准 */
+  /* 正文采用更宽松的行距 */
   p {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 400;
-    line-height: 1.47;
-    letter-spacing: -0.022em;
+    line-height: 1.6;
+    letter-spacing: 0;
     margin-bottom: 1.25rem;
     color: var(--color-base-content);
   }
 
-  /* 标题系统 — 负字间距 + weight 600 */
+  /* 标题系统 */
   h1 {
     font-family: var(--font-heading);
     font-size: 56px;

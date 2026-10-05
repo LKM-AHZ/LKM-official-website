@@ -152,7 +152,7 @@ function chooseLanguage(next: Locale) {
 
     <div
       v-if="isOpen"
-      class="bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] float-panel p-3 shadow-lg"
+      class="bg-card-bg border border-surface-3 rounded-[var(--radius-large)] float-panel p-3 shadow-lg"
       :class="mobile ? 'mx-3 mb-3' : 'absolute right-0 top-full mt-2 w-72'"
     >
       <div

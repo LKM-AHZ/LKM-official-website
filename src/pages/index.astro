@@ -98,7 +98,7 @@ const nav = [
   }}
 >
   <div class="min-h-screen bg-page-bg pb-20">
-    <div class="border-b border-surface-3 bg-card-bg/80">
+    <div class="border-b border-surface-3 bg-card-bg">
       <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
         <nav
           class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
@@ -110,10 +110,10 @@ const nav = [
                 href={link.href}
                 aria-current={index === 0 ? "page" : undefined}
                 class:list={[
-                  "inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-primary",
+                  "inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-primary",
                   index === 0
-                    ? "bg-primary/10 text-primary-readable"
-                    : "text-text-muted hover:bg-primary/10 hover:text-deep-text",
+                    ? "bg-btn-regular-bg text-primary-readable"
+                    : "text-text-muted hover:bg-btn-plain-bg-hover hover:text-deep-text",
                 ]}
               >
                 <Icon name={link.icon} class="h-4 w-4" aria-hidden="true" />
@@ -124,7 +124,7 @@ const nav = [
         </nav>
         <details class="group relative shrink-0">
           <summary
-            class="flex cursor-pointer list-none items-center gap-2 rounded-xl bg-primary-action px-4 py-2 text-sm font-bold text-white hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
+            class="flex cursor-pointer list-none items-center gap-2 rounded-full bg-primary-action px-5 py-2 text-sm font-medium text-white transition hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-action"
             ><Icon
               name="tabler:plus"
               class="h-4 w-4"
@@ -136,7 +136,7 @@ const nav = [
             /></summary
           >
           <div
-            class="absolute right-0 top-full z-30 mt-2 w-44 rounded-xl border border-surface-3 bg-card-bg p-1.5 shadow-xl"
+            class="absolute right-0 top-full z-30 mt-2 w-44 rounded-2xl border border-surface-3 bg-card-bg p-1.5 shadow-lg"
           >
             <a
               href={paths.forum}
@@ -164,29 +164,26 @@ const nav = [
     </div>
 
     <section
-      class="relative overflow-hidden border-b border-surface-3 bg-gradient-to-br from-primary/15 via-page-bg to-amber-100/30 px-4 py-16 sm:px-6 md:py-24"
+      class="relative overflow-hidden bg-card-bg px-4 py-20 sm:px-6 md:py-28"
       aria-labelledby="home-title"
     >
       <div
-        class="pointer-events-none absolute -right-24 -top-48 h-[34rem] w-[34rem] rounded-full border border-primary/15"
+        class="pointer-events-none absolute -right-24 -top-48 h-[34rem] w-[34rem] rounded-full bg-[#e8f0fe] blur-3xl dark:bg-[#1b365c]"
         aria-hidden="true"
       >
       </div>
       <div
-        class="pointer-events-none absolute -right-10 -top-32 h-[25rem] w-[25rem] rounded-full border border-primary/15"
-        aria-hidden="true"
+        class="relative mx-auto flex max-w-7xl flex-col items-center text-center"
       >
-      </div>
-      <div class="relative mx-auto max-w-7xl">
         <div
-          class="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card-bg/75 px-3 py-1.5 text-xs font-bold text-primary-readable"
+          class="mb-6 inline-flex items-center gap-2 rounded-full bg-btn-regular-bg px-4 py-2 text-sm font-medium text-primary-readable"
         >
           <Icon name="tabler:atom" class="h-4 w-4" aria-hidden="true" /> 理科迷 ·
           科学与创造者社区
         </div>
         <h1
           id="home-title"
-          class="max-w-3xl font-heading text-[clamp(2.5rem,6vw,5rem)] font-bold leading-[1.14] tracking-tight text-deep-text"
+          class="max-w-4xl font-heading text-[clamp(2.7rem,6vw,5.25rem)] font-semibold leading-[1.16] tracking-tight text-deep-text"
         >
           从一个问题出发，<br /><span class="text-primary-readable"
             >找到整个理科社区。</span
@@ -201,11 +198,11 @@ const nav = [
           action={paths.search}
           method="get"
           role="search"
-          class="mt-9 flex max-w-3xl items-center gap-2 rounded-2xl border border-surface-3 bg-card-bg p-2 shadow-xl shadow-primary/5 focus-within:border-primary"
+          class="mt-9 flex w-full max-w-2xl items-center gap-2 rounded-full border border-surface-3 bg-page-bg p-2 shadow-sm transition focus-within:border-primary focus-within:shadow-md"
         >
           <Icon
             name="tabler:search"
-            class="ml-3 h-6 w-6 shrink-0 text-primary"
+            class="ml-3 h-6 w-6 shrink-0 text-text-muted"
             aria-hidden="true"
           />
           <label for="home-search" class="sr-only">全站搜索</label>
@@ -220,24 +217,24 @@ const nav = [
           />
           <button
             type="submit"
-            class="rounded-xl bg-primary-action px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 sm:px-7"
+            class="rounded-full bg-primary-action px-6 py-3 text-sm font-medium text-white transition hover:shadow-md sm:px-8"
             >搜索</button
           >
         </form>
         <div
-          class="mt-4 flex flex-wrap items-center gap-2 text-sm text-text-muted"
+          class="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm text-text-muted"
         >
           <span>快速开始</span><a
             href={paths.qa}
-            class="rounded-full border border-surface-3 bg-card-bg/70 px-3 py-1.5 hover:text-primary-readable"
+            class="rounded-full border border-surface-3 bg-card-bg px-4 py-1.5 transition hover:bg-btn-regular-bg hover:text-primary-readable"
             >悬赏求助</a
           ><a
             href={paths.projects}
-            class="rounded-full border border-surface-3 bg-card-bg/70 px-3 py-1.5 hover:text-primary-readable"
+            class="rounded-full border border-surface-3 bg-card-bg px-4 py-1.5 transition hover:bg-btn-regular-bg hover:text-primary-readable"
             >寻找项目</a
           ><a
             href={paths.bank}
-            class="rounded-full border border-surface-3 bg-card-bg/70 px-3 py-1.5 hover:text-primary-readable"
+            class="rounded-full border border-surface-3 bg-card-bg px-4 py-1.5 transition hover:bg-btn-regular-bg hover:text-primary-readable"
             >赛后题库</a
           >
         </div>
@@ -250,11 +247,13 @@ const nav = [
     >
       <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p class="text-xs font-bold tracking-[0.16em] text-primary-readable">
-            COMMUNITY PULSE
+          <p
+            class="text-xs font-semibold tracking-[0.12em] text-primary-readable"
+          >
+            探索社区
           </p><h2
             id="pulse-heading"
-            class="mt-2 font-heading text-3xl font-bold text-deep-text sm:text-4xl"
+            class="mt-2 font-heading text-3xl font-semibold text-deep-text sm:text-4xl"
           >
             此刻值得关注
           </h2><p class="mt-2 text-text-muted">
@@ -262,17 +261,17 @@ const nav = [
           </p>
         </div><a
           href={paths.forum}
-          class="text-sm font-bold text-primary-readable hover:underline"
+          class="rounded-full px-4 py-2 text-sm font-medium text-primary-readable transition hover:bg-btn-regular-bg"
           >探索社区 →</a
         >
       </div>
       <div class="grid gap-5 lg:grid-cols-3">
         <div
-          class="rounded-3xl border border-amber-300/35 bg-card-bg p-6 shadow-sm"
+          class="rounded-[28px] border border-surface-3 bg-card-bg p-6 transition-shadow hover:shadow-md"
         >
           <div class="flex items-center justify-between">
             <div
-              class="flex items-center gap-2 text-amber-700 dark:text-amber-400"
+              class="flex items-center gap-2 text-[#b06000] dark:text-[#ffba6a]"
             >
               <Icon name="tabler:coin" class="h-5 w-5" /><h3 class="font-bold">
                 悬赏求助精选
@@ -319,10 +318,10 @@ const nav = [
           </div>
         </div>
         <div
-          class="rounded-3xl border border-sky-300/35 bg-card-bg p-6 shadow-sm"
+          class="rounded-[28px] border border-surface-3 bg-card-bg p-6 transition-shadow hover:shadow-md"
         >
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 text-sky-700 dark:text-sky-400">
+            <div class="flex items-center gap-2 text-primary-readable">
               <Icon name="tabler:rocket" class="h-5 w-5" /><h3
                 class="font-bold"
               >
@@ -376,11 +375,11 @@ const nav = [
           </div>
         </div>
         <div
-          class="rounded-3xl border border-violet-300/35 bg-card-bg p-6 shadow-sm"
+          class="rounded-[28px] border border-surface-3 bg-card-bg p-6 transition-shadow hover:shadow-md"
         >
           <div class="flex items-center justify-between">
             <div
-              class="flex items-center gap-2 text-violet-700 dark:text-violet-400"
+              class="flex items-center gap-2 text-[#a1428b] dark:text-[#f4a9d7]"
             >
               <Icon name="tabler:book-2" class="h-5 w-5" /><h3
                 class="font-bold"
@@ -425,30 +424,32 @@ const nav = [
     </section>
 
     <section
-      class="border-y border-surface-3 bg-card-bg/60 px-4 py-16 sm:px-6 md:py-20"
+      class="border-y border-surface-3 bg-card-bg px-4 py-16 sm:px-6 md:py-20"
       aria-labelledby="competition-heading"
     >
       <div class="mx-auto max-w-7xl">
         <div class="mb-8">
-          <p class="text-xs font-bold tracking-[0.16em] text-primary-readable">
-            LEARN BY DOING
+          <p
+            class="text-xs font-semibold tracking-[0.12em] text-primary-readable"
+          >
+            每日挑战
           </p><h2
             id="competition-heading"
-            class="mt-2 font-heading text-3xl font-bold text-deep-text sm:text-4xl"
+            class="mt-2 font-heading text-3xl font-semibold text-deep-text sm:text-4xl"
           >
             以赛促学，每天进步一点
           </h2>
         </div><div class="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
           <div
-            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-800 to-indigo-900 p-7 text-white sm:p-9"
+            class="relative overflow-hidden rounded-[28px] bg-[#d3e3fd] p-7 text-[#17365d] dark:bg-[#234268] dark:text-[#e8f0fe] sm:p-9"
           >
             <div
-              class="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/20"
+              class="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/40"
               aria-hidden="true"
             >
             </div><div class="relative">
               <span
-                class="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold"
+                class="inline-flex rounded-full bg-white/60 px-3 py-1 text-xs font-semibold dark:bg-white/10"
                 >{
                   upcomingCompetition
                     ? upcomingCompetition.status === "ongoing"
@@ -462,7 +463,9 @@ const nav = [
                     ? t(upcomingCompetition.title)
                     : "下一场挑战，从这里开始"
                 }
-              </h3><p class="mt-3 max-w-lg text-sm leading-7 text-sky-100">
+              </h3><p
+                class="mt-3 max-w-lg text-sm leading-7 text-[#3d5879] dark:text-[#c6daf7]"
+              >
                 {
                   upcomingCompetition
                     ? t(upcomingCompetition.description)
@@ -470,7 +473,7 @@ const nav = [
                 }
               </p>{
                 upcomingCompetition && (
-                  <p class="mt-5 text-sm font-semibold text-white">
+                  <p class="mt-5 text-sm font-semibold">
                     {daysUntil === null
                       ? "赛事进行中"
                       : `${daysUntil} 天后开始`}{" "}
@@ -481,7 +484,7 @@ const nav = [
                 href={upcomingCompetition
                   ? getPermalink(`/competition/${upcomingCompetition.id}`)
                   : paths.competition}
-                class="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-sky-900 hover:bg-sky-50"
+                class="mt-7 inline-flex items-center gap-2 rounded-full bg-[#0b57d0] px-5 py-3 text-sm font-medium text-white transition hover:shadow-md"
                 >{upcomingCompetition ? "查看赛事" : "查看竞赛大厅"}<Icon
                   name="tabler:arrow-up-right"
                   class="h-4 w-4"
@@ -489,7 +492,7 @@ const nav = [
               >
             </div>
           </div><div
-            class="rounded-3xl border border-surface-3 bg-card-bg p-7 sm:p-9"
+            class="rounded-[28px] border border-surface-3 bg-page-bg p-7 sm:p-9"
           >
             <span
               class="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary-readable"
@@ -505,11 +508,11 @@ const nav = [
             </p><div class="mt-8 flex flex-wrap gap-3">
               <a
                 href={paths.bank}
-                class="inline-flex items-center gap-2 rounded-xl bg-primary-action px-5 py-3 text-sm font-bold text-white hover:opacity-90"
+                class="inline-flex items-center gap-2 rounded-full bg-primary-action px-5 py-3 text-sm font-medium text-white transition hover:shadow-md"
                 >进入题库 <Icon name="tabler:arrow-right" class="h-4 w-4" /></a
               ><a
                 href={paths.competition}
-                class="inline-flex items-center rounded-xl border border-surface-3 px-5 py-3 text-sm font-semibold text-deep-text hover:border-primary/40"
+                class="inline-flex items-center rounded-full border border-surface-3 px-5 py-3 text-sm font-medium text-deep-text transition hover:bg-btn-regular-bg"
                 >全部竞赛</a
               >
             </div>

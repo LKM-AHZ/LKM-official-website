@@ -25,7 +25,7 @@ const hostStyle = `--collapsed-height:${collapsedHeight};${style ?? ''}`;
   data-is-collapsed={String(Boolean(isCollapsed))}
   class={twMerge(
     'pb-4',
-    'bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none',
+    'bg-card-bg rounded-[var(--radius-large)] overflow-hidden shadow-sm dark:shadow-none',
     className
   )}
   style={hostStyle}

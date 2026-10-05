@@ -194,13 +194,13 @@ onUnmounted(() => {
     <div
       :id="panelId"
       v-if="isOpen"
-      class="max-h-96 overflow-y-auto bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] float-panel p-2 z-50 shadow-xl dark:shadow-2xl transition-all"
+      class="max-h-96 overflow-y-auto bg-card-bg border border-surface-3 rounded-[var(--radius-large)] float-panel p-2 z-50 shadow-xl dark:shadow-2xl transition-all"
       :class="mobile ? 'mx-3 mb-3' : 'absolute right-0 top-full mt-2 w-80'"
       @click.stop
     >
       <!-- 面板头部 -->
       <div
-        class="flex items-center justify-between px-3 py-2 border-b border-black/5 dark:border-white/10 mb-1"
+        class="flex items-center justify-between px-3 py-2 border-b border-surface-3 mb-1"
       >
         <span
           class="font-semibold text-sm text-neutral-800 dark:text-neutral-100"

@@ -23,7 +23,7 @@
     <!-- 下拉菜单 -->
     <div
       v-if="isOpen"
-      class="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[oklch(0.23_0.015_var(--hue))] border border-black/5 dark:border-white/10 rounded-[var(--radius-large)] float-panel py-1.5 z-50 shadow-xl dark:shadow-2xl transition-all"
+      class="absolute right-0 top-full mt-2 w-52 bg-card-bg border border-surface-3 rounded-[var(--radius-large)] float-panel py-1.5 z-50 shadow-xl dark:shadow-2xl transition-all"
       @click.stop
     >
       <div class="px-4 py-2 border-b border-surface-3 mb-1">
