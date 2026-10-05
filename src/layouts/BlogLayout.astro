@@ -1,21 +1,22 @@
 ---
-import '~/styles/tailwind.css';
-import '../styles/variables.css';
-import '../styles/main.css';
-import '../styles/markdown.css';
-import '../styles/markdown-extend.css';
-import 'katex/dist/katex.min.css';
-import '../styles/transition.css';
-import '../styles/scrollbar.css';
-import '../styles/photoswipe.css';
-import '../styles/expressive-code.css';
+import "~/styles/tailwind.css";
+import "../styles/variables.css";
+import "../styles/main.css";
+import "../styles/markdown.css";
+import "../styles/markdown-extend.css";
+import "katex/dist/katex.min.css";
+import "../styles/transition.css";
+import "../styles/scrollbar.css";
+import "../styles/photoswipe.css";
+import "../styles/expressive-code.css";
 
-import ConfigCarrier from '~/features/shell/common/components/ConfigCarrier.astro';
-import MobileNavPanel from '~/features/shell/components/MobileNavPanel.astro';
-import { profileConfig, siteConfig } from '~/lib/config';
-import { allMenuItems } from '~/features/shell/menus';
-import { filterNavbarByNames } from '~/lib/navigation';
-import type { NavBarLink } from '~/types/config';
+import ConfigCarrier from "~/features/shell/common/components/ConfigCarrier.astro";
+import ApplyFontSize from "~/features/shell/common/components/ApplyFontSize.astro";
+import MobileNavPanel from "~/features/shell/components/MobileNavPanel.astro";
+import { profileConfig, siteConfig } from "~/lib/config";
+import { allMenuItems } from "~/features/shell/menus";
+import { filterNavbarByNames } from "~/lib/navigation";
+import type { NavBarLink } from "~/types/config";
 import {
   AUTO_MODE,
   BANNER_HEIGHT,
@@ -24,11 +25,11 @@ import {
   DEFAULT_THEME,
   LIGHT_MODE,
   PAGE_WIDTH,
-} from '~/lib/constants/constants';
-import { defaultFavicons } from '~/lib/constants/icon';
-import type { Favicon } from '~/types/config';
-import { pathsEqual, url } from '~/lib/utils/url-utils';
-import { t } from '~/lib/i18n';
+} from "~/lib/constants/constants";
+import { defaultFavicons } from "~/lib/constants/icon";
+import type { Favicon } from "~/types/config";
+import { pathsEqual, url } from "~/lib/utils/url-utils";
+import { t } from "~/lib/i18n";
 interface Props {
   title?: string;
   banner?: string;
@@ -40,12 +41,19 @@ interface Props {
   navItems?: string[];
 }
 
-let { title, banner: _banner, description, lang, setOGTypeArticle, navItems } = Astro.props;
+let {
+  title,
+  banner: _banner,
+  description,
+  lang,
+  setOGTypeArticle,
+  navItems,
+} = Astro.props;
 
 // 给 body 元素添加 class 以决定 Banner 高度，仅用于首次页面加载
 // View Transitions 在页面过渡后更新 body，导致 Banner 高度变化延迟
 // 因此使用 astro:before-swap 事件在链接点击时立即更改高度
-const isHomePage = pathsEqual(Astro.url.pathname, url('/'));
+const isHomePage = pathsEqual(Astro.url.pathname, url("/"));
 
 // 定义全局 CSS 变量
 // 为什么在 Layout 而非 GlobalStyles 中定义：https://github.com/withastro/astro/issues/6728#issuecomment-1502203757
@@ -66,29 +74,35 @@ if (title) {
   pageTitle = `${siteConfig.title} - ${siteConfig.subtitle}`;
 }
 
-const favicons: Favicon[] = siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
+const favicons: Favicon[] =
+  siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
 
 // const siteLang = siteConfig.lang.replace('_', '-')
 if (!lang) {
   lang = `${siteConfig.lang}`;
 }
-const siteLang = lang.replace('_', '-');
+const siteLang = lang.replace("_", "-");
 
 const bannerOffsetByPosition = {
   top: `${BANNER_HEIGHT_EXTEND}vh`,
   center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
-  bottom: '0',
+  bottom: "0",
 };
 // 取值来自用户 YAML：position 写错（如 "middle"）时查表得 undefined，
 // 会让 translateY(var(--bannerOffset)) 变成非法 CSS 而静默丢掉横幅偏移，故显式兜底 center
 const bannerOffset =
-  bannerOffsetByPosition[siteConfig.banner.position || 'center'] ??
+  bannerOffsetByPosition[siteConfig.banner.position || "center"] ??
   bannerOffsetByPosition.center;
 ---
 
 <!doctype html>
-<html lang={siteLang} class="bg-page-bg transition 2xl:text-[20px]" data-overlayscrollbars-initialize>
+<html
+  lang={siteLang}
+  class="bg-page-bg transition"
+  data-overlayscrollbars-initialize
+>
   <head>
+    <ApplyFontSize />
     <title>{pageTitle}</title>
 
     <meta charset="UTF-8" />
@@ -99,7 +113,13 @@ const bannerOffset =
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description || pageTitle} />
-    {setOGTypeArticle ? <meta property="og:type" content="article" /> : <meta property="og:type" content="website" />}
+    {
+      setOGTypeArticle ? (
+        <meta property="og:type" content="article" />
+      ) : (
+        <meta property="og:type" content="website" />
+      )
+    }
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={Astro.url} />
@@ -112,7 +132,7 @@ const bannerOffset =
       favicons.map((favicon) => (
         <link
           rel="icon"
-          href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
+          href={favicon.src.startsWith("/") ? url(favicon.src) : favicon.src}
           sizes={favicon.sizes}
           media={favicon.theme && `(prefers-color-scheme: ${favicon.theme})`}
         />
@@ -120,58 +140,82 @@ const bannerOffset =
     }
 
     <!-- Set the theme before the page is rendered to avoid a flash -->
-    <script is:inline define:vars={{ DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, configHue }}
+    <script
+      is:inline
+      define:vars={{
+        DEFAULT_THEME,
+        LIGHT_MODE,
+        DARK_MODE,
+        AUTO_MODE,
+        BANNER_HEIGHT_EXTEND,
+        configHue,
+      }}
     >
       // 从 localStorage 加载主题
       // 用 var 而非 const/let：Swup reloadScripts 会在每次过渡时重跑本 head 内联脚本，
       // 顶层 const/let 重复声明会抛 "Identifier ... has already been declared" 中断脚本。
-      var theme = localStorage.getItem('theme') || DEFAULT_THEME;
+      var theme = localStorage.getItem("theme") || DEFAULT_THEME;
       switch (theme) {
         case LIGHT_MODE:
-          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.remove("dark");
           break;
         case DARK_MODE:
-          document.documentElement.classList.add('dark');
+          document.documentElement.classList.add("dark");
           break;
         case AUTO_MODE:
-          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
+          if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            document.documentElement.classList.add("dark");
           } else {
-            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.remove("dark");
           }
       }
 
       // 从 localStorage 加载色相
-      var hue = localStorage.getItem('hue') || configHue;
-      document.documentElement.style.setProperty('--hue', hue);
+      var hue = localStorage.getItem("hue") || configHue;
+      document.documentElement.style.setProperty("--hue", hue);
 
       // calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-      var offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
+      var offset = Math.floor(
+        window.innerHeight * (BANNER_HEIGHT_EXTEND / 100),
+      );
       offset = offset - (offset % 4);
-      document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+      document.documentElement.style.setProperty(
+        "--banner-height-extend",
+        `${offset}px`,
+      );
     </script>
     <style
       define:vars={{
         configHue,
-        'page-width': `${PAGE_WIDTH}rem`,
+        "page-width": `${PAGE_WIDTH}rem`,
       }}
     ></style>
     <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
 
     <slot name="head" />
 
-    <link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={profileConfig.name}
+      href={`${Astro.site}rss.xml`}
+    />
   </head>
   <body
     class="min-h-screen transition"
-    class:list={[{ 'lg:is-home': isHomePage, 'enable-banner': enableBanner }]}
+    class:list={[{ "lg:is-home": isHomePage, "enable-banner": enableBanner }]}
     data-overlayscrollbars-initialize
   >
     <ConfigCarrier />
     <slot />
 
     <slot name="body-end" />
-    <MobileNavPanel id="mobile-nav-fuwari" title={t('layout.navigation')} links={navbarLinks} showUtilities />
+    <MobileNavPanel
+      id="mobile-nav-fuwari"
+      title={t("layout.navigation")}
+      links={navbarLinks}
+      showUtilities
+    />
 
     <!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
     <div id="page-height-extend" class="hidden h-[300vh]"></div>
@@ -182,10 +226,10 @@ const bannerOffset =
   is:global
   define:vars={{
     bannerOffset,
-    'banner-height': `${BANNER_HEIGHT}vh`,
+    "banner-height": `${BANNER_HEIGHT}vh`,
     // 下面多条规则读的是 --banner-height-home，此前从未定义（height 全部退化成 auto）；
     // 与 --banner-height 同值，等于原先的预期高度
-    'banner-height-home': `${BANNER_HEIGHT}vh`,
+    "banner-height-home": `${BANNER_HEIGHT}vh`,
   }}
 >
   @layer components {
@@ -225,11 +269,11 @@ const bannerOffset =
 </style>
 
 <script>
-  import '~/scripts/blog-init.ts';
+  import "~/scripts/blog-init.ts";
 </script>
 <script>
-  import '~/scripts/blog-transitions.ts';
+  import "~/scripts/blog-transitions.ts";
 </script>
 <script>
-  import '~/scripts/blog-photoswipe.ts';
+  import "~/scripts/blog-photoswipe.ts";
 </script>

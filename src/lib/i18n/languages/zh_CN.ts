@@ -1025,6 +1025,10 @@ export const zh_CN: DeepStringRecord<typeof en> = {
 
   theme: {
     color: "主题色",
+    fontSize: "字体大小",
+    fontSmall: "小",
+    fontNormal: "标准",
+    fontLarge: "大",
     language: "语言",
     light: "亮色",
     dark: "暗色",

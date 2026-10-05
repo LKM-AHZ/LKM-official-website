@@ -1,0 +1,22 @@
+<script is:inline>
+  (function () {
+    function applyFontSize() {
+      try {
+        const size = localStorage.getItem("site-font-size");
+        if (size === "small" || size === "large") {
+          document.documentElement.dataset.fontSize = size;
+        } else {
+          delete document.documentElement.dataset.fontSize;
+        }
+      } catch {
+        delete document.documentElement.dataset.fontSize;
+      }
+    }
+
+    applyFontSize();
+    if (!window.siteFontSizeListenerAdded) {
+      document.addEventListener("astro:after-swap", applyFontSize);
+      window.siteFontSizeListenerAdded = true;
+    }
+  })();
+</script>

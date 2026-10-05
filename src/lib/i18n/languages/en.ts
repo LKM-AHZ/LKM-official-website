@@ -1046,6 +1046,10 @@ export const en = {
 
   theme: {
     color: "Theme Color",
+    fontSize: "Font Size",
+    fontSmall: "Small",
+    fontNormal: "Default",
+    fontLarge: "Large",
     language: "Language",
     light: "Light",
     dark: "Dark",

@@ -27,6 +27,7 @@ const isOpen = ref(false);
 const mode = ref<LIGHT_DARK_MODE>(AUTO_MODE);
 const hue = ref(250);
 const defaultHue = ref(250);
+const fontSize = ref<"small" | "normal" | "large">("normal");
 let hydrating = true;
 let darkModePreference: MediaQueryList | null = null;
 
@@ -59,6 +60,11 @@ const languages: { value: Locale; label: string; icon: string }[] = [
     icon: "material-symbols:language",
   },
 ];
+const fontSizes = [
+  { value: "small", label: "theme.fontSmall" },
+  { value: "normal", label: "theme.fontNormal" },
+  { value: "large", label: "theme.fontLarge" },
+] as const;
 
 function handleSystemThemeChange() {
   if (mode.value === AUTO_MODE) applyThemeToDocument(mode.value);
@@ -77,6 +83,9 @@ onMounted(() => {
   try {
     mode.value = getStoredTheme();
     hue.value = getHue();
+    const storedFontSize = localStorage.getItem("site-font-size");
+    if (storedFontSize === "small" || storedFontSize === "large")
+      fontSize.value = storedFontSize;
   } catch (error) {
     console.warn("[preferences] 读取偏好设置失败", error);
   }
@@ -123,6 +132,26 @@ function chooseLanguage(next: Locale) {
   setLocale(next);
   window.location.reload();
 }
+
+function toggleMenu() {
+  if (!isOpen.value) {
+    const current = document.documentElement.dataset.fontSize;
+    fontSize.value =
+      current === "small" || current === "large" ? current : "normal";
+  }
+  isOpen.value = !isOpen.value;
+}
+
+function chooseFontSize(next: "small" | "normal" | "large") {
+  fontSize.value = next;
+  if (next === "normal") delete document.documentElement.dataset.fontSize;
+  else document.documentElement.dataset.fontSize = next;
+  try {
+    localStorage.setItem("site-font-size", next);
+  } catch (error) {
+    console.warn("[preferences] 保存字体大小失败", error);
+  }
+}
 </script>
 
 <template>
@@ -138,7 +167,7 @@ function chooseLanguage(next: Locale) {
           ? 'w-full gap-3 px-5 py-3 text-left font-semibold'
           : 'h-11 w-11 justify-center rounded-lg'
       "
-      @click="isOpen = !isOpen"
+      @click="toggleMenu"
     >
       <Icon icon="material-symbols:palette-outline" class="text-[1.25rem]" />
       <span v-if="mobile">{{ t("theme.displaySettings") }}</span>
@@ -176,6 +205,35 @@ function chooseLanguage(next: Locale) {
           <Icon :icon="item.icon" class="text-base" />
           {{ t(item.label) }}
         </button>
+      </div>
+
+      <div class="mt-3 border-t border-black/5 pt-3 dark:border-white/10">
+        <div
+          class="relative mb-3 ml-3 text-lg font-bold text-neutral-900 dark:text-neutral-100 before:absolute before:-left-3 before:top-[0.33rem] before:h-4 before:w-1 before:rounded-md before:bg-[var(--primary)]"
+        >
+          {{ t("theme.fontSize") }}
+        </div>
+        <div
+          class="grid grid-cols-3 gap-1"
+          role="group"
+          :aria-label="t('theme.fontSize')"
+        >
+          <button
+            v-for="item in fontSizes"
+            :key="item.value"
+            type="button"
+            :aria-pressed="fontSize === item.value"
+            class="flex h-9 items-center justify-center rounded-md px-1 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+            :class="
+              fontSize === item.value
+                ? 'bg-primary/10 text-primary font-bold'
+                : 'text-neutral-700 dark:text-neutral-200'
+            "
+            @click="chooseFontSize(item.value)"
+          >
+            {{ t(item.label) }}
+          </button>
+        </div>
       </div>
 
       <div

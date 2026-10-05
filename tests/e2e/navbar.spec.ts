@@ -25,13 +25,45 @@ test("桌面顶栏收拢搜索与偏好设置", async ({ page }) => {
   );
 });
 
+test("字号设置在宽屏与刷新后保持生效", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.goto(`${BASE_PATH}/`);
+  await expect(page.locator("html")).toHaveCSS("font-size", "15px");
+
+  const navbar = page.locator("#navbar");
+  await navbar
+    .locator('astro-island[component-url*="PreferencesMenu"]:not([ssr])')
+    .waitFor();
+  await navbar.getByRole("button", { name: "显示设置" }).click();
+  await navbar
+    .getByRole("group", { name: "字体大小" })
+    .getByRole("button", { name: "大" })
+    .click();
+  await expect(page.locator("html")).toHaveCSS("font-size", "17px");
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveCSS("font-size", "17px");
+  await navbar.getByRole("button", { name: "显示设置" }).click();
+  await expect(
+    navbar
+      .getByRole("group", { name: "字体大小" })
+      .getByRole("button", { name: "大" }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await navbar
+    .getByRole("group", { name: "字体大小" })
+    .getByRole("button", { name: "标准" })
+    .click();
+  await expect(page.locator("html")).toHaveCSS("font-size", "15px");
+});
+
 test("移动端可搜索并从菜单调整外观", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${BASE_PATH}/`);
 
-  await page
-    .locator('astro-island[component-url*="search/index"]:not([ssr])')
-    .waitFor();
+  await expect(
+    page.locator("#navbar").getByRole("button", { name: "搜索" }),
+  ).toBeVisible();
   await page.locator("#navbar").getByRole("button", { name: "搜索" }).click();
   await expect(page.locator("#global-search-input")).toBeVisible();
   await page.getByRole("button", { name: "关闭" }).click();
@@ -44,6 +76,11 @@ test("移动端可搜索并从菜单调整外观", async ({ page }) => {
   await expect(drawer.getByRole("button", { name: "显示设置" })).toBeVisible();
   await drawer.getByRole("button", { name: "显示设置" }).click();
   await expect(drawer.locator("input.preferences-hue")).toBeVisible();
+  await drawer
+    .getByRole("group", { name: "字体大小" })
+    .getByRole("button", { name: "小" })
+    .click();
+  await expect(page.locator("html")).toHaveCSS("font-size", "14px");
 });
 
 test("搜索组件加载后侧边栏仍可展开和收起", async ({ page }) => {
