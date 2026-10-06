@@ -291,24 +291,4 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
   bindNavbarButtons();
   // View Transitions 导航后重新绑定
   document.addEventListener("astro:after-swap", bindNavbarButtons);
-
-  function updateProfileLink() {
-    try {
-      const saved = localStorage.getItem("lkm-auth-store");
-      if (!saved) return;
-      const data = JSON.parse(saved);
-      const username = data.user?.username;
-      if (!username) return;
-      document.querySelectorAll("a").forEach((a) => {
-        if ((a.textContent || "").trim() === "个人主页") {
-          const base = window.__BASE_URL__ || "/";
-          a.setAttribute("href", base.replace(/\/$/, "") + `/user/${username}`);
-        }
-      });
-    } catch {
-      /* empty */
-    }
-  }
-  updateProfileLink();
-  document.addEventListener("astro:after-swap", updateProfileLink);
 </script>

@@ -24,7 +24,6 @@
     <div
       v-if="isOpen"
       class="absolute right-0 top-full mt-2 w-52 bg-card-bg border border-surface-3 rounded-[var(--radius-large)] float-panel py-1.5 z-50 shadow-xl dark:shadow-2xl transition-all"
-      @click.stop
     >
       <div class="px-4 py-2 border-b border-surface-3 mb-1">
         <div class="font-semibold text-sm text-deep-text truncate">
@@ -34,7 +33,7 @@
       </div>
 
       <a
-        :href="navUrl('/profile')"
+        :href="profileUrl"
         class="flex items-center gap-2.5 px-4 py-2 text-sm text-deep-text hover:bg-page-bg transition-colors"
         @click="close"
       >
@@ -90,6 +89,11 @@ const menuRef = ref<HTMLDivElement | null>(null);
 const isOpen = ref(false);
 const isLoggedIn = computed(() => store.isLoggedIn);
 const username = computed(() => store.username);
+const profileUrl = computed(() =>
+  username.value
+    ? navUrl(`/user/${encodeURIComponent(username.value)}`)
+    : navUrl("/account"),
+);
 // UserInfo.account_level 是 string，需收窄为字面量联合（与 auth store 归一化一致）
 const userLevel = computed<"local" | "normal" | "admin">(() => {
   const level = store.user?.account_level;
