@@ -28,7 +28,7 @@ const canInteract = computed(
 );
 
 onMounted(async () => {
-  auth.restoreFromStorage();
+  await auth.restoreAndValidate();
   clockTimer = setInterval(() => {
     nowTick.value = Date.now();
   }, 60_000);

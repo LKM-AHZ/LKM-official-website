@@ -156,9 +156,10 @@ const tabs = [
 const PAGE_SIZE = 50;
 
 async function load() {
-  auth.restoreFromStorage();
   const token = ++requestToken;
   loading.value = true;
+  if (activeTab.value === "mine") await auth.restoreAndValidate();
+  if (token !== requestToken) return;
   if (activeTab.value === "mine" && !auth.user?.id) {
     questions.value = [];
     hasMore.value = false;
