@@ -25,7 +25,6 @@ import remarkSectionize from "remark-sectionize";
 import { parseDirectiveNode } from "./src/lib/markdown-plugins/remark-directive-rehype.js";
 import rehypeSlug from "rehype-slug";
 import rehypeComponents from "rehype-components";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { GithubCardComponent } from "./src/lib/markdown-plugins/rehype-component-github-card.mjs";
 import { AdmonitionComponent } from "./src/lib/markdown-plugins/rehype-component-admonition.mjs";
 import { responsiveTablesRehypePlugin } from "./src/lib/utils/frontmatter.js";
@@ -259,29 +258,6 @@ export default defineConfig({
                 x: Parameters<typeof AdmonitionComponent>[0],
                 y: Parameters<typeof AdmonitionComponent>[1],
               ) => AdmonitionComponent(x, y, "warning"),
-            },
-          },
-        ],
-        [
-          rehypeAutolinkHeadings,
-          {
-            behavior: "append",
-            properties: {
-              className: ["anchor"],
-            },
-            content: {
-              type: "element",
-              tagName: "span",
-              properties: {
-                className: ["anchor-icon"],
-                "data-pagefind-ignore": true,
-              },
-              children: [
-                {
-                  type: "text",
-                  value: "#",
-                },
-              ],
             },
           },
         ],

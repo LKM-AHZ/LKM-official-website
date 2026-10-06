@@ -17,7 +17,16 @@
       class="btn-plain scale-animation rounded-full w-9 h-9 active:scale-90 flex items-center justify-center overflow-hidden border-2 border-transparent hover:border-primary/30 transition-colors"
       @click.stop="toggle"
     >
-      <span class="text-sm font-bold text-primary">{{ avatarLetter }}</span>
+      <img
+        v-if="store.user?.avatar && !avatarFailed"
+        :src="avatarUrl"
+        :alt="username"
+        class="h-full w-full object-cover"
+        @error="avatarFailed = true"
+      />
+      <span v-else class="text-sm font-bold text-primary">{{
+        avatarLetter
+      }}</span>
     </button>
 
     <!-- 下拉菜单 -->
@@ -39,6 +48,14 @@
       >
         <Icon icon="material-symbols:person-outline" class="w-4 h-4" />
         {{ t("user.profile") }}
+      </a>
+      <a
+        :href="navUrl('/my')"
+        class="flex items-center gap-2.5 px-4 py-2 text-sm text-deep-text hover:bg-page-bg transition-colors"
+        @click="close"
+      >
+        <Icon icon="material-symbols:folder-open-outline" class="w-4 h-4" />
+        我的内容
       </a>
       <a
         :href="navUrl('/contribution')"
@@ -71,11 +88,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
 import { buildAuthUrl, buildUrl } from "~/lib/utils/paths";
 import { useAuthStore } from "~/stores/auth";
+import { authApi } from "~/lib/api/modules/auth";
 
 const props = defineProps<{ base?: string }>();
 
@@ -87,6 +105,7 @@ const navUrl = (path: string): string =>
 const store = useAuthStore();
 const menuRef = ref<HTMLDivElement | null>(null);
 const isOpen = ref(false);
+const avatarFailed = ref(false);
 const isLoggedIn = computed(() => store.isLoggedIn);
 const username = computed(() => store.username);
 const profileUrl = computed(() =>
@@ -102,6 +121,17 @@ const userLevel = computed<"local" | "normal" | "admin">(() => {
 
 const avatarLetter = computed(() =>
   username.value ? username.value.charAt(0).toUpperCase() : "?",
+);
+const avatarUrl = computed(() =>
+  store.user?.id
+    ? `${authApi.getAvatarUrl(store.user.id)}?v=${encodeURIComponent(store.user.avatar ?? "")}`
+    : "",
+);
+watch(
+  () => store.user?.avatar,
+  () => {
+    avatarFailed.value = false;
+  },
 );
 
 const userLevelText = computed(() => {

@@ -27,6 +27,7 @@ const metadata = { title: t("page.qa.title") };
       eyebrow={t("page.ui.qaEyebrow")}
       icon="tabler:help-circle"
     />
+    <div class="flex justify-end"><a href={getPermalink("/my/questions")} class="text-sm font-medium text-primary hover:underline">我的提问 →</a></div>
     <div id="questions" style="min-height: 400px">
       <QAListPage client:load />
     </div>

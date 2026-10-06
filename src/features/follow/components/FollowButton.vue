@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // FollowButton.vue — 复用关注按钮（用户/版块）。
 // 登录态读取 followStatus 决定初态；切换调用 followApi；401 时 onMounted 静默跳过。
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { followApi } from "~/lib/api";
 import { useAuthStore } from "~/stores/auth";
 import { t } from "~/lib/i18n";
@@ -17,6 +17,7 @@ const auth = useAuthStore();
 const isLoggedIn = computed(() => auth.isLoggedIn);
 const following = ref(false);
 const loading = ref(false);
+onMounted(() => auth.restoreFromStorage());
 
 async function apply(): Promise<void> {
   if (!isLoggedIn.value) return;

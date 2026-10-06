@@ -1,0 +1,17 @@
+---
+import Layout from "~/layouts/SidebarLayout.astro";
+import PageIntro from "~/components/patterns/PageIntro.astro";
+import MyContentPage from "~/features/profile/components/MyContentPage.vue";
+
+const titles = { questions: "我的提问", posts: "我的帖子", projects: "我的项目" } as const;
+const section = Astro.params.section;
+if (!section || !(section in titles)) return Astro.redirect("/my");
+const selected = section as keyof typeof titles;
+---
+
+<Layout metadata={{ title: titles[selected] }}>
+  <div class="space-y-6">
+    <PageIntro title={titles[selected]} icon="tabler:folder" />
+    <div class="min-h-[400px]"><MyContentPage section={selected} client:only="vue" /></div>
+  </div>
+</Layout>

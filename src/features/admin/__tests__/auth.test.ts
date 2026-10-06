@@ -30,4 +30,26 @@ describe("adminFetch", () => {
     expect(response.status).toBe(403);
     vi.unstubAllGlobals();
   });
+
+  it("refreshes one expired session for concurrent requests and retries them", async () => {
+    let refreshes = 0;
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.endsWith("/auth/refresh")) {
+        refreshes++;
+        return new Response(JSON.stringify({ code: 0, data: {} }), {
+          status: 200,
+        });
+      }
+      return new Response("{}", { status: refreshes ? 200 : 401 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const results = await Promise.all([
+      adminFetch("/api/v1/admin/stats"),
+      adminFetch("/api/v1/admin/users"),
+    ]);
+    expect(results.map((response) => response.status)).toEqual([200, 200]);
+    expect(refreshes).toBe(1);
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    vi.unstubAllGlobals();
+  });
 });

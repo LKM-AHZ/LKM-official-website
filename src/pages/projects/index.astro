@@ -27,6 +27,7 @@ const metadata = { title: t("page.projects.title") };
       eyebrow={t("page.ui.projectsEyebrow")}
       icon="tabler:rocket"
     />
+    <div class="flex justify-end"><a href={getPermalink("/my/projects")} class="text-sm font-medium text-primary hover:underline">我的项目 →</a></div>
     <div id="projects" class="min-h-[400px]">
       <ProjectHubProjectHall client:load />
     </div>

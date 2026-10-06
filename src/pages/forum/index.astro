@@ -95,7 +95,8 @@ rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
       icon="tabler:building-community"
     />
 
-    <div class="flex justify-end">
+    <div class="flex justify-end items-center gap-4">
+      <a href={getPermalink("/my/posts")} class="text-sm font-medium text-primary hover:underline">我的帖子 →</a>
       <button
         type="button"
         class="btn-primary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"

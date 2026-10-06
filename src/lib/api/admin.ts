@@ -2,12 +2,11 @@
 // 后台管理系统 API 客户端 —— 走后端 cookie 会话（admin_session / admin_refresh）。
 //
 //  - 凭证只在 httpOnly cookie 中，前端 JS 不读不存 token；同域请求自动带 cookie。
-//  - 统一使用"单一守卫 + 防重入"：401/403 只由守卫跳一次 /admin/login，
-//    避免并发多请求同时 401 时重复跳转；登录页自身不再跳登录，防止死循环。
+//  - access cookie 失效时合并并发续期请求，重试后仍未认证才跳转登录。
 //  - 底层走 src/lib/api/fetch.ts 的 apiFetch（统一 base URL + timeout + Result），
 //    符合仓库"不直接调 fetch"的约束。
 //  - 路径前缀用 /api/v1/admin：src/middleware.ts 只代理 /api/ 开头并**原样转发**路径，
-//    与仓库其余调用一致（如 /api/v1/admin/content/items），cookie Path=/api/v1/admin 也与之匹配。
+//    与仓库其余调用一致（如 /api/v1/admin/content/items）。
 //    （原先这里另有一句「故请求 /admin/... 即可」，与实际调用（全为 /api/v1/admin/...）矛盾，已删）
 
 import { apiFetch } from "~/lib/api/fetch";
@@ -41,6 +40,24 @@ export class AdminMFARequiredError extends Error {
 
 let redirecting = false;
 let redirectTarget = "/admin/login";
+let refreshPromise: Promise<boolean> | null = null;
+let refreshGeneration = 0;
+
+async function refreshSession(): Promise<boolean> {
+  refreshPromise ??= (async () => {
+    const result = await apiFetch("/api/v1/admin/auth/refresh", {
+      method: "POST",
+    });
+    if (result.isErr() || !result.value.ok) return false;
+    const body = await result.value.json().catch(() => null);
+    if (body?.code !== 0) return false;
+    refreshGeneration++;
+    return true;
+  })().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
 
 /** 登录成功 / 页面进入后台前调用，清掉重入锁，避免后续 401 不再触发跳转。 */
 export function resetRedirectGuard(): void {
@@ -60,22 +77,23 @@ function toLogin(): void {
 }
 
 /**
- * 后台 REST 调用。返回原始 Response；401/403 时触发守卫跳登录并抛 AdminAuthError。
+ * 后台 REST 调用。返回原始 Response；会话失效时先续期，失败才跳登录。
  *
  *   path 传**完整代理路径**（如 `/api/v1/admin/users`、`/api/v1/files`）：
  *   src/middleware.ts 按 /api/ 原样转发到后端，与仓库其余调用一致。
- *   401/403 触发守卫跳登录，调用方 catch AdminAuthError 静默即可，勿各自跳转。
+ *   401（或 /auth/me 的 403）续期失败后由守卫跳登录，调用方勿各自跳转。
  */
 export async function adminFetch(
   path: string,
   init?: RequestInit,
 ): Promise<Response> {
-  const result: Result<Response, AppError> = await apiFetch(path, init);
+  const generation = refreshGeneration;
+  let result: Result<Response, AppError> = await apiFetch(path, init);
   if (result.isErr()) {
     // 网络/超时等 AppError：不让守卫跳登录，交由调用方/网络层统一报错
     throw result.error;
   }
-  const res = result.value;
+  let res = result.value;
   if (
     res.status === 401 ||
     (res.status === 403 && path === "/api/v1/admin/auth/me")
@@ -91,6 +109,23 @@ export async function adminFetch(
     }
     if (mfaRequired) {
       throw new AdminMFARequiredError();
+    }
+    if (
+      path.startsWith("/api/v1/admin/") &&
+      path !== "/api/v1/admin/auth/logout"
+    ) {
+      const refreshed =
+        generation !== refreshGeneration || (await refreshSession());
+      if (refreshed) {
+        result = await apiFetch(path, init);
+        if (result.isErr()) throw result.error;
+        res = result.value;
+        if (
+          res.status !== 401 &&
+          !(res.status === 403 && path === "/api/v1/admin/auth/me")
+        )
+          return res;
+      }
     }
     toLogin();
     throw new AdminAuthError();
