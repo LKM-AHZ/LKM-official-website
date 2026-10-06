@@ -1,19 +1,13 @@
 <template>
-  <div
-    class="letter-card glass glass-hover float-up"
-    :style="{ '--card-grad': grad }"
-  >
+  <div class="letter-card glass glass-hover float-up">
     <!-- 顶部：分类 + 代号 + 时间 -->
     <div class="lc-head">
-      <span class="lc-cat" :style="{ background: category.color }"
-        >{{ category.emoji }} {{ t(category.label) }}</span
-      >
+      <span class="lc-cat">{{ t(category.label) }}</span>
       <span class="lc-code">{{ letter.codename }}</span>
     </div>
 
     <!-- 信纸背景正文 -->
     <div class="lc-body" :style="{ background: paperBg }" :class="{ expanded }">
-      <div v-if="letter.sticker" class="lc-sticker">{{ letter.sticker }}</div>
       <p class="lc-content" :class="{ clamped: !expanded && isLong }">
         {{ letter.content }}
       </p>
@@ -39,35 +33,36 @@
     </div>
     <!-- 内容标签 -->
     <div class="lc-tags" v-if="letter.tags && letter.tags.length">
-      <span
-        v-for="tg in letter.tags"
-        :key="tg"
-        class="lc-tag"
-        :style="{ background: tagColor(tg) }"
-        >{{ tagEmoji(tg) }} {{ t(tagLabel(tg)) }}</span
-      >
+      <span v-for="tg in letter.tags" :key="tg" class="lc-tag">{{
+        t(tagLabel(tg))
+      }}</span>
     </div>
     <slot name="extra" />
 
     <!-- 操作栏 -->
     <div class="lc-actions">
       <button class="lc-act" :class="{ liked: letter.liked }" @click="onLike">
-        <span class="lc-ic" :class="{ 'heart-burst': burst }">❤️</span
-        ><span v-if="burst" class="heart-particles"
-          ><span v-for="n in 6" :key="n" :style="particleStyle(n)"
-            >💗</span
-          ></span
-        >{{ letter.likes || 0 }}
+        <Icon
+          icon="tabler:heart"
+          class="lc-ic"
+          :class="{ 'heart-burst': burst }"
+          aria-hidden="true"
+        />
+        {{ letter.likes || 0 }}
       </button>
       <button class="lc-act" :class="{ favd: isFav }" @click="onFav">
-        <span class="lc-ic">{{ isFav ? "⭐" : "☆" }}</span
-        >{{ favCount }}
+        <Icon icon="tabler:star" class="lc-ic" aria-hidden="true" />
+        {{ favCount }}
       </button>
       <button class="lc-act" @click="onCopy">
-        <span class="lc-ic">📋</span>{{ t("treehole.letterCard.copy") }}
+        <Icon icon="tabler:copy" class="lc-ic" aria-hidden="true" />{{
+          t("treehole.letterCard.copy")
+        }}
       </button>
       <button class="lc-act" @click="onReport">
-        <span class="lc-ic">⚠️</span>{{ t("treehole.letterCard.report") }}
+        <Icon icon="tabler:flag" class="lc-ic" aria-hidden="true" />{{
+          t("treehole.letterCard.report")
+        }}
       </button>
     </div>
 
@@ -94,21 +89,15 @@ import { getCategory, getPaper, getTag, moodKey } from "../stores/constants";
 import { treeholeApi, showTreeholeError } from "../stores/api";
 import ReportDialog from "./ReportDialog.vue";
 import { t } from "~/lib/i18n";
+import { Icon } from "@iconify/vue";
 
 const props = defineProps({ letter: { type: Object, required: true } });
 const emit = defineEmits(["like", "fav", "same-type"]);
 
 const category = computed(() => getCategory(props.letter.category));
 const paperBg = computed(() => getPaper(props.letter.paper).gradient);
-const grad = computed(() => category.value.color);
-function tagColor(k) {
-  return (getTag(k) || {}).color || "#8e7cff";
-}
 function tagLabel(k) {
   return (getTag(k) || {}).label || k;
-}
-function tagEmoji(k) {
-  return (getTag(k) || {}).emoji || "🏷️";
 }
 
 const expanded = ref(false);
@@ -120,16 +109,6 @@ const favCount = computed(() => props.letter.favorites || 0);
 
 const reportVisible = ref(false);
 const burst = ref(false);
-
-function particleStyle(n) {
-  const angle = (n / 6) * Math.PI * 2;
-  const dist = 22 + Math.random() * 10;
-  return {
-    "--dx": Math.cos(angle) * dist + "px",
-    "--dy": Math.sin(angle) * dist + "px",
-    animationDelay: n * 0.02 + "s",
-  };
-}
 
 function formatTime(ts) {
   // 备份导入的数据里 createdAt 可能是 ISO 串或任意值：Date.parse 失败时原来会走进日期分支
@@ -209,6 +188,7 @@ function onSameType() {
 }
 .lc-cat {
   color: var(--accent);
+  background: var(--grad-soft);
   font-size: 12px;
   font-weight: 700;
   padding: 3px 11px;
@@ -251,25 +231,12 @@ function onSameType() {
   border-radius: 0 0 12px 12px;
   pointer-events: none;
 }
-.lc-sticker {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 20px;
-  opacity: 0.8;
-}
 .lc-act {
   position: relative;
 }
 .lc-ic {
   font-size: 13px;
   display: inline-block;
-}
-.heart-particles {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  pointer-events: none;
 }
 .lc-toggle {
   background: none;
@@ -300,6 +267,7 @@ function onSameType() {
 }
 .lc-tag {
   color: var(--text-sub);
+  background: var(--bg-2);
   font-size: 11px;
   font-weight: 600;
   padding: 2px 10px;

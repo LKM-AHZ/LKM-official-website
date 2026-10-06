@@ -1,7 +1,7 @@
 <template>
   <TreeholeShell active-nav="mine">
     <div class="container">
-      <h1 class="page-title">🌙 {{ t("treehole.mine.title") }}</h1>
+      <h1 class="page-title">{{ t("treehole.mine.title") }}</h1>
       <p class="page-sub">{{ t("treehole.mine.subtitle") }}</p>
 
       <!-- 统计 -->
@@ -49,12 +49,9 @@
         <div v-if="letters.length" class="list">
           <div v-for="l in letters" :key="l.id" class="item glass">
             <div class="item-head">
-              <span
-                class="item-cat"
-                :style="{ background: getCategory(l.category).color }"
-                >{{ getCategory(l.category).emoji }}
-                {{ t(getCategory(l.category).label) }}</span
-              >
+              <span class="item-cat">{{
+                t(getCategory(l.category).label)
+              }}</span>
               <span class="item-status" :class="l.status">{{
                 statusLabel(l.status)
               }}</span>
@@ -319,7 +316,8 @@ function resetDraftsConfirm() {
   margin-bottom: 8px;
 }
 .item-cat {
-  color: #5a4a3f;
+  color: var(--accent);
+  background: var(--grad-soft);
   font-size: 12px;
   font-weight: 700;
   padding: 3px 10px;

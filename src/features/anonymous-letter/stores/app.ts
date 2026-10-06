@@ -28,7 +28,6 @@ interface AppApi {
   setTheme: (t: "day" | "night") => void;
   toggleMuted: () => void;
   setFontScale: (s: "small" | "normal" | "large") => void;
-  setAccent: (a: string, b: string) => void;
   toggleLowPerf: () => void;
   toggleHighContrast: () => void;
   setRateLimit: (n: number) => void;
@@ -116,10 +115,6 @@ export function useApp(): AppApi {
   function setFontScale(s: "small" | "normal" | "large"): void {
     state.settings.fontScale = s;
   }
-  function setAccent(a: string, b: string): void {
-    state.settings.accent = a;
-    state.settings.accent2 = b;
-  }
   function toggleLowPerf(): void {
     state.settings.lowPerf = !state.settings.lowPerf;
   }
@@ -142,7 +137,6 @@ export function useApp(): AppApi {
     setTheme,
     toggleMuted,
     setFontScale,
-    setAccent,
     toggleLowPerf,
     toggleHighContrast,
     setRateLimit,

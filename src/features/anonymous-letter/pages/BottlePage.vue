@@ -3,7 +3,7 @@
     <div class="container">
       <!-- 头部 -->
       <section class="bottle-head glass float-up">
-        <h1 class="page-title">🍶 {{ t("treehole.bottle.title") }}</h1>
+        <h1 class="page-title">{{ t("treehole.bottle.title") }}</h1>
         <button class="btn-grad" @click="throwDialogOpen = true">
           {{ t("treehole.bottle.throwBtn") }}
         </button>
@@ -12,7 +12,9 @@
       <!-- 无漂流瓶状态 -->
       <section v-if="!currentBottle" class="bottle-empty glass float-up">
         <div class="bottle-sea">
-          <div class="sea-emoji">🌊</div>
+          <div class="sea-emoji">
+            <Icon icon="tabler:wave-sine" aria-hidden="true" />
+          </div>
           <p class="sea-text">
             {{ t("treehole.bottle.seaText", { count: bottleCount }) }}
           </p>
@@ -34,7 +36,9 @@
       <!-- 当前瓶子 -->
       <section v-else class="bottle-current glass float-up">
         <div class="bottle-display">
-          <div class="bottle-icon">🍶</div>
+          <div class="bottle-icon">
+            <Icon icon="tabler:bottle" aria-hidden="true" />
+          </div>
           <div class="bottle-text">{{ currentBottle.text }}</div>
           <div class="bottle-meta">
             <span class="bottle-from">{{
@@ -88,7 +92,7 @@
       >
         <div class="dialog-box glass">
           <h3 class="dialog-title">
-            🍶 {{ t("treehole.bottle.throwDialogTitle") }}
+            {{ t("treehole.bottle.throwDialogTitle") }}
           </h3>
           <p class="dialog-desc">{{ t("treehole.bottle.throwDialogDesc") }}</p>
           <textarea
@@ -116,6 +120,7 @@
 </template>
 
 <script setup>
+import { Icon } from "@iconify/vue";
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import { treeholeApi, showTreeholeError } from "../stores/api";
@@ -254,6 +259,7 @@ onBeforeUnmount(() => window.removeEventListener("focus", loadBottles));
 }
 .sea-emoji {
   font-size: 80px;
+  color: var(--accent);
   margin-bottom: 16px;
   animation: wave 3s ease-in-out infinite;
 }
@@ -306,6 +312,7 @@ onBeforeUnmount(() => window.removeEventListener("focus", loadBottles));
 }
 .bottle-icon {
   font-size: 40px;
+  color: var(--accent);
   margin-bottom: 12px;
 }
 .bottle-text {

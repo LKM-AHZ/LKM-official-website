@@ -1,7 +1,7 @@
 <template>
   <TreeholeShell active-nav="settings">
     <div class="container">
-      <h1 class="page-title">⚙️ {{ t("treehole.settings.title") }}</h1>
+      <h1 class="page-title">{{ t("treehole.settings.title") }}</h1>
       <p class="page-sub">{{ t("treehole.settings.subtitle") }}</p>
 
       <section class="set-card glass">
@@ -26,36 +26,6 @@
             >
               {{ t("treehole.settings.themeNight") }}
             </button>
-          </div>
-        </div>
-
-        <!-- 自定义主题配色 -->
-        <div class="set-row">
-          <div class="set-info">
-            <b>{{ t("treehole.settings.accentColor") }}</b>
-            <small>{{ t("treehole.settings.accentColorDesc") }}</small>
-          </div>
-          <div class="accent-picks">
-            <button
-              v-for="a in accents"
-              :key="a[0]"
-              type="button"
-              class="accent-dot"
-              :aria-label="`${t('treehole.settings.accentColor')} ${a[0]}`"
-              :aria-pressed="state.settings.accent === a[0]"
-              :class="{ active: state.settings.accent === a[0] }"
-              :style="{
-                background: `linear-gradient(135deg, ${a[0]}, ${a[1]})`,
-              }"
-              @click="setAccent(a[0], a[1])"
-            ></button>
-            <input
-              type="color"
-              v-model="customA"
-              class="accent-color"
-              @input="onCustom"
-              :title="t('treehole.settings.customAccent')"
-            />
           </div>
         </div>
 
@@ -209,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import PrivacyDialog from "../components/PrivacyDialog.vue";
 import { useApp } from "../stores/app";
@@ -223,52 +193,12 @@ const {
   setTheme,
   setFontScale,
   toggleMuted,
-  setAccent,
   toggleLowPerf,
   toggleHighContrast,
   setRateLimit,
 } = app;
 
 const showPrivacy = ref(false);
-
-const accents = [
-  ["#e8a87c", "#c3aed6"],
-  ["#8b7ff0", "#5fd0e0"],
-  ["#ff9aa2", "#ffc6ff"],
-  ["#7bdff2", "#b2f7ef"],
-  ["#f6c28b", "#d9a7c7"],
-  ["#a0c4ff", "#bdb2ff"],
-];
-const customA = ref(state.settings.accent);
-
-// 色板输入框只初始化一次的话，选预设色块/别处改 accent 后它仍显示旧颜色，
-// 用户再确认就会把过期色值写回 store，故跟随 state 同步
-watch(
-  () => state.settings.accent,
-  (a) => {
-    customA.value = a;
-  },
-);
-
-function onCustom() {
-  const b = customA.value;
-  const b2 = shade(b, 40);
-  setAccent(b, b2);
-}
-
-function shade(hex, amt) {
-  // 非 #rrggbb（空串、#abc、被 getSettings 合并弄脏的历史值）解析出来是 NaN 通道，
-  // 会生成 "#NaNNaNNaN" 这种非法颜色；原样返回比产出坏值安全。
-  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
-  const h = hex.replace("#", "");
-  let r = parseInt(h.slice(0, 2), 16) + amt;
-  let g = parseInt(h.slice(2, 4), 16) + amt;
-  let bl = parseInt(h.slice(4, 6), 16) + amt;
-  r = Math.max(0, Math.min(255, r));
-  g = Math.max(0, Math.min(255, g));
-  bl = Math.max(0, Math.min(255, bl));
-  return "#" + [r, g, bl].map((x) => x.toString(16).padStart(2, "0")).join("");
-}
 
 function toggleAudio() {
   // 只改 reactive state：useApp 里已有 deep watch 负责落盘，
@@ -317,8 +247,7 @@ function toggleAudio() {
 }
 
 .theme-switch,
-.rate-pick,
-.accent-picks {
+.rate-pick {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -326,7 +255,7 @@ function toggleAudio() {
 
 .theme-opt {
   border: 1px solid var(--card-border);
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--bg-2);
   color: var(--text-sub);
   border-radius: 999px;
   padding: 6px 16px;
@@ -343,26 +272,6 @@ function toggleAudio() {
   color: var(--accent);
   border-color: var(--blue);
   box-shadow: 0 0 12px var(--glow);
-}
-
-.accent-dot {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.accent-dot.active {
-  border-color: var(--text-main);
-  transform: scale(1.15);
-}
-.accent-color {
-  width: 32px;
-  height: 30px;
-  border: none;
-  background: none;
-  cursor: pointer;
 }
 
 .switch {

@@ -41,7 +41,7 @@
               :class="{ active: activeCat === c.key }"
               @click="setCat(c.key)"
             >
-              {{ c.emoji }} {{ t(c.label) }}
+              {{ t(c.label) }}
             </button>
           </div>
         </div>
@@ -88,7 +88,7 @@
               :class="{ active: activeTag === tg.key }"
               @click="setTag(tg.key)"
             >
-              {{ tg.emoji }} {{ t(tg.label) }}
+              {{ t(tg.label) }}
             </button>
           </div>
         </div>
@@ -379,7 +379,7 @@ async function onLike(letter) {
 }
 .mc-tag {
   border: none;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--grad-soft);
   color: var(--accent);
   padding: 4px 12px;
   border-radius: 999px;
@@ -389,9 +389,6 @@ async function onLike(letter) {
     color var(--duration-base) var(--ease),
     border-color var(--duration-base) var(--ease),
     opacity var(--duration-base) var(--ease);
-}
-:root.dark .mc-tag {
-  background: rgba(255, 255, 255, 0.08);
 }
 .mc-tag:hover {
   background: var(--grad-soft);

@@ -36,6 +36,37 @@ test.describe("关键路由烟雾测试", () => {
     expect(res?.status()).toBe(404);
   });
 
+  test("未登录访问机器人后台会在输出页面前跳到登录页", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (err) => errors.push(err.message));
+    const res = await page.goto(`${BASE_PATH}/admin/bot/`);
+    expect(res?.status()).toBe(200);
+    await expect(page).toHaveURL(/\/admin\/login\/?$/);
+    expect(errors).toEqual([]);
+  });
+
+  test("编辑器与审核页面水合时不抛出异常", async ({ page }) => {
+    for (const route of ["editor", "admin/moderation", "admin/dlq"]) {
+      const errors: string[] = [];
+      const onError = (error: Error) => errors.push(error.message);
+      const onConsole = (message: {
+        type: () => string;
+        text: () => string;
+      }) => {
+        if (/Hydration|node mismatch/i.test(message.text()))
+          errors.push(message.text());
+      };
+      page.on("pageerror", onError);
+      page.on("console", onConsole);
+      const res = await page.goto(`${BASE_PATH}/${route}/`);
+      expect(res?.status()).toBe(200);
+      await page.waitForTimeout(500);
+      expect(errors, route).toEqual([]);
+      page.off("pageerror", onError);
+      page.off("console", onConsole);
+    }
+  });
+
   test("首页无未捕获错误", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));

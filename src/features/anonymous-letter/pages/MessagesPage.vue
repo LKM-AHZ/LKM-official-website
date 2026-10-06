@@ -1,7 +1,7 @@
 <template>
   <TreeholeShell active-nav="messages">
     <div class="container">
-      <h1 class="page-title">💬 {{ t("treehole.messages.title") }}</h1>
+      <h1 class="page-title">{{ t("treehole.messages.title") }}</h1>
       <p class="page-sub">{{ t("treehole.messages.subtitle") }}</p>
 
       <div class="msg-layout">

@@ -11,6 +11,9 @@ import { defineMiddleware } from "astro:middleware";
 import { runWithRequest } from "~/lib/ssr-context.node";
 import { ensureDict } from "~/lib/i18n";
 import { SUPPORTED_LOCALES } from "~/lib/i18n/types";
+import { post } from "~/lib/http/client";
+import { ErrorCode } from "~/lib/errors/error-codes";
+import { buildUrl } from "~/lib/utils/paths";
 import type { Locale } from "~/lib/i18n/types";
 
 // 只填 origin：下面用 `new URL(pathname, base)` 拼接，而 URL 构造会用绝对 pathname 覆盖
@@ -63,6 +66,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // 非代理路径：建立 SSR 请求上下文，供页面 SSR 数据获取转发 Cookie
   if (!isProxyPath) {
+    const botPage = /(?:^|\/)admin\/bot(?:\/|$)/.test(pathname);
+    if (botPage) {
+      const cookie = context.request.headers.get("cookie");
+      if (!/(?:^|;\s*)admin_session=/.test(cookie ?? "")) {
+        return context.redirect(buildUrl("/admin/login"));
+      }
+      // 换票必须在 next() 开始流式渲染前完成；组件内重定向会触发 ResponseSentError。
+      const result = await runWithRequest(context.request.headers, () =>
+        post<{ ticket: string }>("/api/v1/admin/bot/sso-ticket", undefined, {
+          timeout: 5_000,
+        }),
+      );
+      if (result.isErr() && result.error.code === ErrorCode.HTTP_CLIENT_ERROR) {
+        return context.redirect(buildUrl("/admin/login"));
+      }
+      if (result.isErr()) console.error("[admin/bot] 换票失败:", result.error);
+      (context.locals as { botTicket?: string }).botTicket = result.isOk()
+        ? result.value?.ticket
+        : undefined;
+    }
     // 在页面 frontmatter 的同步 t() 之前，确保当前 locale 词典已就绪：
     // 默认 zh-CN 同步已载；en（非默认）动态 import en.flat chunk，
     // 使 en SSR 译文正确（否则同步 t() 会落回 zh-CN，en 页显示中文）。
@@ -75,9 +98,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // 挤到字节嗅探窗口之外），浏览器会按 latin1 解码中文导致 Vue 水合 mismatch。
     // 显式声明 text/html 响应头的 charset=UTF-8，确保编码确定，不依赖 <meta> 嗅探。
     const ct = response.headers.get("Content-Type");
-    if (ct && ct.startsWith("text/html") && !/;\s*charset=/i.test(ct)) {
+    if (
+      botPage ||
+      (ct && ct.startsWith("text/html") && !/;\s*charset=/i.test(ct))
+    ) {
       const headers = new Headers(response.headers);
-      headers.set("Content-Type", `${ct}; charset=UTF-8`);
+      if (ct && ct.startsWith("text/html") && !/;\s*charset=/i.test(ct))
+        headers.set("Content-Type", `${ct}; charset=UTF-8`);
+      if (botPage) headers.set("Cache-Control", "private, no-store");
       return new Response(response.body, { status: response.status, headers });
     }
     return response;

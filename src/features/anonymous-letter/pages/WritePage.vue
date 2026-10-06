@@ -3,7 +3,7 @@
     <div class="container">
       <!-- 页面标题 -->
       <section class="write-header">
-        <h1 class="page-title grad-text">✍️ {{ t("treehole.write.title") }}</h1>
+        <h1 class="page-title grad-text">{{ t("treehole.write.title") }}</h1>
         <p class="page-sub">{{ t("treehole.write.subtitle2") }}</p>
       </section>
 
@@ -14,14 +14,6 @@
           <!-- 工具栏 -->
           <div class="editor-toolbar">
             <div class="tb-left">
-              <button
-                class="tb-btn"
-                @click="emojiOpen = !emojiOpen"
-                :title="t('treehole.write.emoji')"
-              >
-                😊
-              </button>
-              <span class="tb-divider"></span>
               <button
                 class="tb-btn"
                 :class="{ active: fontSize === 'small' }"
@@ -52,7 +44,7 @@
                 @click="clearContent"
                 :title="t('treehole.write.clearContentTitle')"
               >
-                🗑️ {{ t("treehole.write.clearContent") }}
+                {{ t("treehole.write.clearContent") }}
               </button>
             </div>
             <div class="tb-right">
@@ -66,20 +58,6 @@
               >
             </div>
           </div>
-
-          <!-- Emoji 面板 -->
-          <transition name="slide-down">
-            <div v-if="emojiOpen" class="emoji-panel">
-              <button
-                v-for="e in EMOJIS"
-                :key="e"
-                class="emoji-btn"
-                @click="insertEmoji(e)"
-              >
-                {{ e }}
-              </button>
-            </div>
-          </transition>
 
           <!-- 信纸背景区域 + textarea -->
           <div
@@ -105,7 +83,7 @@
         <aside class="setup-panel">
           <!-- 分类 -->
           <div class="setup-card glass">
-            <div class="setup-label">📂 {{ t("treehole.write.category") }}</div>
+            <div class="setup-label">{{ t("treehole.write.category") }}</div>
             <div class="cat-grid">
               <button
                 v-for="c in CATEGORIES"
@@ -114,7 +92,7 @@
                 :class="{ active: form.category === c.key }"
                 @click="form.category = c.key"
               >
-                {{ c.emoji }} {{ t(c.label) }}
+                {{ t(c.label) }}
               </button>
             </div>
           </div>
@@ -122,7 +100,7 @@
           <!-- 隐私等级 -->
           <div class="setup-card glass">
             <div class="setup-label">
-              🔒 {{ t("treehole.write.privacyLevel") }}
+              {{ t("treehole.write.privacyLevel") }}
             </div>
             <div class="privacy-row">
               <button
@@ -141,7 +119,7 @@
 
           <!-- 匿名代号 -->
           <div class="setup-card glass">
-            <div class="setup-label">🎭 {{ t("treehole.write.codename") }}</div>
+            <div class="setup-label">{{ t("treehole.write.codename") }}</div>
             <div class="codename-row">
               <input
                 class="native-input"
@@ -157,7 +135,7 @@
 
           <!-- 心情标签 -->
           <div class="setup-card glass">
-            <div class="setup-label">💭 {{ t("treehole.write.moods") }}</div>
+            <div class="setup-label">{{ t("treehole.write.moods") }}</div>
             <div class="chip-row">
               <button
                 v-for="m in MOODS"
@@ -173,7 +151,7 @@
 
           <!-- 内容标签 -->
           <div class="setup-card glass">
-            <div class="setup-label">🏷️ {{ t("treehole.write.tags") }}</div>
+            <div class="setup-label">{{ t("treehole.write.tags") }}</div>
             <div class="chip-row">
               <button
                 v-for="tg in TAGS"
@@ -182,30 +160,14 @@
                 :class="{ active: form.tags.includes(tg.key) }"
                 @click="toggleTag(tg.key)"
               >
-                {{ tg.emoji }} {{ t(tg.label) }}
-              </button>
-            </div>
-          </div>
-
-          <!-- 贴纸 -->
-          <div class="setup-card glass">
-            <div class="setup-label">🌸 {{ t("treehole.write.sticker") }}</div>
-            <div class="chip-row">
-              <button
-                v-for="s in STICKERS"
-                :key="s"
-                class="sticker-btn"
-                :class="{ active: form.sticker === s }"
-                @click="form.sticker = form.sticker === s ? '' : s"
-              >
-                {{ s }}
+                {{ t(tg.label) }}
               </button>
             </div>
           </div>
 
           <!-- 信纸模板 -->
           <div class="setup-card glass">
-            <div class="setup-label">📄 {{ t("treehole.write.paper") }}</div>
+            <div class="setup-label">{{ t("treehole.write.paper") }}</div>
             <div class="paper-row">
               <button
                 v-for="p in PAPERS"
@@ -223,7 +185,7 @@
           <!-- 定时发布 -->
           <div class="setup-card glass">
             <div class="setup-label">
-              ⏰ {{ t("treehole.write.scheduled") }}
+              {{ t("treehole.write.scheduled") }}
             </div>
             <div class="toggle-row">
               <label class="toggle-switch">
@@ -246,7 +208,7 @@
 
           <!-- 限时封存 -->
           <div class="setup-card glass">
-            <div class="setup-label">🔐 {{ t("treehole.write.seal") }}</div>
+            <div class="setup-label">{{ t("treehole.write.seal") }}</div>
             <div class="toggle-row">
               <label class="toggle-switch">
                 <input type="checkbox" v-model="sealEnabled" />
@@ -268,7 +230,7 @@
 
           <!-- 验证码 -->
           <div class="setup-card glass">
-            <div class="setup-label">🤖 {{ t("treehole.write.captcha") }}</div>
+            <div class="setup-label">{{ t("treehole.write.captcha") }}</div>
             <div class="captcha-row">
               <div class="captcha-code" @click="genCaptcha">
                 {{ captchaCode }}
@@ -290,7 +252,7 @@
               :disabled="submitting"
             >
               <span v-if="submitting" class="spinner-small"></span>
-              <span v-else>📮 {{ t("treehole.write.submit") }}</span>
+              <span v-else>{{ t("treehole.write.submit") }}</span>
             </button>
             <button class="btn-outline" @click="saveAsDraft">
               {{ t("treehole.write.saveDraft") }}
@@ -311,7 +273,9 @@
         @click.self="showSuccess = false"
       >
         <div class="modal-card pop-scale">
-          <div class="modal-icon">✅</div>
+          <div class="modal-icon">
+            <Icon icon="tabler:circle-check" aria-hidden="true" />
+          </div>
           <h2 class="modal-title">{{ t("treehole.write.successTitle") }}</h2>
           <p class="modal-desc">{{ successMsg }}</p>
           <div class="modal-actions">
@@ -338,12 +302,10 @@ import {
   CATEGORIES,
   PRIVACY,
   MOODS,
-  STICKERS,
   PAPERS,
   getCategory,
   getPaper,
   TAGS,
-  EMOJIS,
   SENSITIVE_WORDS,
   moodKey,
 } from "../stores/constants";
@@ -359,6 +321,7 @@ import { randomCodename } from "../utils/codename";
 import { useApp } from "../stores/app";
 import { buildUrl } from "~/lib/utils/paths";
 import { t } from "~/lib/i18n";
+import { Icon } from "@iconify/vue";
 
 const app = useApp();
 
@@ -381,7 +344,6 @@ const form = reactive({
 
 const content = ref("");
 const fontSize = ref("normal");
-const emojiOpen = ref(false);
 const scheduleEnabled = ref(false);
 const sealEnabled = ref(false);
 const captchaCode = ref("");
@@ -418,16 +380,6 @@ function genCaptcha() {
 // ---------- 工具栏 ----------
 function setFontSize(s) {
   fontSize.value = s;
-}
-
-function insertEmoji(e) {
-  // maxlength 只约束 textarea 的用户输入：emoji 也是正文，必须同样受上限约束并过一遍敏感词归一，
-  // 否则能绕过字数限制（validate 里的兜底提示只是掩盖漂移，不该作为唯一防线）
-  if (content.value.length + e.length > MAX_CONTENT_LEN) return;
-  content.value += e;
-  onContentInput();
-  emojiOpen.value = false;
-  nextTick(() => textareaRef.value?.focus());
 }
 
 function clearContent() {
@@ -774,35 +726,6 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-/* Emoji 面板 */
-.emoji-panel {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 2px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--card-border);
-  background: var(--bg-3);
-  max-height: 140px;
-  overflow-y: auto;
-}
-.emoji-btn {
-  width: 100%;
-  aspect-ratio: 1;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-.emoji-btn:hover {
-  background: var(--grad-soft);
-  transform: scale(1.2);
-}
-
 /* 信纸背景 + textarea */
 .paper-wrap {
   padding: 24px 28px;
@@ -985,34 +908,6 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-/* 贴纸按钮 */
-.sticker-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--card-border);
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background var(--duration-base) var(--ease),
-    color var(--duration-base) var(--ease),
-    border-color var(--duration-base) var(--ease),
-    opacity var(--duration-base) var(--ease);
-}
-.sticker-btn:hover {
-  border-color: var(--blue);
-  transform: scale(1.15);
-}
-.sticker-btn.active {
-  border-color: var(--blue);
-  background: var(--grad-soft);
-  box-shadow: 0 0 8px var(--glow);
 }
 
 /* 信纸模板按钮 */
@@ -1305,9 +1200,6 @@ onMounted(async () => {
   .editor-textarea {
     min-height: 260px;
   }
-  .emoji-panel {
-    grid-template-columns: repeat(8, 1fr);
-  }
   .cat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1319,9 +1211,6 @@ onMounted(async () => {
   }
   .editor-toolbar {
     padding: 10px 12px;
-  }
-  .emoji-panel {
-    grid-template-columns: repeat(6, 1fr);
   }
 }
 </style>

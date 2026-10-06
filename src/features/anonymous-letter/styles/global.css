@@ -407,9 +407,6 @@ body {
 .th-app.low-perf .bg-flow {
   display: none;
 }
-.th-app.low-perf .particles {
-  display: none;
-}
 /* 加载指示是必要反馈：低性能模式只放慢，不能停 */
 .th-app.low-perf .spinner {
   animation: spinGlow 1.4s linear infinite !important;

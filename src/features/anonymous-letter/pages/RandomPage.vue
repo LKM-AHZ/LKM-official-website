@@ -4,7 +4,9 @@
       <!-- 抽取状态 -->
       <section v-if="!current" class="random-hero glass float-up">
         <div class="random-pick-area">
-          <div class="pick-emoji">🌌</div>
+          <div class="pick-emoji">
+            <Icon icon="tabler:mail-opened" aria-hidden="true" />
+          </div>
           <p class="pick-slogan">{{ t("treehole.random.pickTip") }}</p>
           <button
             class="btn-grad pick-btn"
@@ -32,7 +34,6 @@
           <!-- 信件元信息 -->
           <div class="letter-meta">
             <span class="letter-cat">
-              <span class="cat-emoji">{{ catInfo.emoji }}</span>
               {{ t(catInfo.label) }}
             </span>
           </div>
@@ -74,7 +75,6 @@
         <!-- 回复区域 -->
         <div class="reply-section">
           <p class="reply-label">
-            💬
             {{
               t("treehole.random.replyLabel", {
                 name: current.codename || t("treehole.anonymous"),
@@ -97,7 +97,7 @@
               @click="sendReply"
               :disabled="!replyText.trim()"
             >
-              📨 {{ t("treehole.random.sendReply") }}
+              {{ t("treehole.random.sendReply") }}
             </button>
           </div>
           <p v-if="replySent" class="reply-ok">
@@ -110,6 +110,7 @@
 </template>
 
 <script setup>
+import { Icon } from "@iconify/vue";
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import { getCategory, getPaper, moodKey } from "../stores/constants";
@@ -147,7 +148,7 @@ onMounted(loadLetters);
 const poolCount = computed(() => letters.value.length);
 
 const catInfo = computed(() => {
-  if (!current.value) return { emoji: "💌", label: "" };
+  if (!current.value) return { emoji: "", label: "" };
   return getCategory(current.value.category || "confess");
 });
 
@@ -244,6 +245,7 @@ function formatDate(ts) {
 }
 .pick-emoji {
   font-size: 80px;
+  color: var(--accent);
   margin-bottom: 16px;
   animation: float 3s ease-in-out infinite;
 }
@@ -309,9 +311,6 @@ function formatDate(ts) {
   background: var(--grad-soft);
   padding: 4px 14px;
   border-radius: 999px;
-}
-.cat-emoji {
-  font-size: 16px;
 }
 .letter-body {
   color: var(--text-main);

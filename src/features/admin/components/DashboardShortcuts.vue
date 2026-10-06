@@ -53,12 +53,7 @@ const items: ShortcutItem[] = [
 </script>
 
 <template>
-  <n-grid
-    responsive="screen"
-    item-responsive
-    :cols="{ xs: 2, s: 2, m: 3, l: 5 }"
-    class="gap-4"
-  >
+  <n-grid responsive="screen" item-responsive cols="2 m:3 l:5" class="gap-4">
     <n-gi v-for="it in items" :key="it.to">
       <!-- 用 n-button 的 tag="a" 让按钮本身就是链接：<a><button> 嵌套是非法 HTML
            （a 的内容模型不允许交互后代），且会产生两个 Tab 停靠点与两个激活目标 -->

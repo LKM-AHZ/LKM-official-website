@@ -99,11 +99,14 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
     editor.on("selectionUpdate", handleSelectionUpdate);
     // Listen to scroll within the editor's parent for position updates
     const scrollHandler = (): void => update(true);
-    const editorDom = editor.view.dom;
-    // 用编辑器自己的滚动容器类名（editor.css 里 .rte-editor-main 才是 overflow-y:auto 的那个），
-    // 不再靠 `[class*="overflow"]` 子串匹配——它会把 overflow-hidden 之类的祖先也算进来
-    const scrollParent = editorDom.closest(".rte-editor-main") || window;
-    scrollParent.addEventListener("scroll", scrollHandler, { passive: true });
+    let scrollParent: Element | Window | null = null;
+    const bindScroll = (): void => {
+      // EditorContent 比本组件稍后挂载；等 tiptap create 后才能读取 view.dom。
+      scrollParent = editor.view.dom.closest(".rte-editor-main") || window;
+      scrollParent.addEventListener("scroll", scrollHandler, { passive: true });
+    };
+    if (editor.isInitialized) bindScroll();
+    else editor.on("create", bindScroll);
 
     const handleBlur = (): void => {
       lastSelectionRef.current = null;
@@ -116,7 +119,8 @@ const BubbleMenuWrapper = memo(function BubbleMenuWrapper({
     return () => {
       editor.off("selectionUpdate", handleSelectionUpdate);
       editor.off("blur", handleBlur);
-      scrollParent.removeEventListener("scroll", scrollHandler);
+      editor.off("create", bindScroll);
+      scrollParent?.removeEventListener("scroll", scrollHandler);
       if (blurTimerRef.current) {
         clearTimeout(blurTimerRef.current);
         blurTimerRef.current = null;

@@ -1,7 +1,7 @@
 <template>
   <TreeholeShell active-nav="rank">
     <div class="container">
-      <h1 class="page-title">🏆 {{ t("treehole.rank.title") }}</h1>
+      <h1 class="page-title">{{ t("treehole.rank.title") }}</h1>
       <p class="page-sub">{{ t("treehole.rank.subtitle") }}</p>
 
       <div class="tabs">
@@ -30,15 +30,13 @@
           <div class="rank-no" :class="'no' + (i + 1)">{{ i + 1 }}</div>
           <div class="rank-body">
             <div class="rank-head">
-              <span
-                class="rank-cat"
-                :style="{ background: getCategory(l.category).color }"
-                >{{ getCategory(l.category).emoji }}</span
-              >
+              <span class="rank-cat">{{
+                t(getCategory(l.category).label)
+              }}</span>
               <span class="rank-code">{{ l.codename }}</span>
-              <span class="rank-heat"
-                >🔥 {{ (l.likes || 0) + (l.favorites || 0) }}</span
-              >
+              <span class="rank-heat">{{
+                (l.likes || 0) + (l.favorites || 0)
+              }}</span>
             </div>
             <p class="rank-content">{{ l.content }}</p>
           </div>
@@ -171,12 +169,12 @@ const rankList = computed(() => {
   margin-bottom: 6px;
 }
 .rank-cat {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 14px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--grad-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
 }
 .rank-code {
   font-size: 13px;

@@ -3,7 +3,7 @@
     <div class="container">
       <!-- 头部 -->
       <section class="wish-head glass float-up">
-        <h1 class="page-title">🌟 {{ t("treehole.wish.title") }}</h1>
+        <h1 class="page-title">{{ t("treehole.wish.title") }}</h1>
         <button class="btn-grad" @click="makeDialogOpen = true">
           {{ t("treehole.wish.makeWish") }}
         </button>
@@ -11,7 +11,9 @@
 
       <!-- 空状态 -->
       <section v-if="wishes.length === 0" class="wish-empty glass float-up">
-        <div class="empty-icon">🌟</div>
+        <div class="empty-icon">
+          <Icon icon="tabler:star" aria-hidden="true" />
+        </div>
         <p class="empty-text">{{ t("treehole.wish.emptyTitle") }}</p>
         <p class="empty-sub">{{ t("treehole.wish.emptySub") }}</p>
         <button class="btn-grad" @click="makeDialogOpen = true">
@@ -21,12 +23,7 @@
 
       <!-- 许愿墙网格 -->
       <section v-else class="wish-grid">
-        <div
-          v-for="w in wishes"
-          :key="w.id"
-          class="wish-card glass float-up"
-          :style="{ borderLeftColor: cardColor(w.id) }"
-        >
+        <div v-for="w in wishes" :key="w.id" class="wish-card glass float-up">
           <p class="wish-text">{{ w.text }}</p>
           <div class="wish-meta">
             <button
@@ -34,7 +31,7 @@
               @click="onLight(w)"
               :title="t('treehole.wish.lightWishTitle')"
             >
-              🕯️ {{ w.lights || 0 }}
+              <Icon icon="tabler:star" aria-hidden="true" /> {{ w.lights || 0 }}
             </button>
             <span class="wish-date">{{ formatDate(w.createdAt) }}</span>
             <template v-if="w.ownerId === 'me_local'">
@@ -44,7 +41,7 @@
                 :aria-label="t('common.edit')"
                 @click="openEdit(w)"
               >
-                ✏️
+                <Icon icon="tabler:pencil" aria-hidden="true" />
               </button>
               <button
                 class="wish-action-chip wish-del"
@@ -52,7 +49,7 @@
                 :aria-label="t('common.delete')"
                 @click="onDelete(w)"
               >
-                🗑️
+                <Icon icon="tabler:trash" aria-hidden="true" />
               </button>
             </template>
           </div>
@@ -68,7 +65,7 @@
     >
       <div class="dialog-box glass">
         <h3 class="dialog-title">
-          🌟 {{ t("treehole.wish.makeDialogTitle") }}
+          {{ t("treehole.wish.makeDialogTitle") }}
         </h3>
         <p class="dialog-desc">{{ t("treehole.wish.makeDialogDesc") }}</p>
         <textarea
@@ -130,6 +127,7 @@
 </template>
 
 <script setup>
+import { Icon } from "@iconify/vue";
 import { ref, onMounted, onUnmounted } from "vue";
 import TreeholeShell from "../components/TreeholeShell.vue";
 import { treeholeApi, showTreeholeError } from "../stores/api";
@@ -212,26 +210,6 @@ function formatDate(ts) {
   });
 }
 
-const COLORS = [
-  "#ff9aa2",
-  "#a0c4ff",
-  "#ffd6a5",
-  "#bdb2ff",
-  "#9bf6ff",
-  "#caffbf",
-  "#ffc6ff",
-  "#b9fbc0",
-  "#ffadad",
-  "#fdffb6",
-];
-function cardColor(id) {
-  let hash = 0;
-  for (let i = 0; i < (id || "").length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return COLORS[Math.abs(hash) % COLORS.length];
-}
-
 // 回到标签页时刷新服务端愿望。
 function onFocus() {
   loadWishes();
@@ -276,6 +254,7 @@ onUnmounted(() => {
 }
 .empty-icon {
   font-size: 72px;
+  color: var(--accent);
   margin-bottom: 12px;
   animation: twinkle 2s ease-in-out infinite;
 }
@@ -311,7 +290,7 @@ onUnmounted(() => {
 .wish-card {
   padding: 18px 20px;
   border-radius: 16px;
-  border-left: 4px solid;
+  border-left: 4px solid var(--accent);
   display: flex;
   flex-direction: column;
   gap: 12px;

@@ -140,27 +140,59 @@ test("侧边栏只链接当前页面的实际模块", async ({ page }) => {
   }
 });
 
-test("两个应用沿用主站顶栏，应用导航不遮挡内容", async ({ page }) => {
+test("两个应用沿用主站顶栏，树洞侧栏不遮挡内容", async ({ page }) => {
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 844 });
-    for (const [route, appNav] of [
-      ["starhope", ".starhope-app aside"],
-      ["treehole", ".th-app .top-nav"],
-    ]) {
-      await page.goto(`${BASE_PATH}/${route}/`);
-      await expect(page.locator(appNav)).toBeVisible();
-      const layout = await page.evaluate((selector) => {
-        const siteNav = document.querySelector("#navbar-wrapper");
-        const localNav = document.querySelector(selector);
-        return {
-          siteBottom: siteNav?.getBoundingClientRect().bottom ?? 0,
-          appTop: localNav?.getBoundingClientRect().top ?? 0,
-          overflow: document.documentElement.scrollWidth - innerWidth,
-        };
-      }, appNav);
-      expect(layout.siteBottom).toBeGreaterThan(0);
-      expect(layout.appTop).toBeGreaterThanOrEqual(layout.siteBottom - 1);
-      expect(layout.overflow).toBeLessThanOrEqual(0);
+    await page.goto(`${BASE_PATH}/starhope/`);
+    await expect(page.locator(".starhope-app aside")).toBeVisible();
+    await page.goto(`${BASE_PATH}/treehole/`);
+    const sidebar = page.locator(".th-app .side-nav");
+    if (width <= 768) {
+      await expect(sidebar).toBeHidden();
+      await page.getByRole("button", { name: "菜单" }).click();
+      await expect
+        .poll(() => sidebar.evaluate((el) => el.getBoundingClientRect().left))
+        .toBe(0);
     }
+    await expect(sidebar).toBeVisible();
+    const layout = await page.evaluate(() => {
+      const siteNav = document.querySelector("#navbar-wrapper");
+      const sidebar = document.querySelector(".th-app .side-nav");
+      const content = document.querySelector(".th-app .main-content");
+      return {
+        siteBottom: siteNav?.getBoundingClientRect().bottom ?? 0,
+        sidebarTop: sidebar?.getBoundingClientRect().top ?? 0,
+        sidebarRight: sidebar?.getBoundingClientRect().right ?? 0,
+        contentLeft: content?.getBoundingClientRect().left ?? 0,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    expect(layout.siteBottom).toBeGreaterThan(0);
+    expect(layout.sidebarTop).toBeGreaterThanOrEqual(layout.siteBottom - 1);
+    if (width > 768)
+      expect(layout.contentLeft).toBeGreaterThanOrEqual(layout.sidebarRight);
+    expect(layout.overflow).toBeLessThanOrEqual(0);
+    await expect(sidebar.getByRole("link", { name: /设置/ })).toBeVisible();
   }
+});
+
+test("树洞侧栏的选中颜色跟随网站主题色", async ({ page }) => {
+  await page.goto(`${BASE_PATH}/treehole/`);
+  const active = page.locator(".th-app .side-nav .nav-link.active");
+  await expect(active).toBeVisible();
+  await page.evaluate(() =>
+    document.documentElement.style.setProperty("--hue", "20"),
+  );
+  await page.waitForTimeout(250);
+  const warm = await active.evaluate(
+    (element) => getComputedStyle(element).color,
+  );
+  await page.evaluate(() =>
+    document.documentElement.style.setProperty("--hue", "260"),
+  );
+  await page.waitForTimeout(250);
+  const cool = await active.evaluate(
+    (element) => getComputedStyle(element).color,
+  );
+  expect(warm).not.toBe(cool);
 });

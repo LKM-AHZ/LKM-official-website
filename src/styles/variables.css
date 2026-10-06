@@ -34,19 +34,27 @@
   --page-bg: #f8fafd;
   --card-bg: #ffffff;
   --surface-3: #e2e7ee;
-  --btn-content: #0b57d0;
-  --btn-regular-bg: #e8f0fe;
-  --btn-regular-bg-hover: #d3e3fd;
-  --btn-regular-bg-active: #c2dbff;
-  --btn-plain-bg-hover: #f1f5fb;
-  --btn-plain-bg-active: #e8f0fe;
-  --btn-card-bg-hover: #f8fafd;
-  --btn-card-bg-active: #e8f0fe;
+  --btn-content: var(--primary-readable);
+  --btn-regular-bg: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
+  --btn-regular-bg-hover: color-mix(
+    in srgb,
+    var(--primary) 18%,
+    var(--card-bg)
+  );
+  --btn-regular-bg-active: color-mix(
+    in srgb,
+    var(--primary) 24%,
+    var(--card-bg)
+  );
+  --btn-plain-bg-hover: color-mix(in srgb, var(--primary) 6%, var(--card-bg));
+  --btn-plain-bg-active: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
+  --btn-card-bg-hover: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+  --btn-card-bg-active: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
   --enter-btn-bg: var(--btn-regular-bg);
   --enter-btn-bg-hover: var(--btn-regular-bg-hover);
   --enter-btn-bg-active: var(--btn-regular-bg-active);
   --deep-text: #1f1f1f;
-  --title-active: #0b57d0;
+  --title-active: var(--primary-readable);
   --line-divider: rgba(0, 0, 0, 0.08);
   --line-color: rgba(0, 0, 0, 0.1);
   --meta-divider: rgba(0, 0, 0, 0.2);
@@ -141,14 +149,22 @@
   --page-bg: #131314;
   --card-bg: #1e1f20;
   --surface-3: #444746;
-  --btn-content: #a8c7fa;
-  --btn-regular-bg: #2b3443;
-  --btn-regular-bg-hover: #34435a;
-  --btn-regular-bg-active: #405675;
-  --btn-plain-bg-hover: #2b2c2f;
-  --btn-plain-bg-active: #35363a;
-  --btn-card-bg-hover: #292a2d;
-  --btn-card-bg-active: #34363a;
+  --btn-content: var(--primary-readable);
+  --btn-regular-bg: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
+  --btn-regular-bg-hover: color-mix(
+    in srgb,
+    var(--primary) 18%,
+    var(--card-bg)
+  );
+  --btn-regular-bg-active: color-mix(
+    in srgb,
+    var(--primary) 24%,
+    var(--card-bg)
+  );
+  --btn-plain-bg-hover: color-mix(in srgb, var(--primary) 6%, var(--card-bg));
+  --btn-plain-bg-active: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
+  --btn-card-bg-hover: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+  --btn-card-bg-active: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
   --line-divider: rgba(255, 255, 255, 0.08);
   --line-color: rgba(255, 255, 255, 0.1);
   --meta-divider: rgba(255, 255, 255, 0.2);

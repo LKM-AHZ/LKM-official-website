@@ -1,250 +1,162 @@
 <template>
-  <NMessageProvider>
-    <NDialogProvider>
-      <NModalProvider>
-        <div
-          class="th-app"
-          :class="{ 'low-perf': lowPerf, 'high-contrast': highContrast }"
-          :style="{
-            '--font-scale':
-              app.state.settings.fontScale === 'small'
-                ? '0.9'
-                : app.state.settings.fontScale === 'large'
-                  ? '1.15'
-                  : '1',
-          }"
-        >
-          <div class="app-root">
-            <!-- 背景层 -->
-            <div class="bg-flow" aria-hidden="true"></div>
-            <Particles />
-            <!-- 角落装饰 -->
-            <div class="corner-deco tl"></div>
-            <div class="corner-deco br"></div>
-            <div class="corner-deco tr"></div>
+  <div class="treehole-root">
+    <NMessageProvider>
+      <NDialogProvider>
+        <NModalProvider>
+          <div
+            class="th-app"
+            :class="{ 'low-perf': lowPerf, 'high-contrast': highContrast }"
+            :style="{
+              '--font-scale':
+                app.state.settings.fontScale === 'small'
+                  ? '0.9'
+                  : app.state.settings.fontScale === 'large'
+                    ? '1.15'
+                    : '1',
+            }"
+          >
+            <div class="app-root" @keydown.esc="mobileMenuOpen = false">
+              <!-- 背景层 -->
+              <div class="bg-flow" aria-hidden="true"></div>
+              <!-- 角落装饰 -->
+              <div class="corner-deco tl"></div>
+              <div class="corner-deco br"></div>
+              <div class="corner-deco tr"></div>
 
-            <!-- ==================== 顶部导航栏 ==================== -->
-            <header class="top-nav glass">
-              <div class="nav-inner">
-                <div class="nav-left">
-                  <a
-                    :href="buildUrl('/apps')"
-                    class="nav-exit-btn"
-                    :title="t('treehole.backToSite')"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                  </a>
+              <div
+                v-if="mobileMenuOpen"
+                class="sidebar-backdrop"
+                @click="mobileMenuOpen = false"
+              ></div>
+              <aside class="side-nav" :class="{ open: mobileMenuOpen }">
+                <div class="sidebar-head">
                   <a
                     :href="buildUrl('/treehole')"
                     class="nav-brand"
                     :aria-label="t('treehole.homeAriaLabel')"
                   >
-                    <span class="brand-icon">&#x1F333;</span>
+                    <Icon
+                      icon="tabler:tree"
+                      class="brand-icon"
+                      aria-hidden="true"
+                    />
                     <span class="brand-text grad-text">{{
                       t("treehole.name")
                     }}</span>
                   </a>
+                  <button
+                    class="sidebar-close"
+                    :aria-label="t('common.close')"
+                    @click="mobileMenuOpen = false"
+                  >
+                    &times;
+                  </button>
                 </div>
 
                 <nav class="nav-links" :aria-label="t('treehole.nav.aria')">
                   <a
-                    :href="buildUrl('/treehole')"
+                    v-for="item in navItems"
+                    :key="item.key"
+                    :href="buildUrl(item.path)"
                     class="nav-link"
-                    :class="{ active: activeNav === 'home' }"
-                    >{{ t("treehole.nav.square") }}</a
+                    :class="{ active: activeNav === item.key }"
+                    :aria-current="activeNav === item.key ? 'page' : undefined"
+                    @click="mobileMenuOpen = false"
                   >
-                  <a
-                    :href="buildUrl('/treehole/random')"
-                    class="nav-link"
-                    :class="{ active: activeNav === 'random' }"
-                    >{{ t("treehole.nav.random") }}</a
-                  >
-                  <a
-                    :href="buildUrl('/treehole/bottle')"
-                    class="nav-link"
-                    :class="{ active: activeNav === 'bottle' }"
-                    >{{ t("treehole.nav.bottle") }}</a
-                  >
-                  <a
-                    :href="buildUrl('/treehole/wish')"
-                    class="nav-link"
-                    :class="{ active: activeNav === 'wish' }"
-                    >{{ t("treehole.nav.wish") }}</a
-                  >
-                  <a
-                    :href="buildUrl('/treehole/rank')"
-                    class="nav-link"
-                    :class="{ active: activeNav === 'rank' }"
-                    >{{ t("treehole.nav.rank") }}</a
-                  >
+                    <Icon
+                      :icon="item.icon"
+                      class="nav-icon"
+                      aria-hidden="true"
+                    />
+                    <span>{{ item.label }}</span>
+                  </a>
                 </nav>
 
-                <!-- 右侧操作 -->
-                <div class="nav-actions">
-                  <a
-                    :href="buildUrl('/treehole/write')"
-                    class="btn-grad nav-write-btn"
-                    >&#x270D;&#xFE0F; {{ t("treehole.nav.write") }}</a
-                  >
-                  <button
-                    class="nav-icon-btn"
-                    @click="app.toggleTheme()"
-                    :aria-label="
-                      app.isNight
-                        ? t('treehole.switchDay')
-                        : t('treehole.switchNight')
-                    "
-                  >
-                    {{ app.isNight ? "&#x2600;&#xFE0F;" : "&#x1F319;" }}
-                  </button>
-                  <button
-                    class="nav-icon-btn hamburger"
-                    @click="mobileMenuOpen = !mobileMenuOpen"
-                    :aria-label="t('treehole.menu')"
-                  >
-                    <span :class="{ open: mobileMenuOpen }">&#x2630;</span>
-                  </button>
+                <div class="sidebar-footer">
+                  <a :href="buildUrl('/apps')" class="footer-action">
+                    <Icon icon="tabler:arrow-left" aria-hidden="true" />
+                    {{ t("treehole.backToSite") }}
+                  </a>
                 </div>
-              </div>
-            </header>
+              </aside>
 
-            <!-- 移动端下拉菜单 -->
-            <transition name="slide-down">
+              <!-- ==================== 主内容区 ==================== -->
+              <main class="main-content float-up">
+                <slot />
+              </main>
+
+              <!-- ==================== 移动端底部导航栏 ==================== -->
               <nav
-                v-if="mobileMenuOpen"
-                class="mobile-menu glass"
-                :aria-label="t('treehole.nav.mobileAria')"
-                @click="mobileMenuOpen = false"
+                class="bottom-nav glass"
+                :aria-label="t('treehole.nav.bottomAria')"
               >
                 <a
                   :href="buildUrl('/treehole')"
-                  class="mobile-nav-link"
+                  class="bn-item"
                   :class="{ active: activeNav === 'home' }"
-                  >&#x1F3E0; {{ t("treehole.nav.square") }}</a
                 >
-                <a
-                  :href="buildUrl('/treehole/write')"
-                  class="mobile-nav-link"
-                  :class="{ active: activeNav === 'write' }"
-                  >&#x270D;&#xFE0F; {{ t("treehole.nav.write") }}</a
-                >
+                  <Icon icon="tabler:home" class="bn-icon" aria-hidden="true" />
+                  <span class="bn-label">{{ t("treehole.nav.square") }}</span>
+                </a>
                 <a
                   :href="buildUrl('/treehole/random')"
-                  class="mobile-nav-link"
+                  class="bn-item"
                   :class="{ active: activeNav === 'random' }"
-                  >&#x1F3B2; {{ t("treehole.nav.randomTreehole") }}</a
                 >
+                  <Icon
+                    icon="tabler:dice-5"
+                    class="bn-icon"
+                    aria-hidden="true"
+                  />
+                  <span class="bn-label">{{ t("treehole.nav.random") }}</span>
+                </a>
+                <a
+                  :href="buildUrl('/treehole/write')"
+                  class="bn-item bn-center"
+                  :class="{ active: activeNav === 'write' }"
+                >
+                  <span class="bn-center-circle"
+                    ><Icon icon="tabler:pencil" aria-hidden="true"
+                  /></span>
+                </a>
                 <a
                   :href="buildUrl('/treehole/bottle')"
-                  class="mobile-nav-link"
+                  class="bn-item"
                   :class="{ active: activeNav === 'bottle' }"
-                  >&#x1F37E; {{ t("treehole.nav.bottle") }}</a
                 >
-                <a
-                  :href="buildUrl('/treehole/wish')"
-                  class="mobile-nav-link"
-                  :class="{ active: activeNav === 'wish' }"
-                  >&#x2B50; {{ t("treehole.nav.wish") }}</a
+                  <Icon
+                    icon="tabler:bottle"
+                    class="bn-icon"
+                    aria-hidden="true"
+                  />
+                  <span class="bn-label">{{ t("treehole.nav.bottle") }}</span>
+                </a>
+                <button
+                  class="bn-item"
+                  :aria-label="t('treehole.menu')"
+                  :aria-expanded="mobileMenuOpen"
+                  @click="mobileMenuOpen = !mobileMenuOpen"
                 >
-                <a
-                  :href="buildUrl('/treehole/rank')"
-                  class="mobile-nav-link"
-                  :class="{ active: activeNav === 'rank' }"
-                  >&#x1F3C6; {{ t("treehole.nav.rank") }}</a
-                >
-                <a
-                  :href="buildUrl('/treehole/mine')"
-                  class="mobile-nav-link"
-                  :class="{ active: activeNav === 'mine' }"
-                  >&#x1F4EC; {{ t("treehole.nav.myMailbox") }}</a
-                >
-                <a
-                  :href="buildUrl('/treehole/messages')"
-                  class="mobile-nav-link"
-                  :class="{ active: activeNav === 'messages' }"
-                  >&#x1F4AC; {{ t("treehole.nav.messages") }}</a
-                >
-                <a
-                  :href="buildUrl('/treehole/settings')"
-                  class="mobile-nav-link"
-                  :class="{ active: activeNav === 'settings' }"
-                  >&#x2699;&#xFE0F; {{ t("treehole.nav.settings") }}</a
-                >
+                  <Icon
+                    icon="tabler:menu-2"
+                    class="bn-icon"
+                    aria-hidden="true"
+                  />
+                  <span class="bn-label">{{ t("treehole.menu") }}</span>
+                </button>
               </nav>
-            </transition>
-
-            <!-- ==================== 主内容区 ==================== -->
-            <main class="main-content float-up">
-              <slot />
-            </main>
-
-            <!-- ==================== 移动端底部导航栏 ==================== -->
-            <nav
-              class="bottom-nav glass"
-              :aria-label="t('treehole.nav.bottomAria')"
-            >
-              <a
-                :href="buildUrl('/treehole')"
-                class="bn-item"
-                :class="{ active: activeNav === 'home' }"
-              >
-                <span class="bn-icon">&#x1F3E0;</span>
-                <span class="bn-label">{{ t("treehole.nav.square") }}</span>
-              </a>
-              <a
-                :href="buildUrl('/treehole/random')"
-                class="bn-item"
-                :class="{ active: activeNav === 'random' }"
-              >
-                <span class="bn-icon">&#x1F3B2;</span>
-                <span class="bn-label">{{ t("treehole.nav.random") }}</span>
-              </a>
-              <a
-                :href="buildUrl('/treehole/write')"
-                class="bn-item bn-center"
-                :class="{ active: activeNav === 'write' }"
-              >
-                <span class="bn-center-circle">&#x270D;&#xFE0F;</span>
-              </a>
-              <a
-                :href="buildUrl('/treehole/bottle')"
-                class="bn-item"
-                :class="{ active: activeNav === 'bottle' }"
-              >
-                <span class="bn-icon">&#x1F37E;</span>
-                <span class="bn-label">{{ t("treehole.nav.bottle") }}</span>
-              </a>
-              <a
-                :href="buildUrl('/treehole/mine')"
-                class="bn-item"
-                :class="{ active: activeNav === 'mine' }"
-              >
-                <span class="bn-icon">&#x1F4EC;</span>
-                <span class="bn-label">{{ t("treehole.nav.mailbox") }}</span>
-              </a>
-            </nav>
+            </div>
           </div>
-        </div>
-      </NModalProvider>
-    </NDialogProvider>
-  </NMessageProvider>
+        </NModalProvider>
+      </NDialogProvider>
+    </NMessageProvider>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { NMessageProvider, NDialogProvider, NModalProvider } from "naive-ui";
-import Particles from "./Particles.vue";
+import { Icon } from "@iconify/vue";
 import { useApp } from "../stores/app";
 import { buildUrl } from "~/lib/utils/paths";
 import { t } from "~/lib/i18n";
@@ -255,6 +167,62 @@ defineProps<{
 
 const app = useApp();
 const mobileMenuOpen = ref(false);
+const navItems = [
+  {
+    key: "home",
+    path: "/treehole",
+    icon: "tabler:home",
+    label: t("treehole.nav.square"),
+  },
+  {
+    key: "random",
+    path: "/treehole/random",
+    icon: "tabler:dice-5",
+    label: t("treehole.nav.random"),
+  },
+  {
+    key: "bottle",
+    path: "/treehole/bottle",
+    icon: "tabler:bottle",
+    label: t("treehole.nav.bottle"),
+  },
+  {
+    key: "wish",
+    path: "/treehole/wish",
+    icon: "tabler:star",
+    label: t("treehole.nav.wish"),
+  },
+  {
+    key: "rank",
+    path: "/treehole/rank",
+    icon: "tabler:trophy",
+    label: t("treehole.nav.rank"),
+  },
+  {
+    key: "write",
+    path: "/treehole/write",
+    icon: "tabler:pencil",
+    label: t("treehole.nav.write"),
+  },
+  {
+    key: "mine",
+    path: "/treehole/mine",
+    icon: "tabler:mailbox",
+    label: t("treehole.nav.myMailbox"),
+  },
+  {
+    key: "messages",
+    path: "/treehole/messages",
+    icon: "tabler:message",
+    label: t("treehole.nav.messages"),
+  },
+  {
+    key: "settings",
+    path: "/treehole/settings",
+    icon: "tabler:settings",
+    label: t("treehole.nav.settings"),
+  },
+];
 
 const { lowPerf, highContrast } = app;
 
@@ -304,202 +272,134 @@ onMounted(forceSync);
   position: relative;
 }
 
-/* ---------- 顶部导航栏 ---------- */
-.top-nav {
+/* ---------- 树洞侧栏 ---------- */
+.side-nav {
   position: fixed;
   top: 4.5rem;
+  bottom: 0;
   left: 0;
-  right: 0;
   z-index: 100;
+  width: 232px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 14px 18px;
   background: var(--nav-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--card-border);
-  height: 56px;
-  display: flex;
-  align-items: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid var(--card-border);
+  box-shadow: 8px 0 28px color-mix(in srgb, var(--accent) 5%, transparent);
 }
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.nav-inner {
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 18px;
+.sidebar-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  padding: 0 12px 20px;
 }
-.nav-exit-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--card-border);
-  color: var(--text-sub);
-  background: transparent;
-  cursor: pointer;
-  transition:
-    background var(--duration-base) var(--ease),
-    color var(--duration-base) var(--ease),
-    border-color var(--duration-base) var(--ease),
-    opacity var(--duration-base) var(--ease);
-  flex-shrink: 0;
-}
-.nav-exit-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  transform: translateX(-2px);
-}
-
 .nav-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
-  flex-shrink: 0;
 }
 .brand-icon {
-  font-size: 22px;
+  font-size: 24px;
 }
 .brand-text {
   font-size: 18px;
   font-weight: 800;
-  letter-spacing: 0.5px;
+}
+.sidebar-close {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 24px;
+  cursor: pointer;
 }
 .nav-links {
   display: flex;
-  gap: 4px;
-  align-items: center;
-}
-.nav-link {
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  color: var(--text-sub);
-  text-decoration: none;
-  transition:
-    background var(--duration-base) var(--ease),
-    color var(--duration-base) var(--ease),
-    border-color var(--duration-base) var(--ease),
-    opacity var(--duration-base) var(--ease);
-  font-weight: 500;
-}
-.nav-link:hover {
-  color: var(--accent);
-  background: var(--grad-soft);
-}
-.nav-link.active {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.nav-write-btn {
-  padding: 6px 16px;
-  font-size: 13px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.nav-icon-btn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--card-border);
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background var(--duration-base) var(--ease),
-    color var(--duration-base) var(--ease),
-    border-color var(--duration-base) var(--ease),
-    opacity var(--duration-base) var(--ease);
-  color: var(--text-sub);
-}
-.nav-icon-btn:hover {
-  border-color: var(--blue);
-  color: var(--accent);
-}
-.hamburger {
-  display: none;
-}
-.hamburger span {
-  transition: transform 0.3s;
-  display: inline-block;
-}
-.hamburger span.open {
-  transform: rotate(90deg);
-}
-
-/* ---------- 移动端下拉菜单 ---------- */
-.mobile-menu {
-  position: fixed;
-  top: calc(4.5rem + 56px);
-  left: 0;
-  right: 0;
-  z-index: 99;
-  background: var(--nav-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--card-border);
-  padding: 12px 18px;
-  display: flex;
   flex-direction: column;
   gap: 4px;
-  box-shadow: var(--card-shadow);
+  min-height: 0;
+  overflow-y: auto;
 }
-.mobile-nav-link {
-  display: block;
-  padding: 10px 14px;
+.nav-link,
+.footer-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
   border-radius: 12px;
-  font-size: 14px;
-  color: var(--text-main);
+  background: transparent;
+  color: var(--text-sub);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
   text-decoration: none;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
-.mobile-nav-link:hover {
+.nav-link:hover,
+.footer-action:hover,
+.sidebar-close:hover {
   background: var(--grad-soft);
+  color: var(--accent);
 }
-.mobile-nav-link.active {
+.nav-link.active {
+  background: var(--grad-soft);
   color: var(--accent);
   font-weight: 700;
-  background: var(--grad-soft);
 }
-
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition:
-    transform var(--duration-slow) var(--ease-out),
-    opacity var(--duration-slow) var(--ease-out);
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  font-size: 18px;
+  line-height: 1;
 }
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-12px);
+.nav-link:nth-child(6) {
+  margin-top: 12px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+.nav-link:nth-child(7) {
+  margin-top: 12px;
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--card-border);
+}
+.footer-action {
+  min-height: 38px;
+  font-size: 12px;
+}
+.footer-action span {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+.sidebar-backdrop {
+  display: none;
 }
 
 /* ---------- 主内容区 ---------- */
 .main-content {
   flex: 1;
-  padding-top: 76px;
-  padding-bottom: 90px;
+  min-width: 0;
+  margin-left: 232px;
+  padding-top: 28px;
+  padding-bottom: 60px;
 }
 
 /* ---------- 移动端底部导航 ---------- */
@@ -529,6 +429,10 @@ onMounted(forceSync);
   font-size: 10px;
   transition: color 0.2s;
   padding: 4px 10px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
 }
 .bn-item.active {
   color: var(--accent);
@@ -558,24 +462,33 @@ onMounted(forceSync);
 
 /* ---------- 响应式 ---------- */
 @media (max-width: 768px) {
-  .mobile-menu {
-    top: calc(4.5rem + 50px);
+  .side-nav {
+    top: 4.5rem;
+    z-index: 101;
+    width: min(280px, 85vw);
+    background: var(--bg-1);
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    visibility: hidden;
+  }
+  .side-nav.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  .sidebar-close,
+  .sidebar-backdrop {
+    display: block;
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 4.5rem 0 0;
+    z-index: 99;
+    background: var(--mask);
   }
   .main-content {
-    padding-top: 66px;
+    margin-left: 0;
+    padding-top: 20px;
     padding-bottom: 100px;
-  }
-  .top-nav {
-    height: 50px;
-  }
-  .nav-links {
-    display: none;
-  }
-  .nav-write-btn {
-    display: none;
-  }
-  .hamburger {
-    display: flex;
   }
   .bottom-nav {
     display: flex;

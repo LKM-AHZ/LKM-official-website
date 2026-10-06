@@ -451,12 +451,17 @@ export default function DocumentEditor({
 
   // 移动端键盘自动滚动
   useEffect(() => {
-    if (editor) {
-      const el = (editor.view.dom as HTMLElement).closest(
-        ".ProseMirror",
-      ) as HTMLElement;
-      return setupKeyboardAutoScroll(el);
-    }
+    if (!editor) return;
+    let cleanup: (() => void) | undefined;
+    const setup = (): void => {
+      cleanup = setupKeyboardAutoScroll(editor.view.dom as HTMLElement);
+    };
+    if (editor.isInitialized) setup();
+    else editor.on("create", setup);
+    return () => {
+      editor.off("create", setup);
+      cleanup?.();
+    };
   }, [editor]);
 
   // 编辑器和 docId 就绪后加载已有内容
