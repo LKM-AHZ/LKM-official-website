@@ -76,7 +76,10 @@ export async function adminFetch(
     throw result.error;
   }
   const res = result.value;
-  if (res.status === 401 || res.status === 403) {
+  if (
+    res.status === 401 ||
+    (res.status === 403 && path === "/api/v1/admin/auth/me")
+  ) {
     // 危险操作 step-up：401 且 body code == MFA_REQUIRED 时，会话仍有效但缺 2FA 信任，
     // 不应跳登录，应抛 MFA 错误由调用方弹 TOTP 验证后重试。
     let mfaRequired = false;

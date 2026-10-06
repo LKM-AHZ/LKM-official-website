@@ -17,6 +17,7 @@ import { ok, err } from "neverthrow";
 import { apiFetch } from "~/lib/api";
 import type { Result } from "neverthrow";
 import { t } from "~/lib/i18n";
+import { buildUrl } from "~/lib/utils/paths";
 
 // ---- Types -----------------------------------------------------------------
 
@@ -170,16 +171,17 @@ export async function requestAiCompletion(
   // 若 endpoint 带 ?query 或 #fragment（校验只查协议/凭据，不拦这些），
   // 字符串拼接会得到 https://host/api?token=1/v1/chat/completions 这类畸形地址。
   const endpointUrl = endpointValidation.value;
-  const url = `${endpointUrl.origin}${endpointUrl.pathname.replace(/\/$/, "")}/v1/chat/completions`;
+  const url = buildUrl("/ai/completion");
 
   const fetchResult = await apiFetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
     body: JSON.stringify({
       model,
+      endpoint: `${endpointUrl.origin}${endpointUrl.pathname.replace(/\/$/, "")}`,
+      apiKey,
       messages: [
         {
           role: "system",

@@ -84,7 +84,11 @@ export async function apiFetch(
   init?: RequestInit & { timeout?: number },
 ): Promise<Result<Response, AppError>> {
   const base = getApiBase();
-  const fullUrl = base ? `${base.replace(/\/$/, "")}${url}` : url;
+  const fullUrl = /^https?:\/\//i.test(url)
+    ? url
+    : base
+      ? `${base.replace(/\/$/, "")}${url}`
+      : url;
   const timeout = init?.timeout ?? DEFAULT_TIMEOUT_MS;
 
   const timeoutCtl = createTimeoutSignal(timeout);

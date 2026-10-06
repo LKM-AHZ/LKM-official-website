@@ -35,12 +35,14 @@ export const CONTENT_ITEMS = graphql`
     $pageSize: Int!
     $boardId: ID
     $contentType: String
+    $authorId: ID
   ) {
     contentItems(
       page: $page
       pageSize: $pageSize
       boardId: $boardId
       contentType: $contentType
+      authorId: $authorId
     ) {
       items {
       ${CONTENT_ITEM_FIELDS}

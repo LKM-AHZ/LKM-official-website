@@ -117,7 +117,7 @@
 
     <AskQuestionModal
       v-model:show="askModalOpen"
-      :category="activeTab"
+      :category="activeTab === 'mine' ? 'help' : activeTab"
       @published="load"
     />
   </div>
@@ -129,6 +129,7 @@ import { t } from "~/lib/i18n";
 import { qaApi, type QaSort, type QuestionSummary } from "~/lib/api/modules/qa";
 import { buildUrl } from "~/lib/utils/paths";
 import AskQuestionModal from "./AskQuestionModal.vue";
+import { useAuthStore } from "~/stores/auth";
 
 // SSR 与客户端水合时 `new Date()`（相对时间计算）结果可能跨天边界导致
 // hydration mismatch。mounted 前渲染空时间，onMounted 后再显示真实相对时间。
@@ -137,7 +138,8 @@ onMounted(() => {
   mounted.value = true;
 });
 
-const activeTab = ref<"help" | "volunteer">("help");
+const auth = useAuthStore();
+const activeTab = ref<"help" | "volunteer" | "mine">("help");
 const askModalOpen = ref(false);
 const loading = ref(true);
 const questions = ref<QuestionSummary[]>([]);
@@ -148,18 +150,27 @@ let requestToken = 0;
 const tabs = [
   { key: "help" as const, label: "page.qa.tabHelp" },
   { key: "volunteer" as const, label: "page.qa.tabVolunteer" },
+  { key: "mine" as const, label: "page.qa.tabMine" },
 ];
 
 const PAGE_SIZE = 50;
 
 async function load() {
+  auth.restoreFromStorage();
   const token = ++requestToken;
   loading.value = true;
+  if (activeTab.value === "mine" && !auth.user?.id) {
+    questions.value = [];
+    hasMore.value = false;
+    loading.value = false;
+    return;
+  }
   const rows = await qaApi.listQuestions(
-    activeTab.value,
+    activeTab.value === "mine" ? undefined : activeTab.value,
     1,
     PAGE_SIZE,
     sortBy.value,
+    activeTab.value === "mine" ? auth.user?.id : undefined,
   );
   if (token !== requestToken) return;
   questions.value = rows;
@@ -172,10 +183,11 @@ async function loadMore() {
   const token = requestToken;
   const next = page.value + 1;
   const rows = await qaApi.listQuestions(
-    activeTab.value,
+    activeTab.value === "mine" ? undefined : activeTab.value,
     next,
     PAGE_SIZE,
     sortBy.value,
+    activeTab.value === "mine" ? auth.user?.id : undefined,
   );
   if (token !== requestToken) return;
   questions.value.push(...rows);

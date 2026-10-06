@@ -36,6 +36,7 @@ export interface ContactLink {
 }
 
 export interface ProfileInfo {
+  user_id?: string | null;
   nickname: string | null;
   avatar: string | null;
   role: string;

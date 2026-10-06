@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import type { Editor, JSONContent } from "@tiptap/core";
 import {
   setAiConfig,
+  getAiConfig,
   requestAiCompletion,
   validateAiEndpoint,
   PROMPT_TEMPLATES,
@@ -53,7 +54,7 @@ export default function AiAssistant({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showSettings, setShowSettings] = useState(false);
-  const [apiEndpoint, setApiEndpoint] = useState("");
+  const [apiEndpoint, setApiEndpoint] = useState(getAiConfig().endpoint ?? "");
   const [apiKey, setApiKey] = useState("");
   // 发起请求时的选区区间：替换结果时按它定位，不能用点击那一刻的选区（用户可能已点别处）
   const requestRangeRef = useRef<{ from: number; to: number } | null>(null);

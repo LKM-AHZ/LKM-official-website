@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { adminLogin } from "~/lib/api/admin";
+import { adminFetch, adminLogin } from "~/lib/api/admin";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -16,6 +16,18 @@ describe("adminLogin", () => {
       ),
     );
     await expect(adminLogin("root", "bad")).rejects.toThrow("用户名或密码错误");
+    vi.unstubAllGlobals();
+  });
+});
+
+describe("adminFetch", () => {
+  it("keeps the admin page open when one widget lacks permission", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("forbidden", { status: 403 })),
+    );
+    const response = await adminFetch("/api/v1/admin/stats");
+    expect(response.status).toBe(403);
     vi.unstubAllGlobals();
   });
 });

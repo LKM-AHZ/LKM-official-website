@@ -127,18 +127,63 @@
           </button>
         </div>
         <div class="pt-4">
-          <div
-            v-if="activeTab === 'posts'"
-            class="text-center py-8 text-sm text-text-muted"
-          >
-            {{ t("profile.noPosts") }}
-          </div>
-          <div
-            v-if="activeTab === 'projects'"
-            class="text-center py-8 text-sm text-text-muted"
-          >
-            {{ t("profile.noProjects") }}
-          </div>
+          <template v-if="activeTab === 'posts'">
+            <a
+              v-for="post in posts"
+              :key="post.id"
+              :href="buildUrl(`/forum/post/${post.id}`)"
+              class="block border-b border-surface-3 px-2 py-3 text-deep-text hover:text-primary"
+              >{{ post.title }}</a
+            >
+            <p
+              v-if="!posts.length"
+              class="text-center py-8 text-sm text-text-muted"
+            >
+              {{ t("profile.noPosts") }}
+            </p>
+          </template>
+          <template v-if="activeTab === 'projects'">
+            <a
+              v-for="project in projects"
+              :key="project.id"
+              :href="buildUrl(`/projects/${project.id}`)"
+              class="block border-b border-surface-3 px-2 py-3 text-deep-text hover:text-primary"
+              >{{ project.title }}</a
+            >
+            <div
+              v-for="application in applications"
+              :key="application.id"
+              class="border-b border-surface-3 px-2 py-3 text-deep-text"
+            >
+              {{ application.title }} ·
+              {{
+                application.status === "pending"
+                  ? t("profile.applicationPending")
+                  : t("profile.applicationRejected")
+              }}
+            </div>
+            <p
+              v-if="!projects.length && !applications.length"
+              class="text-center py-8 text-sm text-text-muted"
+            >
+              {{ t("profile.noProjects") }}
+            </p>
+          </template>
+          <template v-if="activeTab === 'questions'">
+            <a
+              v-for="question in questions"
+              :key="question.id"
+              :href="buildUrl(`/qa/${question.id}`)"
+              class="block border-b border-surface-3 px-2 py-3 text-deep-text hover:text-primary"
+              >{{ question.title }}</a
+            >
+            <p
+              v-if="!questions.length"
+              class="text-center py-8 text-sm text-text-muted"
+            >
+              {{ t("page.qa.empty") }}
+            </p>
+          </template>
           <div v-if="activeTab === 'columns'" class="text-center py-8">
             <p
               v-if="!user.has_column_access"
@@ -178,15 +223,28 @@
 import { ref, computed, onMounted } from "vue";
 import type { ProfileInfo } from "~/lib/api/modules/auth";
 import { authApi } from "~/lib/api";
+import { contentApi, type ContentItem } from "~/lib/api/modules/content";
+import {
+  projectApi,
+  type ProjectItem,
+  type ProjectApplicationItem,
+} from "~/lib/api/modules/projects";
+import { qaApi, type QuestionSummary } from "~/lib/api/modules/qa";
 import { buildUrl } from "~/lib/utils/paths";
 import { titleInfoOf, type TitleInfo } from "../titles";
 import { t } from "~/lib/i18n";
+import { useAuthStore } from "~/stores/auth";
 
 const props = defineProps<{ username: string }>();
 
 const user = ref<(ProfileInfo & { username: string }) | null>(null);
 const loading = ref(true);
 const activeTab = ref("posts");
+const posts = ref<ContentItem[]>([]);
+const projects = ref<ProjectItem[]>([]);
+const applications = ref<ProjectApplicationItem[]>([]);
+const questions = ref<QuestionSummary[]>([]);
+const auth = useAuthStore();
 
 const displayName = computed(
   () => user.value?.nickname || user.value?.username || props.username,
@@ -198,12 +256,17 @@ const tabs = computed(() => [
   {
     key: "posts",
     label: t("profile.tabPosts"),
-    count: user.value?.post_count ?? 0,
+    count: posts.value.length,
   },
   {
     key: "projects",
     label: t("profile.tabProjects"),
-    count: user.value?.project_count ?? 0,
+    count: projects.value.length + applications.value.length,
+  },
+  {
+    key: "questions",
+    label: t("page.qa.title"),
+    count: questions.value.length,
   },
   {
     key: "columns",
@@ -213,15 +276,35 @@ const tabs = computed(() => [
 ]);
 
 onMounted(async () => {
+  auth.restoreFromStorage();
   const result = await authApi.getUserByUsername(props.username);
-  result.match(
-    (data) => {
-      user.value = { ...data, username: props.username };
-    },
-    () => {
-      // user stays null → not-found
-    },
-  );
+  if (result.isOk()) {
+    user.value = { ...result.value, username: props.username };
+    const userId = result.value.user_id;
+    if (userId) {
+      const [postResult, projectRows, questionRows, applicationRows] =
+        await Promise.all([
+          contentApi.listItems({
+            author_id: userId,
+            content_type: "discussion",
+            limit: 50,
+          }),
+          projectApi.listProjects(),
+          qaApi.listQuestions(undefined, 1, 50, "newest", userId),
+          auth.user?.id === userId
+            ? projectApi.listMyApplications()
+            : Promise.resolve([]),
+        ]);
+      posts.value = postResult.isOk() ? postResult.value.items : [];
+      projects.value = projectRows.filter(
+        (project) => project.applicantId === userId,
+      );
+      questions.value = questionRows;
+      applications.value = applicationRows.filter(
+        (application) => application.status !== "approved",
+      );
+    }
+  }
   loading.value = false;
 });
 </script>

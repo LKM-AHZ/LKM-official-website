@@ -44,7 +44,7 @@ async function reload(): Promise<void> {
 }
 
 async function submitAnswer(): Promise<void> {
-  if (!answerText.value.trim() || busy.value) return;
+  if (!answerText.value.trim() || busy.value || isAsker.value) return;
   busy.value = true;
   error.value = "";
   try {
@@ -235,7 +235,9 @@ function formatDate(dateStr: string): string {
             <div
               class="flex items-center gap-3 mt-3 text-xs text-text-muted/60"
             >
-              <span>{{ a.authorId }}</span>
+              <span>{{
+                a.authorName || t("page.communityDetail.forum.anonymousUser")
+              }}</span>
               <span>{{ formatDate(a.createdAt) }}</span>
             </div>
             <button
@@ -255,7 +257,7 @@ function formatDate(dateStr: string): string {
             </button>
           </div>
         </div>
-        <div v-if="canInteract && auth.user" class="mt-5 space-y-2">
+        <div v-if="canInteract && auth.user && !isAsker" class="mt-5 space-y-2">
           <textarea
             v-model="answerText"
             rows="4"

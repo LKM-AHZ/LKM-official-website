@@ -36,6 +36,7 @@ export interface QaAnswer {
   id: string;
   questionId: string;
   authorId: string;
+  authorName: string;
   content: string;
   isAccepted: boolean;
   createdAt: string;
@@ -83,6 +84,7 @@ interface BackendAnswer {
   id: string;
   question_id: string;
   author_id: string;
+  author_name: string;
   content: string;
   is_accepted: boolean;
   created_at: string;
@@ -100,6 +102,7 @@ function mapAnswer(a: BackendAnswer): QaAnswer {
     id: a.id,
     questionId: a.question_id,
     authorId: a.author_id,
+    authorName: a.author_name,
     content: a.content,
     isAccepted: a.is_accepted,
     createdAt: a.created_at,
@@ -143,6 +146,7 @@ export const qaApi = {
     page = 1,
     limit = 20,
     sort: QaSort = "newest",
+    authorId?: string,
   ): Promise<QuestionSummary[]> {
     const res = await get<PaginatedResponse<BackendQuestion>>(
       "/api/v1/content/qa/questions",
@@ -151,6 +155,7 @@ export const qaApi = {
         limit,
         sort,
         ...(category ? { category } : {}),
+        ...(authorId ? { author_id: authorId } : {}),
       },
     );
     if (res.isErr()) return [];

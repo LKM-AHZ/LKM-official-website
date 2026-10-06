@@ -302,6 +302,7 @@ export const contentApi = {
     limit?: number;
     board_id?: string;
     content_type?: ContentType;
+    author_id?: string;
   }) {
     const r = await graphqlClient
       .query(CONTENT_ITEMS, {
@@ -309,6 +310,7 @@ export const contentApi = {
         pageSize: args?.limit ?? 20,
         boardId: args?.board_id ?? null,
         contentType: args?.content_type ?? null,
+        authorId: args?.author_id ?? null,
       })
       .toPromise();
     if (r.error) return err(mapErr(r.error));

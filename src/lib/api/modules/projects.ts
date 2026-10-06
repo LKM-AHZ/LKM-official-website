@@ -7,6 +7,7 @@ import { get, post } from "../../http/client";
 /** 项目广场展示形状（camelCase）。 */
 export interface ProjectItem {
   id: string;
+  applicantId: string;
   title: string;
   summary: string;
   description: string;
@@ -38,6 +39,13 @@ export interface ProjectApplicationInput {
   summary: string;
   description: string;
   memberClaims?: ProjectMemberClaim[];
+}
+
+export interface ProjectApplicationItem {
+  id: string;
+  title: string;
+  summary: string;
+  status: string;
 }
 
 /** 后端 ProjectOut 的 snake_case 形状。 */
@@ -73,6 +81,7 @@ interface BackendProject {
 function mapProject(b: BackendProject): ProjectItem {
   return {
     id: b.id,
+    applicantId: b.applicant_id,
     title: b.title,
     summary: b.summary,
     description: b.description,
@@ -99,6 +108,12 @@ function mapProject(b: BackendProject): ProjectItem {
 }
 
 export const projectApi = {
+  async listMyApplications(): Promise<ProjectApplicationItem[]> {
+    const res = await get<ProjectApplicationItem[]>(
+      "/api/v1/projects/applications/me",
+    );
+    return res.isOk() ? res.value : [];
+  },
   /** 项目广场列表。 */
   async listProjects(): Promise<ProjectItem[]> {
     const res = await get<BackendProject[]>("/api/v1/projects");

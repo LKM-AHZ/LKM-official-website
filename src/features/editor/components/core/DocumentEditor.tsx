@@ -14,6 +14,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { getEditorExtensions } from "../../engine/extensions/index";
 import { useEditorPersistence } from "../../hooks/useEditorPersistence";
 import { exportMdx } from "../../engine/mdx/index";
+import { firstHeadingTitle } from "../../engine/mdx/heading-title";
 import type {
   PersistenceAdapter,
   EditorMode,
@@ -42,12 +43,6 @@ function deriveSlug(title: string): string {
     .replace(/\s+/g, "-")
     .replace(/[^\w\u4e00-\u9fa5-]/g, "");
   return s || "post";
-}
-
-/** 从 MDX 首行 `# ` 提取标题；无标题返回空串 */
-function firstHeadingTitle(mdx: string): string {
-  const line = (mdx.split("\n")[0] ?? "").replace(/^#\s*/, "").trim();
-  return line;
 }
 
 // 懒加载：CodeMirror（仅在切换到源码模式时加载）
@@ -101,6 +96,7 @@ export default function DocumentEditor({
     lastValidJsonRef: lastValidEditorJsonRef,
   } = useEditorPersistence(docId, adapter);
   const [mode, setMode] = useState<EditorMode>("richtext");
+  const switchingModeRef = useRef(false);
 
   // Slash 菜单状态
   const [slashOpen, setSlashOpen] = useState(false);
@@ -505,57 +501,61 @@ export default function DocumentEditor({
   // 模式切换
   const handleModeChange = useCallback(
     async (newMode: EditorMode) => {
-      if (newMode === mode) return;
-
-      if (mode === "richtext" && newMode === "source") {
-        if (editor) {
-          const json = editor.getJSON();
-          const doc =
-            typeof json === "object" && json !== null && "content" in json
-              ? (json as { content: unknown[] }).content
-              : [];
-          // 同步调用 exportMdx — 内部全是纯计算无网络请求，避免无意义 await
-          const result = exportMdx(
-            doc as unknown[] as Parameters<typeof exportMdx>[0],
-            frontmatterRef.current,
-          );
-          sourceMdxRef.current = result.mdx;
-          lastValidEditorJsonRef.current = editor.getJSON();
-        }
-      }
-
-      if (mode === "source" && newMode === "richtext") {
-        if (sourceKind === "html") {
+      if (newMode === mode || switchingModeRef.current) return;
+      switchingModeRef.current = true;
+      try {
+        if (mode === "richtext" && newMode === "source") {
           if (editor) {
+            const json = editor.getJSON();
+            const doc =
+              typeof json === "object" && json !== null && "content" in json
+                ? (json as { content: unknown[] }).content
+                : [];
+            // 同步调用 exportMdx — 内部全是纯计算无网络请求，避免无意义 await
+            const result = exportMdx(
+              doc as unknown[] as Parameters<typeof exportMdx>[0],
+              frontmatterRef.current,
+            );
+            sourceMdxRef.current = result.mdx;
+            setHtmlSource(editor.getHTML());
+            lastValidEditorJsonRef.current = editor.getJSON();
+          }
+        }
+
+        if (mode === "source" && newMode !== "source") {
+          if (sourceKind === "html") {
+            if (editor) {
+              try {
+                editor.commands.setContent(htmlSource);
+                lastValidEditorJsonRef.current = editor.getJSON();
+              } catch (err) {
+                console.warn("[DocumentEditor] HTML 解析失败:", err);
+                alert("HTML 解析失败，请检查源码格式后重试");
+                return;
+              }
+            }
+          } else {
             try {
-              editor.commands.setContent(htmlSource);
-              lastValidEditorJsonRef.current = editor.getJSON();
+              const result = await importMdxContent(sourceMdxRef.current);
+              if (editor) {
+                editor.commands.setContent({
+                  type: "doc",
+                  content: result.content,
+                });
+                lastValidEditorJsonRef.current = editor.getJSON();
+              }
             } catch (err) {
-              console.warn("[DocumentEditor] HTML 解析失败:", err);
-              alert("HTML 解析失败，请检查源码格式后重试");
+              console.warn("[DocumentEditor] MDX 手动解析失败:", err);
+              alert(t("editor.mdxParseError"));
               return;
             }
           }
-        } else {
-          try {
-            const result = await importMdxContent(sourceMdxRef.current);
-            if (editor) {
-              editor.commands.clearContent();
-              editor.commands.setContent({
-                type: "doc",
-                content: result.content,
-              });
-              lastValidEditorJsonRef.current = editor.getJSON();
-            }
-          } catch (err) {
-            console.warn("[DocumentEditor] MDX 手动解析失败:", err);
-            alert(t("editor.mdxParseError"));
-            return;
-          }
         }
-      }
 
-      setMode(newMode);
+        setMode(newMode);
+      } finally {
+        switchingModeRef.current = false;
+      }
     },
     [
       mode,
@@ -584,6 +584,39 @@ export default function DocumentEditor({
   const handleHtmlSourceChange = useCallback((html: string) => {
     setHtmlSource(html);
   }, []);
+
+  const handleSourceKindChange = useCallback(
+    async (nextKind: "mdx" | "html") => {
+      if (!editor || nextKind === sourceKind) return;
+      try {
+        if (nextKind === "html") {
+          const parsed = await importMdxContent(sourceMdxRef.current);
+          editor.commands.setContent({ type: "doc", content: parsed.content });
+          setHtmlSource(editor.getHTML());
+        } else {
+          editor.commands.setContent(htmlSource);
+          const json = editor.getJSON();
+          sourceMdxRef.current = exportMdx(
+            Array.isArray(json.content) ? json.content : [],
+            frontmatterRef.current,
+          ).mdx;
+        }
+        lastValidEditorJsonRef.current = editor.getJSON();
+        setSourceKind(nextKind);
+      } catch {
+        alert(t("editor.mdxParseError"));
+      }
+    },
+    [
+      editor,
+      sourceKind,
+      htmlSource,
+      importMdxContent,
+      sourceMdxRef,
+      frontmatterRef,
+      lastValidEditorJsonRef,
+    ],
+  );
 
   const handlePublish = useCallback(
     async (title: string, slug: string) => {
@@ -993,14 +1026,14 @@ export default function DocumentEditor({
             <button
               type="button"
               className={`rte-mode-tab ${sourceKind === "mdx" ? "is-active" : ""}`}
-              onClick={() => setSourceKind("mdx")}
+              onClick={() => void handleSourceKindChange("mdx")}
             >
               MDX
             </button>
             <button
               type="button"
               className={`rte-mode-tab ${sourceKind === "html" ? "is-active" : ""}`}
-              onClick={() => setSourceKind("html")}
+              onClick={() => void handleSourceKindChange("html")}
             >
               HTML
             </button>
