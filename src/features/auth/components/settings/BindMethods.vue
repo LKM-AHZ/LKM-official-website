@@ -64,7 +64,7 @@
       <div class="flex-1">
         <input
           v-model.trim="email"
-          type="email"
+          :type="pending.email === 'request' ? 'email' : 'text'"
           class="input input-bordered input-sm w-full"
           :placeholder="
             pending.email === 'request'

@@ -131,11 +131,14 @@ export async function adminLogin(
   password: string,
 ): Promise<AdminLoginResult> {
   resetRedirectGuard();
-  const res = await adminFetch("/api/v1/admin/auth/login", {
+  // 登录拒绝是凭证错误，不是已有会话过期；交给 readAdminResp 显示后端原因。
+  const result = await apiFetch("/api/v1/admin/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
+  if (result.isErr()) throw result.error;
+  const res = result.value;
   const body = await readAdminResp(res);
   // 校验载荷形状：登录接口返回 null/缺字段时不能直接断言成 AdminUser，
   // 否则调用方会拿到「字段全 undefined 的合法对象」

@@ -8,6 +8,12 @@ export interface UserInfo {
   id: string;
   username: string;
   account_level: string;
+  role?: string;
+  email?: string | null;
+  phone?: string | null;
+  nickname?: string | null;
+  avatar?: string | null;
+  contact_links?: ContactLink[];
 }
 
 export interface TokenData {

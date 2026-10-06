@@ -318,7 +318,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import { getAuthPath } from "~/features/auth/constants/auth-paths";
 import { t } from "~/lib/i18n";
@@ -328,6 +328,7 @@ import TwoFactorSetup from "~/features/auth/components/settings/TwoFactorSetup.v
 import PasskeySetup from "~/features/auth/components/settings/PasskeySetup.vue";
 import ConfirmDialog from "~/features/auth/components/settings/ConfirmDialog.vue";
 import { authApi, type ContactLink } from "~/lib/api/modules/auth";
+import type { User } from "~/types/auth";
 
 const store = useAuthStore();
 
@@ -355,6 +356,25 @@ const editLinks = ref<ContactLink[]>(
 );
 const editError = ref("");
 const confirmLogout = ref(false);
+
+watch(
+  () => store.user?.nickname,
+  (nickname) => {
+    editNickname.value = nickname || "";
+  },
+  { immediate: true },
+);
+watch(
+  () => store.user?.contact_links,
+  (links) => {
+    editLinks.value = (links || []).map((link) => ({
+      name: link.name,
+      icon: link.icon ?? "",
+      url: link.url ?? "",
+    }));
+  },
+  { immediate: true },
+);
 
 const avatarLetter = computed(() =>
   (store.user?.nickname || store.user?.username || "?").charAt(0).toUpperCase(),
@@ -387,7 +407,8 @@ const levelLabel = computed(() => {
 });
 
 // TwoFactorSetup 的 update 事件不再携带 payload（它只用于刷新提示）
-function handleUserUpdate() {
+function handleUserUpdate(updated?: User) {
+  if (updated) store.updateUser(updated);
   message.value = t("settings.securityUpdated");
   setTimeout(() => (message.value = ""), 3000);
 }
@@ -398,13 +419,17 @@ async function handleSaveNickname() {
   try {
     if (store.user) {
       const r = await authApi.editProfile(store.user.id, {
-        nickname: editNickname.value || null,
+        nickname: editNickname.value.trim() || null,
       });
       if (r.isErr()) {
         editError.value = r.error.message || t("settings.saveFailed");
         return;
       }
-      store.updateUser({ ...store.user, nickname: r.value?.nickname ?? null });
+      if (!r.value || !("nickname" in r.value)) {
+        editError.value = t("settings.saveFailed");
+        return;
+      }
+      store.updateUser({ ...store.user, nickname: r.value.nickname });
       message.value = t("settings.profileUpdated");
       setTimeout(() => (message.value = ""), 3000);
     }
@@ -459,7 +484,10 @@ function removeLink(index: number) {
 function normalizeHttpUrl(raw: string | undefined): string | undefined {
   const v = (raw ?? "").trim();
   if (!v) return undefined;
-  return v.startsWith("/") || /^https?:\/\//i.test(v) ? v : undefined;
+  return !v.includes("\\") &&
+    ((v.startsWith("/") && !v.startsWith("//")) || /^https?:\/\//i.test(v))
+    ? v
+    : undefined;
 }
 async function handleSaveLinks() {
   saving.value = true;
@@ -480,7 +508,11 @@ async function handleSaveLinks() {
         editError.value = r.error.message || t("settings.saveFailed");
         return;
       }
-      store.updateUser({ ...store.user, contact_links: cleaned });
+      if (!r.value || !Array.isArray(r.value.contact_links)) {
+        editError.value = t("settings.saveFailed");
+        return;
+      }
+      store.updateUser({ ...store.user, contact_links: r.value.contact_links });
       message.value = t("settings.contactsUpdated");
       setTimeout(() => (message.value = ""), 3000);
     }

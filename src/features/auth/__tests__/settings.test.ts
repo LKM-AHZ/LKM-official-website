@@ -2,12 +2,14 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { setActivePinia, createPinia } from "pinia";
+import { defineComponent, h } from "vue";
 import BindMethods from "../components/settings/BindMethods.vue";
 import TwoFactorSetup from "../components/settings/TwoFactorSetup.vue";
 import PasskeySetup from "../components/settings/PasskeySetup.vue";
 import ConfirmDialog from "../components/settings/ConfirmDialog.vue";
 import ProtectedRoute from "../components/settings/ProtectedRoute.vue";
-import { authApi } from "~/lib/api/modules/auth";
+import SettingsPage from "../components/settings/SettingsPage.vue";
+import { authApi, type UserInfo } from "~/lib/api/modules/auth";
 import { ok } from "~/lib/errors/result";
 import { useAuthStore } from "~/stores/auth";
 
@@ -81,6 +83,33 @@ describe("BindMethods", () => {
     expect(w.text()).not.toContain("输入验证码");
     expect(requestSpy).not.toHaveBeenCalled();
   });
+
+  it("邮箱验证码阶段允许提交数字验证码并更新绑定态", async () => {
+    vi.spyOn(authApi, "bindEmailRequest").mockResolvedValue(
+      ok({ message: "sent", record_id: "request-1" }),
+    );
+    const verify = vi
+      .spyOn(authApi, "bindEmailVerify")
+      .mockResolvedValue(ok({ message: "bound" }));
+    const wrapper = mount(BindMethods, {
+      props: { user: makeUser() as never },
+    });
+    await flushPromises();
+    await wrapper.find('[data-testid="bind-email"]').trigger("click");
+    const form = wrapper.find("form");
+    await form.find("input").setValue("new@example.com");
+    await form.trigger("submit");
+    await flushPromises();
+    const codeInput = form.find("input");
+    expect(codeInput.attributes("type")).toBe("text");
+    await codeInput.setValue("123456");
+    await form.trigger("submit");
+    await flushPromises();
+    expect(verify).toHaveBeenCalledWith("new@example.com", "123456");
+    expect(wrapper.emitted("update")?.[0]?.[0]).toMatchObject({
+      email: "new@example.com",
+    });
+  });
 });
 
 describe("TwoFactorSetup", () => {
@@ -149,5 +178,131 @@ describe("ProtectedRoute", () => {
     await flushPromises();
     expect(w.text()).toContain("请先登录");
     expect(w.text()).not.toContain("内容");
+  });
+});
+
+describe("SettingsPage", () => {
+  it("applies changed account bindings to the shared user state", async () => {
+    const store = useAuthStore();
+    store.session = "authenticated";
+    store.user = makeUser() as UserInfo;
+    const BindUpdate = defineComponent({
+      props: ["user"],
+      emits: ["update"],
+      setup(props, { emit }) {
+        return () =>
+          h(
+            "button",
+            {
+              "data-testid": "bind-update",
+              onClick: () =>
+                emit("update", {
+                  ...props.user,
+                  email: "new@example.com",
+                }),
+            },
+            "Update binding",
+          );
+      },
+    });
+    const page = mount(SettingsPage, {
+      global: {
+        stubs: {
+          BindMethods: BindUpdate,
+          TwoFactorSetup: true,
+          PasskeySetup: true,
+          ConfirmDialog: true,
+        },
+      },
+    });
+    await page.find('[data-testid="bind-update"]').trigger("click");
+    expect((store.user as UserInfo).email).toBe("new@example.com");
+  });
+
+  it("loads server profile values and applies saved values from the response", async () => {
+    const store = useAuthStore();
+    const user = makeUser();
+    store.session = "authenticated";
+    store.user = user as UserInfo;
+    const save = vi.spyOn(authApi, "editProfile").mockResolvedValue(
+      ok({
+        nickname: "Server Name",
+        avatar: null,
+        role: "member",
+        contact_links: [{ name: "Home", url: "https://example.com" }],
+      }),
+    );
+    const page = mount(SettingsPage, {
+      global: {
+        stubs: {
+          BindMethods: true,
+          TwoFactorSetup: true,
+          PasskeySetup: true,
+          ConfirmDialog: true,
+        },
+      },
+    });
+    store.updateUser({
+      ...user,
+      nickname: "Old Name",
+      contact_links: [{ name: "Old", url: "https://old.example.com" }],
+    });
+    await page.vm.$nextTick();
+    const nickname = page.find("#settings-nickname");
+    expect((nickname.element as HTMLInputElement).value).toBe("Old Name");
+    await nickname.setValue("Edited Name");
+    await page.find("form").trigger("submit");
+    await flushPromises();
+    expect(save).toHaveBeenCalledWith(user.id, {
+      nickname: "Edited Name",
+    });
+    expect((store.user as UserInfo).nickname).toBe("Server Name");
+    expect((nickname.element as HTMLInputElement).value).toBe("Server Name");
+  });
+
+  it("sends contact links and uses the persisted response", async () => {
+    const store = useAuthStore();
+    const user = makeUser({
+      contact_links: [{ name: "Old", url: "https://old.example.com" }],
+    });
+    store.session = "authenticated";
+    store.user = user as UserInfo;
+    const persisted = [{ name: "Home", url: "https://example.com" }];
+    const save = vi.spyOn(authApi, "editProfile").mockResolvedValue(
+      ok({
+        nickname: null,
+        avatar: null,
+        role: "member",
+        contact_links: persisted,
+      }),
+    );
+    const page = mount(SettingsPage, {
+      global: {
+        stubs: {
+          BindMethods: true,
+          TwoFactorSetup: true,
+          PasskeySetup: true,
+          ConfirmDialog: true,
+        },
+      },
+    });
+    const name = page.find('input[placeholder="名称（如 QQ / GitHub）"]');
+    const url = page.find('input[placeholder="链接 / 账号（选填）"]');
+    expect(name.exists()).toBe(true);
+    expect(url.exists()).toBe(true);
+    await name.setValue("Home");
+    await url.setValue("https://example.com");
+    const saveButton = page
+      .findAll("button")
+      .find((button) => button.text().includes("保存联系方式"));
+    expect(saveButton).toBeDefined();
+    await saveButton!.trigger("click");
+    await flushPromises();
+    expect(save).toHaveBeenCalledWith(user.id, {
+      contact_links: [
+        { name: "Home", icon: undefined, url: "https://example.com" },
+      ],
+    });
+    expect((store.user as UserInfo).contact_links).toEqual(persisted);
   });
 });
