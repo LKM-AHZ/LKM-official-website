@@ -30,15 +30,39 @@ const currentRoute = ref<StarHopeRoute>("dashboard");
  */
 function buildNavItems(): NavItem[] {
   return [
-    { route: "dashboard", label: t("starhope.nav.dashboard"), icon: "📊" },
-    { route: "bank", label: t("starhope.nav.bank"), icon: "📚" },
-    { route: "practice", label: t("starhope.nav.practice"), icon: "✏️" },
-    { route: "exam", label: t("starhope.nav.exam"), icon: "📝" },
-    { route: "wrong-book", label: t("starhope.nav.wrongBook"), icon: "📕" },
-    { route: "ai", label: t("starhope.nav.ai"), icon: "🤖" },
-    { route: "reader", label: t("starhope.nav.reader"), icon: "📖" },
-    { route: "plugins", label: t("starhope.nav.plugins"), icon: "🧩" },
-    { route: "settings", label: t("starhope.nav.settings"), icon: "⚙️" },
+    {
+      route: "dashboard",
+      label: t("starhope.nav.dashboard"),
+      icon: "tabler:layout-dashboard",
+    },
+    { route: "bank", label: t("starhope.nav.bank"), icon: "tabler:books" },
+    {
+      route: "practice",
+      label: t("starhope.nav.practice"),
+      icon: "tabler:pencil",
+    },
+    {
+      route: "exam",
+      label: t("starhope.nav.exam"),
+      icon: "tabler:clipboard-list",
+    },
+    {
+      route: "wrong-book",
+      label: t("starhope.nav.wrongBook"),
+      icon: "tabler:bookmarks",
+    },
+    { route: "ai", label: t("starhope.nav.ai"), icon: "tabler:robot" },
+    { route: "reader", label: t("starhope.nav.reader"), icon: "tabler:book-2" },
+    {
+      route: "plugins",
+      label: t("starhope.nav.plugins"),
+      icon: "tabler:puzzle",
+    },
+    {
+      route: "settings",
+      label: t("starhope.nav.settings"),
+      icon: "tabler:settings",
+    },
   ];
 }
 

@@ -3887,6 +3887,8 @@ export const zh_CN: DeepStringRecord<typeof en> = {
   starhope: {
     appName: "StarHope",
     tagline: "学习助手",
+    menu: "学习助手菜单",
+    backToSite: "返回应用中心",
     user: "用户",
     logout: "退出登录",
 
@@ -3956,7 +3958,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
 
     reader: {
       title: "阅读器",
-      emptyHint: "上传 PDF 开始阅读和标注",
+      emptyHint: "PDF 阅读功能正在完善",
     },
 
     plugins: {

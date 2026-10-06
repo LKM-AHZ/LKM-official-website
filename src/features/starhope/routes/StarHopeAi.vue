@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch } from "vue";
+import { Icon } from "@iconify/vue";
 import { useAiStore } from "../stores/ai";
-import type { AiAgent } from "~/features/starhope/types";
 import { t } from "~/lib/i18n";
 
 const ai = useAiStore();
 const inputText = ref("");
-const _showAgentEditor = ref(false);
-const _editingAgent = ref<AiAgent | null>(null);
 const messagesEl = ref<HTMLElement | null>(null);
 
 // 追加消息后滚到底：否则新消息与「生成中」提示会停在视口之外，用户看不到反馈
@@ -41,123 +39,162 @@ function onEnterKey(e: KeyboardEvent): void {
 </script>
 
 <template>
-  <div class="flex h-[calc(100vh-4rem)]">
-    <div class="w-56 shrink-0 border-r border-surface-3 p-4 flex flex-col">
-      <h3 class="text-sm font-semibold text-deep-text mb-3">
+  <div
+    class="mx-auto w-full max-w-6xl px-4 py-7 pb-16 sm:px-7 sm:py-9 lg:px-10"
+  >
+    <header class="mb-6 flex items-center gap-4">
+      <span
+        class="flex size-12 items-center justify-center rounded-2xl bg-btn-regular-bg text-primary-readable"
+        ><Icon icon="tabler:robot" class="size-6" aria-hidden="true"
+      /></span>
+      <h1
+        class="text-xl font-semibold tracking-tight text-deep-text sm:text-2xl"
+      >
         {{ t("starhope.ai.title") }}
-      </h3>
-      <!-- loadAgents 失败时 store 会写 ai.error：不读它侧栏就永远空白且毫无反馈 -->
-      <p v-if="ai.error.value" class="mb-2 text-xs text-red-500">
-        {{ ai.error.value }}
-      </p>
-      <div class="space-y-1 flex-1 overflow-y-auto">
-        <div
-          v-for="agent in ai.agents.value"
-          :key="agent.id"
-          role="button"
-          tabindex="0"
-          class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 cursor-pointer"
-          :class="
-            ai.currentAgentId.value === agent.id
-              ? 'bg-primary/10 text-primary'
-              : 'text-text-muted hover:bg-surface-3'
-          "
-          @click="ai.selectAgent(agent.id)"
-          @keydown.enter="ai.selectAgent(agent.id)"
-          @keydown.space.prevent="ai.selectAgent(agent.id)"
-        >
-          <span>{{ agent.name }}</span>
-        </div>
-      </div>
-      <button class="btn-neutral rounded-lg w-full py-2 text-sm mt-2">
-        + {{ t("starhope.ai.newAgent") }}
-      </button>
-    </div>
-    <div class="flex-1 flex flex-col min-w-0">
-      <div v-if="ai.currentAgent.value" class="flex-1 flex flex-col">
-        <div
-          class="border-b border-surface-3 px-6 py-3 flex items-center justify-between"
-        >
-          <div>
-            <h2 class="text-sm font-semibold text-deep-text">
-              {{ ai.currentAgent.value.name }}
-            </h2>
-            <p class="text-xs text-text-muted">
-              {{ ai.currentAgent.value.model }}
-            </p>
-          </div>
+      </h1>
+    </header>
+    <div
+      class="card-base flex h-[min(42rem,calc(100dvh-13rem))] min-h-96 flex-col md:flex-row"
+    >
+      <aside
+        class="shrink-0 border-b border-surface-3 bg-page-bg p-3 md:w-48 md:border-b-0 md:border-r md:p-4"
+      >
+        <p v-if="ai.error.value" role="alert" class="mb-3 text-xs text-red-500">
+          {{ ai.error.value }}
+        </p>
+        <div class="flex gap-2 overflow-x-auto md:flex-col">
           <button
-            @click="ai.clearConversation()"
-            class="text-xs text-text-muted hover:text-red-500"
+            v-for="agent in ai.agents.value"
+            :key="agent.id"
+            type="button"
+            class="flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors md:w-full"
+            :class="
+              ai.currentAgentId.value === agent.id
+                ? 'bg-btn-regular-bg font-medium text-primary-readable'
+                : 'text-text-muted hover:bg-btn-plain-bg-hover'
+            "
+            :aria-current="
+              ai.currentAgentId.value === agent.id ? 'true' : undefined
+            "
+            @click="ai.selectAgent(agent.id)"
           >
-            {{ t("starhope.ai.clearConversation") }}
+            <Icon
+              icon="tabler:robot"
+              class="size-4 shrink-0"
+              aria-hidden="true"
+            />
+            <span class="truncate">{{ agent.name }}</span>
           </button>
         </div>
-        <div
-          ref="messagesEl"
-          class="flex-1 overflow-y-auto px-6 py-4 space-y-4"
-        >
+      </aside>
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+        <template v-if="ai.currentAgent.value">
           <div
-            v-for="msg in ai.messages.value"
-            :key="msg.id"
-            class="flex"
-            :class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
+            class="flex items-center justify-between gap-3 border-b border-surface-3 px-4 py-3 sm:px-5"
           >
-            <div
-              class="max-w-[75%] rounded-2xl px-4 py-3 text-sm"
-              :class="
-                msg.role === 'user'
-                  ? 'bg-primary text-white'
-                  : 'bg-surface-3 text-deep-text'
-              "
-            >
-              <div class="whitespace-pre-wrap leading-relaxed">
-                {{ msg.content }}
-              </div>
+            <div class="min-w-0">
+              <h2 class="truncate text-sm font-semibold text-deep-text">
+                {{ ai.currentAgent.value.name }}
+              </h2>
+              <p class="text-xs text-text-muted">
+                {{ ai.currentAgent.value.model }}
+              </p>
             </div>
+            <button
+              type="button"
+              :disabled="
+                ai.messages.value.length === 0 || ai.isGenerating.value
+              "
+              class="shrink-0 rounded-lg px-2 py-1.5 text-xs text-text-muted hover:bg-btn-plain-bg-hover hover:text-deep-text disabled:opacity-40"
+              @click="ai.clearConversation()"
+            >
+              {{ t("starhope.ai.clearConversation") }}
+            </button>
           </div>
           <div
-            v-if="ai.messages.value.length === 0 && !ai.isGenerating.value"
-            class="flex items-center justify-center h-full"
+            ref="messagesEl"
+            class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6"
           >
-            <div class="text-center">
-              <div class="text-5xl mb-4">🤖</div>
-              <h3 class="text-lg font-semibold text-deep-text">
+            <div
+              v-for="msg in ai.messages.value"
+              :key="msg.id"
+              class="flex"
+              :class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
+            >
+              <div
+                class="max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 sm:max-w-[75%]"
+                :class="
+                  msg.role === 'user'
+                    ? 'bg-primary-action text-white'
+                    : 'bg-surface-3 text-deep-text'
+                "
+              >
+                <div class="whitespace-pre-wrap">{{ msg.content }}</div>
+              </div>
+            </div>
+            <div
+              v-if="ai.isGenerating.value"
+              role="status"
+              class="w-fit rounded-2xl bg-surface-3 px-4 py-3 text-sm text-text-muted"
+            >
+              {{ t("common.loading") }}
+            </div>
+            <div
+              v-if="ai.messages.value.length === 0 && !ai.isGenerating.value"
+              class="flex h-full flex-col items-center justify-center text-center"
+            >
+              <span
+                class="mb-4 flex size-14 items-center justify-center rounded-2xl bg-btn-regular-bg text-primary-readable"
+                ><Icon
+                  icon="tabler:message-circle"
+                  class="size-7"
+                  aria-hidden="true"
+              /></span>
+              <h3 class="text-sm font-semibold text-deep-text">
                 {{ ai.currentAgent.value.name }}
               </h3>
-              <p class="text-sm text-text-muted">
+              <p class="mt-1 text-sm text-text-muted">
                 {{ t("starhope.ai.startHint") }}
               </p>
             </div>
           </div>
-        </div>
-        <div class="border-t border-surface-3 px-6 py-4">
-          <div class="flex gap-3">
-            <textarea
-              v-model="inputText"
-              rows="2"
-              @keydown.enter.exact.prevent="onEnterKey"
-              @compositionstart="composing = true"
-              @compositionend="composing = false"
-              class="flex-1 rounded-xl border border-surface-3 bg-page-bg px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none"
-              :placeholder="t('starhope.ai.inputPlaceholder')"
-              :disabled="ai.isGenerating.value"
-            ></textarea>
-            <button
-              @click="handleSend"
-              :disabled="!inputText.trim() || ai.isGenerating.value"
-              class="btn-primary rounded-xl px-5 py-3 text-sm font-semibold shrink-0 disabled:opacity-50"
-            >
-              {{ ai.isGenerating.value ? "..." : t("starhope.ai.send") }}
-            </button>
+          <div class="border-t border-surface-3 bg-card-bg p-3 sm:p-4">
+            <div class="flex items-end gap-2">
+              <textarea
+                v-model="inputText"
+                rows="2"
+                @keydown.enter.exact.prevent="onEnterKey"
+                @compositionstart="composing = true"
+                @compositionend="composing = false"
+                class="min-w-0 flex-1 resize-none rounded-xl border border-surface-3 bg-page-bg px-3 py-2.5 text-sm text-deep-text outline-none focus:border-primary-action"
+                :placeholder="t('starhope.ai.inputPlaceholder')"
+                :aria-label="t('starhope.ai.inputPlaceholder')"
+                :disabled="ai.isGenerating.value"
+              ></textarea>
+              <button
+                type="button"
+                @click="handleSend"
+                :aria-label="t('starhope.ai.send')"
+                :disabled="!inputText.trim() || ai.isGenerating.value"
+                class="btn-primary flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-semibold disabled:opacity-50"
+              >
+                <Icon
+                  icon="tabler:send"
+                  class="size-4"
+                  aria-hidden="true"
+                /><span class="hidden sm:inline">{{
+                  t("starhope.ai.send")
+                }}</span>
+              </button>
+            </div>
           </div>
+        </template>
+        <div
+          v-else
+          class="flex flex-1 items-center justify-center p-6 text-center text-sm text-text-muted"
+        >
+          {{ t("starhope.ai.selectHint") }}
         </div>
-      </div>
-      <div
-        v-else
-        class="flex items-center justify-center h-full text-text-muted"
-      >
-        <p>{{ t("starhope.ai.selectHint") }}</p>
       </div>
     </div>
   </div>

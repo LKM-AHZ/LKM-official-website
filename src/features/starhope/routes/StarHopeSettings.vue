@@ -3,6 +3,8 @@ import { ref } from "vue";
 import { db } from "../stores/db";
 import type { Question } from "~/features/starhope/types";
 import { t } from "~/lib/i18n";
+import { Icon } from "@iconify/vue";
+import StarHopePage from "../components/StarHopePage.vue";
 const exportStatus = ref("");
 // 导出期间置位：await 期间按钮仍可点，会并发起多次导出、让状态文案相互覆盖（失败盖掉成功）
 const isExporting = ref(false);
@@ -52,24 +54,39 @@ async function exportData() {
 </script>
 
 <template>
-  <div class="site-content-frame">
-    <h1 class="text-2xl font-bold text-deep-text mb-6">
-      {{ t("starhope.settings.title") }}
-    </h1>
-    <div class="card-base p-6">
-      <h3 class="text-sm font-semibold text-deep-text mb-3">
-        {{ t("starhope.settings.dataManagement") }}
-      </h3>
+  <StarHopePage :title="t('starhope.settings.title')" icon="tabler:settings">
+    <div
+      class="card-base flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+    >
+      <div class="flex items-center gap-4">
+        <span
+          class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-btn-regular-bg text-primary-readable"
+          ><Icon
+            icon="tabler:database-export"
+            class="size-5"
+            aria-hidden="true"
+        /></span>
+        <div>
+          <h2 class="text-sm font-semibold text-deep-text">
+            {{ t("starhope.settings.dataManagement") }}
+          </h2>
+          <p
+            v-if="exportStatus"
+            role="status"
+            class="mt-1 text-xs text-text-muted"
+          >
+            {{ exportStatus }}
+          </p>
+        </div>
+      </div>
       <button
         @click="exportData"
         :disabled="isExporting"
-        class="btn-primary rounded-lg px-4 py-2 text-sm"
+        class="btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm disabled:opacity-50"
       >
+        <Icon icon="tabler:download" class="size-4" aria-hidden="true" />
         {{ t("starhope.settings.exportBank") }}
       </button>
-      <p v-if="exportStatus" class="text-sm text-text-muted mt-2">
-        {{ exportStatus }}
-      </p>
     </div>
-  </div>
+  </StarHopePage>
 </template>

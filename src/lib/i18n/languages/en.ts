@@ -4048,6 +4048,8 @@ export const en = {
   starhope: {
     appName: "StarHope",
     tagline: "Learning Assistant",
+    menu: "Learning assistant menu",
+    backToSite: "Back to apps",
     user: "User",
     logout: "Log out",
 
@@ -4124,7 +4126,7 @@ export const en = {
 
     reader: {
       title: "Reader",
-      emptyHint: "Upload a PDF to start reading and annotating",
+      emptyHint: "PDF reading is being prepared",
     },
 
     plugins: {

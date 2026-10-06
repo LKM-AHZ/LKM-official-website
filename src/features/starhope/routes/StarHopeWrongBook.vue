@@ -3,6 +3,8 @@ import { ref, onMounted } from "vue";
 import { usePracticeStore } from "../stores/practice";
 import type { Question } from "~/features/starhope/types";
 import { t } from "~/lib/i18n";
+import StarHopePage from "../components/StarHopePage.vue";
+import StarHopeEmptyState from "../components/StarHopeEmptyState.vue";
 const practice = usePracticeStore();
 const wrongQuestions = ref<Question[]>([]);
 // 初值同样是 []：不区分「正在读 IndexedDB」与「真的一道错题都没有」，
@@ -24,34 +26,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="site-content-frame">
-    <h1 class="text-2xl font-bold text-deep-text mb-6">
-      {{ t("starhope.wrongBook.title") }}
-    </h1>
-    <p v-if="loading" class="card-base p-8 text-center text-text-muted">
-      {{ t("common.loading") }}
-    </p>
-    <div
+  <StarHopePage :title="t('starhope.wrongBook.title')" icon="tabler:bookmarks">
+    <StarHopeEmptyState
+      v-if="loading"
+      icon="tabler:bookmarks"
+      :message="t('common.loading')"
+    />
+    <StarHopeEmptyState
       v-else-if="loadFailed"
-      class="card-base p-8 text-center text-text-muted"
-    >
-      {{ t("messages.operationFailed") }}
-    </div>
-    <div
+      icon="tabler:alert-circle"
+      :message="t('messages.operationFailed')"
+    />
+    <StarHopeEmptyState
       v-else-if="wrongQuestions.length === 0"
-      class="card-base p-8 text-center text-text-muted"
-    >
-      <div class="text-5xl mb-4">📕</div>
-      <p>{{ t("starhope.wrongBook.empty") }}</p>
-    </div>
-    <div v-else class="card-base p-4">
+      icon="tabler:bookmarks"
+      :message="t('starhope.wrongBook.empty')"
+    />
+    <div v-else class="card-base divide-y divide-surface-3">
       <div
         v-for="q in wrongQuestions"
         :key="q.id"
-        class="p-3 border-b border-surface-3 text-sm"
+        class="px-5 py-4 text-sm leading-6 text-deep-text"
       >
         {{ q.content }}
       </div>
     </div>
-  </div>
+  </StarHopePage>
 </template>
