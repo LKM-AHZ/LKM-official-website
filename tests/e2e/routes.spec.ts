@@ -121,4 +121,17 @@ test.describe("关键路由烟雾测试", () => {
     await expect(page).toHaveURL(/\/forum\/basic-science\/?$/);
     await expect(page.getByRole("heading", { name: "基础学科" })).toBeVisible();
   });
+
+  test("论坛广场提供发帖入口并打开选板块弹窗", async ({ page }) => {
+    await page.goto(`${BASE_PATH}/forum/`);
+    await page
+      .locator('astro-island[component-url*="CreatePostDialog"]:not([ssr])')
+      .waitFor({ state: "attached" });
+
+    await page.getByRole("button", { name: "发帖", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "发布新帖子" }),
+    ).toBeVisible();
+    await expect(page.getByRole("combobox")).toBeVisible();
+  });
 });

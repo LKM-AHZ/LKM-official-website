@@ -2,6 +2,7 @@
 import Layout from "~/layouts/SidebarLayout.astro";
 import PageIntro from "~/components/patterns/PageIntro.astro";
 import { Icon } from "astro-icon/components";
+import CreatePostDialog from "~/features/forum/components/CreatePostDialog.vue";
 import {
   getRootCategories,
   getChildCategories,
@@ -94,6 +95,17 @@ rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
       icon="tabler:building-community"
     />
 
+    <div class="flex justify-end">
+      <button
+        type="button"
+        class="btn-primary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
+        onclick="window.dispatchEvent(new CustomEvent('lkm:open-create-post'))"
+      >
+        <Icon name="tabler:pencil-plus" class="h-4 w-4" />
+        {t("community.forum.createPost")}
+      </button>
+    </div>
+
     <div
       id="boards"
       class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
@@ -129,5 +141,6 @@ rootBoards = rootBoards.filter((b) => b.slug.trim() !== "");
         ))
       }
     </div>
+    <CreatePostDialog client:load />
   </div>
 </Layout>
