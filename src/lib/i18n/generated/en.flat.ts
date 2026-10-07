@@ -2588,6 +2588,13 @@ export const enFlat = {
   "page.ui.forumEyebrow": "Community · Discussions",
   "page.ui.projectsEyebrow": "Collaborate · Create",
   "page.ui.qaEyebrow": "Ask · Answer",
+  "permission.deniedLocal":
+    "You are using a local account. Bind an email or phone number to complete registration and unlock this feature.",
+  "permission.deniedOther": "Your account does not have permission to do this.",
+  "permission.deniedTitle": "No permission",
+  "permission.dismiss": "Got it",
+  "permission.goRegister": "Complete registration",
+  "permission.viewAccount": "Account settings",
   "primitives.empty": "Nothing here yet",
   "primitives.formStaticWarning":
     "This form is a static demo and cannot be submitted online. Please contact us through other channels.",

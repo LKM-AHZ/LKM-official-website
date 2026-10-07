@@ -342,7 +342,18 @@ const groups = [
 
 const tabs = groups;
 
-const activeSection = ref<SectionKey>("profile");
+/**
+ * 初始分区可被 `?section=` 指定（绑定邮箱/手机号在 security 段）：
+ * 无权限引导弹窗把 local 账户直接送到这里，否则会落在「个人资料」上还要再点一次。
+ * 只认白名单内的三个键，其余（含旧链接/手改参数）一律回落 profile。
+ */
+function initialSection(): SectionKey {
+  if (typeof window === "undefined") return "profile";
+  const raw = new URLSearchParams(window.location.search).get("section");
+  return groups.some((g) => g.key === raw) ? (raw as SectionKey) : "profile";
+}
+
+const activeSection = ref<SectionKey>(initialSection());
 
 const message = ref("");
 const saving = ref(false);

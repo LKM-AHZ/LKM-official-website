@@ -18,6 +18,10 @@ import { ok, err } from "../errors/result";
 import { t } from "~/lib/i18n";
 import type { Result } from "../errors/result";
 import { getSsrCookie } from "../ssr-context";
+import {
+  dispatchPermissionDenied,
+  parsePermissionDenial,
+} from "./permission-denied";
 
 /** SSR 时使用真实后端直连地址，客户端时使用同域 /api */
 function getApiBase(): string {
@@ -291,7 +295,7 @@ async function rawRequest<T>(
     }
 
     cleanup();
-    return toResult<T>(response);
+    return toResult<T>(response, config.method ?? "GET");
   } catch (e: unknown) {
     cleanup();
     if (isTimeoutError(e)) {
@@ -306,22 +310,33 @@ async function rawRequest<T>(
 }
 
 /** 把 fetch Response 映射为 Result<T, AppError>：非 2xx 也走 err。 */
-async function toResult<T>(response: Response): Promise<Result<T, AppError>> {
+async function toResult<T>(
+  response: Response,
+  method: NonNullable<RequestConfig["method"]>,
+): Promise<Result<T, AppError>> {
   if (!response.ok) {
     const status = response.status;
     const code =
       status >= 500 ? ErrorCode.HTTP_SERVER_ERROR : ErrorCode.HTTP_CLIENT_ERROR;
     const m = t("messages.requestFailed", { status });
     // 尽力取后端 msg/message（只取可读错误信息，不透传完整响应体）
-    let detail = "";
+    let raw: Record<string, unknown> | null = null;
     try {
-      const raw = (await response.json()) as Record<string, unknown> | null;
-      const a = raw?.msg;
-      const b = raw?.message;
-      const msg = typeof a === "string" ? a : typeof b === "string" ? b : null;
-      if (msg) detail = msg.slice(0, 160);
+      raw = (await response.json()) as Record<string, unknown> | null;
     } catch {
       // 响应非 JSON（如 HTML 错误页），忽略 detail
+    }
+    const a = raw?.msg;
+    const b = raw?.message;
+    const msg = typeof a === "string" ? a : typeof b === "string" ? b : null;
+    const detail = msg ? msg.slice(0, 160) : "";
+    // 越权拒绝 → 广播给全局对话框（见 permission-denied.ts 的分类）。放在这里是因为
+    // 各 API 模块会把 err 压成 null/false，压平之后 403 就认不出来了。
+    // 只对非 GET 生效：通知铃铛等只读请求在页面加载时被拒是常态，不该弹全局弹窗
+    //（它自己有行内提示），否则每次进站都会跳一个模态。
+    if (method !== "GET") {
+      const denial = parsePermissionDenial(status, raw);
+      if (denial) dispatchPermissionDenied(denial);
     }
     return err(new AppError(code, m + (detail ? `：${detail}` : ""), status));
   }

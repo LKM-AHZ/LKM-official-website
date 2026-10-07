@@ -2428,6 +2428,13 @@ export const zhFlat = {
   "page.ui.forumEyebrow": "社区 · 讨论",
   "page.ui.projectsEyebrow": "协作 · 实践",
   "page.ui.qaEyebrow": "提问 · 解答",
+  "permission.deniedLocal":
+    "当前为本地账户，绑定邮箱或手机号完成注册后即可使用该功能。",
+  "permission.deniedOther": "当前账号暂无执行该操作的权限。",
+  "permission.deniedTitle": "无权限",
+  "permission.dismiss": "知道了",
+  "permission.goRegister": "去完成注册",
+  "permission.viewAccount": "查看账号设置",
   "primitives.empty": "暂无内容",
   "primitives.formStaticWarning":
     "此表单为静态展示，暂不支持在线提交。请通过其他方式联系我们。",

@@ -542,6 +542,15 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     daysAgo: "{count} 天前",
   },
 
+  permission: {
+    deniedTitle: "无权限",
+    deniedLocal: "当前为本地账户，绑定邮箱或手机号完成注册后即可使用该功能。",
+    deniedOther: "当前账号暂无执行该操作的权限。",
+    goRegister: "去完成注册",
+    viewAccount: "查看账号设置",
+    dismiss: "知道了",
+  },
+
   share: {
     twitter: "分享到 X (Twitter)",
     facebook: "分享到 Facebook",

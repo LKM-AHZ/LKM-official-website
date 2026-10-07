@@ -548,6 +548,16 @@ export const en = {
     daysAgo: "{count} days ago",
   },
 
+  permission: {
+    deniedTitle: "No permission",
+    deniedLocal:
+      "You are using a local account. Bind an email or phone number to complete registration and unlock this feature.",
+    deniedOther: "Your account does not have permission to do this.",
+    goRegister: "Complete registration",
+    viewAccount: "Account settings",
+    dismiss: "Got it",
+  },
+
   share: {
     twitter: "Share to X (Twitter)",
     facebook: "Share to Facebook",

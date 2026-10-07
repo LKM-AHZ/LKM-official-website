@@ -9,6 +9,7 @@ import { I18N } from "~/lib/config";
 import { siteConfig } from "~/lib/config";
 import { t, getLocale } from "~/lib/i18n";
 import AuthModal from "~/features/auth/components/AuthModal.vue";
+import PermissionDeniedDialog from "~/features/auth/components/PermissionDeniedDialog.vue";
 import CommonMeta from "~/features/shell/common/components/CommonMeta.astro";
 import Favicons from "~/features/shell/components/Favicons.astro";
 import CustomStyles from "~/features/shell/common/components/CustomStyles.astro";
@@ -139,6 +140,10 @@ const navbarLinks: NavBarLink[] =
 
     <!-- 通用 Auth 浮层（登录 / 注册 / 密码找回）：由 AuthModal 自管开合/遮罩/Escape/焦点/滚动 -->
     <AuthModal client:only="vue" />
+
+    <!-- 无权限引导浮层：订阅 lkm:permission-denied（HTTP 层在非 GET 的 403 上广播），
+         与 AuthModal 同为全站单例 -->
+    <PermissionDeniedDialog client:only="vue" />
 
     <!-- 前端性能监测 RUM（Sentry）：仅配置了 PUBLIC_SENTRY_DSN 时注入，空则整组件不渲染 -->
     {sentryDsn ? <SentryInit client:load /> : null}
