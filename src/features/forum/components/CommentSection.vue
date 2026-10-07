@@ -126,6 +126,12 @@
               >
                 {{ t("community.forum.reply") }}
               </button>
+              <button
+                class="text-xs text-text-muted/60 hover:text-primary transition-colors"
+                @click="openReport(comment.id)"
+              >
+                {{ t("community.forum.report") }}
+              </button>
             </div>
           </div>
         </div>
@@ -149,6 +155,15 @@
         {{ t("community.forum.noComments") }}
       </div>
     </template>
+
+    <!-- 举报弹窗（与帖子互动栏共用同一组件） -->
+    <ReportDialog
+      :open="showReport"
+      target-type="comment"
+      :target-id="reportTargetId"
+      @close="showReport = false"
+      @submitted="onReported"
+    />
   </div>
 </template>
 
@@ -160,6 +175,7 @@ import { contentApi, type ContentComment } from "~/lib/api/modules/content";
 import { useAuthStore } from "~/stores/auth";
 import { dispatchOpenLoginModal } from "~/features/shell/common/shell-events";
 import { reportInteractionFailure } from "~/features/forum/interaction-feedback";
+import ReportDialog from "~/features/forum/components/ReportDialog.vue";
 
 const props = defineProps<{
   postId: string;
@@ -185,6 +201,9 @@ const newComment = ref("");
 const submitting = ref(false);
 const replyToId = ref("");
 const replyToAuthor = ref("");
+// 举报弹窗：一个实例服务整页评论，靠 targetId 指定举报哪一条
+const showReport = ref(false);
+const reportTargetId = ref("");
 // 本组件输入框的模板引用（回复时只聚焦它，不碰页面上别的 textarea）
 const commentInputEl = ref<HTMLTextAreaElement | null>(null);
 // 回复聚焦的定时器句柄：重复点回复/卸载时要能清掉
@@ -277,6 +296,15 @@ async function toggleCommentLike(comment: ContentComment): Promise<void> {
     return;
   }
   comment.like_count = res.value.like_count;
+}
+
+function openReport(id: string): void {
+  reportTargetId.value = id;
+  showReport.value = true;
+}
+
+function onReported(reason: string): void {
+  alert(t("community.forum.reportSubmitted", { reason }));
 }
 
 function startReply(id: string, author: string) {

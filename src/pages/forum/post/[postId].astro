@@ -3,6 +3,7 @@ import Layout from "~/layouts/SidebarLayout.astro";
 import { Icon } from "astro-icon/components";
 import PostInteractions from "~/features/forum/components/PostInteractions.vue";
 import CommentSection from "~/features/forum/components/CommentSection.vue";
+import ViewReporter from "~/features/forum/components/ViewReporter.vue";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { sanitizeHtmlContent } from "~/lib/utils/html-sanitize";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
@@ -58,6 +59,9 @@ const metadata = { title: post.title };
   ]}
   currentPath={getPermalink(`/forum/post/${postId}`)}
 >
+  <!-- 浏览上报：无 UI，客户端登录态下记一次浏览（供「浏览历史」读） -->
+  <ViewReporter client:load contentId={String(post.id)} />
+
   <div class="mx-auto max-w-4xl space-y-6">
     <!-- 面包屑 -->
     <div class="flex items-center gap-2 text-sm text-text-muted/60">

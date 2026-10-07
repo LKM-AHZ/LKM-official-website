@@ -52,36 +52,14 @@
       <span class="hidden sm:inline">{{ t("community.forum.report") }}</span>
     </button>
 
-    <!-- 举报弹窗 -->
-    <Teleport to="body">
-      <div
-        v-if="showReport"
-        class="fixed inset-0 bg-black/40 dark:bg-black/70 z-[200] flex items-center justify-center"
-        @click.self="showReport = false"
-      >
-        <div class="bg-card-bg rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4">
-          <h3 class="text-lg font-semibold text-deep-text mb-4">
-            {{ t("community.forum.reportTitle") }}
-          </h3>
-          <div class="space-y-2">
-            <button
-              v-for="reason in reportReasons"
-              :key="reason"
-              class="w-full text-left px-4 py-2.5 rounded-lg text-sm text-deep-text hover:bg-surface-3 transition-colors"
-              @click="submitReport(reason)"
-            >
-              {{ reason }}
-            </button>
-          </div>
-          <button
-            class="w-full mt-4 px-4 py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors"
-            @click="showReport = false"
-          >
-            {{ t("community.forum.cancel") }}
-          </button>
-        </div>
-      </div>
-    </Teleport>
+    <!-- 举报弹窗（与评论区共用同一组件） -->
+    <ReportDialog
+      :open="showReport"
+      target-type="post"
+      :target-id="postId"
+      @close="showReport = false"
+      @submitted="onReported"
+    />
   </div>
 </template>
 
@@ -94,6 +72,7 @@ import { interactionApi } from "~/lib/api/modules/interaction";
 import { useAuthStore } from "~/stores/auth";
 import { dispatchOpenLoginModal } from "~/features/shell/common/shell-events";
 import { reportInteractionFailure } from "~/features/forum/interaction-feedback";
+import ReportDialog from "~/features/forum/components/ReportDialog.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -165,14 +144,6 @@ watch([() => props.postId, isLoggedIn], () => void loadViewerState(), {
   immediate: true,
 });
 
-const reportReasons = computed(() => [
-  t("community.forum.reportSpam"),
-  t("community.forum.reportMisinformation"),
-  t("community.forum.reportHarassment"),
-  t("community.forum.reportInfringement"),
-  t("community.forum.reportOther"),
-]);
-
 /** 下界保护：服务端计数为 0 但本地态是「已赞」时，取消会算出 -1 并直接渲染出来 */
 function applyLike(value: boolean, count: number): void {
   liked.value = value;
@@ -230,25 +201,43 @@ async function toggleBookmark(): Promise<void> {
   applyBookmark(res.value.favorited, res.value.bookmark_count);
 }
 
-function handleShare() {
+function handleShare(): void {
   // 非安全上下文（http/旧浏览器）下 navigator.clipboard 是 undefined，直接调用会抛 TypeError
   if (!navigator.clipboard) {
     alert(t("community.forum.linkCopied"));
     return;
   }
-  // window.location.href 即帖子详情页地址（本组件只在该页使用）；
-  // 转发数不再本地 +1：分享没有对应的后端端点上账，本地自增只会让显示与真实数据脱节
+  // window.location.href 即帖子详情页地址（本组件只在该页使用）
   navigator.clipboard
     .writeText(window.location.href)
-    .then(() => alert(t("community.forum.linkCopied")))
+    .then(() => {
+      alert(t("community.forum.linkCopied"));
+      void reportForward();
+    })
     .catch((err) => {
       console.warn("[PostInteractions] 复制链接失败:", err);
       alert(t("messages.operationFailed"));
     });
 }
 
-function submitReport(reason: string) {
-  showReport.value = false;
+/**
+ * 转发上报：只在链接真的复制成功后才调，返回的服务端计数用来校正显示。
+ *
+ * 失败**刻意不提示**（连 403 也不弹）：用户要的动作（复制链接）已经成功并已弹过提示，
+ * 为一个后台计数再报一次错只会让人以为复制失败了。失败时保留原计数、不本地自增，
+ * 显示与服务端真值因此不会脱节。未登录直接跳过——复制链接不该要求登录。
+ */
+async function reportForward(): Promise<void> {
+  if (!isLoggedIn.value) return;
+  const res = await contentApi.forwardItem(props.postId);
+  if (res.isErr()) {
+    console.warn("[PostInteractions] 转发上报失败:", res.error);
+    return;
+  }
+  forwardCount.value = res.value.forward_count;
+}
+
+function onReported(reason: string): void {
   alert(t("community.forum.reportSubmitted", { reason }));
 }
 

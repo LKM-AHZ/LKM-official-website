@@ -77,3 +77,24 @@ export function onPermissionDenied(
   window.addEventListener(PERMISSION_DENIED_EVENT, listener);
   return () => window.removeEventListener(PERMISSION_DENIED_EVENT, listener);
 }
+
+// ── 「这条错误已经被全局对话框承接了」的标记 ──────────────────────────────
+//
+// 调用方需要知道「要不要再自己提示一次」：不标记的话，它只能按 `status === 403` 猜，
+// 而 403 远不止「越权」一种——匿名请求打需要登录的端点也返回 403
+// （core/ports/authz.py 的 `_parse_bearer` 抛 FORBIDDEN）、板块禁言/非属主同样是 403。
+// 按状态码一刀切会让这些**既不弹全局对话框、也不给任何提示**，回到静默失败。
+//
+// 用 WeakSet 而不是给 AppError 加字段：错误对象是通用的，不该长出 UI 专用属性；
+// 键是对象，随错误一同被回收，不留引用。
+const handledByDialog = new WeakSet<object>();
+
+/** 记录「这条错误已广播给全局无权限对话框」。由 client.ts 在派发的同一处调用。 */
+export function markPermissionDeniedHandled(error: object): void {
+  handledByDialog.add(error);
+}
+
+/** 该错误是否已由全局无权限对话框承接（调用方据此避免重复提示）。 */
+export function isPermissionDeniedHandled(error: object): boolean {
+  return handledByDialog.has(error);
+}

@@ -20,6 +20,7 @@ import type { Result } from "../errors/result";
 import { getSsrCookie } from "../ssr-context";
 import {
   dispatchPermissionDenied,
+  markPermissionDeniedHandled,
   parsePermissionDenial,
 } from "./permission-denied";
 
@@ -330,15 +331,25 @@ async function toResult<T>(
     const b = raw?.message;
     const msg = typeof a === "string" ? a : typeof b === "string" ? b : null;
     const detail = msg ? msg.slice(0, 160) : "";
+    const appError = new AppError(
+      code,
+      m + (detail ? `：${detail}` : ""),
+      status,
+    );
     // 越权拒绝 → 广播给全局对话框（见 permission-denied.ts 的分类）。放在这里是因为
     // 各 API 模块会把 err 压成 null/false，压平之后 403 就认不出来了。
     // 只对非 GET 生效：通知铃铛等只读请求在页面加载时被拒是常态，不该弹全局弹窗
     //（它自己有行内提示），否则每次进站都会跳一个模态。
+    // 命中时在错误对象上打标记：调用方据「是否已被承接」决定要不要自己提示，
+    // 而不是按 403 一刀切（403 远不止越权一种，见 permission-denied.ts 的说明）。
     if (method !== "GET") {
       const denial = parsePermissionDenial(status, raw);
-      if (denial) dispatchPermissionDenied(denial);
+      if (denial) {
+        dispatchPermissionDenied(denial);
+        markPermissionDeniedHandled(appError);
+      }
     }
-    return err(new AppError(code, m + (detail ? `：${detail}` : ""), status));
+    return err(appError);
   }
 
   // 2xx：尝试解析 JSON body

@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
+import { nextTick } from "vue";
 import { ok, err } from "~/lib/errors/result";
 import { AppError, ErrorCode } from "~/lib/errors/error-codes";
 import CommentSection from "./CommentSection.vue";
@@ -15,6 +16,7 @@ const { contentApi, authStore, dispatchOpenLoginModal } = vi.hoisted(() => ({
     createComment: vi.fn(),
     likeComment: vi.fn(),
     unlikeComment: vi.fn(),
+    reportItem: vi.fn(),
   },
   authStore: { isLoggedIn: true, restoreFromStorage: vi.fn() },
   dispatchOpenLoginModal: vi.fn(),
@@ -33,9 +35,17 @@ vi.mock("~/features/shell/common/shell-events", () => ({
 
 let wrapper: VueWrapper | null = null;
 
+// happy-dom 不保证有全局 alert，而失败反馈会调它——不桩住就是未捕获异常
+beforeEach(() => {
+  vi.stubGlobal("alert", vi.fn());
+});
+
 afterEach(() => {
   wrapper?.unmount();
   wrapper = null;
+  // 举报弹窗 Teleport 到 body：不清会残留到下一个用例
+  document.body.innerHTML = "";
+  vi.unstubAllGlobals();
   vi.clearAllMocks();
   authStore.isLoggedIn = true;
 });
@@ -192,5 +202,33 @@ describe("评论区", () => {
 
     expect(dispatchOpenLoginModal).toHaveBeenCalledOnce();
     expect(contentApi.createComment).not.toHaveBeenCalled();
+  });
+
+  it("举报按被点的那条评论的 id 提交，不是列表第一条", async () => {
+    contentApi.listComments.mockResolvedValue(
+      page([makeComment(), makeComment({ id: "c-2", floor_number: 2 })]),
+    );
+    contentApi.reportItem.mockResolvedValue(ok({ ok: true }));
+
+    const w = mountSection();
+    await flushPromises();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+    // 每行三个按钮：0 赞 / 1 回复 / 2 举报
+    await commentButtons(w, 1)[2].trigger("click");
+    await nextTick();
+
+    const dialog = document.querySelector('[role="dialog"]');
+    expect(dialog).not.toBeNull();
+    // 弹窗标题区分帖子/评论两种目标
+    expect(dialog!.textContent).toContain("community.forum.reportCommentTitle");
+    (dialog!.querySelectorAll("button")[0] as HTMLButtonElement).click();
+    await flushPromises();
+
+    expect(contentApi.reportItem).toHaveBeenCalledWith({
+      target_type: "comment",
+      target_id: "c-2",
+      reason: "community.forum.reportSpam",
+    });
   });
 });

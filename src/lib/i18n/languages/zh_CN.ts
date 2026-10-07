@@ -551,6 +551,20 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     dismiss: "知道了",
   },
 
+  myContent: {
+    tabAll: "全部",
+    tabQuestions: "我的提问",
+    tabPosts: "我的帖子",
+    tabProjects: "我的项目",
+    tabFavorites: "我的收藏",
+    tabHistory: "浏览历史",
+    favoritesTitle: "我的收藏",
+    historyTitle: "浏览历史",
+    noFavorites: "还没有收藏任何内容",
+    noHistory: "还没有浏览记录",
+    loginRequired: "请先登录后查看。",
+  },
+
   share: {
     twitter: "分享到 X (Twitter)",
     facebook: "分享到 Facebook",
@@ -2196,6 +2210,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       countTenThousand: "{count}万",
       report: "举报",
       reportTitle: "举报帖子",
+      reportCommentTitle: "举报评论",
       reportSpam: "垃圾广告",
       reportMisinformation: "不实信息",
       reportHarassment: "人身攻击",

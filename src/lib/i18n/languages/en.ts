@@ -558,6 +558,20 @@ export const en = {
     dismiss: "Got it",
   },
 
+  myContent: {
+    tabAll: "All",
+    tabQuestions: "My Questions",
+    tabPosts: "My Posts",
+    tabProjects: "My Projects",
+    tabFavorites: "My Favorites",
+    tabHistory: "Browsing History",
+    favoritesTitle: "My Favorites",
+    historyTitle: "Browsing History",
+    noFavorites: "You haven't bookmarked anything yet",
+    noHistory: "No browsing history yet",
+    loginRequired: "Please sign in to view this.",
+  },
+
   share: {
     twitter: "Share to X (Twitter)",
     facebook: "Share to Facebook",
@@ -2301,6 +2315,7 @@ export const en = {
       countTenThousand: "{count}w",
       report: "Report",
       reportTitle: "Report Post",
+      reportCommentTitle: "Report Comment",
       reportSpam: "Spam / advertisement",
       reportMisinformation: "Misinformation",
       reportHarassment: "Harassment",

@@ -115,6 +115,20 @@ export interface LikeState {
   like_count: number;
 }
 
+/** 转发上报的返回：服务端权威转发数。 */
+export interface ForwardState {
+  forward_count: number;
+}
+
+/** 可举报的内容目标。后端入参也是这两个字面量（content/schemas.py 的 ContentReportCreate）。 */
+export type ReportTargetType = "post" | "comment";
+
+export interface ReportInput {
+  target_type: ReportTargetType;
+  target_id: string;
+  reason: string;
+}
+
 export interface ContentCreateInput {
   content_type?: ContentType;
   board_id: string;
@@ -425,4 +439,12 @@ export const contentApi = {
     del<LikeState>(
       `/api/v1/content/items/${itemId}/comments/${commentId}/like`,
     ),
+
+  /** 转发上报：由调用方在「链接已复制」之后调用，返回新的转发数。 */
+  forwardItem: (id: string) =>
+    post<ForwardState>(`/api/v1/content/items/${id}/forward`),
+
+  /** 提交举报（帖子 / 评论）。target_title 由后端从内容行回填，前端不传。 */
+  reportItem: (data: ReportInput) =>
+    post<{ ok: boolean }>("/api/v1/content/reports", data),
 };

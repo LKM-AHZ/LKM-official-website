@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
+import { nextTick } from "vue";
 import { ok, err } from "~/lib/errors/result";
 import { AppError, ErrorCode } from "~/lib/errors/error-codes";
+import { markPermissionDeniedHandled } from "~/lib/http/permission-denied";
 import PostInteractions from "./PostInteractions.vue";
 
 // 图标组件换成只暴露 icon 名的桩：断言「已赞」看的是图标语义，
@@ -17,6 +19,8 @@ const { contentApi, interactionApi, authStore, dispatchOpenLoginModal } =
       getViewerState: vi.fn(),
       likeItem: vi.fn(),
       unlikeItem: vi.fn(),
+      forwardItem: vi.fn(),
+      reportItem: vi.fn(),
     },
     interactionApi: { favorite: vi.fn(), unfavorite: vi.fn() },
     authStore: { isLoggedIn: true, restoreFromStorage: vi.fn() },
@@ -41,12 +45,44 @@ const IDLE_VIEWER = {
 
 let wrapper: VueWrapper | null = null;
 
+// happy-dom 不保证有全局 alert，而失败反馈会调它——不桩住就是未捕获异常
+beforeEach(() => {
+  vi.stubGlobal("alert", vi.fn());
+});
+
 afterEach(() => {
   wrapper?.unmount();
   wrapper = null;
+  // 举报弹窗 Teleport 到 body：不清会残留到下一个用例
+  document.body.innerHTML = "";
+  vi.unstubAllGlobals();
   vi.clearAllMocks();
   authStore.isLoggedIn = true;
 });
+
+/**
+ * 点举报弹窗的第一个理由（ReportDialog 内部 Teleport 到 body，不在 wrapper 里）。
+ *
+ * 不查子组件 props 而点真实节点：一是断言的是「提交了什么」而不是「传了什么」，
+ * 二是 `findComponent(X.vue)` 在该项目的类型下解析不出组件类型（报 DOMWrapper<Node>）。
+ * 返回是否点到了——弹窗未渲染时返回 false，便于先断言「默认不弹」。
+ */
+function clickFirstReportReason(expectedTitleKey?: string): boolean {
+  const dialog = document.querySelector('[role="dialog"]');
+  if (!dialog) return false;
+  if (expectedTitleKey) {
+    expect(dialog.textContent).toContain(expectedTitleKey);
+  }
+  (dialog.querySelectorAll("button")[0] as HTMLButtonElement).click();
+  return true;
+}
+
+/** 非安全上下文下 navigator.clipboard 不存在，组件会走 alert 分支——测试里给它一个可断言的桩。 */
+function stubClipboard(): ReturnType<typeof vi.fn> {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  vi.stubGlobal("navigator", { clipboard: { writeText } });
+  return writeText;
+}
 
 function mountBar(props: Record<string, unknown> = {}): VueWrapper {
   wrapper = mount(PostInteractions, {
@@ -61,8 +97,10 @@ function mountBar(props: Record<string, unknown> = {}): VueWrapper {
   return wrapper;
 }
 
-/** 第 n 个操作按钮（点赞 / 收藏），按模板顺序取。 */
-function actionButton(w: VueWrapper, index: 0 | 1) {
+/** 操作栏按模板顺序的按钮：0 赞 / 1 收藏 / 2 分享 / 3 举报。 */
+type ActionIndex = 0 | 1 | 2 | 3;
+
+function actionButton(w: VueWrapper, index: ActionIndex) {
   return w.findAll("button")[index];
 }
 
@@ -172,5 +210,102 @@ describe("帖子互动栏", () => {
     expect(contentApi.likeItem).not.toHaveBeenCalled();
     expect(iconOf(w, 0)).toBe("material-symbols:favorite-outline");
     expect(actionButton(w, 0).text()).toContain("2");
+  });
+
+  it("复制链接成功后上报转发，并用服务端计数校正显示", async () => {
+    contentApi.getViewerState.mockResolvedValue(ok(IDLE_VIEWER));
+    contentApi.forwardItem.mockResolvedValue(ok({ forward_count: 5 }));
+    const writeText = stubClipboard();
+
+    const w = mountBar();
+    await flushPromises();
+    await actionButton(w, 2).trigger("click"); // 0 赞 / 1 藏 / 2 分享 / 3 举报
+    await flushPromises();
+
+    expect(writeText).toHaveBeenCalledWith(window.location.href);
+    expect(contentApi.forwardItem).toHaveBeenCalledWith("p-1");
+    expect(actionButton(w, 2).text()).toContain("5");
+  });
+
+  it("转发上报失败不改本地计数，也不打断「已复制」的提示", async () => {
+    contentApi.getViewerState.mockResolvedValue(ok(IDLE_VIEWER));
+    contentApi.forwardItem.mockResolvedValue(
+      err(new AppError(ErrorCode.HTTP_CLIENT_ERROR, "403", 403)),
+    );
+    stubClipboard();
+
+    const w = mountBar();
+    await flushPromises();
+    await actionButton(w, 2).trigger("click");
+    await flushPromises();
+
+    // 用户要的动作（复制）已成功，计数保持服务端原值 0，不本地自增
+    expect(actionButton(w, 2).text()).toContain("0");
+  });
+
+  it("未登录也能复制链接，但不上报转发（复制不该要求登录）", async () => {
+    authStore.isLoggedIn = false;
+    contentApi.getViewerState.mockResolvedValue(ok(IDLE_VIEWER));
+    const writeText = stubClipboard();
+
+    const w = mountBar();
+    await flushPromises();
+    await actionButton(w, 2).trigger("click");
+    await flushPromises();
+
+    expect(writeText).toHaveBeenCalledOnce();
+    expect(contentApi.forwardItem).not.toHaveBeenCalled();
+  });
+
+  it("已被全局对话框承接的 403 不再自己提示一次", async () => {
+    contentApi.getViewerState.mockResolvedValue(ok(IDLE_VIEWER));
+    // client.ts 在广播 lkm:permission-denied 的同时会给错误打上这个标记；
+    // 这里模拟同一条链路，断言「不会既弹对话框又弹 alert / 登录浮层」
+    const denied = new AppError(ErrorCode.HTTP_CLIENT_ERROR, "403", 403);
+    markPermissionDeniedHandled(denied);
+    contentApi.likeItem.mockResolvedValue(err(denied));
+
+    const w = mountBar();
+    await flushPromises();
+    await actionButton(w, 0).trigger("click");
+    await flushPromises();
+
+    expect(alert).not.toHaveBeenCalled();
+    expect(dispatchOpenLoginModal).not.toHaveBeenCalled();
+  });
+
+  it("未被承接的 403（如没带令牌）给出可见反馈，而不是静默", async () => {
+    contentApi.getViewerState.mockResolvedValue(ok(IDLE_VIEWER));
+    contentApi.likeItem.mockResolvedValue(
+      err(new AppError(ErrorCode.HTTP_CLIENT_ERROR, "403", 403)),
+    );
+
+    const w = mountBar();
+    await flushPromises();
+    await actionButton(w, 0).trigger("click");
+    await flushPromises();
+
+    expect(alert).toHaveBeenCalledOnce();
+  });
+
+  it("点举报后按帖子 id 提交，且默认不发请求", async () => {
+    contentApi.getViewerState.mockResolvedValue(ok(IDLE_VIEWER));
+    contentApi.reportItem.mockResolvedValue(ok({ ok: true }));
+
+    const w = mountBar();
+    await flushPromises();
+    expect(clickFirstReportReason()).toBe(false); // 没点举报前弹窗不渲染
+
+    await actionButton(w, 3).trigger("click");
+    await nextTick();
+
+    // 标题 key 区分帖子/评论两种目标
+    expect(clickFirstReportReason("community.forum.reportTitle")).toBe(true);
+    await flushPromises();
+    expect(contentApi.reportItem).toHaveBeenCalledWith({
+      target_type: "post",
+      target_id: "p-1",
+      reason: "community.forum.reportSpam",
+    });
   });
 });

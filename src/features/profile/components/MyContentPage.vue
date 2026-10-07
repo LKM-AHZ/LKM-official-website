@@ -105,6 +105,8 @@ onMounted(async () => {
           { key: 'questions', title: '我的提问' },
           { key: 'posts', title: '我的帖子' },
           { key: 'projects', title: '我的项目' },
+          { key: 'favorites', title: '我的收藏' },
+          { key: 'history', title: '浏览历史' },
         ]"
         :key="item.key"
         :href="buildUrl(item.key === 'all' ? '/my' : `/my/${item.key}`)"
