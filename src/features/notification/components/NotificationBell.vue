@@ -20,6 +20,9 @@ const isOpen = ref(false);
 const notifications = ref<SiteNotification[]>([]);
 const unreadCount = ref(0);
 const loadFailed = ref(false);
+// 403 单独标记：会话有效但没有 notification.read（如 account_level=local 的未绑定联系方式账号），
+// 与网络/服务端故障是两回事 —— 统一报「加载失败」会把权限问题误导成故障。
+const loadDenied = ref(false);
 let refreshTimer: ReturnType<typeof setInterval> | undefined;
 
 async function refresh() {
@@ -30,6 +33,10 @@ async function refresh() {
   ]);
   if (!isLoggedIn.value) return;
   loadFailed.value = list.isErr() || count.isErr();
+  // AppError 的 cause 承载 HTTP 状态码（见 src/lib/http/client.ts 的 toResult）
+  loadDenied.value =
+    (list.isErr() && list.error.cause === 403) ||
+    (count.isErr() && count.error.cause === 403);
   if (list.isOk()) notifications.value = list.value.items;
   if (count.isOk()) unreadCount.value = count.value.unread;
 }
@@ -39,6 +46,8 @@ watch(isLoggedIn, (loggedIn) => {
   else {
     notifications.value = [];
     unreadCount.value = 0;
+    loadFailed.value = false;
+    loadDenied.value = false;
     isOpen.value = false;
   }
 });
@@ -221,7 +230,11 @@ onUnmounted(() => {
         v-if="loadFailed && notifications.length === 0"
         class="px-3 py-6 text-center text-sm text-neutral-400 dark:text-neutral-500"
       >
-        {{ t("notification.loadFailed") }}
+        {{
+          loadDenied
+            ? t("notification.noPermission")
+            : t("notification.loadFailed")
+        }}
       </div>
       <div
         v-else-if="notifications.length === 0"

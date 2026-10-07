@@ -1558,6 +1558,8 @@ export const enFlat = {
     "Could not load notifications. Please try again later.",
   "notification.markAllRead": "Mark all as read",
   "notification.minutesAgo": "{count} minutes ago",
+  "notification.noPermission":
+    "Your account does not have permission to view notifications.",
   "notification.qaAccepted": "Your answer was accepted",
   "notification.qaAcceptedPoints": "Earned {count} points",
   "notification.system": "Notification",

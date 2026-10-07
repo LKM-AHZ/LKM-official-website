@@ -529,6 +529,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     markAllRead: "全部已读",
     empty: "暂无通知",
     loadFailed: "通知加载失败，请稍后重试",
+    noPermission: "当前账号暂无权限查看通知",
     contentLiked: "内容获得点赞",
     contentCommented: "内容收到评论",
     commentReplied: "评论收到回复",

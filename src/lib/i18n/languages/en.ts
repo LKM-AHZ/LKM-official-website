@@ -534,6 +534,8 @@ export const en = {
     markAllRead: "Mark all as read",
     empty: "No notifications",
     loadFailed: "Could not load notifications. Please try again later.",
+    noPermission:
+      "Your account does not have permission to view notifications.",
     contentLiked: "Your content received a like",
     contentCommented: "Your content received a comment",
     commentReplied: "Your comment received a reply",

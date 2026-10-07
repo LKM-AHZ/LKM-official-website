@@ -1470,6 +1470,7 @@ export const zhFlat = {
   "notification.loadFailed": "通知加载失败，请稍后重试",
   "notification.markAllRead": "全部已读",
   "notification.minutesAgo": "{count} 分钟前",
+  "notification.noPermission": "当前账号暂无权限查看通知",
   "notification.qaAccepted": "你的回答已被采纳",
   "notification.qaAcceptedPoints": "获得 {count} 积分",
   "notification.system": "站内通知",
