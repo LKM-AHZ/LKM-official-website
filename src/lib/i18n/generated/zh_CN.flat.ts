@@ -570,6 +570,8 @@ export const zhFlat = {
   "community.forum.justNow": "刚刚",
   "community.forum.latestPosts": "全部帖子",
   "community.forum.linkCopied": "链接已复制到剪贴板",
+  "community.forum.loadCommentsFailed": "评论加载失败，请重试",
+  "community.forum.loadMoreComments": "加载更多评论",
   "community.forum.loginRequired": "请先登录后再发布",
   "community.forum.markdownHint": "支持 Markdown 语法",
   "community.forum.me": "我",

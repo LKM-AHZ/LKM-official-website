@@ -28,6 +28,8 @@ it("头像菜单链接指向实际路由，并允许导航点击冒泡", async (
   const links = menu.findAll("a");
   expect(links.map((link) => link.attributes("href"))).toEqual([
     "/sub/user/alma",
+    // 「个人内容」入口（07e8a17 加的），位置在主页与投稿之间
+    "/sub/my",
     "/sub/contribution",
     "/sub/account",
   ]);

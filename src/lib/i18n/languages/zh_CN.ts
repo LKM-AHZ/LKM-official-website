@@ -2163,6 +2163,8 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       submitComment: "发表评论",
       reply: "回复",
       noComments: "暂无评论，来发表第一条评论吧",
+      loadMoreComments: "加载更多评论",
+      loadCommentsFailed: "评论加载失败，请重试",
       justNow: "刚刚",
       minutesAgo: "{count} 分钟前",
       hoursAgo: "{count} 小时前",

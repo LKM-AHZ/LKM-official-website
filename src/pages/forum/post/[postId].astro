@@ -147,9 +147,11 @@ const metadata = { title: post.title };
         <Fragment set:html={sanitizeHtmlContent(bodyHtml)} />
       </div>
 
-      <!-- 交互栏 -->
+      <!-- 交互栏：postId 供组件在客户端补拉「我是否已赞/已藏」
+           （SSR 拿不到登录态，后端只认 Authorization 头而 SSR 只转发 Cookie） -->
       <PostInteractions
         client:visible
+        postId={String(post.id)}
         likeCount={post.like_count}
         bookmarkCount={post.bookmark_count}
         forwardCount={post.forward_count}

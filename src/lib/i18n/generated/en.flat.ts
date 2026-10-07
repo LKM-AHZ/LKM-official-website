@@ -599,6 +599,9 @@ export const enFlat = {
   "community.forum.justNow": "just now",
   "community.forum.latestPosts": "All posts",
   "community.forum.linkCopied": "Link copied to clipboard",
+  "community.forum.loadCommentsFailed":
+    "Failed to load comments. Please retry.",
+  "community.forum.loadMoreComments": "Load more comments",
   "community.forum.loginRequired": "Please sign in before publishing",
   "community.forum.markdownHint": "Markdown syntax supported",
   "community.forum.me": "Me",

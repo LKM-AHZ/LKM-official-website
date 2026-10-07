@@ -82,11 +82,26 @@ export const CONTENT_COMMENTS = graphql`
         floorNumber
         parentId
         likeCount
+        liked
         createdAt
       }
       total
       page
       pages
+    }
+  }
+`;
+
+// 详情页互动按钮的初值。刻意不复用 CONTENT_ITEM：那份查询带正文，详情页已在 SSR 拉过
+// 一遍，客户端为了补初值再拉整篇等于把正文重复传一遍。
+// 后端实现是 interaction 域（收藏归属那边），字段名 camelCase 对齐 GraphContentViewerState。
+export const CONTENT_VIEWER_STATE = graphql`
+  query ContentViewerState($contentId: ID!) {
+    contentViewerState(contentId: $contentId) {
+      liked
+      favorited
+      likeCount
+      bookmarkCount
     }
   }
 `;

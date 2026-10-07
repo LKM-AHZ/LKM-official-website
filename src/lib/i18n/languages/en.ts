@@ -2268,6 +2268,8 @@ export const en = {
       submitComment: "Post Comment",
       reply: "Reply",
       noComments: "No comments yet — be the first to comment",
+      loadMoreComments: "Load more comments",
+      loadCommentsFailed: "Failed to load comments. Please retry.",
       justNow: "just now",
       minutesAgo: "{count} minutes ago",
       hoursAgo: "{count} hours ago",

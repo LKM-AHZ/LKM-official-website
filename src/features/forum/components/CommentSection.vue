@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <h3 class="font-semibold text-deep-text">
-      {{ t("community.forum.comments", { count: comments.length }) }}
+      {{ t("community.forum.comments", { count: total }) }}
     </h3>
 
     <!-- 评论输入 -->
@@ -36,8 +36,12 @@
           <button
             type="button"
             class="btn-primary px-4 py-1.5 rounded-lg text-sm font-medium"
-            :disabled="!newComment.trim()"
-            :class="!newComment.trim() ? 'opacity-50 cursor-not-allowed' : ''"
+            :disabled="!newComment.trim() || submitting"
+            :class="
+              !newComment.trim() || submitting
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            "
             @click="submitComment"
           >
             {{ t("community.forum.submitComment") }}
@@ -46,94 +50,139 @@
       </div>
     </div>
 
+    <!-- 加载失败：给出可见提示与重试入口，不静默留白 -->
+    <div
+      v-if="loadError"
+      class="text-center py-8 text-sm text-text-muted space-y-2"
+    >
+      <p>{{ t("community.forum.loadCommentsFailed") }}</p>
+      <button
+        type="button"
+        class="text-primary hover:underline"
+        @click="loadComments(true)"
+      >
+        {{ t("common.retry") }}
+      </button>
+    </div>
+
     <!-- 评论列表 -->
-    <div v-if="comments.length > 0" class="space-y-3">
-      <div v-for="comment in comments" :key="comment.id" class="flex gap-3">
-        <div
-          class="w-9 h-9 rounded-full bg-surface-3 flex items-center justify-center shrink-0 text-text-muted font-bold text-sm"
-        >
-          {{ comment.authorName.charAt(0) }}
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-sm font-medium text-deep-text">{{
-              comment.authorName
-            }}</span>
-            <span class="text-xs text-text-muted/60"
-              >#{{ comment.floorNumber }}</span
-            >
-            <span class="text-xs text-text-muted/60">{{
-              formatTime(comment.createdAt)
-            }}</span>
-            <!-- 回复目标：parentId 从提交起就有，但此前模板是扁平列表、被回复者不可见 -->
-            <span
-              v-if="parentAuthor(comment)"
-              class="text-xs text-text-muted/60"
-            >
-              {{
-                t("community.forum.replyTo", { name: parentAuthor(comment) })
-              }}
-            </span>
-          </div>
-          <p class="text-sm text-deep-text mt-1 leading-relaxed">
-            {{ comment.content }}
-          </p>
-          <div class="flex items-center gap-3 mt-1.5">
-            <button
-              class="text-xs text-text-muted/60 hover:text-primary transition-colors inline-flex items-center gap-1"
-              @click="toggleCommentLike(comment.id)"
-            >
-              <Icon
-                :icon="
-                  likedComments.has(comment.id)
-                    ? 'material-symbols:favorite'
-                    : 'material-symbols:favorite-outline'
-                "
-                class="w-3.5 h-3.5"
-                :class="likedComments.has(comment.id) ? 'text-red-500' : ''"
-              />
-              {{ likeCountFor(comment) }}
-            </button>
-            <button
-              class="text-xs text-text-muted/60 hover:text-primary transition-colors"
-              @click="startReply(comment.id, comment.authorName)"
-            >
-              {{ t("community.forum.reply") }}
-            </button>
-          </div>
-        </div>
+    <template v-else>
+      <div v-if="loading" class="text-center py-8 text-sm text-text-muted">
+        {{ t("common.loading") }}
       </div>
-    </div>
-    <div v-else class="text-center py-8 text-sm text-text-muted">
-      {{ t("community.forum.noComments") }}
-    </div>
+      <div v-else-if="comments.length > 0" class="space-y-3">
+        <div v-for="comment in comments" :key="comment.id" class="flex gap-3">
+          <div
+            class="w-9 h-9 rounded-full bg-surface-3 flex items-center justify-center shrink-0 text-text-muted font-bold text-sm"
+          >
+            {{ comment.author_name.charAt(0) }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-medium text-deep-text">{{
+                comment.author_name
+              }}</span>
+              <span class="text-xs text-text-muted/60"
+                >#{{ comment.floor_number }}</span
+              >
+              <span class="text-xs text-text-muted/60">{{
+                formatTime(comment.created_at)
+              }}</span>
+              <!-- 回复目标：parentId 从提交起就有，但此前模板是扁平列表、被回复者不可见 -->
+              <span
+                v-if="parentAuthor(comment)"
+                class="text-xs text-text-muted/60"
+              >
+                {{
+                  t("community.forum.replyTo", {
+                    name: parentAuthor(comment),
+                  })
+                }}
+              </span>
+            </div>
+            <p class="text-sm text-deep-text mt-1 leading-relaxed">
+              {{ comment.content }}
+            </p>
+            <div class="flex items-center gap-3 mt-1.5">
+              <button
+                class="text-xs text-text-muted/60 hover:text-primary transition-colors inline-flex items-center gap-1 disabled:opacity-60"
+                :disabled="likePending.has(comment.id)"
+                @click="toggleCommentLike(comment)"
+              >
+                <Icon
+                  :icon="
+                    comment.liked
+                      ? 'material-symbols:favorite'
+                      : 'material-symbols:favorite-outline'
+                  "
+                  class="w-3.5 h-3.5"
+                  :class="comment.liked ? 'text-red-500' : ''"
+                />
+                {{ comment.like_count }}
+              </button>
+              <button
+                class="text-xs text-text-muted/60 hover:text-primary transition-colors"
+                @click="startReply(comment.id, comment.author_name)"
+              >
+                {{ t("community.forum.reply") }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分页：不加载更多就等于静默少显示评论，故把「还有多少条」摆出来 -->
+        <button
+          v-if="comments.length < total"
+          type="button"
+          class="w-full py-2 rounded-lg text-sm text-text-muted hover:bg-surface-3 transition-colors disabled:opacity-50"
+          :disabled="loadingMore"
+          @click="loadComments(false)"
+        >
+          {{
+            loadingMore
+              ? t("common.loading")
+              : t("community.forum.loadMoreComments")
+          }}
+        </button>
+      </div>
+      <div v-else class="text-center py-8 text-sm text-text-muted">
+        {{ t("community.forum.noComments") }}
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
 import { t } from "~/lib/i18n";
+import { contentApi, type ContentComment } from "~/lib/api/modules/content";
+import { useAuthStore } from "~/stores/auth";
+import { dispatchOpenLoginModal } from "~/features/shell/common/shell-events";
+import { reportInteractionFailure } from "~/features/forum/interaction-feedback";
 
-defineProps<{
+const props = defineProps<{
   postId: string;
 }>();
 
-interface Comment {
-  id: string;
-  authorName: string;
-  content: string;
-  floorNumber: number;
-  parentId?: string;
-  likeCount: number;
-  createdAt: string;
-}
+const auth = useAuthStore();
+const isLoggedIn = computed(() => auth.isLoggedIn);
+onMounted(() => auth.restoreFromStorage());
 
-// 评论初始为空，待接入真实评论接口后加载
-const comments = ref<Comment[]>([]);
-const likedComments = ref<Set<string>>(new Set());
+const PAGE_SIZE = 20;
+const PAGE_ONE = 1;
+
+const comments = ref<ContentComment[]>([]);
+const total = ref(0);
+const page = ref(PAGE_ONE);
+const loading = ref(true);
+const loadingMore = ref(false);
+const loadError = ref(false);
+// 在途的评论点赞 id：连点两下不该发两次请求
+const likePending = ref<Set<string>>(new Set());
 
 const newComment = ref("");
+const submitting = ref(false);
 const replyToId = ref("");
 const replyToAuthor = ref("");
 // 本组件输入框的模板引用（回复时只聚焦它，不碰页面上别的 textarea）
@@ -141,39 +190,93 @@ const commentInputEl = ref<HTMLTextAreaElement | null>(null);
 // 回复聚焦的定时器句柄：重复点回复/卸载时要能清掉
 let focusTimer: number | null = null;
 
-// 点赞数展示值：liked 时 +1（本地乐观态，未持久化），0 也要显示 "0" 而不是空串
-function likeCountFor(comment: Comment): number {
+/**
+ * 加载评论。
+ *
+ * ``reset`` 为 true 时从第一页重来（首次挂载 / 失败重试），否则追加下一页。
+ * 用 page/total 分页而非一次全量：评论无上限，一次性拉全会在热帖上把响应体撑爆。
+ */
+async function loadComments(reset: boolean): Promise<void> {
+  if (reset) {
+    loading.value = true;
+    loadError.value = false;
+  } else {
+    loadingMore.value = true;
+  }
+  const target = reset ? PAGE_ONE : page.value + 1;
+  const res = await contentApi.listComments(props.postId, target, PAGE_SIZE);
+  loading.value = false;
+  loadingMore.value = false;
+  if (res.isErr()) {
+    // 失败时保留已加载的评论，只标记错误——把列表清空会让用户以为评论没了
+    loadError.value = comments.value.length === 0;
+    if (comments.value.length > 0) reportInteractionFailure(res.error);
+    return;
+  }
+  comments.value = reset
+    ? res.value.items
+    : [...comments.value, ...res.value.items];
+  total.value = res.value.total;
+  page.value = target;
+}
+
+onMounted(() => void loadComments(true));
+
+// 被回复者：本地已加载的列表里能找到父评论时显示（父评论在未加载的页里则不显示）
+function parentAuthor(comment: ContentComment): string {
+  if (!comment.parent_id) return "";
   return (
-    (comment.likeCount ?? 0) + (likedComments.value.has(comment.id) ? 1 : 0)
+    comments.value.find((c) => c.id === comment.parent_id)?.author_name ?? ""
   );
 }
 
-// 被回复者：本地列表里能找到父评论时显示（跨页父评论不在本地则不显示）
-function parentAuthor(comment: Comment): string {
-  if (!comment.parentId) return "";
-  return (
-    comments.value.find((c) => c.id === comment.parentId)?.authorName ?? ""
-  );
-}
-
-function submitComment() {
-  if (!newComment.value.trim()) return;
-  const newId = `c-new-${Date.now()}`;
-  // 楼层取现有最大值 +1：数组长度在分页/删除/乱序加载下并不等于楼层
-  const floor =
-    comments.value.reduce((max, c) => Math.max(max, c.floorNumber), 0) + 1;
-  comments.value.push({
-    id: newId,
-    authorName: t("community.forum.me"),
-    content: newComment.value.trim(),
-    floorNumber: floor,
-    parentId: replyToId.value || undefined,
-    likeCount: 0,
-    createdAt: new Date().toISOString(),
+async function submitComment(): Promise<void> {
+  if (!isLoggedIn.value) {
+    dispatchOpenLoginModal();
+    return;
+  }
+  const text = newComment.value.trim();
+  if (!text || submitting.value) return;
+  submitting.value = true;
+  const res = await contentApi.createComment(props.postId, {
+    content: text,
+    parent_id: replyToId.value || null,
   });
+  submitting.value = false;
+  if (res.isErr()) {
+    reportInteractionFailure(res.error);
+    return;
+  }
+  // 用接口返回的权威行（含真实楼层号与作者名），不本地拼一条——
+  // 楼层由后端在行锁下分配，本地推算在并发/软删下会重号
+  comments.value.push(res.value);
+  total.value += 1;
   newComment.value = "";
-  replyToId.value = "";
-  replyToAuthor.value = "";
+  cancelReply();
+}
+
+async function toggleCommentLike(comment: ContentComment): Promise<void> {
+  if (!isLoggedIn.value) {
+    dispatchOpenLoginModal();
+    return;
+  }
+  if (likePending.value.has(comment.id)) return;
+  const next = !comment.liked;
+  const before = comment.like_count;
+  likePending.value.add(comment.id);
+  comment.liked = next;
+  comment.like_count = Math.max(0, before + (next ? 1 : -1)); // 乐观
+  const res = next
+    ? await contentApi.likeComment(props.postId, comment.id)
+    : await contentApi.unlikeComment(props.postId, comment.id);
+  likePending.value.delete(comment.id);
+  if (res.isErr()) {
+    comment.liked = !next; // 回滚：本地不能停在错的颜色/计数上
+    comment.like_count = before;
+    reportInteractionFailure(res.error);
+    return;
+  }
+  comment.like_count = res.value.like_count;
 }
 
 function startReply(id: string, author: string) {
@@ -198,17 +301,6 @@ onBeforeUnmount(() => {
   // 更会跨页触发）
   if (focusTimer !== null) window.clearTimeout(focusTimer);
 });
-
-function toggleCommentLike(id: string) {
-  // ref(new Set()) 本身是响应式的：add/delete 就会触发模板更新，重建 Set 只是多分配对象
-  if (likedComments.value.has(id)) {
-    likedComments.value.delete(id);
-  } else {
-    likedComments.value.add(id);
-  }
-  // 说明：点赞目前只存在本地内存，未持久化到后端——论坛旧 REST/GraphQL 数据层已移除
-  // （见 features/forum/index.ts 顶部注释），要真正落库需先有对应的 content API 契约。
-}
 
 function formatTime(dateStr: string): string {
   const date = new Date(dateStr);

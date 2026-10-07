@@ -18,6 +18,7 @@ import {
   CONTENT_ITEM,
   CONTENT_ITEM_BY_SLUG,
   CONTENT_COMMENTS,
+  CONTENT_VIEWER_STATE,
 } from "./content.graphql";
 
 export type { PaginatedResponse } from "../types";
@@ -96,7 +97,22 @@ export interface ContentComment {
   floor_number: number;
   parent_id: string | null;
   like_count: number;
+  /** 当前登录用户是否已给这条评论点赞；未登录时后端恒回 false */
+  liked: boolean;
   created_at: string;
+}
+
+/** 详情页互动按钮的初值（当前用户是否已赞/已藏 + 两个计数）。 */
+export interface ContentViewerState {
+  liked: boolean;
+  favorited: boolean;
+  like_count: number;
+  bookmark_count: number;
+}
+
+/** 点赞/取消点赞接口的返回：服务端权威计数，用于校正本地乐观值。 */
+export interface LikeState {
+  like_count: number;
 }
 
 export interface ContentCreateInput {
@@ -272,6 +288,7 @@ function mapComment(c: {
   floorNumber: number;
   parentId: string | null;
   likeCount: number;
+  liked: boolean;
   createdAt: string;
 }): ContentComment {
   return {
@@ -283,7 +300,23 @@ function mapComment(c: {
     floor_number: c.floorNumber,
     parent_id: c.parentId,
     like_count: c.likeCount,
+    liked: c.liked,
     created_at: c.createdAt,
+  };
+}
+
+/** GraphContentViewerState（camelCase）→ ContentViewerState（snake_case） */
+function mapViewerState(s: {
+  liked: boolean;
+  favorited: boolean;
+  likeCount: number;
+  bookmarkCount: number;
+}): ContentViewerState {
+  return {
+    liked: s.liked,
+    favorited: s.favorited,
+    like_count: s.likeCount,
+    bookmark_count: s.bookmarkCount,
   };
 }
 
@@ -348,18 +381,48 @@ export const contentApi = {
     return ok(mapPage(d, mapComment));
   },
 
+  /**
+   * 当前用户对该内容的互动态（是否已赞/已藏 + 计数）。
+   *
+   * 必须在客户端调用：SSR 阶段后端只认 Authorization 头、而 SSR 只转发 Cookie，
+   * 服务端渲染时拿不到登录态，`liked`/`favorited` 会恒为 false。
+   */
+  async getViewerState(contentId: string) {
+    const r = await graphqlClient
+      .query(CONTENT_VIEWER_STATE, { contentId })
+      .toPromise();
+    if (r.error) return err(mapErr(r.error));
+    if (!r.data?.contentViewerState)
+      return err(new AppError(ErrorCode.DOCUMENT_NOT_FOUND, "not found"));
+    return ok(mapViewerState(r.data.contentViewerState));
+  },
+
   // —— 以下写方法保留 REST ——
   createItem: (data: ContentCreateInput) =>
     post<ContentItem>("/api/v1/content/items", data),
 
   deleteItem: (id: string) => del<void>(`/api/v1/content/items/${id}`),
 
-  likeItem: (id: string) => post<void>(`/api/v1/content/items/${id}/like`),
+  likeItem: (id: string) => post<LikeState>(`/api/v1/content/items/${id}/like`),
 
-  unlikeItem: (id: string) => del<void>(`/api/v1/content/items/${id}/like`),
+  unlikeItem: (id: string) =>
+    del<LikeState>(`/api/v1/content/items/${id}/like`),
 
   createComment: (
     itemId: string,
     data: { content: string; parent_id?: string | null },
   ) => post<ContentComment>(`/api/v1/content/items/${itemId}/comments`, data),
+
+  deleteComment: (itemId: string, commentId: string) =>
+    del<void>(`/api/v1/content/items/${itemId}/comments/${commentId}`),
+
+  likeComment: (itemId: string, commentId: string) =>
+    post<LikeState>(
+      `/api/v1/content/items/${itemId}/comments/${commentId}/like`,
+    ),
+
+  unlikeComment: (itemId: string, commentId: string) =>
+    del<LikeState>(
+      `/api/v1/content/items/${itemId}/comments/${commentId}/like`,
+    ),
 };

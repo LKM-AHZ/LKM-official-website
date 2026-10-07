@@ -20,6 +20,8 @@ export type { SiteNotification } from "./modules/notification";
 export type * from "./modules/points";
 export { followApi } from "./modules/follow";
 export type * from "./modules/follow";
+export { interactionApi } from "./modules/interaction";
+export type * from "./modules/interaction";
 export { timelineApi } from "./modules/timeline";
 export type * from "./modules/timeline";
 export { moderationApi } from "./modules/moderation";
