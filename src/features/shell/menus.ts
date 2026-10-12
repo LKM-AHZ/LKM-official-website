@@ -6,6 +6,7 @@ import type { NavBarLink } from "~/types/config";
  */
 export const officialDefaultNavItems: string[] = [
   "nav.home",
+  "nav.search",
   "nav.community",
   "nav.projects",
   "nav.resources",
@@ -23,6 +24,10 @@ export const allMenuItems: NavBarLink[] = [
   {
     name: "nav.home",
     url: "/",
+  },
+  {
+    name: "nav.search",
+    url: "/discover",
   },
   {
     name: "nav.community",

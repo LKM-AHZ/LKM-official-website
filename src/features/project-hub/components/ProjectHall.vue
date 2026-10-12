@@ -39,6 +39,23 @@
 
       <div class="flex flex-wrap gap-2">
         <button
+          type="button"
+          class="flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition-colors"
+          :class="
+            onlyRecruiting
+              ? 'border-green-500/40 bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400'
+              : 'border-surface-3 bg-card-bg text-deep-text hover:bg-btn-regular-bg'
+          "
+          :aria-pressed="onlyRecruiting"
+          @click="onlyRecruiting = !onlyRecruiting"
+        >
+          <span
+            class="inline-block h-1.5 w-1.5 rounded-full"
+            :class="onlyRecruiting ? 'bg-green-500' : 'bg-text-muted/40'"
+          />
+          仅看招募中
+        </button>
+        <button
           :aria-label="t('projectHub.applyAria')"
           class="rounded-full border border-surface-3 bg-card-bg px-4 py-2 text-sm font-medium text-deep-text transition-colors hover:bg-btn-regular-bg"
           @click="openApplyModal"
@@ -67,7 +84,7 @@
         class="profile-card group block"
       >
         <div class="profile-inner p-5 flex flex-col gap-2.5 h-full">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <span
               v-if="proj.isPinned"
               class="text-xs px-1.5 py-0.5 rounded font-medium bg-red-100 dark:bg-red-950/30 text-red-600"
@@ -80,6 +97,13 @@
             >
               {{ t("projectHub.incubated") }}
             </span>
+            <span
+              v-if="proj.isRecruiting"
+              class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-green-500" />
+              {{ t("projectHub.recruiting") }}
+            </span>
           </div>
           <h3
             class="font-bold text-deep-text group-hover:text-primary transition-colors"
@@ -89,14 +113,8 @@
           <p class="text-xs text-text-muted">
             {{ t("projectHub.initiatedBy", { name: proj.applicantName }) }}
           </p>
-          <div class="mt-1">
-            <div class="h-1.5 rounded-full bg-surface-3">
-              <div
-                class="h-full rounded-full bg-primary transition-all"
-                :style="{ width: proj.progress + '%' }"
-              />
-            </div>
-          </div>
+          <!-- 进度条缩略图（含里程碑节点） -->
+          <ProjectProgressBar :progress="proj.progress" compact />
           <div class="flex items-center justify-between text-xs">
             <span
               :class="
@@ -414,6 +432,103 @@
             />
           </div>
 
+          <!-- 招募开关（P0）：勾选后展开结构化招募表单 -->
+          <div
+            class="flex items-center gap-2 rounded-lg border border-surface-3 bg-surface-3/30 px-3 py-2.5"
+          >
+            <input
+              id="project-recruit-toggle"
+              v-model="projectForm.recruitEnabled"
+              type="checkbox"
+              class="w-4 h-4 text-primary rounded border-surface-3 focus:ring-primary"
+            />
+            <label
+              for="project-recruit-toggle"
+              class="text-sm font-medium text-deep-text dark:text-white"
+            >
+              招募项目成员
+            </label>
+          </div>
+
+          <div v-if="projectForm.recruitEnabled" class="space-y-4 rounded-lg border border-dashed border-primary/30 p-4">
+            <!-- 招募岗位/角色（多选 chip） -->
+            <div>
+              <label class="block text-sm font-medium text-deep-text dark:text-white mb-1.5">
+                招募岗位 / 角色
+              </label>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="role in RECRUIT_ROLE_OPTIONS"
+                  :key="role"
+                  type="button"
+                  class="text-xs px-2.5 py-1 rounded-full border transition-colors"
+                  :class="
+                    projectForm.selectedRoles.includes(role)
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'border-surface-3 text-text-muted hover:border-primary/40 hover:text-primary'
+                  "
+                  @click="toggleRoleChip(role)"
+                >
+                  {{ role }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 能力要求（文本域） -->
+            <div>
+              <label
+                for="project-req"
+                class="block text-sm font-medium text-deep-text dark:text-white mb-1"
+              >
+                能力要求
+              </label>
+              <textarea
+                id="project-req"
+                v-model="projectForm.requirements"
+                rows="2"
+                maxlength="200"
+                class="w-full px-3 py-2 border border-surface-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
+                placeholder="例如：熟悉 Python，有机器学习项目经验优先"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- 招募人数（数字输入） -->
+              <div>
+                <label
+                  for="project-headcount"
+                  class="block text-sm font-medium text-deep-text dark:text-white mb-1"
+                >
+                  招募人数
+                </label>
+                <input
+                  id="project-headcount"
+                  v-model.number="projectForm.headcount"
+                  type="number"
+                  min="1"
+                  max="50"
+                  class="w-full px-3 py-2 border border-surface-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
+                  placeholder="如 2-3 人"
+                />
+              </div>
+              <!-- 项目周期/截止时间（日期选择器） -->
+              <div>
+                <label
+                  for="project-deadline"
+                  class="block text-sm font-medium text-deep-text dark:text-white mb-1"
+                >
+                  招募截止时间
+                </label>
+                <input
+                  id="project-deadline"
+                  v-model="projectForm.deadline"
+                  type="date"
+                  class="w-full px-3 py-2 border border-surface-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
           <div>
             <label
               class="block text-sm font-medium text-deep-text dark:text-white mb-1"
@@ -469,6 +584,7 @@ import {
   type ProjectItem as Project,
 } from "~/lib/api/modules/projects";
 import { buildUrl } from "~/lib/utils/paths";
+import ProjectProgressBar from "./ProjectProgressBar.vue";
 
 // ==================== 类型 ====================
 interface ApplyForm {
@@ -484,7 +600,23 @@ interface ProjectForm {
   description: string;
   roles: string;
   contact: string;
+  // 招募模块（P0）
+  recruitEnabled: boolean;
+  selectedRoles: string[];
+  requirements: string;
+  headcount: number | null;
+  deadline: string;
 }
+
+// 可选招募岗位（P0 示例 chip）
+const RECRUIT_ROLE_OPTIONS = [
+  "算法工程师",
+  "数据分析师",
+  "论文撰写",
+  "前端开发",
+  "硬件调试",
+  "UI 设计",
+];
 
 // ==================== 校验工具 ====================
 const isValidPhone = (v: string): boolean => /^1[3-9]\d{9}$/.test(v);
@@ -537,6 +669,8 @@ const tabs = [
 ];
 
 const activeTab = ref<"recruiting" | "showcase">("recruiting");
+// 「仅看招募中」快捷筛选（P0）：只保留正在招募且未结项的项目
+const onlyRecruiting = ref(false);
 const allProjects = ref<Project[]>([]);
 const loading = ref(true);
 
@@ -549,6 +683,7 @@ onMounted(async () => {
 const filteredProjects = computed<Project[]>(() =>
   allProjects.value
     .filter((p) => p.type === activeTab.value)
+    .filter((p) => (onlyRecruiting.value ? p.isRecruiting : true))
     .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0)),
 );
 
@@ -674,6 +809,11 @@ const projectForm = reactive<ProjectForm>({
   description: "",
   roles: "",
   contact: "",
+  recruitEnabled: false,
+  selectedRoles: [],
+  requirements: "",
+  headcount: null,
+  deadline: "",
 });
 const projectErrors = reactive<
   Record<"name" | "description" | "contact", string>
@@ -712,6 +852,13 @@ const openProjectModal = () => {
   showProjectModal.value = true;
 };
 
+// 招募岗位 chip 多选切换（P0）
+const toggleRoleChip = (role: string): void => {
+  const idx = projectForm.selectedRoles.indexOf(role);
+  if (idx >= 0) projectForm.selectedRoles.splice(idx, 1);
+  else projectForm.selectedRoles.push(role);
+};
+
 const closeProjectModal = () => {
   // 同 closeApplyModal：提交中不许关闭，避免复位标志后重复提交
   if (isSubmittingProject.value) return;
@@ -721,6 +868,11 @@ const closeProjectModal = () => {
     projectForm.roles =
     projectForm.contact =
       "";
+  projectForm.recruitEnabled = false;
+  projectForm.selectedRoles = [];
+  projectForm.requirements = "";
+  projectForm.headcount = null;
+  projectForm.deadline = "";
   Object.keys(projectErrors).forEach(
     (k) => (projectErrors[k as keyof typeof projectErrors] = ""),
   );
@@ -733,10 +885,26 @@ const handleProjectSubmit = async (): Promise<void> => {
   try {
     // contact/roles 是必填/已采集数据，不能丢：接口没有对应字段，
     // 按申请模态框的既有做法把它们并入 description 文本
+    const recruitLines: string[] = [];
+    if (projectForm.recruitEnabled) {
+      if (projectForm.selectedRoles.length)
+        recruitLines.push(
+          `招募岗位：${projectForm.selectedRoles.join("、")}`,
+        );
+      if (projectForm.requirements.trim())
+        recruitLines.push(
+          `能力要求：${sanitizeInput(projectForm.requirements)}`,
+        );
+      if (projectForm.headcount)
+        recruitLines.push(`招募人数：${projectForm.headcount} 人`);
+      if (projectForm.deadline)
+        recruitLines.push(`截止时间：${projectForm.deadline}`);
+    }
     const extras = [
       projectForm.roles.trim()
         ? `需要角色：${sanitizeInput(projectForm.roles)}`
         : "",
+      ...recruitLines,
       `联系方式：${sanitizeInput(projectForm.contact)}`,
     ].filter(Boolean);
     const ok = await projectApi.submitApplication({

@@ -23,8 +23,55 @@
       </button>
     </div>
 
-    <!-- 面包屑 -->
-    <FolderBreadcrumb :path="currentPath" @navigate="navigateBreadcrumb" />
+    <!-- 移动端：分类树折叠到顶部（P0） -->
+    <div class="lg:hidden">
+      <button
+        type="button"
+        class="w-full flex items-center justify-between rounded-xl border border-surface-3 bg-card-bg px-3 py-2.5 text-sm font-medium text-deep-text"
+        :aria-expanded="mobileTreeOpen"
+        @click="mobileTreeOpen = !mobileTreeOpen"
+      >
+        <span class="flex items-center gap-2">
+          <Icon icon="material-symbols:folder" class="w-4 h-4" />
+          分类目录
+        </span>
+        <Icon
+          icon="material-symbols:expand-more"
+          class="w-5 h-5 transition-transform"
+          :class="{ 'rotate-180': mobileTreeOpen }"
+        />
+      </button>
+      <div
+        v-if="mobileTreeOpen"
+        class="mt-2 rounded-xl border border-surface-3 bg-card-bg p-2"
+      >
+        <CategoryTreeNav
+          :current-id="currentId"
+          :expanded-ids="expandedIds"
+          :file-counts="folderFileCounts"
+          @select="selectTreeNode"
+          @toggle="toggleTree"
+        />
+      </div>
+    </div>
+
+    <div class="flex gap-6 items-start">
+      <!-- 桌面端：左侧分类树（P0） -->
+      <aside class="hidden lg:block w-60 shrink-0 sticky top-4">
+        <div class="rounded-xl border border-surface-3 bg-card-bg p-2 max-h-[70vh] overflow-y-auto">
+          <CategoryTreeNav
+            :current-id="currentId"
+            :expanded-ids="expandedIds"
+            :file-counts="folderFileCounts"
+            @select="selectTreeNode"
+            @toggle="toggleTree"
+          />
+        </div>
+      </aside>
+
+      <div class="flex-1 min-w-0 space-y-6">
+        <!-- 面包屑 -->
+        <FolderBreadcrumb :path="currentPath" @navigate="navigateBreadcrumb" />
 
     <!-- 文件夹层（根或非叶子，且非搜索态）：逐级下钻 -->
     <template v-if="isFolderLayer && !isSearching">
@@ -52,6 +99,23 @@
         }}
       </div>
       <!-- 筛选器 -->
+      <!-- 资料类型快捷筛选 chips（P0） -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button
+          v-for="chip in TYPE_CHIPS"
+          :key="chip.key"
+          type="button"
+          class="text-xs px-2.5 py-1 rounded-full border transition-colors"
+          :class="
+            filterType === chip.key
+              ? 'bg-primary text-on-primary border-primary'
+              : 'border-surface-3 text-text-muted hover:border-primary/40 hover:text-primary'
+          "
+          @click="filterType = chip.key"
+        >
+          {{ chip.label }}
+        </button>
+      </div>
       <div class="flex flex-wrap items-center gap-3">
         <select
           v-model="filterType"
@@ -150,6 +214,13 @@
                     count: file.downloadCount,
                   })
                 }}</span>
+                <span class="inline-flex items-center gap-0.5">
+                  <Icon
+                    icon="material-symbols:visibility-outline"
+                    class="w-3.5 h-3.5"
+                  />
+                  {{ file.viewCount }}
+                </span>
                 <span class="text-text-muted">{{ file.createdAt }}</span>
               </div>
             </div>
@@ -233,7 +304,7 @@
                   count: file.downloadCount,
                 })
               }}
-              · {{ file.createdAt }}
+              · 👁 {{ file.viewCount }} · {{ file.createdAt }}
             </div>
           </div>
           <div
@@ -260,6 +331,10 @@
         {{ t("community.fileLibrary.noMatchingFiles") }}
       </div>
     </template>
+      </div>
+      <!-- /右栏内容 -->
+    </div>
+    <!-- /双栏布局 -->
 
     <!-- 上传按钮 -->
     <button
@@ -312,24 +387,67 @@
                 })
               }}
             </p>
+            <!-- 资料标题（P0） -->
             <div>
-              <label class="block text-sm font-medium text-deep-text mb-1">{{
-                t("community.fileLibrary.classificationLabel")
-              }}</label>
-              <select
-                v-model="uploadClassification"
-                class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text"
-              >
-                <option value="public">
-                  {{ t("community.fileLibrary.public") }}
-                </option>
-                <option value="internal">
-                  {{ t("community.fileLibrary.internal") }}
-                </option>
-                <option value="confidential">
-                  {{ t("community.fileLibrary.confidential") }}
-                </option>
-              </select>
+              <label class="block text-sm font-medium text-deep-text mb-1">
+                资料标题 <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="uploadTitle"
+                type="text"
+                maxlength="80"
+                class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary outline-none"
+                placeholder="例如：2024 光学实验报告合集"
+              />
+            </div>
+            <!-- 资料类型 + 权限（P0） -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-deep-text mb-1">
+                  资料类型
+                </label>
+                <select
+                  v-model="uploadMaterialType"
+                  class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text"
+                >
+                  <option value="">请选择</option>
+                  <option v-for="m in MATERIAL_TYPES" :key="m" :value="m">
+                    {{ m }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-deep-text mb-1">{{
+                  t("community.fileLibrary.classificationLabel")
+                }}</label>
+                <select
+                  v-model="uploadClassification"
+                  class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text"
+                >
+                  <option value="public">
+                    {{ t("community.fileLibrary.public") }}
+                  </option>
+                  <option value="internal">
+                    {{ t("community.fileLibrary.internal") }}
+                  </option>
+                  <option value="confidential">
+                    {{ t("community.fileLibrary.confidential") }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <!-- 标签输入（P0） -->
+            <div>
+              <label class="block text-sm font-medium text-deep-text mb-1">
+                标签
+              </label>
+              <input
+                v-model="uploadTagsInput"
+                type="text"
+                maxlength="100"
+                class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary outline-none"
+                placeholder="逗号分隔，如：量子力学, Python代码"
+              />
             </div>
             <div>
               <label class="block text-sm font-medium text-deep-text mb-1">{{
@@ -422,6 +540,7 @@ import type { FileCategory } from "../data/category-tree";
 import { searchFiles } from "../data/search";
 import FolderBreadcrumb from "./FolderBreadcrumb.vue";
 import FolderGrid from "./FolderGrid.vue";
+import CategoryTreeNav from "./CategoryTreeNav.vue";
 import { buildUrl } from "~/lib/utils/paths";
 import { t } from "~/lib/i18n";
 
@@ -435,6 +554,11 @@ const showUpload = ref(false);
 const mounted = ref(false);
 const uploadCategory = ref("");
 const uploadDesc = ref("");
+// 上传元数据（P0）：标题 / 资料类型 / 标签
+const uploadTitle = ref("");
+const uploadMaterialType = ref("");
+const uploadTagsInput = ref("");
+const MATERIAL_TYPES = ["课件", "论文", "实验数据", "代码", "题库", "其他"];
 const uploadClassification = ref<"public" | "internal" | "confidential">(
   "public",
 );
@@ -513,6 +637,20 @@ const categories = forumCategories.filter((c) => !c.parentId);
 // 三级树状下钻状态：null 表示根（全部学科）
 const currentId = ref<string | null>(null);
 
+// 分类树展开状态（P0）：默认展开一级学科
+const expandedIds = ref<Set<string>>(new Set(["basic-science"]));
+// 移动端分类树是否展开（P0：默认折叠，展开后置于内容顶部）
+const mobileTreeOpen = ref(false);
+
+// 资料类型快捷筛选 chips（P0）：与下拉 filterType 等价，用 chips 表达
+const TYPE_CHIPS = [
+  { key: "", label: "全部" },
+  { key: "pdf", label: "PDF" },
+  { key: "zip", label: "压缩包" },
+  { key: "code", label: "代码" },
+  { key: "xlsx", label: "表格" },
+];
+
 const currentPath = computed<FileCategory[]>(() =>
   currentId.value ? getCategoryPath(currentId.value) : [],
 );
@@ -538,6 +676,26 @@ function openFolder(id: string) {
   currentId.value = id;
 }
 
+// 树节点折叠/展开（P0）
+function toggleTree(id: string) {
+  const next = new Set(expandedIds.value);
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  expandedIds.value = next;
+}
+
+// 树节点选中：移动同时收起移动端树
+function selectTreeNode(id: string | null) {
+  currentId.value = id;
+  mobileTreeOpen.value = false;
+  // 选中非叶子节点时自动展开其子孙
+  if (id && !isLeaf(id)) {
+    const next = new Set(expandedIds.value);
+    next.add(id);
+    expandedIds.value = next;
+  }
+}
+
 function navigateBreadcrumb(id: string | null) {
   currentId.value = id;
 }
@@ -547,12 +705,16 @@ const filteredFiles = computed(() => {
     ? [...searchResults.value]
     : [...currentFiles.value];
   if (filterType.value === "pdf")
-    files = files.filter((f) => f.mimeType === "application/pdf");
+    files = files.filter((f) => fileKind(f.mimeType) === "pdf");
   if (filterType.value === "zip")
-    files = files.filter((f) => f.mimeType === "application/zip");
+    files = files.filter((f) => fileKind(f.mimeType) === "zip");
+  if (filterType.value === "code")
+    files = files.filter((f) => fileKind(f.mimeType) === "code");
+  if (filterType.value === "xlsx")
+    files = files.filter((f) => fileKind(f.mimeType) === "xlsx");
   if (filterType.value === "other")
     files = files.filter(
-      (f) => !["application/pdf", "application/zip"].includes(f.mimeType),
+      (f) => !["pdf", "zip", "code", "xlsx"].includes(fileKind(f.mimeType)),
     );
   if (filterStatus.value)
     files = files.filter((f) => f.status === filterStatus.value);
@@ -563,8 +725,45 @@ const filteredFiles = computed(() => {
 
 function fileIcon(mime: string): string {
   if (mime === "application/pdf") return "📄";
-  if (mime === "application/zip") return "📦";
+  if (mime === "application/zip" || mime === "application/x-zip-compressed")
+    return "📦";
+  if (
+    mime.includes("spreadsheet") ||
+    mime.includes("excel") ||
+    mime.includes("csv")
+  )
+    return "📊";
+  if (
+    mime.includes("python") ||
+    mime.includes("javascript") ||
+    mime.includes("typescript") ||
+    mime.includes("x-sh") ||
+    mime.includes("json")
+  )
+    return "💻";
   return "📁";
+}
+
+// 按资料类型归类（用于 chips 筛选）
+function fileKind(mime: string): "pdf" | "zip" | "code" | "xlsx" | "other" {
+  if (mime === "application/pdf") return "pdf";
+  if (mime === "application/zip" || mime === "application/x-zip-compressed")
+    return "zip";
+  if (
+    mime.includes("spreadsheet") ||
+    mime.includes("excel") ||
+    mime.includes("csv")
+  )
+    return "xlsx";
+  if (
+    mime.includes("python") ||
+    mime.includes("javascript") ||
+    mime.includes("typescript") ||
+    mime.includes("x-sh") ||
+    mime.includes("json")
+  )
+    return "code";
+  return "other";
 }
 
 function formatSize(bytes: number): string {
@@ -611,6 +810,9 @@ function closeUpload() {
   showUpload.value = false;
   selectedFile.value = null;
   uploadDesc.value = "";
+  uploadTitle.value = "";
+  uploadMaterialType.value = "";
+  uploadTagsInput.value = "";
   uploadClassification.value = "public";
   uploadProjectId.value = "";
   if (fileInputEl.value) fileInputEl.value.value = "";
@@ -626,24 +828,25 @@ async function doUpload() {
   }
   uploading.value = true;
   try {
+    const tags = uploadTagsInput.value
+      .split(/[,，]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const meta = {
+      categoryId: uploadCategory.value,
+      description: uploadDesc.value,
+      tags,
+      classification: uploadClassification.value,
+      projectId: uploadProjectId.value.trim() || null,
+    };
     const init = await fileLibraryApi.uploadInit({
       originalName: selectedFile.value.name,
       mimeType: selectedFile.value.type,
-      categoryId: uploadCategory.value,
-      description: uploadDesc.value,
-      tags: [],
-      classification: uploadClassification.value,
-      projectId: uploadProjectId.value.trim() || null,
+      ...meta,
     });
     if (init.mode === "sync") {
       // Local：无预签名，直接 multipart 同步上传
-      await fileLibraryApi.uploadSyncFromFile(selectedFile.value, {
-        categoryId: uploadCategory.value,
-        description: uploadDesc.value,
-        tags: [],
-        classification: uploadClassification.value,
-        projectId: uploadProjectId.value.trim() || null,
-      });
+      await fileLibraryApi.uploadSyncFromFile(selectedFile.value, meta);
     } else {
       // S3：先 PUT 字节到预签名 URL。Phase 2-C 起**不再调 confirmUpload** —— 登记改由
       // MinIO 事件通知驱动（对象落桶 → webhook → 后端登记），后端经 WebSocket 推送

@@ -177,42 +177,25 @@
 }
 
 @media (min-width: 768px) {
-  [data-main-content] {
+  /* 仅当侧边栏 DOM 实际存在时才给主内容让位；
+     Swup 换页时可能短暂清空 #sidebar-wrapper，此时不应残留 padding-left。 */
+  :global(body:has(#sidebar-wrapper [data-sidebar])) [data-main-content] {
     padding-left: 240px;
   }
 
-  :global(html.sidebar-collapsed) [data-main-content] {
+  :global(html.sidebar-collapsed body:has(#sidebar-wrapper [data-sidebar])) [data-main-content] {
     padding-left: 67px;
   }
 }
 
 @media (max-width: 767px) {
+  /* 移动端：侧边栏仅承载本页锚点，顶部汉堡菜单已覆盖全局导航，
+     窄条图标会挤压主内容并与顶栏重复，直接隐藏并复位主内容偏移。 */
   .shell {
-    width: 200px;
-  }
-
-  .shell:global(.collapsed),
-  :global(html.sidebar-collapsed) .shell {
-    width: 50px;
-    padding: 0 4px;
-  }
-
-  .shell:global(.collapsed) .nav li a,
-  :global(html.sidebar-collapsed) .shell .nav li a {
-    min-height: 42px;
-  }
-
-  .shell:global(.collapsed) .toggle,
-  :global(html.sidebar-collapsed) .shell .toggle {
-    right: 4px;
-    left: 4px;
+    display: none;
   }
 
   [data-main-content] {
-    padding-left: 200px;
-  }
-
-  :global(html.sidebar-collapsed) [data-main-content] {
-    padding-left: 50px;
+    padding-left: 0;
   }
 }

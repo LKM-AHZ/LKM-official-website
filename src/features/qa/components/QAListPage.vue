@@ -52,7 +52,7 @@
         class="profile-card group block"
       >
         <div class="profile-inner p-4 flex flex-col gap-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <span
               class="text-xs px-1.5 py-0.5 rounded-full font-medium"
               :class="
@@ -71,15 +71,15 @@
             </span>
             <span
               v-if="q.status === 'open' && q.urgent"
-              class="text-xs font-medium text-red-500"
+              class="text-xs px-1.5 py-0.5 rounded-full font-medium bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400"
             >
-              {{ t("page.qa.urgentBadge") }}
+              ⚡ {{ t("page.qa.urgentBadge") }}
             </span>
             <span
               v-if="q.bountyTotal > 0"
-              class="text-xs text-amber-500 font-medium"
+              class="text-xs px-1.5 py-0.5 rounded-full font-medium bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400"
             >
-              {{ t("page.qa.bounty", { count: q.bountyTotal }) }}
+              💰 {{ t("page.qa.bounty", { count: q.bountyTotal }) }}
             </span>
           </div>
           <h3

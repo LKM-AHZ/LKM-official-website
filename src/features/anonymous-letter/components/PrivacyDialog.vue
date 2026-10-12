@@ -4,7 +4,7 @@
     <div class="dialog glass">
       <div class="privacy">
         <div class="privacy-icon">
-          <Icon icon="tabler:lock" aria-hidden="true" />
+          <Icon icon="fa6-solid:lock" aria-hidden="true" />
         </div>
         <h2 class="grad-text">{{ t("treehole.privacy.title") }}</h2>
         <p class="privacy-text">

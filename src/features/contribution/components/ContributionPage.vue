@@ -37,14 +37,14 @@
     <template v-else>
       <!-- Tab 导航 -->
       <div
-        class="flex gap-1 overflow-x-auto rounded-2xl bg-btn-plain-bg-hover p-1"
+        class="flex gap-0.5 overflow-x-auto rounded-2xl bg-btn-plain-bg-hover p-1 sm:gap-1"
         role="group"
       >
         <button
           v-for="tab in pageTabs"
           :key="tab.key"
           type="button"
-          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors shrink-0"
+          class="rounded-full px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors shrink-0 sm:px-4"
           :class="
             activeTab === tab.key
               ? 'bg-card-bg text-primary-readable shadow-sm'

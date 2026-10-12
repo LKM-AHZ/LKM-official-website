@@ -27,6 +27,14 @@ const canInteract = computed(
       new Date(question.value.bountyExpiresAt).getTime() > nowTick.value),
 );
 
+const bountyRemainingDays = computed<number | null>(() => {
+  if (!question.value?.bountyExpiresAt) return null;
+  const ms =
+    new Date(question.value.bountyExpiresAt).getTime() - nowTick.value;
+  if (ms <= 0) return 0;
+  return Math.ceil(ms / 86400000);
+});
+
 onMounted(async () => {
   await auth.restoreAndValidate();
   clockTimer = setInterval(() => {
@@ -118,7 +126,7 @@ function formatDate(dateStr: string): string {
       <div>
         <header class="page-intro">
           <div class="page-intro-copy">
-            <div class="flex items-center gap-2 mb-2">
+            <div class="flex items-center gap-2 flex-wrap mb-2">
               <span
                 class="text-xs px-2 py-0.5 rounded-full font-medium"
                 :class="
@@ -136,16 +144,10 @@ function formatDate(dateStr: string): string {
                 }}
               </span>
               <span
-                v-if="question.bountyTotal > 0"
-                class="text-xs text-amber-500 font-medium"
-              >
-                {{ t("page.qa.bounty", { count: question.bountyTotal }) }}
-              </span>
-              <span
                 v-if="question.status === 'open' && question.urgent"
-                class="text-xs text-red-500 font-medium"
+                class="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400"
               >
-                {{ t("page.qa.urgentBadge") }}
+                ⚡ {{ t("page.qa.urgentBadge") }}
               </span>
             </div>
             <h1 class="text-2xl font-bold text-deep-text">
@@ -164,6 +166,30 @@ function formatDate(dateStr: string): string {
             </div>
           </div>
         </header>
+
+        <!-- 悬赏横幅 -->
+        <div
+          v-if="question.bountyTotal > 0"
+          class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-[18px] border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/10"
+        >
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">💰</span>
+            <div>
+              <div class="text-lg font-bold text-amber-600 dark:text-amber-400">
+                {{ t("page.qa.bountyBanner", { count: question.bountyTotal }) }}
+              </div>
+              <div class="text-xs text-text-muted">
+                {{ t("page.qa.bountyMaxHint") }}
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="bountyRemainingDays !== null && question.status === 'open'"
+            class="text-sm font-medium text-amber-600 dark:text-amber-400 shrink-0"
+          >
+            ⏳ {{ t("page.qa.remainingDays", { count: bountyRemainingDays }) }}
+          </div>
+        </div>
         <div
           class="mt-5 p-5 bg-card-bg border border-surface-3 rounded-[18px] text-sm text-deep-text leading-7 whitespace-pre-wrap"
         >

@@ -1,0 +1,425 @@
+---
+import { Icon } from "astro-icon/components";
+import Layout from "~/layouts/PageLayout.astro";
+import { getPermalink } from "~/lib/utils/permalinks";
+
+const paths = {
+  search: getPermalink("/search"),
+  files: getPermalink("/files"),
+  qa: getPermalink("/qa"),
+  columns: getPermalink("/search?type=columns"),
+  bank: getPermalink("/competition/bank"),
+};
+
+// ===== 静态示例数据 =====
+
+// 热门资料
+interface HotFile {
+  name: string;
+  size: string;
+  subject: string;
+  updated: string;
+  downloads: number;
+  icon: string;
+}
+
+const hotFiles: HotFile[] = [
+  {
+    name: "2026 国赛数学建模优秀论文合集.pdf",
+    size: "24.6 MB",
+    subject: "数学建模",
+    updated: "3 天前更新",
+    downloads: 3492,
+    icon: "tabler:file-text",
+  },
+  {
+    name: "Python 物理仿真代码合集（v1.3）.zip",
+    size: "8.1 MB",
+    subject: "计算物理",
+    updated: "含 12 个算例 · 昨天更新",
+    downloads: 2190,
+    icon: "tabler:file-code",
+  },
+  {
+    name: "有机化学实验数据记录模板.xlsx",
+    size: "412 KB",
+    subject: "实验数据",
+    updated: "待审核 · 5 小时前上传",
+    downloads: 618,
+    icon: "tabler:file-spreadsheet",
+  },
+  {
+    name: "天文观测数据处理指南（附数据集）.pdf",
+    size: "56.3 MB",
+    subject: "天文",
+    updated: "含 FITS 样例数据 · 2 天前更新",
+    downloads: 1534,
+    icon: "tabler:file-star",
+  },
+];
+
+// 帖子流（混合悬赏求助 + 专栏文章）
+interface PostItem {
+  type: "qa" | "column";
+  avatarChar: string;
+  avatarColor: string;
+  username: string;
+  tags: string[];
+  tagColors: string[];
+  title: string;
+  summary: string;
+  reads: string;
+  answers: string;
+  follows: string;
+  likes: number;
+  comments: number;
+  actionLabel: string;
+  actionIcon: string;
+}
+
+const posts: PostItem[] = [
+  {
+    type: "qa",
+    avatarChar: "宇",
+    avatarColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+    username: "观测者",
+    tags: ["悬赏 50 积分", "#天体物理", "#观测技巧"],
+    tagColors: [
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+      "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+      "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+    ],
+    title: "计划观测 HD 209458 b 的凌日，想要一套可复现的流程：定标、平场、光变曲线提取与误差估计。",
+    summary: "已经拿到了 i 波段的 raw 帧，但不知道怎么正确做 bias/dark/flat 校正，以及怎么从减背景后的 FITS 里提取目标星的差分星等。有走过这条路的同学吗？",
+    reads: "阅读 1.1k",
+    answers: "解答 2",
+    follows: "关注 18",
+    likes: 38,
+    comments: 0,
+    actionLabel: "查看详情",
+    actionIcon: "tabler:arrow-up-right",
+  },
+  {
+    type: "column",
+    avatarChar: "许",
+    avatarColor: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+    username: "许知微",
+    tags: ["生物", "工具/资源推荐", "4 天前"],
+    tagColors: [
+      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300",
+      "bg-surface-3/60 text-text-muted",
+    ],
+    title: "我用 Python 写了个自动整理测序数据的脚本（附源码与说明）",
+    summary: "把 FASTQ 质控、去接头、比对统计串成一条命令，输出统一的结构化报告，已经在文件库上传了压缩包。",
+    reads: "阅读 2.2k",
+    answers: "解答 6",
+    follows: "下载 418",
+    likes: 142,
+    comments: 1,
+    actionLabel: "查看资料",
+    actionIcon: "tabler:file-download",
+  },
+  {
+    type: "qa",
+    avatarChar: "林",
+    avatarColor: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+    username: "林致远",
+    tags: ["悬赏 100 积分", "#量子力学", "#在线求解"],
+    tagColors: [
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+      "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300",
+      "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+    ],
+    title: "一维无限深势阱的微扰问题，加入一个 delta 势后一阶修正怎么算？",
+    summary: "势阱宽度为 L，在 x=L/2 处加入 V0·δ(x-L/2)。我用狄拉克归一化积分算出来的结果和书上的不一样，想确认一下积分边界条件有没有搞错。",
+    reads: "阅读 856",
+    answers: "解答 4",
+    follows: "关注 23",
+    likes: 27,
+    comments: 3,
+    actionLabel: "查看详情",
+    actionIcon: "tabler:arrow-up-right",
+  },
+  {
+    type: "column",
+    avatarChar: "陈",
+    avatarColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+    username: "陈方程",
+    tags: ["数学", "学习笔记", "1 周前"],
+    tagColors: [
+      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      "bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300",
+      "bg-surface-3/60 text-text-muted",
+    ],
+    title: "从 Galois 对应到五次方程不可解：一份可视化笔记",
+    summary: "用群论的语言重新整理了 Abel-Ruffini 定理的证明思路，配了 6 张交换图和 3 道引导性练习，适合学过半学期近世代数的同学。",
+    reads: "阅读 3.4k",
+    answers: "解答 12",
+    follows: "点赞 567",
+    likes: 318,
+    comments: 15,
+    actionLabel: "阅读专栏",
+    actionIcon: "tabler:book",
+  },
+];
+
+// 侧边栏：学科分类
+const subjectTags = [
+  { label: "数学", href: `${paths.search}?subject=math` },
+  { label: "物理", href: `${paths.search}?subject=physics` },
+  { label: "化学", href: `${paths.search}?subject=chemistry` },
+  { label: "生物", href: `${paths.search}?subject=biology` },
+  { label: "计算机/算法", href: `${paths.search}?subject=cs` },
+  { label: "天文", href: `${paths.search}?subject=astronomy` },
+];
+
+// 侧边栏：资料类型
+const typeTags = [
+  { label: "文献", href: `${paths.files}?type=paper` },
+  { label: "课件", href: `${paths.files}?type=slides` },
+  { label: "代码", href: `${paths.files}?type=code` },
+  { label: "数据集", href: `${paths.files}?type=dataset` },
+  { label: "论文模板", href: `${paths.files}?type=template` },
+];
+---
+
+<Layout
+  metadata={{
+    title: "搜索 · 全站中枢 · 理科迷",
+    description: "聚合搜索全站帖子、专栏、文件库资料与题库，一站式发现理科社区内容。",
+  }}
+>
+  <div class="min-h-screen bg-page-bg pb-16">
+    <!-- 顶部搜索 Hero 区：全站搜索中枢 -->
+    <section class="bg-card-bg border-b border-surface-3">
+      <div class="mx-auto max-w-[1200px] px-4 sm:px-6 py-10 sm:py-14">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="inline-flex items-center gap-2 rounded-full bg-btn-regular-bg px-4 py-1.5 text-sm font-medium text-primary-readable">
+            <Icon name="tabler:search" class="h-4 w-4" aria-hidden="true" />
+            全站搜索
+          </span>
+          <h1 class="mt-5 font-heading text-[clamp(1.75rem,3.5vw,2.5rem)] font-semibold leading-tight tracking-tight text-deep-text">
+            一句话，找到你要的理科内容
+          </h1>
+          <p class="mt-3 text-base leading-7 text-text-muted">
+            同时搜索帖子、专栏文章、文件库资料和题库，一键直达全站。
+          </p>
+        </div>
+
+        <!-- 大搜索框：页面核心视觉 -->
+        <form
+          action={paths.search}
+          method="get"
+          role="search"
+          class="mx-auto mt-8 flex w-full max-w-3xl items-center gap-2 rounded-full border border-surface-3 bg-page-bg p-2.5 shadow-md transition focus-within:border-primary focus-within:shadow-lg"
+        >
+          <Icon
+            name="tabler:search"
+            class="ml-4 h-6 w-6 shrink-0 text-text-muted"
+            aria-hidden="true"
+          />
+          <label for="discover-search" class="sr-only">全站搜索</label>
+          <input
+            id="discover-search"
+            name="q"
+            type="search"
+            required
+            maxlength="200"
+            placeholder="搜索帖子、专栏、文件库资料、题库…"
+            class="min-w-0 flex-1 bg-transparent px-2 py-3 text-base text-deep-text outline-none placeholder:text-text-muted/70"
+          />
+          <button
+            type="submit"
+            class="rounded-full bg-primary-action px-7 py-3 text-sm font-semibold text-white transition hover:shadow-md"
+          >
+            搜索
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <div class="mx-auto max-w-[1200px] px-4 sm:px-6" style="padding-top: 32px;">
+      <!-- 两栏布局：桌面端主内容 2/3 + 侧边栏 1/3 -->
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-10">
+        <!-- 左侧主内容区 -->
+        <div class="min-w-0 space-y-10">
+          <!-- 最新上传 / 热门资料 -->
+          <section aria-labelledby="hot-files-heading">
+            <div class="mb-5 flex items-center gap-2">
+              <Icon name="tabler:flame" class="h-5 w-5 text-primary-readable" aria-hidden="true" />
+              <h2 id="hot-files-heading" class="text-lg font-semibold text-deep-text">
+                最新上传 / 热门资料
+              </h2>
+            </div>
+            <div class="divide-y divide-surface-3/60">
+              {
+                hotFiles.map((file) => (
+                  <div
+                    class="flex items-center gap-4 py-4 hover:bg-btn-card-bg-hover transition -mx-2 px-2 rounded-lg"
+                  >
+                    <div class="min-w-0 flex-1">
+                      <h3 class="truncate text-sm font-semibold text-deep-text sm:text-[15px]">
+                        {file.name}
+                      </h3>
+                      <p class="mt-0.5 text-xs text-text-muted">
+                        {file.size} · {file.subject} · {file.updated}
+                      </p>
+                    </div>
+                    <div class="hidden shrink-0 text-right sm:block">
+                      <p class="text-xs text-text-muted">下载 {file.downloads.toLocaleString()}</p>
+                    </div>
+                    <a
+                      href={paths.files}
+                      class="shrink-0 text-sm font-medium text-primary-readable hover:underline"
+                    >
+                      查看
+                    </a>
+                  </div>
+                ))
+              }
+            </div>
+          </section>
+
+          <!-- 帖子流 -->
+          <section aria-labelledby="feed-heading">
+            <div class="mb-5 flex items-center gap-2">
+              <Icon name="tabler:news" class="h-5 w-5 text-primary-readable" aria-hidden="true" />
+              <h2 id="feed-heading" class="text-lg font-semibold text-deep-text">
+                为你推荐
+              </h2>
+            </div>
+            <div class="space-y-5">
+              {
+                posts.map((post) => (
+                  <article class="rounded-[20px] border border-surface-3 bg-card-bg p-5 sm:p-6 transition hover:shadow-sm">
+                    <!-- 用户行 -->
+                    <div class="flex items-center gap-3">
+                      <span
+                        class={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${post.avatarColor}`}
+                      >
+                        {post.avatarChar}
+                      </span>
+                      <span class="text-sm font-medium text-deep-text">{post.username}</span>
+                    </div>
+
+                    <!-- 标签行 -->
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      {post.tags.map((tag, i) => (
+                        <span
+                          class={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.tagColors[i]}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <!-- 标题与摘要 -->
+                    <h3 class="mt-3 line-clamp-2 text-base font-semibold leading-6 text-deep-text sm:text-lg sm:leading-7">
+                      {post.title}
+                    </h3>
+                    <p class="mt-2 line-clamp-2 text-sm leading-6 text-text-muted">
+                      {post.summary}
+                    </p>
+
+                    <!-- 底部统计 -->
+                    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
+                      <span>{post.reads}</span>
+                      <span>{post.answers}</span>
+                      <span>{post.follows}</span>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="mt-4 flex items-center justify-between border-t border-surface-3/60 pt-4">
+                      <div class="flex items-center gap-1">
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-text-muted transition hover:bg-btn-plain-bg-hover hover:text-primary-readable"
+                        >
+                          <Icon name="tabler:heart" class="h-4 w-4" aria-hidden="true" />
+                          {post.likes}
+                        </button>
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-text-muted transition hover:bg-btn-plain-bg-hover hover:text-primary-readable"
+                        >
+                          <Icon name="tabler:bookmark" class="h-4 w-4" aria-hidden="true" />
+                          收藏
+                        </button>
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-text-muted transition hover:bg-btn-plain-bg-hover hover:text-primary-readable"
+                        >
+                          <Icon name="tabler:message-circle" class="h-4 w-4" aria-hidden="true" />
+                          评论 {post.comments}
+                        </button>
+                      </div>
+                      <a
+                        href={post.type === "qa" ? paths.qa : paths.columns}
+                        class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-primary-readable transition hover:bg-btn-regular-bg"
+                      >
+                        {post.actionLabel}
+                        <Icon name={post.actionIcon} class="h-3.5 w-3.5" aria-hidden="true" />
+                      </a>
+                    </div>
+                  </article>
+                ))
+              }
+            </div>
+
+            <!-- 加载更多 -->
+            <div class="mt-8 text-center">
+              <button
+                type="button"
+                class="rounded-full border border-surface-3 px-6 py-2.5 text-sm font-medium text-deep-text transition hover:bg-btn-regular-bg hover:text-primary-readable"
+              >
+                加载更多帖子
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- 右侧边栏 -->
+        <aside class="min-w-0" aria-label="资源分类快捷跳转">
+          <div class="rounded-[20px] border border-surface-3 bg-card-bg p-5 sm:p-6 lg:sticky lg:top-20">
+            <h3 class="text-base font-semibold text-deep-text">资源分类快捷跳转</h3>
+
+            <!-- 按学科 -->
+            <div class="mt-5">
+              <p class="text-xs font-semibold tracking-wider text-primary-readable">按学科</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                {
+                  subjectTags.map((tag) => (
+                    <a
+                      href={tag.href}
+                      class="rounded-full bg-btn-regular-bg px-3.5 py-1.5 text-sm font-medium text-primary-readable transition hover:bg-btn-regular-bg-hover"
+                    >
+                      {tag.label}
+                    </a>
+                  ))
+                }
+              </div>
+            </div>
+
+            <!-- 按资料类型 -->
+            <div class="mt-6">
+              <p class="text-xs font-semibold tracking-wider text-primary-readable">按资料类型</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                {
+                  typeTags.map((tag) => (
+                    <a
+                      href={tag.href}
+                      class="rounded-full bg-btn-regular-bg px-3.5 py-1.5 text-sm font-medium text-primary-readable transition hover:bg-btn-regular-bg-hover"
+                    >
+                      {tag.label}
+                    </a>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</Layout>

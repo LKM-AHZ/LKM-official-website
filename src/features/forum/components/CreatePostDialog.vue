@@ -54,6 +54,58 @@
             </select>
           </div>
 
+          <!-- 学科大类 -->
+          <div>
+            <label class="block text-sm font-medium text-deep-text mb-1.5">{{
+              t("community.forum.subjectLabel")
+            }}</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button
+                v-for="s in subjects"
+                :key="s.id"
+                type="button"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors"
+                :class="
+                  selectedSubject === s.id
+                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                    : 'border-surface-3 text-deep-text hover:border-primary/50'
+                "
+                @click="selectedSubject = s.id"
+              >
+                <Icon :icon="s.icon" class="w-4 h-4 shrink-0" />
+                <span class="truncate">{{ t(s.label) }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 内容属性 -->
+          <div>
+            <label class="block text-sm font-medium text-deep-text mb-1.5">{{
+              t("community.forum.contentTypeLabel")
+            }}</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="ct in contentTypes"
+                :key="ct.id"
+                type="button"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs transition-colors"
+                :class="
+                  selectedContentTypes.includes(ct.id)
+                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                    : 'border-surface-3 text-text-muted hover:border-primary/50'
+                "
+                @click="toggleContentType(ct.id)"
+              >
+                <Icon
+                  v-if="selectedContentTypes.includes(ct.id)"
+                  icon="material-symbols:check"
+                  class="w-3.5 h-3.5"
+                />
+                {{ t(ct.label) }}
+              </button>
+            </div>
+          </div>
+
           <!-- 标题 -->
           <div>
             <label class="block text-sm font-medium text-deep-text mb-1.5">{{
@@ -70,9 +122,12 @@
 
           <!-- 标签 -->
           <div>
-            <label class="block text-sm font-medium text-deep-text mb-1.5">{{
-              t("community.forum.tagsLabel")
-            }}</label>
+            <label class="block text-sm font-medium text-deep-text mb-1.5">
+              {{ t("community.forum.tagsLabel") }}
+              <span class="text-xs text-text-muted font-normal">
+                {{ tags.length }}/5 · {{ t("community.forum.maxTagsHint", { count: 5 }) }}
+              </span>
+            </label>
             <div class="flex flex-wrap gap-1.5 mb-2">
               <span
                 v-for="(tag, i) in tags"
@@ -80,7 +135,7 @@
                 class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary"
               >
                 {{ tag }}
-                <button class="hover:text-red-500" @click="tags.splice(i, 1)">
+                <button class="hover:text-red-500" @click="removeTag(i)">
                   &times;
                 </button>
               </span>
@@ -88,10 +143,30 @@
             <input
               v-model="tagInput"
               type="text"
-              class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              :disabled="tags.length >= 5"
+              class="w-full px-3 py-2 rounded-lg border border-surface-3 bg-card-bg text-sm text-deep-text focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50"
               :placeholder="t('community.forum.tagsPlaceholder')"
               @keydown.enter.prevent="addTag"
             />
+            <div
+              v-if="recommendedTags.length"
+              class="mt-2 flex flex-wrap items-center gap-1.5"
+            >
+              <span class="text-xs text-text-muted">
+                {{ t("community.forum.recommendedTagsLabel") }}：
+              </span>
+              <button
+                v-for="rt in recommendedTags"
+                :key="rt"
+                type="button"
+                class="text-xs px-2 py-0.5 rounded-full border border-surface-3 text-text-muted hover:border-primary hover:text-primary transition-colors"
+                :disabled="tags.includes(rt) || tags.length >= 5"
+                :class="(tags.includes(rt) || tags.length >= 5) ? 'opacity-40 cursor-not-allowed' : ''"
+                @click="addTag(rt)"
+              >
+                {{ rt }}
+              </button>
+            </div>
           </div>
 
           <!-- 正文 -->
@@ -158,12 +233,69 @@ const props = defineProps<{ boardId?: string }>();
 
 const visible = ref(false);
 const selectedCategory = ref("");
+const selectedSubject = ref("");
+const selectedContentTypes = ref<string[]>([]);
 const title = ref("");
 const content = ref("");
 const tags = ref<string[]>([]);
 const tagInput = ref("");
 const submitting = ref(false);
 const errorMessage = ref("");
+
+const MAX_TAGS = 5;
+
+const subjects = [
+  { id: "math", icon: "tabler:math-symbols", label: "community.forum.math" },
+  { id: "physics", icon: "tabler:atom", label: "community.forum.physics" },
+  { id: "chemistry", icon: "tabler:flask", label: "community.forum.chemistry" },
+  { id: "biology", icon: "tabler:microscope", label: "community.forum.biology" },
+  { id: "cs", icon: "tabler:code", label: "community.forum.cs" },
+  { id: "astronomy", icon: "tabler:telescope", label: "community.forum.astronomy" },
+];
+
+const contentTypes = [
+  { id: "discussion", label: "community.forum.ctDiscussion" },
+  { id: "notes", label: "community.forum.ctNotes" },
+  { id: "paper", label: "community.forum.ctPaper" },
+  { id: "popular", label: "community.forum.ctPopular" },
+  { id: "tool", label: "community.forum.ctTool" },
+];
+
+const SUBJECT_TAG_SUGGESTIONS: Record<string, string[]> = {
+  math: ["微积分", "线性代数", "概率论", "数论"],
+  physics: ["量子力学", "相对论", "电磁学", "力学"],
+  chemistry: ["有机化学", "无机化学", "物理化学", "分析化学"],
+  biology: ["细胞生物学", "遗传学", "生态学", "分子生物学"],
+  cs: ["算法", "数据结构", "机器学习", "操作系统"],
+  astronomy: ["天体物理", "宇宙学", "观测", "行星科学"],
+};
+
+const recommendedTags = computed(() => {
+  if (!selectedSubject.value) return [];
+  return (SUBJECT_TAG_SUGGESTIONS[selectedSubject.value] ?? []).filter(
+    (tag) => !tags.value.includes(tag),
+  );
+});
+
+function toggleContentType(id: string) {
+  const idx = selectedContentTypes.value.indexOf(id);
+  if (idx >= 0) selectedContentTypes.value.splice(idx, 1);
+  else selectedContentTypes.value.push(id);
+}
+
+function removeTag(i: number) {
+  tags.value.splice(i, 1);
+}
+
+function addTag(preset?: string) {
+  const tag = (preset ?? tagInput.value).trim();
+  if (!tag) return;
+  if (tags.value.length >= MAX_TAGS) return;
+  if (!tags.value.includes(tag)) {
+    tags.value.push(tag);
+  }
+  if (!preset) tagInput.value = "";
+}
 
 const auth = useAuthStore();
 const boards = ref<BoardItem[]>([]);
@@ -183,17 +315,12 @@ function childrenOf(parentId: string): BoardItem[] {
   return boards.value.filter((b) => b.parent_id === parentId);
 }
 
-function addTag() {
-  const tag = tagInput.value.trim();
-  if (tag && !tags.value.includes(tag)) {
-    tags.value.push(tag);
-  }
-  tagInput.value = "";
-}
-
 async function open() {
   errorMessage.value = "";
   boards.value = [];
+  selectedSubject.value = "";
+  selectedContentTypes.value = [];
+  tagInput.value = "";
   visible.value = true;
   const res = await contentApi.listBoards();
   if (res.isOk()) {
@@ -234,6 +361,8 @@ async function submit() {
   if (res.isOk()) {
     // 重置表单
     selectedCategory.value = "";
+    selectedSubject.value = "";
+    selectedContentTypes.value = [];
     title.value = "";
     content.value = "";
     tags.value = [];

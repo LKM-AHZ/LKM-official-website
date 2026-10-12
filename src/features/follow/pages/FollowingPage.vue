@@ -19,14 +19,20 @@ async function load(): Promise<void> {
     followApi.myFollowingUsers(),
     followApi.myFollowingBoards(),
   ]);
-  // 两个请求各自失败都要能看到原因：只留第一条会把另一个列表的错误吞掉
+  // 两个请求各自失败都要能看到原因：只留第一条会把另一个列表的错误吞掉。
+  // 未登录（401/403）属于预期空态，不在页面上暴露技术性错误消息，
+  // 由下方空状态文案提示用户即可。
   const messages: string[] = [];
   if (uRes.isOk()) users.value = uRes.value.items;
-  else messages.push(uRes.error.message);
+  else if (!isAuthError(uRes.error.message)) messages.push(uRes.error.message);
   if (bRes.isOk()) boards.value = bRes.value.items;
-  else messages.push(bRes.error.message);
+  else if (!isAuthError(bRes.error.message)) messages.push(bRes.error.message);
   error.value = messages.join("；");
   loading.value = false;
+}
+
+function isAuthError(msg: string): boolean {
+  return /40[13]|authorization|unauthorized|未登录|请先登录/i.test(msg);
 }
 
 onMounted(() => void load());

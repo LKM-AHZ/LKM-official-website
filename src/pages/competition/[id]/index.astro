@@ -1,6 +1,7 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
 import PageIntro from "~/components/patterns/PageIntro.astro";
+import CompetitionDetail from "~/features/competition/components/CompetitionDetail.vue";
 import { mockCompetitions } from "~/features/competition/data/mock-competitions";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
@@ -23,72 +24,21 @@ const metadata = {
   metadata={metadata}
   sidebarLinks={comp
     ? [
-        { text: "nav.overview", href: "#overview" },
-        { text: "nav.details", href: "#details" },
+        { text: "nav.overview", href: "#overview", icon: "tabler:trophy" },
+        { text: "nav.details", href: "#details", icon: "tabler:clipboard-list" },
       ]
     : []}
   currentPath={getPermalink(`/competition/${id}`)}
 >
   {
     comp ? (
-      <div class="space-y-6">
+      <div id="details" class="space-y-6">
         <PageIntro
           title={t(comp.title)}
           description={t(comp.description)}
           icon="tabler:trophy"
         />
-        <div
-          id="details"
-          class="grid gap-5 rounded-[18px] border border-surface-3 bg-card-bg p-6 text-sm sm:grid-cols-2"
-        >
-          <div>
-            <span class="text-text-muted/60">
-              {t("page.communityDetail.competition.startsAt")}
-            </span>
-            {comp.startDate}
-          </div>
-          <div>
-            <span class="text-text-muted/60">
-              {t("page.communityDetail.competition.endsAt")}
-            </span>
-            {comp.endDate}
-          </div>
-          <div>
-            <span class="text-text-muted/60">
-              {t("page.communityDetail.competition.duration")}
-            </span>
-            {t("page.communityDetail.competition.durationMinutes", {
-              count: comp.duration,
-            })}
-          </div>
-          <div>
-            <span class="text-text-muted/60">
-              {t("page.communityDetail.competition.status")}
-            </span>
-            {comp.status === "ongoing"
-              ? t("page.communityDetail.competition.ongoing")
-              : comp.status === "upcoming"
-                ? t("page.communityDetail.competition.upcoming")
-                : t("page.communityDetail.competition.ended")}
-          </div>
-          <div>
-            <span class="text-text-muted/60">
-              {t("page.communityDetail.competition.participants")}
-            </span>
-            {/* 不能用 `||`：报名人数 0 是合法值，只有未开始的比赛才显示"待定" */}
-            {comp.participantCount > 0 || comp.status !== "upcoming"
-              ? comp.participantCount
-              : t("page.communityDetail.competition.pending")}
-          </div>
-        </div>
-        {comp.status === "ongoing" && (
-          <a
-            href={getPermalink(`/competition/${id}/exam`)}
-            class="btn-primary px-6 py-3 rounded-full text-sm font-semibold inline-block"
-          >
-            {t("page.communityDetail.competition.enterExam")}
-          </a>
-        )}
+        <CompetitionDetail comp={comp} client:visible />
       </div>
     ) : (
       <p>{t("page.communityDetail.competition.notFound")}</p>

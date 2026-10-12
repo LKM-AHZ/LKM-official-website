@@ -34,14 +34,14 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
         href={url("/")}
         class="flex h-12 items-center rounded-full px-2 font-semibold text-deep-text transition-colors hover:bg-btn-plain-bg-hover focus-visible:outline-2 focus-visible:outline-primary sm:px-3"
       >
-        <div class="flex items-center gap-2.5 text-lg tracking-normal">
-          <span class="grid h-7 w-7 grid-cols-2 gap-0.5" aria-hidden="true">
-            <span class="rounded-[4px] bg-[#4285f4]"></span><span
-              class="rounded-[4px] bg-[#ea4335]"></span>
-            <span class="rounded-[4px] bg-[#fbbc04]"></span><span
-              class="rounded-[4px] bg-[#34a853]"></span>
-          </span>
-          {siteConfig.title}
+        <div class="flex items-center gap-2 text-lg tracking-normal">
+          <img
+            src="/logo.jpeg"
+            alt="理科迷"
+            width="36"
+            height="36"
+            class="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-surface-3"
+          />
         </div>
       </a>
     </div>

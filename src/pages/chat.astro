@@ -1,0 +1,405 @@
+---
+import { Icon } from "astro-icon/components";
+import Layout from "~/layouts/PageLayout.astro";
+
+/* ===== 静态示例数据（双轨制：公开频道 + 私密群组） ===== */
+interface Channel {
+  id: string;
+  name: string;
+  kind: "public" | "private";
+  unread: number;
+  members: number;
+}
+
+const publicChannels: Channel[] = [
+  { id: "quantum", name: "#量子力学探讨", kind: "public", unread: 3, members: 486 },
+  { id: "algo", name: "#算法求助", kind: "public", unread: 0, members: 1204 },
+  { id: "chitchat", name: "#闲聊灌水", kind: "public", unread: 12, members: 2317 },
+];
+
+const privateGroups: Channel[] = [
+  { id: "project-team", name: "物理仿真项目组", kind: "private", unread: 1, members: 8 },
+  { id: "contest-team", name: "竞赛冲刺小队", kind: "private", unread: 0, members: 5 },
+];
+
+interface ChatMessage {
+  id: string;
+  author: string;
+  avatarBg: string;
+  time: string;
+  self?: boolean;
+  kind: "text" | "latex" | "code";
+  text?: string;
+  latex?: string;
+  quote?: { author: string; text: string };
+  codeLang?: string;
+  code?: string;
+}
+
+const messages: ChatMessage[] = [
+  {
+    id: "m1",
+    author: "林小满",
+    avatarBg: "#7c5cff",
+    time: "14:02",
+    kind: "text",
+    text: "大家帮忙看看这个薛定谔方程的推导哪里有问题？卡了一晚上了 😭",
+  },
+  {
+    id: "m2",
+    author: "林小满",
+    avatarBg: "#7c5cff",
+    time: "14:03",
+    kind: "latex",
+    quote: {
+      author: "林小满",
+      text: "从定态假设出发，对时间求导后应该得到……",
+    },
+    text: "代入算符后应该得到：",
+    latex: "i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi",
+  },
+  {
+    id: "m3",
+    author: "陈数",
+    avatarBg: "#0b8457",
+    time: "14:05",
+    self: true,
+    kind: "text",
+    text: "边界条件代错了，第 3 步积分上下限要和势能定义域一致，重新代一次试试",
+  },
+  {
+    id: "m4",
+    author: "阿基米德",
+    avatarBg: "#d97706",
+    time: "14:11",
+    kind: "code",
+    codeLang: "python",
+    code: "import numpy as np\n\ndef solve_schrodinger(V, x):\n    hbar = 1.055e-34\n    # 数值求解定态能级\n    H = kinetic(V, x)\n    return np.linalg.eigh(H)",
+    text: "顺手写了个数值版，代入你的势能函数就能跑：",
+  },
+  {
+    id: "m5",
+    author: "林小满",
+    avatarBg: "#7c5cff",
+    time: "14:18",
+    kind: "text",
+    quote: {
+      author: "陈数",
+      text: "第 3 步积分上下限要和势能定义域一致",
+    },
+    text: "改完边界条件后对上了！感谢大佬 🙏 今晚加鸡腿",
+  },
+];
+---
+
+<Layout
+  metadata={{
+    title: "聊天室 · 理科迷",
+    description: "与同好实时讨论理科问题：公开频道与私密群组，支持公式与代码。",
+  }}
+>
+  <div
+    id="chat-root"
+    class="mx-auto flex h-[calc(100dvh-3.5rem)] max-w-[1440px] overflow-hidden bg-page-bg"
+  >
+    {/* ===== 左侧：频道列表（公开频道 + 私密群组） ===== */}
+    <aside
+      id="chat-channel-list"
+      class="flex w-72 shrink-0 flex-col border-r border-surface-3 bg-card-bg"
+      aria-label="频道列表"
+    >
+      <div class="flex items-center justify-between gap-2 border-b border-surface-3 px-4 py-3">
+        <h1 class="font-heading text-lg font-semibold text-deep-text">聊天室</h1>
+        <button
+          type="button"
+          class="btn-plain rounded-full p-2"
+          title="新建频道（占位）"
+          aria-label="新建频道"
+        >
+          <Icon name="tabler:plus" class="h-5 w-5" />
+        </button>
+      </div>
+
+      <label
+        class="mx-3 mt-3 flex items-center gap-2 rounded-xl bg-btn-regular-bg px-3 py-2 text-sm text-text-muted"
+      >
+        <Icon name="tabler:search" class="h-4 w-4" />
+        <input
+          type="search"
+          placeholder="搜索频道…"
+          class="w-full bg-transparent text-sm text-deep-text outline-none placeholder:text-text-muted"
+          aria-label="搜索频道"
+        />
+      </label>
+
+      <nav class="flex-1 overflow-y-auto px-3 py-4">
+        <p class="px-2 text-xs font-semibold tracking-wide text-text-muted">公开频道</p>
+        <ul class="mt-2 space-y-1">
+          {
+            publicChannels.map((c, i) => (
+              <li>
+                <button
+                  type="button"
+                  data-channel
+                  data-active={i === 0 ? "true" : undefined}
+                  class={[
+                    "flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition",
+                    i === 0
+                      ? "bg-btn-regular-bg font-semibold text-primary-readable"
+                      : "text-deep-text hover:bg-btn-plain-bg-hover",
+                  ].join(" ")}
+                >
+                  <span class="flex min-w-0 items-center gap-2">
+                    <span class="flex h-4 w-4 shrink-0 items-center justify-center text-xs font-bold text-text-muted">#</span>
+                    <span class="truncate">{c.name}</span>
+                  </span>
+                  {c.unread > 0 && (
+                    <span class="badge badge-error badge-xs shrink-0">{c.unread}</span>
+                  )}
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="mt-5 px-2 text-xs font-semibold tracking-wide text-text-muted">私密群组</p>
+        <ul class="mt-2 space-y-1">
+          {
+            privateGroups.map((c) => (
+              <li>
+                <button
+                  type="button"
+                  data-channel
+                  class="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-deep-text transition hover:bg-btn-plain-bg-hover"
+                >
+                  <span class="flex min-w-0 items-center gap-2">
+                    <span class="h-4 w-4 shrink-0 text-center text-xs">🔒</span>
+                    <span class="truncate">{c.name}</span>
+                  </span>
+                  {c.unread > 0 && (
+                    <span class="badge badge-error badge-xs shrink-0">{c.unread}</span>
+                  )}
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="border-t border-surface-3 px-4 py-3 text-xs text-text-muted">
+        双轨制：公开频道所有人可见，私密群组仅限成员
+      </div>
+    </aside>
+
+    {/* ===== 右侧：聊天窗口 ===== */}
+    <section
+      id="chat-pane"
+      class="flex min-w-0 flex-1 flex-col bg-page-bg"
+      aria-label="聊天窗口"
+    >
+      {/* 频道头：群管理入口 */}
+      <header
+        class="flex items-center gap-3 border-b border-surface-3 bg-card-bg px-4 py-3"
+      >
+        <button
+          type="button"
+          id="chat-back"
+          class="btn-plain rounded-full p-2 lg:hidden"
+          aria-label="返回频道列表"
+        >
+          <Icon name="tabler:arrow-left" class="h-5 w-5" />
+        </button>
+        <div class="min-w-0 flex-1">
+          <h2 class="truncate font-semibold text-deep-text">#量子力学探讨</h2>
+          <p class="text-xs text-text-muted">486 名成员 · 欢迎讨论量子力学与数学物理</p>
+        </div>
+        <button
+          type="button"
+          class="btn-plain rounded-full p-2.5"
+          title="成员列表（占位）"
+          aria-label="成员列表"
+        >
+          <Icon name="tabler:users" class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          class="btn-plain rounded-full p-2.5"
+          title="群设置（占位）"
+          aria-label="群设置"
+        >
+          <Icon name="tabler:settings" class="h-5 w-5" />
+        </button>
+      </header>
+
+      {/* 消息列表 */}
+      <div class="flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-6">
+        <p class="text-center text-xs text-text-muted">今天 14:00</p>
+        {
+          messages.map((m) => (
+            <div
+              class={[
+                "flex gap-3",
+                m.self ? "flex-row-reverse" : "",
+              ].join(" ")}
+            >
+              <span
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                style={`background:${m.avatarBg}`}
+                aria-hidden="true"
+              >
+                {m.author.slice(0, 1)}
+              </span>
+              <div class={["max-w-[78%] sm:max-w-[65%]", m.self ? "items-end text-right" : ""].join(" ")}>
+                <p
+                  class={[
+                    "mb-1 flex items-baseline gap-2 text-xs text-text-muted",
+                    m.self ? "flex-row-reverse" : "",
+                  ].join(" ")}
+                >
+                  <span class="font-medium text-deep-text">{m.self ? "我" : m.author}</span>
+                  <span>{m.time}</span>
+                </p>
+
+                <div
+                  class={[
+                    "rounded-2xl px-4 py-2.5 text-sm leading-6 shadow-sm",
+                    m.self
+                      ? "rounded-tr-sm bg-primary-action text-white"
+                      : "rounded-tl-sm bg-card-bg text-deep-text",
+                  ].join(" ")}
+                >
+                  {
+                    m.quote && (
+                      <blockquote
+                        class={[
+                          "mb-2 rounded-lg border-l-4 px-3 py-1.5 text-xs leading-5",
+                          m.self
+                            ? "border-white/50 bg-white/10 text-white/90"
+                            : "border-primary/40 bg-btn-regular-bg text-text-muted",
+                        ].join(" ")}
+                      >
+                        <span class="font-semibold">{m.quote.author}：</span>
+                        {m.quote.text}
+                      </blockquote>
+                    )
+                  }
+                  {
+                    m.kind === "latex" && (
+                      <>
+                        <p>{m.text}</p>
+                        <div
+                          class={[
+                            "my-2 rounded-lg px-3 py-2 text-center font-serif italic",
+                            m.self ? "bg-white/10 text-white" : "bg-btn-regular-bg text-primary-readable",
+                          ].join(" ")}
+                        >
+                          $ {m.latex} $
+                        </div>
+                      </>
+                    )
+                  }
+                  {m.kind === "text" && <p>{m.text}</p>}
+                  {
+                    m.kind === "code" && (
+                      <>
+                        <p class="mb-2">{m.text}</p>
+                        <div class="overflow-hidden rounded-xl">
+                          <div
+                            class="flex items-center justify-between bg-[oklch(0.3_0.02_var(--hue,250))] px-3 py-1.5 text-xs text-white/70"
+                          >
+                            <span>{m.codeLang}</span>
+                            <span class="text-xs opacity-60">⧉</span>
+                          </div>
+                          <pre class="overflow-x-auto bg-[oklch(0.17_0.015_var(--hue,250))] p-3 text-xs leading-5 text-[#e3e3e3]"><code>{m.code}</code></pre>
+                        </div>
+                      </>
+                    )
+                  }
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      {/* 输入区 */}
+      <div class="border-t border-surface-3 bg-card-bg px-4 py-3 sm:px-6">
+        <div class="mb-2 flex items-center gap-1">
+          <button
+            type="button"
+            class="btn-plain rounded-lg px-2.5 py-1.5 text-xs"
+            title="插入 LaTeX 公式（占位）"
+          >
+            <span class="text-xs font-bold">∑</span> 公式
+          </button>
+          <button
+            type="button"
+            class="btn-plain rounded-lg px-2.5 py-1.5 text-xs"
+            title="插入代码块（占位）"
+          >
+            <span class="text-xs font-mono">&lt;/&gt;</span> 代码
+          </button>
+          <button
+            type="button"
+            class="btn-plain rounded-lg px-2.5 py-1.5 text-xs"
+            title="引用消息（占位）"
+          >
+            <span class="text-xs font-serif">❝</span> 引用
+          </button>
+          <button
+            type="button"
+            class="btn-plain rounded-lg px-2.5 py-1.5 text-xs"
+            title="上传文件（占位）"
+          >
+            <span class="text-xs">📎</span>
+          </button>
+        </div>
+        <div class="flex items-end gap-2">
+          <textarea
+            rows="2"
+            placeholder="发送消息，支持 LaTeX 公式与代码块…"
+            class="flex-1 resize-none rounded-xl border border-surface-3 bg-page-bg px-3.5 py-2.5 text-sm text-deep-text outline-none transition placeholder:text-text-muted focus:border-primary-action"
+            aria-label="消息输入框"
+          >
+          </textarea>
+          <button
+            type="button"
+            class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-primary-action px-4 text-sm font-medium text-white transition hover:shadow-md"
+          >
+            发送 <span class="text-xs">➤</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    /* 移动端：默认只显示频道列表，点击频道后进入聊天视图 */
+    @media (max-width: 1023px) {
+      #chat-pane {
+        display: none;
+      }
+      #chat-root.chat-open #chat-channel-list {
+        display: none;
+      }
+      #chat-root.chat-open #chat-pane {
+        display: flex;
+      }
+    }
+  </style>
+
+  <script>
+    const root = document.getElementById("chat-root");
+    if (root) {
+      root.querySelectorAll("[data-channel]").forEach((el) => {
+        el.addEventListener("click", () => {
+          root.classList.add("chat-open");
+        });
+      });
+      const back = document.getElementById("chat-back");
+      back?.addEventListener("click", () => {
+        root.classList.remove("chat-open");
+      });
+    }
+  </script>
+</Layout>

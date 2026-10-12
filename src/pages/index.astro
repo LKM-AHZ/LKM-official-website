@@ -114,35 +114,20 @@ const dailyQuestion =
             >
           </h1>
           <p class="mt-6 max-w-2xl text-base leading-7 text-text-muted">
-            搜索讨论、专栏和学习资料；找到愿意一起解题、做项目、参加竞赛的同好。
+            讨论、专栏和学习资料；找到愿意一起解题、做项目、参加竞赛的同好。
           </p>
-          <form
-            action={paths.search}
-            method="get"
-            role="search"
-            class="mt-9 flex w-full max-w-2xl items-center gap-2 rounded-full border border-surface-3 bg-page-bg p-2 shadow-sm transition focus-within:border-primary focus-within:shadow-md"
-          >
-            <Icon
-              name="tabler:search"
-              class="ml-3 h-6 w-6 shrink-0 text-text-muted"
-              aria-hidden="true"
-            />
-            <label for="home-search" class="sr-only">全站搜索</label>
-            <input
-              id="home-search"
-              name="q"
-              type="search"
-              required
-              maxlength="200"
-              placeholder="搜索帖子、专栏、文件库和题库…"
-              class="min-w-0 flex-1 bg-transparent px-2 py-3 text-base text-deep-text outline-none placeholder:text-text-muted/70"
-            />
-            <button
-              type="submit"
-              class="rounded-full bg-primary-action px-6 py-3 text-sm font-medium text-white transition hover:shadow-md sm:px-8"
-              >搜索</button
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              href={paths.forum}
+              class="rounded-full bg-primary-action px-6 py-3 text-sm font-medium text-white transition hover:shadow-md"
+              >浏览社区</a
             >
-          </form>
+            <a
+              href={paths.projects}
+              class="rounded-full border border-surface-3 bg-card-bg px-6 py-3 text-sm font-medium text-deep-text transition hover:bg-btn-regular-bg"
+              >查看项目</a
+            >
+          </div>
         </div>
         <aside
           class="rounded-[24px] border border-surface-3 bg-page-bg p-6 sm:p-7"
@@ -407,6 +392,241 @@ const dailyQuestion =
                   近期还没有已发布的专栏文章。先去发现社区讨论。
                 </p>
               )
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="mx-auto max-w-[1200px] px-4 pb-12 sm:px-6 md:pb-16"
+      aria-labelledby="ops-heading"
+    >
+      <div class="mb-8">
+        <p class="text-xs font-semibold tracking-[0.12em] text-primary-readable">
+          社区运营
+        </p>
+        <h2
+          id="ops-heading"
+          class="mt-2 font-heading text-2xl font-semibold text-deep-text sm:text-3xl"
+        >
+          你的社区动态
+        </h2>
+        <p class="mt-2 text-text-muted">
+          个人看板、官方公告，以及本周最活跃的社区成员。
+        </p>
+      </div>
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {/* 卡片一：用户个人看板 */}
+        <div class="card-base p-5 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-primary-readable">
+              <Icon name="tabler:dashboard" class="h-5 w-5" />
+              <h3 class="font-bold">个人看板</h3>
+            </div>
+            <a
+              href={getPermalink("/account")}
+              class="text-xs font-semibold text-primary-readable hover:underline"
+              >我的主页 →</a
+            >
+          </div>
+
+          <div
+            class="mt-5 flex items-center justify-between rounded-2xl bg-page-bg p-4"
+          >
+            <div>
+              <p class="text-xs text-text-muted">贡献积分余额</p>
+              <p class="mt-1 text-2xl font-bold text-deep-text">
+                1,280 <span class="text-sm font-normal text-text-muted">积分</span>
+              </p>
+            </div>
+            <span class="badge badge-success badge-sm">本月 +120</span>
+          </div>
+
+          <div class="mt-4">
+            <p class="text-xs font-semibold text-text-muted">最近参与的悬赏</p>
+            <div class="mt-2 space-y-2">
+              <a
+                href={paths.qa}
+                class="group flex items-center justify-between gap-3 rounded-xl border border-surface-3 bg-page-bg px-3 py-2.5 hover:border-amber-400"
+              >
+                <span
+                  class="line-clamp-1 text-sm text-deep-text group-hover:text-primary-readable"
+                  >测不准原理的物理直觉怎么理解？</span
+                >
+                <span
+                  class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800"
+                  >💰 50</span
+                >
+              </a>
+              <a
+                href={paths.qa}
+                class="group flex items-center justify-between gap-3 rounded-xl border border-surface-3 bg-page-bg px-3 py-2.5 hover:border-amber-400"
+              >
+                <span
+                  class="line-clamp-1 text-sm text-deep-text group-hover:text-primary-readable"
+                  >复赛第三题的构造性证明思路</span
+                >
+                <span
+                  class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800"
+                  >已采纳</span
+                >
+              </a>
+            </div>
+          </div>
+
+          <div
+            class="mt-4 flex items-center justify-between rounded-xl bg-btn-regular-bg px-4 py-3"
+          >
+            <div class="flex items-center gap-2">
+              <Icon
+                name="tabler:notebook"
+                class="h-4 w-4 text-primary-readable"
+              />
+              <span class="text-sm text-deep-text">错题本待复习</span>
+            </div>
+            <span class="text-sm font-bold text-primary-readable">
+              12 道 <span class="font-normal text-text-muted">（今日到期 3 道）</span>
+            </span>
+          </div>
+        </div>
+
+        {/* 卡片二：社区公告与活动 */}
+        <div class="card-base p-5 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-primary-readable">
+              <Icon name="tabler:flag" class="h-5 w-5" />
+              <h3 class="font-bold">公告与活动</h3>
+            </div>
+            <a href={paths.forum} class="text-xs font-semibold text-primary-readable hover:underline"
+              >全部 →</a
+            >
+          </div>
+
+          <p class="mt-5 text-xs font-semibold tracking-wide text-text-muted">
+            官方公告
+          </p>
+          <div class="mt-2 space-y-2">
+            <a
+              href={getPermalink("/forum")}
+              class="group block rounded-xl border border-surface-3 bg-page-bg p-3 hover:border-sky-400"
+            >
+              <span class="text-xs text-text-muted">10-05</span>
+              <p
+                class="mt-1 line-clamp-1 text-sm font-medium text-deep-text group-hover:text-primary-readable"
+                >社区积分体系 V2 正式上线，悬赏结算规则更新</p
+              >
+            </a>
+            <a
+              href={getPermalink("/forum")}
+              class="group block rounded-xl border border-surface-3 bg-page-bg p-3 hover:border-sky-400"
+            >
+              <span class="text-xs text-text-muted">10-01</span>
+              <p
+                class="mt-1 line-clamp-1 text-sm font-medium text-deep-text group-hover:text-primary-readable"
+                >秋季维护公告：题库服务将于本周六凌晨升级</p
+              >
+            </a>
+          </div>
+
+          <p class="mt-5 text-xs font-semibold tracking-wide text-text-muted">
+            进行中的活动
+          </p>
+          <div
+            class="mt-2 flex items-center justify-between rounded-xl border border-violet-300 bg-violet-50 p-3 dark:border-violet-500/40 dark:bg-violet-500/10"
+          >
+            <div>
+              <p class="text-sm font-semibold text-deep-text">
+                秋季数学建模组队周
+              </p>
+              <p class="mt-0.5 text-xs text-text-muted">距结束还有 5 天</p>
+            </div>
+            <a
+              href={paths.competition}
+              class="shrink-0 rounded-full bg-primary-action px-3.5 py-1.5 text-xs font-medium text-white transition hover:shadow-md"
+              >立即参加</a
+            >
+          </div>
+        </div>
+
+        {/* 卡片三：活跃榜单 */}
+        <div class="card-base p-5 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-primary-readable">
+              <Icon name="tabler:trophy" class="h-5 w-5" />
+              <h3 class="font-bold">活跃榜单</h3>
+            </div>
+            <span class="badge badge-ghost badge-sm">本周</span>
+          </div>
+
+          <div class="mt-5 space-y-5">
+            {
+              [
+                {
+                  title: "解答达人榜",
+                  icon: "tabler:star-filled",
+                  rows: [
+                    ["林小满", "156 采纳"],
+                    ["陈数", "142 采纳"],
+                    ["阿基米德", "128 采纳"],
+                    ["量子少年", "110 采纳"],
+                    ["黎曼ζ", "98 采纳"],
+                  ],
+                },
+                {
+                  title: "项目贡献榜",
+                  icon: "tabler:rocket",
+                  rows: [
+                    ["物理仿真组", "32 PR"],
+                    ["题库整理组", "28 PR"],
+                    ["竞赛算法组", "21 PR"],
+                    ["专栏编辑部", "17 PR"],
+                    ["资料组", "12 PR"],
+                  ],
+                },
+                {
+                  title: "积分富豪榜",
+                  icon: "tabler:coin",
+                  rows: [
+                    ["学霸本霸", "9,800"],
+                    ["解题狂魔", "7,600"],
+                    ["深夜刷题人", "6,200"],
+                    ["公式之美", "5,400"],
+                    ["路人甲", "4,800"],
+                  ],
+                },
+              ].map((list) => (
+                <div>
+                  <p class="flex items-center gap-1.5 text-xs font-semibold text-text-muted">
+                    <Icon name={list.icon} class="h-3.5 w-3.5" />
+                    {list.title}
+                  </p>
+                  <ol class="mt-2 space-y-1.5">
+                    {list.rows.map(([name, value], idx) => (
+                      <li class="flex items-center justify-between text-sm">
+                        <span class="flex items-center gap-2">
+                          <span
+                            class={
+                              idx === 0
+                                ? "w-4 text-center font-bold text-amber-500"
+                                : idx === 1
+                                  ? "w-4 text-center font-bold text-slate-400"
+                                  : idx === 2
+                                    ? "w-4 text-center font-bold text-orange-400"
+                                    : "w-4 text-center text-text-muted"
+                            }
+                          >
+                            {idx + 1}
+                          </span>
+                          <span class="text-deep-text">{name}</span>
+                        </span>
+                        <span class="text-xs text-text-muted">{value}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))
             }
           </div>
         </div>
