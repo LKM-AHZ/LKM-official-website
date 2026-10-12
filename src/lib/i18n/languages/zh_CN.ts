@@ -4086,7 +4086,8 @@ export const zh_CN: DeepStringRecord<typeof en> = {
         description:
           "涵盖力学、电磁学、热学、光学、近代物理等，适合高中及以上学生参加。",
         category: "物理",
-        reward: "金奖 1 名：3000 积分 + 证书；银奖 3 名：1500 积分；铜奖 6 名：800 积分。",
+        reward:
+          "金奖 1 名：3000 积分 + 证书；银奖 3 名：1500 积分；铜奖 6 名：800 积分。",
       },
       comp2: {
         title: "2026 数学建模挑战赛",

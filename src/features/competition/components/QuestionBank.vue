@@ -119,7 +119,10 @@
             <div class="mt-2.5 flex items-center justify-between gap-2">
               <div class="flex items-center gap-3 text-xs text-text-muted">
                 <span class="text-warning">{{ stars(q.difficulty) }}</span>
-                <span>{{ t("community.competition.accuracy") }} {{ q.accuracy }}%</span>
+                <span
+                  >{{ t("community.competition.accuracy") }}
+                  {{ q.accuracy }}%</span
+                >
               </div>
               <button
                 class="text-xs text-primary hover:underline"
@@ -132,7 +135,10 @@
                 }}
               </button>
             </div>
-            <div v-if="revealed.has(q.id)" class="mt-2 text-xs text-text-muted/80 leading-5">
+            <div
+              v-if="revealed.has(q.id)"
+              class="mt-2 text-xs text-text-muted/80 leading-5"
+            >
               {{ t("community.competition.answer") }}
               {{ answerText(q) }}
               <span class="mx-2">|</span>
@@ -203,7 +209,8 @@ function typeLabel(type: QuestionType): string {
 }
 
 function typeBadgeClass(type: QuestionType): string {
-  if (type === "multiple") return "bg-[var(--warning)] text-[var(--on-warning)]";
+  if (type === "multiple")
+    return "bg-[var(--warning)] text-[var(--on-warning)]";
   if (type === "fill") return "bg-[var(--info)] text-[var(--on-info)]";
   if (type === "true_false") return "bg-[var(--surface-3)] text-text-muted";
   return "bg-[var(--btn-regular-bg)] text-primary";

@@ -183,7 +183,8 @@
     padding-left: 240px;
   }
 
-  :global(html.sidebar-collapsed body:has(#sidebar-wrapper [data-sidebar])) [data-main-content] {
+  :global(html.sidebar-collapsed body:has(#sidebar-wrapper [data-sidebar]))
+    [data-main-content] {
     padding-left: 67px;
   }
 }

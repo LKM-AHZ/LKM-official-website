@@ -58,7 +58,9 @@
     <div class="flex gap-6 items-start">
       <!-- 桌面端：左侧分类树（P0） -->
       <aside class="hidden lg:block w-60 shrink-0 sticky top-4">
-        <div class="rounded-xl border border-surface-3 bg-card-bg p-2 max-h-[70vh] overflow-y-auto">
+        <div
+          class="rounded-xl border border-surface-3 bg-card-bg p-2 max-h-[70vh] overflow-y-auto"
+        >
           <CategoryTreeNav
             :current-id="currentId"
             :expanded-ids="expandedIds"
@@ -73,264 +75,279 @@
         <!-- 面包屑 -->
         <FolderBreadcrumb :path="currentPath" @navigate="navigateBreadcrumb" />
 
-    <!-- 文件夹层（根或非叶子，且非搜索态）：逐级下钻 -->
-    <template v-if="isFolderLayer && !isSearching">
-      <div v-if="childFolders.length > 0">
-        <FolderGrid
-          :folders="childFolders"
-          :file-counts="folderFileCounts"
-          @open="openFolder"
-        />
-      </div>
-      <div v-else class="text-center py-12 text-sm text-text-muted">
-        {{ t("community.fileLibrary.noSubcategories") }}
-      </div>
-    </template>
+        <!-- 文件夹层（根或非叶子，且非搜索态）：逐级下钻 -->
+        <template v-if="isFolderLayer && !isSearching">
+          <div v-if="childFolders.length > 0">
+            <FolderGrid
+              :folders="childFolders"
+              :file-counts="folderFileCounts"
+              @open="openFolder"
+            />
+          </div>
+          <div v-else class="text-center py-12 text-sm text-text-muted">
+            {{ t("community.fileLibrary.noSubcategories") }}
+          </div>
+        </template>
 
-    <!-- 文件层（叶子，或全局搜索态）：筛选 + 列表/卡片；数据经 filteredFiles 已切到 searchResults -->
-    <template v-else>
-      <!-- 搜索态头标题（仅搜索时显示） -->
-      <div v-if="isSearching" class="text-sm text-text-muted">
-        {{
-          t("community.fileLibrary.searchResults", {
-            query: searchQuery,
-            count: searchResults.length,
-          })
-        }}
-      </div>
-      <!-- 筛选器 -->
-      <!-- 资料类型快捷筛选 chips（P0） -->
-      <div class="flex flex-wrap items-center gap-1.5">
-        <button
-          v-for="chip in TYPE_CHIPS"
-          :key="chip.key"
-          type="button"
-          class="text-xs px-2.5 py-1 rounded-full border transition-colors"
-          :class="
-            filterType === chip.key
-              ? 'bg-primary text-on-primary border-primary'
-              : 'border-surface-3 text-text-muted hover:border-primary/40 hover:text-primary'
-          "
-          @click="filterType = chip.key"
-        >
-          {{ chip.label }}
-        </button>
-      </div>
-      <div class="flex flex-wrap items-center gap-3">
-        <select
-          v-model="filterType"
-          class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
-        >
-          <option value="">{{ t("community.fileLibrary.allTypes") }}</option>
-          <option value="pdf">PDF</option>
-          <option value="zip">{{ t("community.fileLibrary.zipType") }}</option>
-          <option value="other">
-            {{ t("community.fileLibrary.otherType") }}
-          </option>
-        </select>
-        <select
-          v-model="filterStatus"
-          class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
-        >
-          <option value="">{{ t("community.fileLibrary.allStatuses") }}</option>
-          <option value="approved">
-            {{ t("community.fileLibrary.statusApproved") }}
-          </option>
-          <option value="pending">
-            {{ t("community.fileLibrary.statusPending") }}
-          </option>
-          <option value="rejected">
-            {{ t("community.fileLibrary.statusRejected") }}
-          </option>
-        </select>
-        <select
-          v-model="sortBy"
-          class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
-        >
-          <option value="newest">
-            {{ t("community.fileLibrary.sortNewest") }}
-          </option>
-          <option value="downloads">
-            {{ t("community.fileLibrary.sortMostDownloaded") }}
-          </option>
-        </select>
-        <div class="ml-auto flex gap-1 rounded-xl bg-btn-plain-bg-hover p-1">
-          <button
-            class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-            :class="
-              viewMode === 'list'
-                ? 'bg-primary text-on-primary'
-                : 'bg-surface-3 text-text-muted'
-            "
-            @click="viewMode = 'list'"
-            :title="t('community.fileLibrary.listView')"
-          >
-            <Icon icon="material-symbols:list" class="w-5 h-5" />
-          </button>
-          <button
-            class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-            :class="
-              viewMode === 'grid'
-                ? 'bg-primary text-on-primary'
-                : 'bg-surface-3 text-text-muted'
-            "
-            @click="viewMode = 'grid'"
-            :title="t('community.fileLibrary.cardView')"
-          >
-            <Icon icon="material-symbols:grid-view" class="w-5 h-5" />
-          </button>
-        </div>
-      </div>
+        <!-- 文件层（叶子，或全局搜索态）：筛选 + 列表/卡片；数据经 filteredFiles 已切到 searchResults -->
+        <template v-else>
+          <!-- 搜索态头标题（仅搜索时显示） -->
+          <div v-if="isSearching" class="text-sm text-text-muted">
+            {{
+              t("community.fileLibrary.searchResults", {
+                query: searchQuery,
+                count: searchResults.length,
+              })
+            }}
+          </div>
+          <!-- 筛选器 -->
+          <!-- 资料类型快捷筛选 chips（P0） -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button
+              v-for="chip in TYPE_CHIPS"
+              :key="chip.key"
+              type="button"
+              class="text-xs px-2.5 py-1 rounded-full border transition-colors"
+              :class="
+                filterType === chip.key
+                  ? 'bg-primary text-on-primary border-primary'
+                  : 'border-surface-3 text-text-muted hover:border-primary/40 hover:text-primary'
+              "
+              @click="filterType = chip.key"
+            >
+              {{ chip.label }}
+            </button>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <select
+              v-model="filterType"
+              class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
+            >
+              <option value="">
+                {{ t("community.fileLibrary.allTypes") }}
+              </option>
+              <option value="pdf">PDF</option>
+              <option value="zip">
+                {{ t("community.fileLibrary.zipType") }}
+              </option>
+              <option value="other">
+                {{ t("community.fileLibrary.otherType") }}
+              </option>
+            </select>
+            <select
+              v-model="filterStatus"
+              class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
+            >
+              <option value="">
+                {{ t("community.fileLibrary.allStatuses") }}
+              </option>
+              <option value="approved">
+                {{ t("community.fileLibrary.statusApproved") }}
+              </option>
+              <option value="pending">
+                {{ t("community.fileLibrary.statusPending") }}
+              </option>
+              <option value="rejected">
+                {{ t("community.fileLibrary.statusRejected") }}
+              </option>
+            </select>
+            <select
+              v-model="sortBy"
+              class="rounded-xl border border-surface-3 bg-card-bg px-3 py-2 text-sm text-deep-text outline-none focus:border-primary"
+            >
+              <option value="newest">
+                {{ t("community.fileLibrary.sortNewest") }}
+              </option>
+              <option value="downloads">
+                {{ t("community.fileLibrary.sortMostDownloaded") }}
+              </option>
+            </select>
+            <div
+              class="ml-auto flex gap-1 rounded-xl bg-btn-plain-bg-hover p-1"
+            >
+              <button
+                class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+                :class="
+                  viewMode === 'list'
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-3 text-text-muted'
+                "
+                @click="viewMode = 'list'"
+                :title="t('community.fileLibrary.listView')"
+              >
+                <Icon icon="material-symbols:list" class="w-5 h-5" />
+              </button>
+              <button
+                class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+                :class="
+                  viewMode === 'grid'
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-3 text-text-muted'
+                "
+                @click="viewMode = 'grid'"
+                :title="t('community.fileLibrary.cardView')"
+              >
+                <Icon icon="material-symbols:grid-view" class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
 
-      <!-- 列表视图 -->
-      <div
-        v-if="viewMode === 'list'"
-        class="bg-card-bg border border-surface-3 rounded-2xl overflow-hidden"
-      >
-        <div class="divide-y divide-surface-3">
+          <!-- 列表视图 -->
           <div
-            v-for="file in filteredFiles"
-            :key="file.id"
-            class="flex flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-btn-card-bg-hover sm:flex-nowrap sm:gap-4 sm:px-5"
+            v-if="viewMode === 'list'"
+            class="bg-card-bg border border-surface-3 rounded-2xl overflow-hidden"
           >
-            <span class="text-2xl shrink-0">{{ fileIcon(file.mimeType) }}</span>
-            <div class="flex-1 min-w-0">
-              <a
-                :href="buildUrl(`/files/${file.id}`)"
-                class="font-medium text-deep-text hover:text-primary transition-colors line-clamp-1"
-              >
-                {{ file.originalName }}
-              </a>
+            <div class="divide-y divide-surface-3">
               <div
-                class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-text-muted/60"
+                v-for="file in filteredFiles"
+                :key="file.id"
+                class="flex flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-btn-card-bg-hover sm:flex-nowrap sm:gap-4 sm:px-5"
               >
-                <span>{{ file.uploaderName }}</span>
-                <span v-if="file.documentCode"
-                  >{{ file.documentCode }} · v{{ file.version }}</span
-                >
-                <span>{{ formatSize(file.size) }}</span>
-                <span>{{
-                  t("community.fileLibrary.downloadCount", {
-                    count: file.downloadCount,
-                  })
+                <span class="text-2xl shrink-0">{{
+                  fileIcon(file.mimeType)
                 }}</span>
-                <span class="inline-flex items-center gap-0.5">
-                  <Icon
-                    icon="material-symbols:visibility-outline"
-                    class="w-3.5 h-3.5"
-                  />
-                  {{ file.viewCount }}
-                </span>
-                <span class="text-text-muted">{{ file.createdAt }}</span>
+                <div class="flex-1 min-w-0">
+                  <a
+                    :href="buildUrl(`/files/${file.id}`)"
+                    class="font-medium text-deep-text hover:text-primary transition-colors line-clamp-1"
+                  >
+                    {{ file.originalName }}
+                  </a>
+                  <div
+                    class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-text-muted/60"
+                  >
+                    <span>{{ file.uploaderName }}</span>
+                    <span v-if="file.documentCode"
+                      >{{ file.documentCode }} · v{{ file.version }}</span
+                    >
+                    <span>{{ formatSize(file.size) }}</span>
+                    <span>{{
+                      t("community.fileLibrary.downloadCount", {
+                        count: file.downloadCount,
+                      })
+                    }}</span>
+                    <span class="inline-flex items-center gap-0.5">
+                      <Icon
+                        icon="material-symbols:visibility-outline"
+                        class="w-3.5 h-3.5"
+                      />
+                      {{ file.viewCount }}
+                    </span>
+                    <span class="text-text-muted">{{ file.createdAt }}</span>
+                  </div>
+                </div>
+                <div
+                  class="flex w-full flex-wrap items-center gap-2 pl-10 sm:w-auto sm:shrink-0 sm:pl-0"
+                >
+                  <span
+                    class="text-xs px-2 py-0.5 rounded-full font-medium"
+                    :class="statusClass(file.status)"
+                  >
+                    {{ statusLabel(file.status) }}
+                  </span>
+                  <!-- 仅 approved 文件提供预览/下载 -->
+                  <template v-if="file.status === 'approved'">
+                    <button
+                      type="button"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-surface-3 text-deep-text hover:text-primary hover:border-primary/30 transition-colors"
+                      @click="previewFile(file)"
+                    >
+                      <Icon
+                        icon="material-symbols:visibility-outline"
+                        class="w-3.5 h-3.5 inline -mt-0.5 mr-1"
+                      />
+                      {{ t("community.fileLibrary.preview") }}
+                    </button>
+                    <button
+                      type="button"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-surface-3 text-deep-text hover:text-primary hover:border-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      :disabled="downloading.has(file.id)"
+                      @click="downloadFile(file)"
+                    >
+                      <Icon
+                        :icon="
+                          downloading.has(file.id)
+                            ? 'material-symbols:progress-activity'
+                            : 'material-symbols:download'
+                        "
+                        class="w-3.5 h-3.5 inline -mt-0.5 mr-1"
+                        :class="downloading.has(file.id) ? 'animate-spin' : ''"
+                      />
+                      {{
+                        downloading.has(file.id)
+                          ? t("common.loading")
+                          : t("community.fileLibrary.download")
+                      }}
+                    </button>
+                  </template>
+                  <a
+                    :href="buildUrl(`/files/${file.id}`)"
+                    class="btn-primary px-3 py-1.5 rounded-lg text-xs font-medium"
+                    >{{ t("community.fileLibrary.viewDetails") }}</a
+                  >
+                </div>
               </div>
             </div>
-            <div
-              class="flex w-full flex-wrap items-center gap-2 pl-10 sm:w-auto sm:shrink-0 sm:pl-0"
-            >
-              <span
-                class="text-xs px-2 py-0.5 rounded-full font-medium"
-                :class="statusClass(file.status)"
-              >
-                {{ statusLabel(file.status) }}
-              </span>
-              <!-- 仅 approved 文件提供预览/下载 -->
-              <template v-if="file.status === 'approved'">
-                <button
-                  type="button"
-                  class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-surface-3 text-deep-text hover:text-primary hover:border-primary/30 transition-colors"
-                  @click="previewFile(file)"
-                >
-                  <Icon
-                    icon="material-symbols:visibility-outline"
-                    class="w-3.5 h-3.5 inline -mt-0.5 mr-1"
-                  />
-                  {{ t("community.fileLibrary.preview") }}
-                </button>
-                <button
-                  type="button"
-                  class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-surface-3 text-deep-text hover:text-primary hover:border-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  :disabled="downloading.has(file.id)"
-                  @click="downloadFile(file)"
-                >
-                  <Icon
-                    :icon="
-                      downloading.has(file.id)
-                        ? 'material-symbols:progress-activity'
-                        : 'material-symbols:download'
-                    "
-                    class="w-3.5 h-3.5 inline -mt-0.5 mr-1"
-                    :class="downloading.has(file.id) ? 'animate-spin' : ''"
-                  />
-                  {{
-                    downloading.has(file.id)
-                      ? t("common.loading")
-                      : t("community.fileLibrary.download")
-                  }}
-                </button>
-              </template>
-              <a
-                :href="buildUrl(`/files/${file.id}`)"
-                class="btn-primary px-3 py-1.5 rounded-lg text-xs font-medium"
-                >{{ t("community.fileLibrary.viewDetails") }}</a
-              >
-            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- 卡片视图 -->
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <a
-          v-for="file in filteredFiles"
-          :key="file.id"
-          :href="buildUrl(`/files/${file.id}`)"
-          class="group flex flex-col rounded-[18px] border border-surface-3 bg-card-bg p-5 transition-colors hover:border-primary/40 hover:bg-btn-card-bg-hover"
-        >
-          <div class="flex items-start gap-3 mb-3">
-            <span class="text-3xl shrink-0">{{ fileIcon(file.mimeType) }}</span>
-            <div class="flex-1 min-w-0">
-              <h3
-                class="font-semibold text-deep-text group-hover:text-primary transition-colors line-clamp-2 text-sm leading-snug"
-              >
-                {{ file.originalName }}
-              </h3>
-            </div>
-          </div>
-          <div class="text-xs text-text-muted/60 space-y-1 flex-1">
-            <div>{{ file.uploaderName }} · {{ formatSize(file.size) }}</div>
-            <div>
-              {{
-                t("community.fileLibrary.downloadCount", {
-                  count: file.downloadCount,
-                })
-              }}
-              · 👁 {{ file.viewCount }} · {{ file.createdAt }}
-            </div>
-          </div>
+          <!-- 卡片视图 -->
           <div
-            class="flex items-center justify-between mt-3 pt-3 border-t border-surface-3"
+            v-else
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            <span
-              class="text-xs px-2 py-0.5 rounded-full font-medium"
-              :class="statusClass(file.status)"
+            <a
+              v-for="file in filteredFiles"
+              :key="file.id"
+              :href="buildUrl(`/files/${file.id}`)"
+              class="group flex flex-col rounded-[18px] border border-surface-3 bg-card-bg p-5 transition-colors hover:border-primary/40 hover:bg-btn-card-bg-hover"
             >
-              {{ statusLabel(file.status) }}
-            </span>
-            <span class="text-xs text-primary font-medium">{{
-              t("community.fileLibrary.viewDetails")
-            }}</span>
+              <div class="flex items-start gap-3 mb-3">
+                <span class="text-3xl shrink-0">{{
+                  fileIcon(file.mimeType)
+                }}</span>
+                <div class="flex-1 min-w-0">
+                  <h3
+                    class="font-semibold text-deep-text group-hover:text-primary transition-colors line-clamp-2 text-sm leading-snug"
+                  >
+                    {{ file.originalName }}
+                  </h3>
+                </div>
+              </div>
+              <div class="text-xs text-text-muted/60 space-y-1 flex-1">
+                <div>{{ file.uploaderName }} · {{ formatSize(file.size) }}</div>
+                <div>
+                  {{
+                    t("community.fileLibrary.downloadCount", {
+                      count: file.downloadCount,
+                    })
+                  }}
+                  · 👁 {{ file.viewCount }} · {{ file.createdAt }}
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between mt-3 pt-3 border-t border-surface-3"
+              >
+                <span
+                  class="text-xs px-2 py-0.5 rounded-full font-medium"
+                  :class="statusClass(file.status)"
+                >
+                  {{ statusLabel(file.status) }}
+                </span>
+                <span class="text-xs text-primary font-medium">{{
+                  t("community.fileLibrary.viewDetails")
+                }}</span>
+              </div>
+            </a>
           </div>
-        </a>
-      </div>
 
-      <!-- 空状态 -->
-      <div
-        v-if="filteredFiles.length === 0"
-        class="text-center py-12 text-sm text-text-muted"
-      >
-        {{ t("community.fileLibrary.noMatchingFiles") }}
-      </div>
-    </template>
+          <!-- 空状态 -->
+          <div
+            v-if="filteredFiles.length === 0"
+            class="text-center py-12 text-sm text-text-muted"
+          >
+            {{ t("community.fileLibrary.noMatchingFiles") }}
+          </div>
+        </template>
       </div>
       <!-- /右栏内容 -->
     </div>

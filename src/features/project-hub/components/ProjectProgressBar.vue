@@ -8,7 +8,10 @@
   - compact 模式用于列表卡片（不显示节点文字），详情页用完整模式
 -->
 <template>
-  <div class="project-progress" :class="{ 'project-progress--compact': compact }">
+  <div
+    class="project-progress"
+    :class="{ 'project-progress--compact': compact }"
+  >
     <!-- 进度轨道 -->
     <div class="relative h-2.5 rounded-full bg-surface-3">
       <!-- 已填充部分 -->
@@ -30,20 +33,24 @@
               ? 'bg-on-primary border-on-primary'
               : 'bg-card-bg border-surface-3'
           "
-          :style="{ width: compact ? '8px' : '12px', height: compact ? '8px' : '12px' }"
+          :style="{
+            width: compact ? '8px' : '12px',
+            height: compact ? '8px' : '12px',
+          }"
         />
       </div>
     </div>
     <!-- 里程碑文字标签（非 compact） -->
-    <div
-      v-if="!compact"
-      class="relative mt-2 text-[11px] leading-tight"
-    >
+    <div v-if="!compact" class="relative mt-2 text-[11px] leading-tight">
       <div
         v-for="m in normalizedMilestones"
         :key="m.percent"
         class="absolute -translate-x-1/2 whitespace-nowrap transition-colors"
-        :class="clamped >= m.percent ? 'text-primary font-medium' : 'text-text-muted/60'"
+        :class="
+          clamped >= m.percent
+            ? 'text-primary font-medium'
+            : 'text-text-muted/60'
+        "
         :style="{ left: m.percent + '%' }"
       >
         <span class="block">{{ m.percent }}%</span>

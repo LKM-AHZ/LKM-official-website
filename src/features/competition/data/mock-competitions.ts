@@ -53,19 +53,14 @@ export interface MockRankEntry {
  * 而 CompetitionHall 正是按 status 分组的，脱节会让比赛归错组、徽章显示错误。
  * 起止按本地时间解析，结束当天仍算「进行中」。
  */
-function deriveStatus(
-  startDate: string,
-  endDate: string,
-): CompetitionStatus {
+function deriveStatus(startDate: string, endDate: string): CompetitionStatus {
   const now = Date.now();
   if (now < Date.parse(`${startDate}T00:00:00`)) return "upcoming";
   if (now > Date.parse(`${endDate}T23:59:59`)) return "ended";
   return "ongoing";
 }
 
-const competitionEntries: Array<
-  Omit<MockCompetition, "status">
-> = [
+const competitionEntries: Array<Omit<MockCompetition, "status">> = [
   {
     id: "comp-1",
     title: "competitionData.competitions.comp1.title",

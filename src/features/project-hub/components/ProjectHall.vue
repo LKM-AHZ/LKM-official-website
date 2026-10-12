@@ -450,10 +450,15 @@
             </label>
           </div>
 
-          <div v-if="projectForm.recruitEnabled" class="space-y-4 rounded-lg border border-dashed border-primary/30 p-4">
+          <div
+            v-if="projectForm.recruitEnabled"
+            class="space-y-4 rounded-lg border border-dashed border-primary/30 p-4"
+          >
             <!-- 招募岗位/角色（多选 chip） -->
             <div>
-              <label class="block text-sm font-medium text-deep-text dark:text-white mb-1.5">
+              <label
+                class="block text-sm font-medium text-deep-text dark:text-white mb-1.5"
+              >
                 招募岗位 / 角色
               </label>
               <div class="flex flex-wrap gap-1.5">
@@ -888,9 +893,7 @@ const handleProjectSubmit = async (): Promise<void> => {
     const recruitLines: string[] = [];
     if (projectForm.recruitEnabled) {
       if (projectForm.selectedRoles.length)
-        recruitLines.push(
-          `招募岗位：${projectForm.selectedRoles.join("、")}`,
-        );
+        recruitLines.push(`招募岗位：${projectForm.selectedRoles.join("、")}`);
       if (projectForm.requirements.trim())
         recruitLines.push(
           `能力要求：${sanitizeInput(projectForm.requirements)}`,

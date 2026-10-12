@@ -15,7 +15,7 @@ export const figurePropsSchema = z.object({
   // Figure 节点的 width 默认值是 null，`.optional()` 只允许 undefined → 直接把节点原始属性
   // 传进来会 parse 抛错，故补 nullable；同时收紧取值域（负数/NaN/Infinity 会渲染出坏样式），
   // 非法值用 .catch 归一成 null，避免导出时被单个坏值整体打断
-  width: z.number().finite().positive().nullable().optional().catch(null),
+  width: z.number().positive().nullable().optional().catch(null),
   align: z.enum(["left", "center", "right"]).default("center"),
 });
 

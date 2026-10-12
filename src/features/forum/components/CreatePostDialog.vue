@@ -125,7 +125,8 @@
             <label class="block text-sm font-medium text-deep-text mb-1.5">
               {{ t("community.forum.tagsLabel") }}
               <span class="text-xs text-text-muted font-normal">
-                {{ tags.length }}/5 · {{ t("community.forum.maxTagsHint", { count: 5 }) }}
+                {{ tags.length }}/5 ·
+                {{ t("community.forum.maxTagsHint", { count: 5 }) }}
               </span>
             </label>
             <div class="flex flex-wrap gap-1.5 mb-2">
@@ -161,7 +162,11 @@
                 type="button"
                 class="text-xs px-2 py-0.5 rounded-full border border-surface-3 text-text-muted hover:border-primary hover:text-primary transition-colors"
                 :disabled="tags.includes(rt) || tags.length >= 5"
-                :class="(tags.includes(rt) || tags.length >= 5) ? 'opacity-40 cursor-not-allowed' : ''"
+                :class="
+                  tags.includes(rt) || tags.length >= 5
+                    ? 'opacity-40 cursor-not-allowed'
+                    : ''
+                "
                 @click="addTag(rt)"
               >
                 {{ rt }}
@@ -248,9 +253,17 @@ const subjects = [
   { id: "math", icon: "tabler:math-symbols", label: "community.forum.math" },
   { id: "physics", icon: "tabler:atom", label: "community.forum.physics" },
   { id: "chemistry", icon: "tabler:flask", label: "community.forum.chemistry" },
-  { id: "biology", icon: "tabler:microscope", label: "community.forum.biology" },
+  {
+    id: "biology",
+    icon: "tabler:microscope",
+    label: "community.forum.biology",
+  },
   { id: "cs", icon: "tabler:code", label: "community.forum.cs" },
-  { id: "astronomy", icon: "tabler:telescope", label: "community.forum.astronomy" },
+  {
+    id: "astronomy",
+    icon: "tabler:telescope",
+    label: "community.forum.astronomy",
+  },
 ];
 
 const contentTypes = [

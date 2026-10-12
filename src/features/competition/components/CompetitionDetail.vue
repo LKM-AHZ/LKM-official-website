@@ -32,7 +32,9 @@
                 : 'border-surface-3'
             "
           >
-            <p class="text-xs font-medium text-deep-text">{{ stageLabel(stage.key) }}</p>
+            <p class="text-xs font-medium text-deep-text">
+              {{ stageLabel(stage.key) }}
+            </p>
             <p class="mt-1 text-[11px] text-text-muted">
               {{ stage.start }} ~ {{ stage.end }}
             </p>
@@ -130,7 +132,9 @@
     </div>
 
     <!-- 右：排行榜预览 -->
-    <aside class="rounded-[18px] border border-surface-3 bg-card-bg p-5 h-fit lg:sticky lg:top-6">
+    <aside
+      class="rounded-[18px] border border-surface-3 bg-card-bg p-5 h-fit lg:sticky lg:top-6"
+    >
       <h3 class="text-sm font-semibold text-deep-text mb-3">
         {{ t("community.competition.leaderboard") }}
       </h3>
@@ -143,9 +147,7 @@
         >
           <span
             class="w-6 text-center font-mono text-xs font-bold"
-            :class="
-              row.rank <= 3 ? 'text-warning' : 'text-text-muted/60'
-            "
+            :class="row.rank <= 3 ? 'text-warning' : 'text-text-muted/60'"
             >{{ row.rank }}</span
           >
           <span class="flex-1 truncate text-deep-text">{{ row.name }}</span>
@@ -176,9 +178,7 @@ const mode = ref<"individual" | "team">(
 );
 const inviteCode = ref("");
 
-const leaderboard = computed(
-  () => mockLeaderboards[props.comp.id] ?? [],
-);
+const leaderboard = computed(() => mockLeaderboards[props.comp.id] ?? []);
 
 const activeStageKey = computed<StageKey | null>(() => {
   const t0 = Date.now();

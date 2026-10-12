@@ -66,7 +66,8 @@ const timelineNodes = computed<TimelineNode[]>(() => {
   const total = Math.max(reports.length, 1);
   reports.forEach((r, i) => {
     // 从 0 到 current 均匀递增，最后一条对齐当前进度
-    const frac = total === 1 ? current : Math.round(((i + 1) / total) * current);
+    const frac =
+      total === 1 ? current : Math.round(((i + 1) / total) * current);
     nodes.push({
       date: r.date || "—",
       progress: frac,
@@ -232,20 +233,19 @@ const timelineNodes = computed<TimelineNode[]>(() => {
         class="bg-card-bg border border-surface-3 rounded-xl p-5 sm:p-6"
       >
         <div class="flex items-center justify-between mb-5">
-          <h3 class="font-semibold text-deep-text">{{
-            t("page.projects.reports")
-          }}</h3>
+          <h3 class="font-semibold text-deep-text">
+            {{ t("page.projects.reports") }}
+          </h3>
           <span class="text-xs text-text-muted/60">
             {{ timelineNodes.length }} 个节点
           </span>
         </div>
 
-        <ol v-if="timelineNodes.length" class="relative ml-2 space-y-6 border-l-2 border-surface-3 pl-6">
-          <li
-            v-for="(node, i) in timelineNodes"
-            :key="i"
-            class="relative"
-          >
+        <ol
+          v-if="timelineNodes.length"
+          class="relative ml-2 space-y-6 border-l-2 border-surface-3 pl-6"
+        >
+          <li v-for="(node, i) in timelineNodes" :key="i" class="relative">
             <!-- 时间轴节点圆点 -->
             <span
               class="absolute -left-[31px] top-1.5 block h-3 w-3 rounded-full border-2 border-primary bg-card-bg"

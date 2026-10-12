@@ -16,7 +16,11 @@
         }}</span>
         <span
           class="font-mono text-sm font-bold px-2 py-0.5 rounded"
-          :class="remaining < 300 ? 'bg-red-500/10 text-red-500' : 'bg-[var(--btn-regular-bg)] text-primary'"
+          :class="
+            remaining < 300
+              ? 'bg-red-500/10 text-red-500'
+              : 'bg-[var(--btn-regular-bg)] text-primary'
+          "
         >
           {{ formatTime(remaining) }}
         </span>
@@ -50,7 +54,9 @@
         </div>
 
         <div class="bg-card-bg border border-surface-3 rounded-xl p-6">
-          <p class="text-deep-text font-medium mb-4 leading-7">{{ t(currentQ.stem) }}</p>
+          <p class="text-deep-text font-medium mb-4 leading-7">
+            {{ t(currentQ.stem) }}
+          </p>
 
           <!-- 选项（单选/多选/判断） -->
           <div v-if="currentQ.type !== 'fill'" class="space-y-2">
@@ -61,7 +67,9 @@
               :class="optionClass(i)"
               @click="selectOption(i)"
             >
-              <span class="font-mono text-text-muted mr-2">{{ labelOf(i) }}.</span>
+              <span class="font-mono text-text-muted mr-2"
+                >{{ labelOf(i) }}.</span
+              >
               {{ t(opt) }}
             </button>
           </div>
@@ -103,7 +111,9 @@
 
       <!-- 桌面端答题卡侧边栏 -->
       <aside class="hidden lg:block w-52 shrink-0">
-        <div class="bg-card-bg border border-surface-3 rounded-xl p-4 sticky top-20">
+        <div
+          class="bg-card-bg border border-surface-3 rounded-xl p-4 sticky top-20"
+        >
           <p class="text-xs font-semibold text-deep-text mb-3">
             {{ t("community.competition.answerSheet") }}
           </p>
@@ -120,11 +130,15 @@
           </div>
           <div class="mt-4 space-y-1 text-[11px] text-text-muted">
             <p class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-sm bg-primary inline-block"></span>
+              <span
+                class="w-2.5 h-2.5 rounded-sm bg-primary inline-block"
+              ></span>
               {{ t("community.competition.answeredShort") }}
             </p>
             <p class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-sm bg-surface-3 inline-block"></span>
+              <span
+                class="w-2.5 h-2.5 rounded-sm bg-surface-3 inline-block"
+              ></span>
               {{ t("community.competition.unansweredShort") }}
             </p>
           </div>
@@ -151,7 +165,10 @@
           :key="q.id"
           class="h-9 rounded-md text-xs font-medium flex items-center justify-center"
           :class="answerCellClass(i)"
-          @click="currentIndex = i; showSheet = false"
+          @click="
+            currentIndex = i;
+            showSheet = false;
+          "
         >
           {{ i + 1 }}
         </button>
@@ -184,11 +201,16 @@ let timer: ReturnType<typeof setInterval> | undefined;
 let deadline = 0;
 let submitted = false;
 
-const currentQ = computed<MockQuestion>(() => questions.value[currentIndex.value]);
+const currentQ = computed<MockQuestion>(
+  () => questions.value[currentIndex.value],
+);
 
 // 填空题单独绑 v-model，同步回 answers
 const fillAnswer = computed<string>({
-  get: () => (typeof answers.value[currentIndex.value] === "string" ? (answers.value[currentIndex.value] as string) : ""),
+  get: () =>
+    typeof answers.value[currentIndex.value] === "string"
+      ? (answers.value[currentIndex.value] as string)
+      : "",
   set: (v: string) => {
     answers.value[currentIndex.value] = v;
   },
@@ -233,7 +255,8 @@ function typeLabel(type: MockQuestion["type"]): string {
 }
 
 function typeBadgeClass(type: MockQuestion["type"]): string {
-  if (type === "multiple") return "bg-[var(--warning)] text-[var(--on-warning)]";
+  if (type === "multiple")
+    return "bg-[var(--warning)] text-[var(--on-warning)]";
   if (type === "fill") return "bg-[var(--info)] text-[var(--on-info)]";
   if (type === "true_false") return "bg-[var(--surface-3)] text-text-muted";
   return "bg-[var(--btn-regular-bg)] text-primary";
@@ -257,17 +280,14 @@ function optionClass(i: number): string {
   const q = currentQ.value;
   const cur = answers.value[currentIndex.value];
   const selected =
-    q.type === "multiple"
-      ? Array.isArray(cur) && cur.includes(i)
-      : cur === i;
+    q.type === "multiple" ? Array.isArray(cur) && cur.includes(i) : cur === i;
   return selected
     ? "border-primary bg-[var(--btn-regular-bg)] text-primary"
     : "border-surface-3 text-deep-text hover:border-primary/40";
 }
 
 function answerCellClass(i: number): string {
-  if (currentIndex.value === i)
-    return "bg-primary text-on-primary";
+  if (currentIndex.value === i) return "bg-primary text-on-primary";
   return isAnswered(i)
     ? "bg-primary/20 text-primary"
     : "bg-surface-3 text-text-muted";

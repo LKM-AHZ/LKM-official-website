@@ -2424,7 +2424,8 @@ export const en = {
       stageOfficial: "Official",
       stageReview: "Review",
       rewardRule: "Rewards",
-      rewardDefault: "First-place certificate + contribution points; top results count toward your rank.",
+      rewardDefault:
+        "First-place certificate + contribution points; top results count toward your rank.",
       participateMode: "Participation",
       modeIndividual: "Individual",
       modeTeam: "Team",

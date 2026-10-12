@@ -39,15 +39,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Icon } from "@iconify/vue";
-import {
-  fileCategories,
-  getChildren,
-  isLeaf,
-  type FileCategory,
-} from "../data/category-tree";
+import { getChildren, type FileCategory } from "../data/category-tree";
 import CategoryTreeBranch from "./CategoryTreeBranch.vue";
 
-const props = defineProps<{
+defineProps<{
   currentId: string | null;
   expandedIds: Set<string>;
   fileCounts: Record<string, number>;

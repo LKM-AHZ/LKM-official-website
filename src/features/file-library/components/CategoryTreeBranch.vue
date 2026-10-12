@@ -37,7 +37,11 @@
         @click="emit('select', node.id)"
       >
         <Icon
-          :icon="isLeaf(node.id) ? 'material-symbols:insert-drive-file' : 'material-symbols:folder'"
+          :icon="
+            isLeaf(node.id)
+              ? 'material-symbols:insert-drive-file'
+              : 'material-symbols:folder'
+          "
           class="w-4 h-4 shrink-0"
           :class="isLeaf(node.id) ? 'text-text-muted/60' : 'text-amber-500/80'"
         />
@@ -52,7 +56,10 @@
     </div>
 
     <!-- 子节点 -->
-    <div v-if="!isLeaf(node.id) && expanded" class="ml-3 border-l border-surface-3 pl-2">
+    <div
+      v-if="!isLeaf(node.id) && expanded"
+      class="ml-3 border-l border-surface-3 pl-2"
+    >
       <CategoryTreeBranch
         v-for="child in children"
         :key="child.id"
@@ -70,11 +77,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Icon } from "@iconify/vue";
-import {
-  getChildren,
-  isLeaf,
-  type FileCategory,
-} from "../data/category-tree";
+import { getChildren, isLeaf, type FileCategory } from "../data/category-tree";
 import { t } from "~/lib/i18n";
 
 const props = defineProps<{

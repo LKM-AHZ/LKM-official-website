@@ -79,7 +79,9 @@
         </div>
 
         <!-- 底部：人数 + 倒计时 + 操作 -->
-        <div class="mt-auto pt-4 flex flex-wrap items-center justify-between gap-3">
+        <div
+          class="mt-auto pt-4 flex flex-wrap items-center justify-between gap-3"
+        >
           <div class="flex flex-col gap-1 text-xs text-text-muted">
             <span>
               {{ t("community.competition.participants")
@@ -88,7 +90,9 @@
             <span
               v-if="comp.status !== 'ended'"
               class="font-mono font-semibold"
-              :class="comp.status === 'ongoing' ? 'text-primary' : 'text-warning'"
+              :class="
+                comp.status === 'ongoing' ? 'text-primary' : 'text-warning'
+              "
             >
               {{ t("community.competition.countdown") }}
               {{ countdownText(comp) }}
@@ -188,10 +192,8 @@ function statusLabel(s: CompetitionStatus): string {
 }
 
 function statusBadgeClass(s: CompetitionStatus): string {
-  if (s === "ongoing")
-    return "bg-[var(--success)] text-[var(--on-success)]";
-  if (s === "upcoming")
-    return "bg-[var(--warning)] text-[var(--on-warning)]";
+  if (s === "ongoing") return "bg-[var(--success)] text-[var(--on-success)]";
+  if (s === "upcoming") return "bg-[var(--warning)] text-[var(--on-warning)]";
   return "bg-[var(--surface-3)] text-text-muted";
 }
 
@@ -218,7 +220,8 @@ function activeStageKey(comp: MockCompetition): StageKey | null {
 
 function stageDotClass(comp: MockCompetition, key: StageKey): string {
   const active = activeStageKey(comp);
-  if (active === key) return "bg-[var(--primary)] ring-2 ring-[var(--primary)]/30";
+  if (active === key)
+    return "bg-[var(--primary)] ring-2 ring-[var(--primary)]/30";
   // 已过去的阶段
   const stage = comp.stages.find((s) => s.key === key)!;
   if (Date.parse(`${stage.end}T23:59:59`) < now.value)

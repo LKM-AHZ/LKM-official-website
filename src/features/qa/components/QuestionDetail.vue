@@ -29,8 +29,7 @@ const canInteract = computed(
 
 const bountyRemainingDays = computed<number | null>(() => {
   if (!question.value?.bountyExpiresAt) return null;
-  const ms =
-    new Date(question.value.bountyExpiresAt).getTime() - nowTick.value;
+  const ms = new Date(question.value.bountyExpiresAt).getTime() - nowTick.value;
   if (ms <= 0) return 0;
   return Math.ceil(ms / 86400000);
 });
