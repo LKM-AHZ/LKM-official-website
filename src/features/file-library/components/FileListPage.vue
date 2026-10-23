@@ -376,7 +376,16 @@
           <div class="space-y-4">
             <!-- 真文件选择：隐藏 input + 点击拖放区触发 -->
             <label
-              class="border-2 border-dashed border-surface-3 rounded-xl p-6 text-center hover:border-primary/40 transition-colors cursor-pointer block"
+              class="border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer block"
+              :class="
+                isDragOver
+                  ? 'border-primary bg-primary/5'
+                  : 'border-surface-3 hover:border-primary/40'
+              "
+              @dragover.prevent
+              @dragenter.prevent="onDragEnter"
+              @dragleave="onDragLeave"
+              @drop.prevent="onFileDrop"
             >
               <input
                 ref="fileInputEl"
@@ -584,6 +593,9 @@ const uploadProjects = ref<{ id: string; title: string }[]>([]);
 // 上传态：所选文件 + 上传中标志（用于禁用/提示）
 const selectedFile = ref<File | null>(null);
 const uploading = ref(false);
+// 拖拽悬停态：dragenter/dragleave 会在子元素间反复触发，用计数判断真正离开拖放区
+const isDragOver = ref(false);
+let dragDepth = 0;
 // 文件 input 的模板引用：关闭弹窗时要把 DOM 里的选择也清掉，否则再选同一个文件不会触发 change
 const fileInputEl = ref<HTMLInputElement | null>(null);
 
@@ -821,10 +833,31 @@ function onFileChange(e: Event) {
   selectedFile.value = input.files?.[0] ?? null;
 }
 
+function onDragEnter(e: DragEvent) {
+  if (uploading.value || !e.dataTransfer?.types.includes("Files")) return;
+  dragDepth += 1;
+  isDragOver.value = true;
+}
+
+function onDragLeave() {
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) isDragOver.value = false;
+}
+
+// 拖拽选择：拖放区与隐藏 input 等价，只取第一个文件（input 无 multiple）
+function onFileDrop(e: DragEvent) {
+  dragDepth = 0;
+  isDragOver.value = false;
+  if (uploading.value) return;
+  selectedFile.value = e.dataTransfer?.files?.[0] ?? null;
+}
+
 // 关闭上传弹窗：连同捕获的表单状态（所选文件 / 说明 / input 里的选择）一起清掉。
 // 原来只把 showUpload 置 false，重开弹窗会带着上次的文件与说明，存在误提交。
 function closeUpload() {
   showUpload.value = false;
+  dragDepth = 0;
+  isDragOver.value = false;
   selectedFile.value = null;
   uploadDesc.value = "";
   uploadTitle.value = "";

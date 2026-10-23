@@ -39,7 +39,7 @@
         <Icon
           :icon="
             isLeaf(node.id)
-              ? 'material-symbols:insert-drive-file'
+              ? 'material-symbols:description'
               : 'material-symbols:folder'
           "
           class="w-4 h-4 shrink-0"
