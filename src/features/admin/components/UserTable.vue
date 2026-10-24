@@ -56,6 +56,8 @@ const admissionRows = ref<AdmissionRow[]>([]);
 const admissionLoading = ref(false);
 const admissionError = ref("");
 const admissionMessage = ref("");
+// 无 admin.users_review 的角色（如 org_member）打开用户页时整块隐藏，不渲染 403 噪音
+const admissionVisible = ref(true);
 const rejectingId = ref<string | null>(null);
 const rejectReason = ref("");
 const mfa = useAdminMFA();
@@ -67,6 +69,10 @@ async function loadAdmission(): Promise<void> {
     const res = await adminFetch(
       "/api/v1/admin/admission/users?status=pending",
     );
+    if (res.status === 403) {
+      admissionVisible.value = false;
+      return;
+    }
     const body = await readAdminResp(res);
     admissionRows.value = body.data as AdmissionRow[];
   } catch (e) {
@@ -130,7 +136,10 @@ onMounted(() => {
       @cancel="mfa.onCancel"
     />
 
-    <section class="mb-6 bg-card-bg border border-surface-3 rounded-xl p-4">
+    <section
+      v-if="admissionVisible"
+      class="mb-6 bg-card-bg border border-surface-3 rounded-xl p-4"
+    >
       <div class="flex items-center gap-2 mb-3">
         <h3 class="text-sm font-semibold text-deep-text">
           {{ t("admin.users.admissionPending") }}

@@ -1,8 +1,11 @@
 <script setup lang="ts">
-// 后台文件审核列表 —— 统一走 useAdminPagination（按 status 过滤）
-import { ref } from "vue";
+// 后台文件审核列表 —— 统一走 useAdminPagination（按 status 过滤）+ 待审文件批量审核。
+import { computed, ref } from "vue";
 import { useAdminPagination } from "~/lib/http/useAdminPagination";
+import { adminFetch, readAdminResp } from "~/lib/api/admin";
+import { useAdminMFA } from "~/lib/http/useAdminMFA";
 import { t } from "~/lib/i18n";
+import AdminMFAVerifyDialog from "./AdminMFAVerifyDialog.vue";
 
 interface AdminFileRow {
   id: string;
@@ -13,6 +16,12 @@ interface AdminFileRow {
   status: string;
   description: string;
   created_at: string;
+}
+
+interface BatchResult {
+  succeeded: number;
+  failed: number;
+  results: { file_id: string; ok: boolean; error: string | null }[];
 }
 
 const statusFilter = ref<"all" | "pending" | "approved" | "rejected">("all");
@@ -55,10 +64,90 @@ function setFilter(f: "all" | "pending" | "approved" | "rejected") {
   page.value = 1;
   void refresh();
 }
+
+// —— 批量审核（仅 pending 行；限 50 条、后端逐条独立事务）——
+const selected = ref<Set<string>>(new Set());
+const batchReason = ref("");
+const batchBusy = ref(false);
+const batchError = ref("");
+const batchResult = ref<BatchResult | null>(null);
+const mfa = useAdminMFA();
+
+const pendingRows = computed(() =>
+  rows.value.filter((row) => row.status === "pending"),
+);
+const allPendingSelected = computed(
+  () =>
+    pendingRows.value.length > 0 &&
+    pendingRows.value.every((row) => selected.value.has(row.id)),
+);
+
+function toggleRow(id: string): void {
+  const next = new Set(selected.value);
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  selected.value = next;
+}
+
+function toggleAll(): void {
+  selected.value = allPendingSelected.value
+    ? new Set()
+    : new Set(pendingRows.value.map((row) => row.id));
+}
+
+async function submitBatch(action: "approve" | "reject"): Promise<void> {
+  const ids = [...selected.value];
+  if (!ids.length) return;
+  const reason = batchReason.value.trim();
+  if (action === "reject" && !reason) {
+    batchError.value = t("admin.files.batchReasonRequired");
+    return;
+  }
+  const confirmed = window.confirm(
+    t(
+      action === "approve"
+        ? "admin.files.batchConfirmApprove"
+        : "admin.files.batchConfirmReject",
+      { n: ids.length },
+    ),
+  );
+  if (!confirmed) return;
+
+  batchBusy.value = true;
+  batchError.value = "";
+  batchResult.value = null;
+  try {
+    await mfa.run(async () => {
+      const res = await adminFetch("/api/v1/files/review-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_ids: ids,
+          status: action === "approve" ? "approved" : "rejected",
+          review_comment: action === "reject" ? reason : undefined,
+        }),
+      });
+      const body = await readAdminResp(res);
+      batchResult.value = body.data as BatchResult;
+      selected.value = new Set();
+      batchReason.value = "";
+      await refresh();
+    });
+  } catch (e) {
+    batchError.value = e instanceof Error ? e.message : t("admin.loadFailed");
+  } finally {
+    batchBusy.value = false;
+  }
+}
 </script>
 
 <template>
   <div>
+    <AdminMFAVerifyDialog
+      :state="mfa.dialog"
+      @verify="mfa.onCode"
+      @cancel="mfa.onCancel"
+    />
     <div class="flex gap-2 mb-4">
       <button
         v-for="f in ['all', 'pending', 'approved', 'rejected'] as const"
@@ -75,12 +164,83 @@ function setFilter(f: "all" | "pending" | "approved" | "rejected") {
       </button>
     </div>
 
+    <div
+      v-if="selected.size || batchResult || batchError"
+      class="mb-4 rounded-xl border border-surface-3 bg-card-bg p-3 space-y-2"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm text-text-muted">
+          {{ t("admin.files.batchSelected", { n: selected.size }) }}
+        </span>
+        <button
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-sm bg-green-100 dark:bg-green-950/30 text-green-600 disabled:opacity-40"
+          :disabled="!selected.size || batchBusy"
+          @click="submitBatch('approve')"
+        >
+          {{ t("admin.files.batchApprove") }}
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-sm bg-red-100 dark:bg-red-950/30 text-red-500 disabled:opacity-40"
+          :disabled="!selected.size || batchBusy"
+          @click="submitBatch('reject')"
+        >
+          {{ t("admin.files.batchReject") }}
+        </button>
+        <input
+          v-model="batchReason"
+          type="text"
+          :placeholder="t('admin.files.batchReasonPlaceholder')"
+          class="flex-1 min-w-48 px-3 py-1.5 rounded-lg text-sm bg-page-bg border border-surface-3 focus:outline-none focus:border-primary"
+        />
+        <button
+          type="button"
+          class="text-sm text-text-muted underline"
+          @click="selected = new Set()"
+        >
+          {{ t("common.cancel") }}
+        </button>
+      </div>
+      <p v-if="batchError" class="text-sm text-red-500">{{ batchError }}</p>
+      <div v-if="batchResult" class="text-sm">
+        <p class="text-text-muted">
+          {{
+            t("admin.files.batchResult", {
+              ok: batchResult.succeeded,
+              failed: batchResult.failed,
+            })
+          }}
+        </p>
+        <ul
+          v-if="batchResult.failed"
+          class="mt-1 space-y-0.5 text-xs text-red-500"
+        >
+          <li
+            v-for="item in batchResult.results.filter((r) => !r.ok)"
+            :key="item.file_id"
+          >
+            {{ item.file_id }}：{{ item.error || t("admin.loadFailed") }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <div v-if="error" class="mb-4 text-sm text-red-500">{{ error }}</div>
 
     <div class="bg-card-bg border border-surface-3 rounded-xl overflow-hidden">
       <table class="w-full text-sm">
         <thead class="bg-surface-3/50">
           <tr>
+            <th class="px-2 py-3 w-8">
+              <input
+                type="checkbox"
+                :checked="allPendingSelected"
+                :disabled="!pendingRows.length"
+                :aria-label="t('admin.files.batchSelectAll')"
+                @change="toggleAll"
+              />
+            </th>
             <th class="text-left px-4 py-3 font-medium text-text-muted">
               {{ t("admin.files.filename") }}
             </th>
@@ -105,6 +265,14 @@ function setFilter(f: "all" | "pending" | "approved" | "rejected") {
             :key="f.id"
             class="hover:bg-page-bg transition-colors"
           >
+            <td class="px-2 py-3">
+              <input
+                v-if="f.status === 'pending'"
+                type="checkbox"
+                :checked="selected.has(f.id)"
+                @change="toggleRow(f.id)"
+              />
+            </td>
             <td class="px-4 py-3">
               <div class="font-medium text-deep-text line-clamp-1 max-w-56">
                 {{ f.original_name }}
@@ -144,12 +312,12 @@ function setFilter(f: "all" | "pending" | "approved" | "rejected") {
           </tr>
           <!-- 加载态单独占一行：原先只有空态行且被 !loading 挡住，首次加载时表体整片空白 -->
           <tr v-if="loading">
-            <td colspan="4" class="px-4 py-8 text-center text-text-muted">
+            <td colspan="5" class="px-4 py-8 text-center text-text-muted">
               <span class="inline-block animate-pulse">…</span>
             </td>
           </tr>
           <tr v-else-if="rows.length === 0">
-            <td colspan="4" class="px-4 py-8 text-center text-text-muted">
+            <td colspan="5" class="px-4 py-8 text-center text-text-muted">
               {{ t("admin.files.empty") }}
             </td>
           </tr>

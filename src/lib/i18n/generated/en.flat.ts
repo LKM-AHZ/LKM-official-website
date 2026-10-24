@@ -34,6 +34,17 @@ export const enFlat = {
   "admin.fileStatus.pending": "Pending",
   "admin.fileStatus.rejected": "Rejected",
   "admin.files.all": "All",
+  "admin.files.batchApprove": "Approve selected",
+  "admin.files.batchConfirmApprove": "Approve the {n} selected files?",
+  "admin.files.batchConfirmReject": "Reject the {n} selected files?",
+  "admin.files.batchReasonPlaceholder":
+    "Rejection reason (required for batch reject)",
+  "admin.files.batchReasonRequired": "A reason is required to reject files",
+  "admin.files.batchReject": "Reject selected",
+  "admin.files.batchResult":
+    "Batch review done: {ok} succeeded, {failed} failed",
+  "admin.files.batchSelectAll": "Select all pending files on this page",
+  "admin.files.batchSelected": "{n} pending files selected",
   "admin.files.empty": "No files",
   "admin.files.filename": "File Name",
   "admin.files.size": "Size",
