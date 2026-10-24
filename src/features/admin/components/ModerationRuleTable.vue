@@ -307,7 +307,7 @@ onMounted(() => void load());
             :disabled="!pattern.trim()"
             @click="save"
           >
-            {{ t("admin.save") }}
+            {{ t("common.save") }}
           </button>
           <button
             type="button"

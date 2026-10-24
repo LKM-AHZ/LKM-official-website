@@ -627,14 +627,14 @@ async function addImageFile(file: File): Promise<void> {
     if (!url) {
       // blob 已不存在（被清理或并发删除）：不入列表，避免渲染出一个空图框
       await deleteImageBlobs([ref]).catch(() => {});
-      showToast(t("common.loadFailed"));
+      showToast(t("common.loadError"));
       return;
     }
     imageUrls[ref] = url;
     formModel.images.push(ref);
   } catch (e) {
     console.warn("[AskQuestionModal] 保存图片失败:", e);
-    showToast(t("common.loadFailed"));
+    showToast(t("common.loadError"));
   }
 }
 

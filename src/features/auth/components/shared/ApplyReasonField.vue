@@ -2,7 +2,7 @@
   <div class="w-full">
     <label :for="fieldId" class="label pb-1">
       <span class="label-text font-medium">{{
-        t("auth.register.applyReasonLabel")
+        t("messages.register.applyReasonLabel")
       }}</span>
     </label>
     <textarea
@@ -10,12 +10,12 @@
       class="textarea textarea-bordered w-full"
       rows="3"
       maxlength="500"
-      :placeholder="t('auth.register.applyReasonPlaceholder')"
+      :placeholder="t('messages.register.applyReasonPlaceholder')"
       :value="flow.applyReason"
       @input="flow.applyReason = ($event.target as HTMLTextAreaElement).value"
     />
     <span class="label-text-alt text-text-muted">{{
-      t("auth.register.applyReasonHint")
+      t("messages.register.applyReasonHint")
     }}</span>
   </div>
 </template>
