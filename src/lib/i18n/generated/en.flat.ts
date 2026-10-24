@@ -94,6 +94,7 @@ export const enFlat = {
   "admin.posts.title": "Title",
   "admin.posts.views": "Views",
   "admin.prevPage": "Previous",
+  "admin.reviewQueues.admissionUsers": "Pending accounts",
   "admin.reviewQueues.boardApplications": "Board applications",
   "admin.reviewQueues.columnApplications": "Column applications",
   "admin.reviewQueues.days": "{n} d",
@@ -145,6 +146,7 @@ export const enFlat = {
   "admin.users.admissionPending": "Pending accounts",
   "admin.users.admissionRejected": "Application rejected",
   "admin.users.appliedAt": "Applied At",
+  "admin.users.applyReason": "Application reason",
   "admin.users.approve": "Approve",
   "admin.users.createdAt": "Registered At",
   "admin.users.email": "Email",
@@ -258,8 +260,12 @@ export const enFlat = {
   "auth.login.waitingDevice": "Waiting for device verification",
   "auth.login.welcomeBack": "Welcome back, {name}",
   "auth.modal.ariaLabel": "Authentication dialog",
+  "auth.oauth.backToLogin": "Back to login",
   "auth.oauth.completing": "Completing third-party login...",
   "auth.oauth.failed": "Third-party login failed, please try again",
+  "auth.oauth.pending": "Application submitted",
+  "auth.oauth.pendingHint":
+    "You can sign in once an admin approves your account.",
   "auth.register.admissionPending": "Application submitted",
   "auth.register.admissionPendingHint":
     "Your account must be approved by an admin before you can sign in.",
@@ -1579,6 +1585,11 @@ export const enFlat = {
   "messages.recovery.passwordTooShort":
     "Password must be at least 6 characters",
   "messages.recovery.resetSuccess": "Password reset, please log in",
+  "messages.register.applyReasonHint":
+    "Only used in application mode; leave empty otherwise.",
+  "messages.register.applyReasonLabel": "Application reason (optional)",
+  "messages.register.applyReasonPlaceholder":
+    "Briefly explain why you would like to join; admins will see this",
   "messages.register.codeRequestFailed":
     "Failed to get the verification code, please try again",
   "messages.register.contactSpecialChars":

@@ -79,6 +79,9 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       sessionExpired: "注册会话已失效，请重新提交",
       invalidCodeLength: "验证码长度不正确",
       invalidCodeFormat: "验证码格式不正确",
+      applyReasonLabel: "申请理由（选填）",
+      applyReasonPlaceholder: "简单介绍你想加入的原因，管理员审核时会看到",
+      applyReasonHint: "仅申请制模式使用；普通注册可留空。",
     },
     webauthn: {
       browserOnly:
@@ -306,6 +309,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       boardApplications: "板块申请",
       columnApplications: "专栏申请",
       projectApplications: "项目申请",
+      admissionUsers: "待审账号",
       empty: "暂无待办",
       oldest: "最久",
       minutes: "{n} 分钟",
@@ -412,6 +416,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
       active: "正常",
       empty: "暂无用户",
       admissionPending: "待审账号",
+      applyReason: "申请理由",
       admissionEmpty: "暂无待审申请",
       approve: "通过",
       reject: "拒绝",
@@ -1356,6 +1361,9 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     },
     oauth: {
       completing: "正在完成第三方登录…",
+      pending: "申请已提交，等待管理员审核",
+      pendingHint: "审核通过后即可使用第三方登录进入社区。",
+      backToLogin: "返回登录",
       failed: "第三方登录未能完成，请重试",
     },
 

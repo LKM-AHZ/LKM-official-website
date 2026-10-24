@@ -81,6 +81,10 @@ export const en = {
       sessionExpired: "Registration session expired, please resubmit",
       invalidCodeLength: "Incorrect verification code length",
       invalidCodeFormat: "Incorrect verification code format",
+      applyReasonLabel: "Application reason (optional)",
+      applyReasonPlaceholder:
+        "Briefly explain why you would like to join; admins will see this",
+      applyReasonHint: "Only used in application mode; leave empty otherwise.",
     },
     webauthn: {
       browserOnly:
@@ -310,6 +314,7 @@ export const en = {
       boardApplications: "Board applications",
       columnApplications: "Column applications",
       projectApplications: "Project applications",
+      admissionUsers: "Pending accounts",
       empty: "Nothing pending",
       oldest: "oldest",
       minutes: "{n} min",
@@ -416,6 +421,7 @@ export const en = {
       active: "Active",
       empty: "No users",
       admissionPending: "Pending accounts",
+      applyReason: "Application reason",
       admissionEmpty: "No pending applications",
       approve: "Approve",
       reject: "Reject",
@@ -1386,6 +1392,9 @@ export const en = {
     },
     oauth: {
       completing: "Completing third-party login...",
+      pending: "Application submitted",
+      pendingHint: "You can sign in once an admin approves your account.",
+      backToLogin: "Back to login",
       failed: "Third-party login failed, please try again",
     },
 

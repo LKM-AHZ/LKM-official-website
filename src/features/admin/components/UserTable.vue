@@ -190,6 +190,12 @@ onMounted(() => {
               </button>
             </span>
           </div>
+          <p
+            v-if="row.apply_reason"
+            class="mt-1 text-xs text-text-muted whitespace-pre-wrap"
+          >
+            {{ t("admin.users.applyReason") }}: {{ row.apply_reason }}
+          </p>
           <div
             v-if="rejectingId === row.user_id"
             class="mt-2 flex flex-wrap gap-2"

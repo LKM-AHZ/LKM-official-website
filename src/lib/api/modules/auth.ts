@@ -218,8 +218,12 @@ export const authApi = {
     ),
 
   // ── 注册本地账户 ──
-  registerLocal: (username: string, password: string) =>
-    post<TokenData>("/api/v1/auth/reg/local", { username, password }),
+  registerLocal: (username: string, password: string, applyReason?: string) =>
+    post<TokenData>("/api/v1/auth/reg/local", {
+      username,
+      password,
+      ...(applyReason ? { apply_reason: applyReason } : {}),
+    }),
 
   // ── 注册普通账户（发送验证码） ──
   registerNormal: (
@@ -227,12 +231,14 @@ export const authApi = {
     password: string,
     email: string | null,
     phone: string | null,
+    applyReason?: string,
   ) =>
     post<RegNormalResponse>("/api/v1/auth/reg/normal", {
       username,
       password,
       email,
       phone,
+      ...(applyReason ? { apply_reason: applyReason } : {}),
     }),
 
   // ── 验证并完成普通账户注册 ──

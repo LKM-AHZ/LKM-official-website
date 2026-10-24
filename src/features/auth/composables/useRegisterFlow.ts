@@ -20,6 +20,7 @@ export interface RegisterFlow {
   confirm: string;
   contact: string;
   useEmail: boolean;
+  applyReason: string;
   code: string;
   txnId: string;
   stage: RegisterStage;
@@ -76,6 +77,7 @@ export function useRegisterFlow(
   const confirm = ref("");
   const contact = ref("");
   const useEmail = ref(true);
+  const applyReason = ref("");
   const code = ref("");
   const txnId = ref("");
   const stage = ref<RegisterStage>("form");
@@ -151,7 +153,10 @@ export function useRegisterFlow(
     try {
       if (type.value === "local") {
         // 本地注册：使用用户输入的密码，无随机生成
-        const r = await store.registerLocal(trimmedUsername, password.value);
+        const reason = applyReason.value.trim();
+        const r = reason
+          ? await store.registerLocal(trimmedUsername, password.value, reason)
+          : await store.registerLocal(trimmedUsername, password.value);
         if (r.isErr()) return fail(r.error.message);
         if (r.value?.admissionPending) {
           // apply 模式：账号待审，停在“已提交”态，不跳转（此时未登录）
@@ -166,12 +171,21 @@ export function useRegisterFlow(
       // 普通账户：发送验证码，进入 verify 步（喵，等验证码来敲门～）
       const email = useEmail.value ? contact.value.trim() : null;
       const phone = !useEmail.value ? contact.value.trim() : null;
-      const r = await store.registerNormal(
-        trimmedUsername,
-        password.value,
-        email ?? undefined,
-        phone ?? undefined,
-      );
+      const reason = applyReason.value.trim();
+      const r = reason
+        ? await store.registerNormal(
+            trimmedUsername,
+            password.value,
+            email ?? undefined,
+            phone ?? undefined,
+            reason,
+          )
+        : await store.registerNormal(
+            trimmedUsername,
+            password.value,
+            email ?? undefined,
+            phone ?? undefined,
+          );
       if (r.isErr()) return fail(r.error.message);
 
       // 防御：确保 txn_id 存在（喵，后端没返回就报错！）
@@ -225,6 +239,7 @@ export function useRegisterFlow(
     password.value = "";
     confirm.value = "";
     contact.value = "";
+    applyReason.value = "";
     code.value = "";
     txnId.value = "";
     loading.value = false;
@@ -246,6 +261,7 @@ export function useRegisterFlow(
     confirm,
     contact,
     useEmail,
+    applyReason,
     code,
     txnId,
     stage,

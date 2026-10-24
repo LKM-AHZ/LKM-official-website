@@ -69,6 +69,7 @@
       :autocomplete="flow.useEmail ? 'email' : 'tel'"
       v-model="flow.contact"
     />
+    <ApplyReasonField :flow="flow" />
     <AuthStatus v-if="flow.error" type="error" :message="flow.error" />
     <button
       type="submit"
@@ -144,6 +145,7 @@
 import type { RegisterFlow } from "~/features/auth/composables/useRegisterFlow";
 import { t } from "~/lib/i18n";
 import AuthField from "../shared/AuthField.vue";
+import ApplyReasonField from "../shared/ApplyReasonField.vue";
 import AuthStatus from "../shared/AuthStatus.vue";
 
 const props = defineProps<{ flow: RegisterFlow }>();

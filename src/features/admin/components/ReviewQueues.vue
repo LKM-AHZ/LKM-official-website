@@ -47,6 +47,7 @@ function queueLabel(key: string): string {
     board_applications: t("admin.reviewQueues.boardApplications"),
     column_applications: t("admin.reviewQueues.columnApplications"),
     project_applications: t("admin.reviewQueues.projectApplications"),
+    admission_users: t("admin.reviewQueues.admissionUsers"),
   };
   return labels[key] ?? key;
 }

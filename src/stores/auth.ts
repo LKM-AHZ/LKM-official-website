@@ -225,8 +225,11 @@ export const useAuthStore = defineStore("auth", () => {
   async function registerLocal(
     username: string,
     password: string,
+    applyReason?: string,
   ): Promise<Result<AuthSuccess, AppError>> {
-    const result = await authApi.registerLocal(username, password);
+    const result = applyReason
+      ? await authApi.registerLocal(username, password, applyReason)
+      : await authApi.registerLocal(username, password);
     if (result.isErr()) return err(result.error);
     return completeLogin(result.value);
   }
@@ -237,18 +240,27 @@ export const useAuthStore = defineStore("auth", () => {
     password: string,
     email?: string,
     phone?: string,
+    applyReason?: string,
   ): Promise<
     Result<
       { txn_id: string; email_sent: boolean; phone_sent: boolean },
       AppError
     >
   > {
-    return authApi.registerNormal(
-      username,
-      password,
-      email ?? null,
-      phone ?? null,
-    );
+    return applyReason
+      ? authApi.registerNormal(
+          username,
+          password,
+          email ?? null,
+          phone ?? null,
+          applyReason,
+        )
+      : authApi.registerNormal(
+          username,
+          password,
+          email ?? null,
+          phone ?? null,
+        );
   }
 
   // ── API: 验证并完成普通账户注册 ──

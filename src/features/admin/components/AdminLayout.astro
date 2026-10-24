@@ -51,6 +51,7 @@ const itemClass = (href: string) =>
               {group.items.map((item) => (
                 <a
                   href={getPermalink(item.href)}
+                  data-nav-href={item.href}
                   class={`${itemClass(item.href)} shrink-0 whitespace-nowrap`}
                   aria-current={
                     isActive(currentPath, getPermalink(item.href))
@@ -97,12 +98,52 @@ const itemClass = (href: string) =>
   // 直接复用 lib/api/admin 的 bootAdminSession：它共享 adminFetch 的 401/403 跳转守卫
   // （含防重入锁与 2FA 识别）。先前这里自己写了一份跳转逻辑，两套跳转在并发 401 时
   // 会互相竞争，还会漏掉「先清重入锁」这一步。
-  import { bootAdminSession } from "~/lib/api/admin";
+  import { adminFetch, bootAdminSession, readAdminResp } from "~/lib/api/admin";
+
+  // 侧边栏待办角标：队列 → 后台页；角标只是增强，任何失败都静默
+  const BADGE_NAV: Record<string, string> = {
+    files: "/admin/files",
+    reports: "/admin/reports",
+    admission_users: "/admin/users",
+  };
+
+  function applyBadge(href: string, count: number): void {
+    if (count <= 0) return;
+    const link = document.querySelector<HTMLAnchorElement>(
+      `a[data-nav-href="${href}"]`,
+    );
+    if (!link) return;
+    link.querySelector("[data-nav-badge]")?.remove();
+    const badge = document.createElement("span");
+    badge.dataset.navBadge = "";
+    badge.className =
+      "ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-medium leading-4 text-white";
+    badge.textContent = count > 99 ? "99+" : String(count);
+    link.appendChild(badge);
+  }
+
+  async function loadNavBadges(): Promise<void> {
+    try {
+      const res = await adminFetch("/api/v1/admin/review-summary");
+      if (res.status === 401 || res.status === 403) return;
+      const body = await readAdminResp(res);
+      const queues =
+        (body.data as { queues?: { key: string; count: number }[] }).queues ??
+        [];
+      for (const queue of queues) {
+        const href = BADGE_NAV[queue.key];
+        if (href) applyBadge(href, queue.count);
+      }
+    } catch {
+      // 角标失败不影响后台使用
+    }
+  }
 
   (async () => {
     // 已是登录页则不再校验（跳转守卫本身也会跳过登录页，这里省掉一次无谓请求）
     if (window.location.pathname.startsWith("/admin/login")) return;
     // 网络/超时/5xx 时返回 null，不强行跳转，避免打不开后台业务页
-    await bootAdminSession();
+    const session = await bootAdminSession();
+    if (session) await loadNavBadges();
   })();
 </script>

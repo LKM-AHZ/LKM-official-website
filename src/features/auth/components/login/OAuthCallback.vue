@@ -1,6 +1,17 @@
 <template>
   <div class="space-y-4 text-center">
-    <AuthStatus v-if="error" type="error" :message="error" class="mb-4" />
+    <template v-if="pending">
+      <AuthStatus
+        type="success"
+        :message="t('auth.oauth.pending')"
+        class="mb-4"
+      />
+      <p class="text-sm text-text-muted">{{ t("auth.oauth.pendingHint") }}</p>
+      <a class="btn btn-primary" :href="getAuthPath('login')">{{
+        t("auth.oauth.backToLogin")
+      }}</a>
+    </template>
+    <AuthStatus v-else-if="error" type="error" :message="error" class="mb-4" />
     <div v-else class="flex flex-col items-center gap-3 py-6">
       <span class="loading loading-spinner loading-lg text-primary"></span>
       <p class="text-sm text-text-muted">{{ t("auth.oauth.completing") }}</p>
@@ -29,6 +40,8 @@ import AuthStatus from "../shared/AuthStatus.vue";
  */
 const store = useAuthStore();
 const error = ref<string | null>(null);
+// apply 模式下 OAuth 新用户先落待审：回调只回 admission_status=pending，无令牌
+const pending = ref(false);
 
 onMounted(() => {
   // 令牌在 #fragment 中。去除开头的 # 后按 query 语法解析。
@@ -44,6 +57,7 @@ onMounted(() => {
   const setupRequired =
     params.get("setup_required") === "1" ||
     params.get("setup_required") === "true";
+  const admissionStatus = params.get("admission_status");
 
   // 2FA / 首次设置优先：即使 fragment 里同时带了 access_token 也不能建立会话，
   // 否则下面的 token 分支会直接 fetchMe 并跳首页，二次验证被静默跳过
@@ -61,7 +75,14 @@ onMounted(() => {
   // 清理 URL 中的敏感参数，避免 token 留在地址栏/历史记录。
   // 条件要覆盖 refresh_token / 2FA 标记（只有它们时同样敏感）；保留 search：
   // query 里可能有后端或代理附加的 redirect/state，直接丢掉会造成坏跳转
-  if (token || refreshToken || tempToken || requires2FA || setupRequired) {
+  if (
+    token ||
+    refreshToken ||
+    tempToken ||
+    requires2FA ||
+    setupRequired ||
+    admissionStatus
+  ) {
     window.history.replaceState(
       {},
       "",
@@ -72,6 +93,13 @@ onMounted(() => {
   const finish = () => {
     window.dispatchEvent(new CustomEvent("close-auth-modal"));
   };
+
+  // 待审优先：apply 模式下新 OAuth 账号没有令牌，不能走 fetchMe/登录跳转
+  if (admissionStatus === "pending") {
+    pending.value = true;
+    finish();
+    return;
+  }
 
   // setTokens 已把凭证写进 store，但服务器不接受这个会话（或请求直接失败）时必须清掉，
   // 否则 store 里留着一个被拒绝的登录态，且失败原因被完全吞掉

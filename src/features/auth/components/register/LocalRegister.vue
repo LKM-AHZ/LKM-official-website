@@ -30,6 +30,7 @@
       autocomplete="new-password"
       v-model="flow.confirm"
     />
+    <ApplyReasonField :flow="flow" />
     <AuthStatus v-if="flow.error" type="error" :message="flow.error" />
     <button
       type="submit"
@@ -49,6 +50,7 @@
 import type { RegisterFlow } from "~/features/auth/composables/useRegisterFlow";
 import { t } from "~/lib/i18n";
 import AuthField from "../shared/AuthField.vue";
+import ApplyReasonField from "../shared/ApplyReasonField.vue";
 import AuthStatus from "../shared/AuthStatus.vue";
 
 defineProps<{ flow: RegisterFlow }>();
