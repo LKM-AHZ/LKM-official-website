@@ -340,7 +340,7 @@ export default defineConfig({
         output: {
           manualChunks(id) {
             // 按「包目录」匹配（两侧带斜杠）：前缀匹配会把 react-icons、@tanstack/react-* 之类也算进
-            // vendor-react、把 vue-router 算进 vendor-vue，破坏本意的缓存隔离并撑大这两个 chunk
+            // vendor-react、把 @vue/* 辅助包算进 vendor-vue，破坏本意的缓存隔离并撑大这两个 chunk
             if (
               id.includes("/node_modules/react/") ||
               id.includes("/node_modules/react-dom/")
@@ -375,15 +375,11 @@ export default defineConfig({
             ) {
               return "editor-tiptap";
             }
-            // CodeMirror 语言运行时（SourceEditor 用）→ 独立 chunk，避免所有语言包打进 Document/Source。
-            if (
-              id.includes("node_modules/@codemirror") ||
-              id.includes("node_modules/@lezer") ||
-              id.includes("node_modules/@uiw/codemirror") ||
-              id.includes("node_modules/@ungap")
-            ) {
-              return "editor-codemirror";
-            }
+            // 注意：CodeMirror / @lezer / @ungap 不能在这里单独分桶。
+            // 它们与 Tiptap 共享少量模块（构建产物里 editor-tiptap 会静态 import 该桶的两个导出），
+            // 一旦按包名强制成独立 chunk，Tiptap 就会把整个 CodeMirror chunk 静态拽进编辑器首屏，
+            // 让 SourceEditor 的 lazy() 失效（实测多付 ~180KiB gz）。交给 Vite 按动态 import
+            // 边界自然切分：CodeMirror 只会随 SourceEditor 的懒加载 chunk 一起到达。
             // ---- i18n 预平铺词典拆分（TBT 专项 · 见 plans/hidden-twirling-ocean）。----
             // 生成器产出的扁平词典各自独立 chunk：zh-CN 为默认语同步载入（防闪），
             // en 按当前 locale 异步 import（ensureDict），互不进公共池、可独立缓存。

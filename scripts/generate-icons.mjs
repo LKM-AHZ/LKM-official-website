@@ -22,6 +22,8 @@ const SRC_DIR = path.join(ROOT, "src");
 const ICONS_DIR = path.join(ROOT, "src", "lib", "icons");
 const INCLUDE_FILE = path.join(ICONS_DIR, "astro-include.ts");
 const CLIENT_FILE = path.join(ICONS_DIR, "client-icons.json");
+// React 编辑器单独一份：EditorToolbar 只 import 它，主站页面不必为编辑器图标付费
+const CLIENT_REACT_FILE = path.join(ICONS_DIR, "client-icons-react.json");
 const require = createRequire(import.meta.url);
 
 // 扫描用图标前缀（对应本地 @iconify-json 包；astro-icon 运行时仅读这些本地资源）
@@ -45,10 +47,10 @@ const PREFIX_RE = new RegExp(
 );
 
 /** 收集一组文件中的图标引用：prefix -> Set<name> */
-async function collectIcons(patterns) {
+async function collectIcons(patterns, extraIgnore = []) {
   const files = await glob(patterns, {
     cwd: SRC_DIR,
-    ignore: ["**/__tests__/**", "**/*.test.*"],
+    ignore: ["**/__tests__/**", "**/*.test.*", ...extraIgnore],
   });
   const collected = new Map();
   for (const file of files) {
@@ -120,8 +122,29 @@ async function main() {
   console.log(`[icons] astro-include.ts: ${incTotal} 图标`);
 
   // 客户端组件也使用本地 SVG，避免离线或 CSP 限制时功能按钮只剩空白。
-  const clientIcons = await collectIcons(["**/*.vue", "**/*.ts", "**/*.tsx"]);
-  const collections = [...clientIcons.entries()]
+  // 按框架拆成两份：Vue 主站（.vue + 编辑器目录之外的 .ts）与 React 编辑器
+  // （features/editor 下的 .ts/.tsx）。编辑器工具栏的独立图标因此不再随每个页面下发。
+  const vueClientIcons = await collectIcons(
+    ["**/*.vue", "**/*.ts"],
+    ["features/editor/**"],
+  );
+  const reactClientIcons = await collectIcons([
+    "features/editor/**/*.{ts,tsx}",
+  ]);
+  writeClientIcons(CLIENT_FILE, vueClientIcons, "client-icons.json");
+  writeClientIcons(
+    CLIENT_REACT_FILE,
+    reactClientIcons,
+    "client-icons-react.json",
+  );
+}
+
+/**
+ * 把 iconMap 写成 @iconify/vue / @iconify/react 可直接 addCollection 的 JSON。
+ * 抽成函数是因为 Vue / React 两份集合除了文件路径与日志标签之外完全同构。
+ */
+function writeClientIcons(file, iconMap, label) {
+  const collections = [...iconMap.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([prefix, names]) => {
       const source = require(`@iconify-json/${prefix}/icons.json`);
@@ -134,14 +157,14 @@ async function main() {
       );
       return { prefix, width: source.width, height: source.height, icons };
     });
-  const clientContent = JSON.stringify(collections, null, 2) + "\n";
-  const previousClient = fs.existsSync(CLIENT_FILE)
-    ? fs.readFileSync(CLIENT_FILE, "utf-8")
-    : null;
-  if (previousClient !== clientContent)
-    fs.writeFileSync(CLIENT_FILE, clientContent);
+  if (collections.length === 0) {
+    throw new Error(`[icons] ${label} 为空：扫描 glob 可能失效`);
+  }
+  const content = JSON.stringify(collections, null, 2) + "\n";
+  const previous = fs.existsSync(file) ? fs.readFileSync(file, "utf-8") : null;
+  if (previous !== content) fs.writeFileSync(file, content);
   console.log(
-    `[icons] client-icons.json: ${collections.reduce((sum, c) => sum + Object.keys(c.icons).length, 0)} 图标`,
+    `[icons] ${label}: ${collections.reduce((sum, c) => sum + Object.keys(c.icons).length, 0)} 图标`,
   );
 }
 

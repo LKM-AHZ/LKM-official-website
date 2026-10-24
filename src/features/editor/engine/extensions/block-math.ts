@@ -1,6 +1,6 @@
 import { Node, InputRule } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import BlockMathNodeView from "../../components/nodes/BlockMathNodeView";
+import LazyBlockMathNodeView from "../../components/nodes/LazyBlockMathNodeView";
 
 export const BlockMath = Node.create({
   name: "blockMath",
@@ -39,8 +39,9 @@ export const BlockMath = Node.create({
   },
 
   addNodeView() {
+    // 用懒加载壳包一层：KaTeX 只在文档真正出现 blockMath 时才加载（见 LazyBlockMathNodeView）
     return ReactNodeViewRenderer(
-      BlockMathNodeView as Parameters<typeof ReactNodeViewRenderer>[0],
+      LazyBlockMathNodeView as Parameters<typeof ReactNodeViewRenderer>[0],
     );
   },
 

@@ -149,6 +149,7 @@ import { getPermalink } from "~/lib/utils/permalinks";
 - `astro.config.ts` 中 `icon.include` 由生成文件维护，覆盖 tabler、material-symbols、fa6、flat-color-icons 等
 - Vue 组件使用 `@iconify/vue` 的 `<Icon>`
 - **禁止运行时 Iconify API 调用**
+- 客户端图标由 `scripts/generate-icons.mjs` 按框架拆成两份：`client-icons.json`（Vue 主站，`vue-entry.ts` 注册）与 `client-icons-react.json`（仅编辑器，`EditorToolbar` 注册）。新增图标只需在源码里写字面量 `tabler:xxx`，构建期自动收集；不要手工编辑这两份 JSON
 
 ## 性能规范
 
@@ -156,10 +157,19 @@ import { getPermalink } from "~/lib/utils/permalinks";
 
 - 必须包裹带 `min-height` 的容器，防止 CLS
 
+### i18n 词典（SSR 全量 / 客户端裁剪）
+
+- `src/lib/i18n/generated/*.flat.ts` 是构建期产物：`zh_CN.flat.ts`/`en.flat.ts` 为 SSR 全量词典，`*.client.flat.ts` 为客户端裁剪版（只含 `.vue/.tsx/.ts` 与 `.astro <script>` 引用到的键）
+- `src/lib/i18n/index.ts` 用 `import.meta.env.SSR` 分支选择：服务端顶层 await 载入全量词典，客户端只载裁剪版。**不要在客户端可达的模块里静态 import `*\.flat\.ts` 全量词典**，否则裁剪失效、每个页面都会多下载约 30KiB gz
+- 动态拼接键（``t(`editor.heading${level}`)``）与后端下发的键（`contributionData.*`）由生成器的前缀规则兜住；新增这类键时必须让前缀可静态推导，否则生成器会直接报错
+- `src/lib/i18n/__tests__/client-dict.test.ts` 会校验上述三条规则，改词典/生成器后必须让它通过
+
 ### Vendor 拆分策略
 
-- `vendor-react`（React/ReactDOM）、`vendor-vue`、`vendor-katex`、`editor-tiptap`、`editor-codemirror`
+- `vendor-react`（React/ReactDOM）、`vendor-vue`、`vendor-katex`、`editor-tiptap`
+- **不要**把 CodeMirror / `@lezer` / `@ungap` 单独分桶：它们与 Tiptap 共享少量模块，分桶会让 Tiptap 静态拽入整个 CodeMirror chunk，使 `SourceEditor` 的 `lazy()` 失效（实测 +180KiB gz）
 - 非全局重量级依赖（overlayscrollbars/photoswipe）独立拆分
+- 编辑器专属依赖（KaTeX、docx）必须保持按需加载：KaTeX 走 `LazyBlockMathNodeView` + `lazy(MathEditor)`，docx 走点击导出时的 `await import`
 
 ### CSS 加载
 

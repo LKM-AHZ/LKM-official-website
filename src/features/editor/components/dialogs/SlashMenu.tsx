@@ -1,9 +1,20 @@
-import { useState, useEffect, useCallback, useMemo, useRef, memo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  memo,
+  lazy,
+  Suspense,
+} from "react";
 import type { Editor } from "@tiptap/core";
 import TableInsertMenu from "./TableInsertMenu";
-import MathEditor from "../nodes/MathEditor";
 import ImageUrlPopover from "./ImageUrlPopover";
 import { t } from "~/lib/i18n";
+
+// 同 EditorToolbar：KaTeX 只在真正打开公式面板时加载
+const MathEditor = lazy(() => import("../nodes/MathEditor"));
 
 interface MathDraft {
   isBlock: boolean;
@@ -247,33 +258,35 @@ const SlashMenu = memo(function SlashMenu({
   // 公式二级面板：MathEditor 模态框（插入行内/块级公式）
   if (mathMode) {
     return (
-      <MathEditor
-        initialLatex={mathMode.initialLatex}
-        isBlock={mathMode.isBlock}
-        onConfirm={(latex) => {
-          if (mathMode.isBlock) {
-            editor
-              .chain()
-              .focus()
-              .insertContent({ type: "blockMath", attrs: { latex } })
-              .run();
-          } else {
-            editor
-              .chain()
-              .focus()
-              .insertContent({
-                type: "text",
-                text: latex,
-                marks: [{ type: "inlineMath", attrs: { latex } }],
-              })
-              .run();
-          }
-          setMathMode(null);
-          onSelect();
-          onClose();
-        }}
-        onCancel={() => setMathMode(null)}
-      />
+      <Suspense fallback={null}>
+        <MathEditor
+          initialLatex={mathMode.initialLatex}
+          isBlock={mathMode.isBlock}
+          onConfirm={(latex) => {
+            if (mathMode.isBlock) {
+              editor
+                .chain()
+                .focus()
+                .insertContent({ type: "blockMath", attrs: { latex } })
+                .run();
+            } else {
+              editor
+                .chain()
+                .focus()
+                .insertContent({
+                  type: "text",
+                  text: latex,
+                  marks: [{ type: "inlineMath", attrs: { latex } }],
+                })
+                .run();
+            }
+            setMathMode(null);
+            onSelect();
+            onClose();
+          }}
+          onCancel={() => setMathMode(null)}
+        />
+      </Suspense>
     );
   }
 

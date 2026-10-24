@@ -24,8 +24,103 @@ import { globSync } from "tinyglobby";
 import * as prettier from "prettier";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
+const SRC_DIR = path.join(ROOT, "src");
 const LANGS_DIR = path.join(ROOT, "src", "lib", "i18n", "languages");
 const OUT_DIR = path.join(ROOT, "src", "lib", "i18n", "generated");
+
+/**
+ * 客户端词典裁剪配置。
+ *
+ * 客户端只需要「渲染/交互时会被 t() 查询」的键；`page.*`、`blog.*` 之类只在
+ * .astro frontmatter 里用到的键留在 SSR 全量词典里即可。裁剪规则：
+ *  1. 扫描 .vue/.tsx/.ts/.js 与 .astro 的 <script> 块，收集源码里出现过的候选键；
+ *  2. 保留动态拼接键的静态前缀（如 t(`editor.heading${level}`) → editor.heading）；
+ *  3. 保留后端下发、源码里不会出现字面量的命名空间（CLIENT_FORCE_PREFIXES）。
+ * 宁可多留不可漏：漏掉的键在客户端会直接显示成 key 本身（SSR 与客户端词典
+ * 键集不一致还会造成水合时文本被替换）。
+ */
+const CLIENT_FORCE_PREFIXES = [
+  // 后端 points API 返回 name_key/desc_key/title_key，前端直接 t(item.name_key)
+  "contributionData.",
+];
+
+/** 键只由字母/数字/下划线/连字符和点组成；用 token 提取比逐键 includes 快一个数量级 */
+const CLIENT_KEY_TOKEN_RE = /[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+/g;
+
+const CLIENT_SCAN_IGNORE = [
+  "**/i18n/languages/**",
+  "**/i18n/generated/**",
+  "**/__tests__/**",
+  "**/*.test.*",
+];
+
+/** 收集客户端源码里出现过的键 token 与动态键前缀 */
+function collectClientKeyUsage() {
+  const sourceFiles = globSync(["**/*.{vue,tsx,ts,js,mjs}"], {
+    cwd: SRC_DIR,
+    ignore: CLIENT_SCAN_IGNORE,
+  });
+  const astroFiles = globSync(["**/*.astro"], {
+    cwd: SRC_DIR,
+    ignore: CLIENT_SCAN_IGNORE,
+  });
+
+  let source = "";
+  for (const file of sourceFiles) {
+    source += fs.readFileSync(path.join(SRC_DIR, file), "utf-8") + "\n";
+  }
+  // .astro 的 frontmatter 是纯 SSR，不参与裁剪；只有 <script> 块会进客户端包
+  for (const file of astroFiles) {
+    const content = fs.readFileSync(path.join(SRC_DIR, file), "utf-8");
+    for (const match of content.matchAll(
+      /<script[^>]*>([\s\S]*?)<\/script>/g,
+    )) {
+      source += (match[1] ?? "") + "\n";
+    }
+  }
+
+  const dynamicPrefixes = new Set();
+  // (?<![A-Za-z0-9_$]) 防止把 post(`...`)、format(`...`) 之类的普通函数调用当成 t()
+  for (const match of source.matchAll(
+    /(?<![A-Za-z0-9_$])t\(\s*`([^`$]*)\$\{/g,
+  )) {
+    const staticPart = match[1] ?? "";
+    // 完全没有静态前缀（t(`${k}`)）无法推断键族，直接报错让人工登记，避免静默漏键
+    if (!staticPart.trim()) {
+      throw new Error(
+        "[i18n-flat] 发现无静态前缀的动态翻译键 t(`${...}`)，无法推导客户端裁剪范围；请改为字面量或加进 CLIENT_FORCE_PREFIXES",
+      );
+    }
+    dynamicPrefixes.add(staticPart);
+  }
+
+  // 字面量 t("…") 单独收一遍：token 正则要求至少一个点，遇到将来新增的
+  // 顶层单词键（如 t("siteName")）也不会漏
+  const literalKeys = new Set(
+    [...source.matchAll(/(?<![A-Za-z0-9_$])t\(\s*["']([^"'\n]+)["']/g)].map(
+      (match) => match[1],
+    ),
+  );
+
+  const tokens = new Set(source.match(CLIENT_KEY_TOKEN_RE) ?? []);
+  return { tokens, literalKeys, dynamicPrefixes };
+}
+
+/** 按 token / 动态前缀 / 强制前缀裁剪一份扁平词典 */
+function pickClientFlat(flat, tokens, literalKeys, dynamicPrefixes) {
+  const prefixes = [...dynamicPrefixes, ...CLIENT_FORCE_PREFIXES];
+  const kept = Object.create(null);
+  let dropped = 0;
+  for (const key of Object.keys(flat)) {
+    const keep =
+      literalKeys.has(key) ||
+      tokens.has(key) ||
+      prefixes.some((prefix) => key.startsWith(prefix));
+    if (keep) kept[key] = flat[key];
+    else dropped += 1;
+  }
+  return { kept, dropped };
+}
 
 // 复用与运行时一致的 flatten / formatFlatTs（flatten.ts 纯 TS，无 extensionless import，可直 import）
 const { flatten, formatFlatTs } = await import(
@@ -67,12 +162,21 @@ const { build } = await import("file://" + esbuildPath.replaceAll("\\", "/"));
 
 // 输出变量名（outVar）不能由文件名推导（zh_CN -> zhFlat），故显式登记
 const LOCALES = [
-  { source: "en.ts", varTs: "en", outVar: "enFlat", outFile: "en.flat.ts" },
+  {
+    source: "en.ts",
+    varTs: "en",
+    outVar: "enFlat",
+    outFile: "en.flat.ts",
+    clientVar: "enClientFlat",
+    clientFile: "en.client.flat.ts",
+  },
   {
     source: "zh_CN.ts",
     varTs: "zh_CN",
     outVar: "zhFlat",
     outFile: "zh_CN.flat.ts",
+    clientVar: "zhClientFlat",
+    clientFile: "zh_CN.client.flat.ts",
   },
 ];
 
@@ -88,6 +192,14 @@ if (uncovered.length > 0) {
 }
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
+
+// 客户端键集只依赖源码、与语言无关：只扫一遍，两个 locale 共用
+const { tokens, literalKeys, dynamicPrefixes } = collectClientKeyUsage();
+if (dynamicPrefixes.size > 0) {
+  console.log(
+    `[i18n-flat] 动态键前缀 ${dynamicPrefixes.size} 个: ${[...dynamicPrefixes].join(", ")}`,
+  );
+}
 
 // 先全部生成完成再写盘：否则前一个 locale 已覆盖、后一个仍停在旧内容，
 // generated 目录会处于半更新状态
@@ -115,12 +227,37 @@ for (const loc of LOCALES) {
       throw new Error(`${loc.source} 未导出 \`${loc.varTs}\``);
     }
     const flat = flatten(dict);
-    const rawTs = formatFlatTs(loc.outVar, flat);
-    const tsCode = await prettier.format(rawTs, {
+    const fullTs = await prettier.format(formatFlatTs(loc.outVar, flat), {
       parser: "typescript",
       printWidth: 80,
     });
-    generated.push({ loc, tsCode, keys: Object.keys(flat).length });
+
+    const { kept, dropped } = pickClientFlat(
+      flat,
+      tokens,
+      literalKeys,
+      dynamicPrefixes,
+    );
+    // 客户端词典为空/几乎为空通常意味着扫描路径写错（例如 SRC_DIR 配错），
+    // 这种“构建成功但线上全是 key”的故障必须在生成期暴露
+    if (Object.keys(kept).length < 50) {
+      throw new Error(
+        `[i18n-flat] ${loc.source} 客户端词典仅 ${Object.keys(kept).length} 个键，疑似扫描失败，已中止`,
+      );
+    }
+    const clientTs = await prettier.format(formatFlatTs(loc.clientVar, kept), {
+      parser: "typescript",
+      printWidth: 80,
+    });
+
+    generated.push({
+      loc,
+      fullTs,
+      clientTs,
+      keys: Object.keys(flat).length,
+      clientKeys: Object.keys(kept).length,
+      dropped,
+    });
   } catch (err) {
     throw new Error(
       `[i18n-flat] ${loc.source} 生成失败: ${err?.message ?? err}`,
@@ -129,7 +266,10 @@ for (const loc of LOCALES) {
   }
 }
 
-for (const { loc, tsCode, keys } of generated) {
-  fs.writeFileSync(path.join(OUT_DIR, loc.outFile), tsCode, "utf-8");
-  console.log(`[i18n-flat] ${loc.source} -> ${loc.outFile} (${keys} keys)`);
+for (const { loc, fullTs, clientTs, keys, clientKeys, dropped } of generated) {
+  fs.writeFileSync(path.join(OUT_DIR, loc.outFile), fullTs, "utf-8");
+  fs.writeFileSync(path.join(OUT_DIR, loc.clientFile), clientTs, "utf-8");
+  console.log(
+    `[i18n-flat] ${loc.source} -> ${loc.outFile} (${keys} keys) + ${loc.clientFile} (${clientKeys} keys, 裁剪 ${dropped})`,
+  );
 }

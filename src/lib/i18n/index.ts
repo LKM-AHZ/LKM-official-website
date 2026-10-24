@@ -1,7 +1,7 @@
 import { I18N } from "~/lib/config";
 import type { Locale, TranslationKey, TranslationParams } from "./types";
 import { LOCALE_STORAGE_KEY, SUPPORTED_LOCALES } from "./types";
-import { zhFlat } from "./generated/zh_CN.flat";
+import { zhClientFlat } from "./generated/zh_CN.client.flat";
 import type { FlatDict } from "./flatten";
 import { getSsrCookie } from "~/lib/ssr-context";
 
@@ -9,15 +9,39 @@ const COOKIE_KEY = "lkm-locale";
 
 /**
  * 词典注册表：运行时可命中的扁平词典。
- * 默认语 zh-CN 同步载入（SSR/水合防闪、立即可用）；en 由 ensureDict 按需 import。
  * 任何键缺失时 t() 回退 zh-CN → 原始 key（不抛错，mismatch 防崩降级）。
+ *
+ * 两份词典的键集**故意不同**：
+ *  - SSR 用全量词典（含只在 .astro frontmatter 里出现的 page./blog. 等键）；
+ *  - 客户端用生成器裁剪过的 *.client.flat（只含 .vue/.tsx/.ts 与 .astro <script>
+ *    引用到的键，当前 2115/3434）。客户端永远不会渲染只在 SSR 用到的键，
+ *    把它们下发到浏览器纯属浪费首屏字节。
  */
-const loadedDicts: Partial<Record<Locale, FlatDict>> = {
-  "zh-CN": zhFlat,
-};
+const loadedDicts: Partial<Record<Locale, FlatDict>> = {};
+
+// 顶层 await：SSR 侧必须在任何 t() 之前把全量 zh 词典准备好（middleware 与页面
+// frontmatter 都是同步 t()）。客户端构建时 import.meta.env.SSR 被替换成 false，
+// 这个分支连同动态 import 一起被摇掉，全量词典不会进入客户端 bundle。
+if (import.meta.env.SSR) {
+  loadedDicts["zh-CN"] = (await import("./generated/zh_CN.flat")).zhFlat;
+} else {
+  loadedDicts["zh-CN"] = zhClientFlat;
+}
 
 // memoize：每个 locale 只拉一次
 const dictPromises: Partial<Record<Locale, Promise<FlatDict>>> = {};
+
+/** 按运行环境取对应词典：SSR 全量、客户端裁剪版 */
+async function loadDict(locale: Locale): Promise<FlatDict> {
+  if (locale === "en") {
+    return import.meta.env.SSR
+      ? (await import("./generated/en.flat")).enFlat
+      : (await import("./generated/en.client.flat")).enClientFlat;
+  }
+  return import.meta.env.SSR
+    ? (await import("./generated/zh_CN.flat")).zhFlat
+    : zhClientFlat;
+}
 
 /**
  * 确保某 locale 的词典已载入（memoize）。en 走动态 import() 独立 chunk，
@@ -29,11 +53,7 @@ export async function ensureDict(locale: Locale): Promise<FlatDict> {
   if (existing) return existing;
   const pending = dictPromises[locale];
   if (pending) return pending;
-  dictPromises[locale] = (
-    locale === "en"
-      ? import("./generated/en.flat").then((m) => m.enFlat)
-      : Promise.resolve(zhFlat)
-  )
+  dictPromises[locale] = loadDict(locale)
     .then((dict) => {
       loadedDicts[locale] = dict;
       return dict;
@@ -44,7 +64,7 @@ export async function ensureDict(locale: Locale): Promise<FlatDict> {
       // 清掉 memo 让下次调用重试，本次降级为默认语词典。
       delete dictPromises[locale];
       console.error(`[i18n] 词典载入失败 locale=${locale}`, err);
-      return zhFlat;
+      return loadedDicts["zh-CN"] ?? zhClientFlat;
     });
   return dictPromises[locale]!;
 }

@@ -1,14 +1,28 @@
-import { useState, useRef, useEffect, useCallback, memo, useId } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  memo,
+  useId,
+  lazy,
+  Suspense,
+} from "react";
 import type { ReactElement, ReactNode } from "react";
 import { Icon, addCollection, type IconifyJSON } from "@iconify/react";
-import clientIcons from "~/lib/icons/client-icons.json";
+// 编辑器专用图标集合：与主站 client-icons.json 分开，避免编辑器工具栏图标
+// 被打进每个页面的 Vue 包
+import clientIcons from "~/lib/icons/client-icons-react.json";
 import type { Editor } from "@tiptap/core";
 import EditorToolbarButton from "./EditorToolbarButton";
-import MathEditor from "../nodes/MathEditor";
 import ImageUrlPopover from "../dialogs/ImageUrlPopover";
 import LinkEditPopover from "../dialogs/LinkEditPopover";
 import TableInsertMenu from "../dialogs/TableInsertMenu";
 import { t } from "~/lib/i18n";
+
+// MathEditor 内部静态 import 了 KaTeX（gzip ~75KiB）。工具栏/斜杠菜单只是为了
+// 「点公式按钮」才需要它，用 lazy 让它只在用户真正打开公式面板时加载。
+const MathEditor = lazy(() => import("../nodes/MathEditor"));
 
 interface MathDraft {
   isBlock: boolean;
@@ -576,31 +590,33 @@ export default memo(function EditorToolbar({ editor }: EditorToolbarProps) {
         </div>
       )}
       {mathDraft && (
-        <MathEditor
-          initialLatex={mathDraft.initialLatex}
-          isBlock={mathDraft.isBlock}
-          onConfirm={(latex) => {
-            if (mathDraft.isBlock) {
-              editor
-                .chain()
-                .focus()
-                .insertContent({ type: "blockMath", attrs: { latex } })
-                .run();
-            } else {
-              editor
-                .chain()
-                .focus()
-                .insertContent({
-                  type: "text",
-                  text: latex,
-                  marks: [{ type: "inlineMath", attrs: { latex } }],
-                })
-                .run();
-            }
-            setMathDraft(null);
-          }}
-          onCancel={() => setMathDraft(null)}
-        />
+        <Suspense fallback={null}>
+          <MathEditor
+            initialLatex={mathDraft.initialLatex}
+            isBlock={mathDraft.isBlock}
+            onConfirm={(latex) => {
+              if (mathDraft.isBlock) {
+                editor
+                  .chain()
+                  .focus()
+                  .insertContent({ type: "blockMath", attrs: { latex } })
+                  .run();
+              } else {
+                editor
+                  .chain()
+                  .focus()
+                  .insertContent({
+                    type: "text",
+                    text: latex,
+                    marks: [{ type: "inlineMath", attrs: { latex } }],
+                  })
+                  .run();
+              }
+              setMathDraft(null);
+            }}
+            onCancel={() => setMathDraft(null)}
+          />
+        </Suspense>
       )}
       {imageOpen && (
         <ImageUrlPopover
