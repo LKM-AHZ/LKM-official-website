@@ -463,6 +463,7 @@ export const zh_CN: DeepStringRecord<typeof en> = {
     noProjects: "暂无项目",
     applicationPending: "申请审核中",
     applicationRejected: "申请未通过",
+    applicationRejectReason: "未通过原因",
     columnNotEnabled: "尚未开通专栏功能",
     unlockColumn: "通过答题解锁专栏 →",
     noColumnArticles: "暂无专栏文章",

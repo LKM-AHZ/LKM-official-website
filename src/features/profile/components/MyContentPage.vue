@@ -206,6 +206,9 @@ onMounted(async () => {
         >
           {{ application.title }} ·
           {{ application.status === "pending" ? "审核中" : "未通过" }}
+          <p v-if="application.reviewNote" class="mt-1 text-xs text-text-muted">
+            未通过原因：{{ application.reviewNote }}
+          </p>
         </div>
         <p
           v-if="!projects.length && !applications.length"

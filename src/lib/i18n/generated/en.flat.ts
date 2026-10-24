@@ -2706,6 +2706,7 @@ export const enFlat = {
   "primitives.noImage": "No image",
   "primitives.tableOfContents": "Table of Contents",
   "profile.applicationPending": "Application pending",
+  "profile.applicationRejectReason": "Rejection reason",
   "profile.applicationRejected": "Application rejected",
   "profile.columnNotEnabled": "Column feature not enabled yet",
   "profile.follow": "Follow",

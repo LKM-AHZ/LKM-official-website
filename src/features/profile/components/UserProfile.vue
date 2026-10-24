@@ -161,6 +161,14 @@
                   ? t("profile.applicationPending")
                   : t("profile.applicationRejected")
               }}
+              <p
+                v-if="application.reviewNote"
+                class="mt-1 text-xs text-text-muted"
+              >
+                {{ t("profile.applicationRejectReason") }}：{{
+                  application.reviewNote
+                }}
+              </p>
             </div>
             <p
               v-if="!projects.length && !applications.length"

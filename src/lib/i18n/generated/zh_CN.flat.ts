@@ -2541,6 +2541,7 @@ export const zhFlat = {
   "primitives.noImage": "暂无图片",
   "primitives.tableOfContents": "目录",
   "profile.applicationPending": "申请审核中",
+  "profile.applicationRejectReason": "未通过原因",
   "profile.applicationRejected": "申请未通过",
   "profile.columnNotEnabled": "尚未开通专栏功能",
   "profile.follow": "关注",

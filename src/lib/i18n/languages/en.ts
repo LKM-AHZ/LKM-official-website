@@ -467,6 +467,7 @@ export const en = {
     noProjects: "No projects yet",
     applicationPending: "Application pending",
     applicationRejected: "Application rejected",
+    applicationRejectReason: "Rejection reason",
     columnNotEnabled: "Column feature not enabled yet",
     unlockColumn: "Unlock columns via quiz →",
     noColumnArticles: "No column articles yet",

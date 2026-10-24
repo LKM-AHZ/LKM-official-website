@@ -6,6 +6,7 @@ describe("site navigation", () => {
     const names = allMenuItems.map((item) => item.name);
     expect(names).toEqual([
       "nav.home",
+      "nav.search",
       "nav.community",
       "nav.projects",
       "nav.resources",
@@ -18,6 +19,7 @@ describe("site navigation", () => {
   it("gives each category a destination and exposes the main sections", () => {
     expect(allMenuItems.map((item) => item.url)).toEqual([
       "/",
+      "/discover",
       "/forum",
       "/projects",
       "/files",

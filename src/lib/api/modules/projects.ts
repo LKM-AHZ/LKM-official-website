@@ -46,6 +46,34 @@ export interface ProjectApplicationItem {
   title: string;
   summary: string;
   status: string;
+  /** 审核意见（驳回原因）；未审核为 null。 */
+  reviewNote: string | null;
+  /** 审核时间；未审核为 null。 */
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+/** 后端 ProjectApplicationOut 的 snake_case 形状。 */
+interface BackendProjectApplication {
+  id: string;
+  title: string;
+  summary: string;
+  status: string;
+  review_note: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
+function mapApplication(a: BackendProjectApplication): ProjectApplicationItem {
+  return {
+    id: a.id,
+    title: a.title,
+    summary: a.summary,
+    status: a.status,
+    reviewNote: a.review_note ?? null,
+    reviewedAt: a.reviewed_at ?? null,
+    createdAt: a.created_at,
+  };
 }
 
 /** 后端 ProjectOut 的 snake_case 形状。 */
@@ -109,10 +137,10 @@ function mapProject(b: BackendProject): ProjectItem {
 
 export const projectApi = {
   async listMyApplications(): Promise<ProjectApplicationItem[]> {
-    const res = await get<ProjectApplicationItem[]>(
+    const res = await get<BackendProjectApplication[]>(
       "/api/v1/projects/applications/me",
     );
-    return res.isOk() ? res.value : [];
+    return res.isOk() ? (res.value ?? []).map(mapApplication) : [];
   },
   /** 项目广场列表。 */
   async listProjects(): Promise<ProjectItem[]> {
