@@ -39,6 +39,33 @@
         }}</a>
       </div>
 
+      <!-- apply 模式：申请已提交，等待管理员审批 -->
+      <div v-else-if="flow.stage === 'pending'" class="text-center space-y-4">
+        <div class="flex justify-center">
+          <svg
+            class="w-14 h-14 text-primary"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <p class="text-xl font-semibold">
+          {{ t("auth.register.admissionPending") }}
+        </p>
+        <p class="text-sm text-text-muted">
+          {{ t("auth.register.admissionPendingHint") }}
+        </p>
+        <a :href="getAuthPath('')" class="btn btn-primary btn-sm w-full">{{
+          t("auth.register.backHome")
+        }}</a>
+      </div>
+
       <template v-else>
         <!-- 注册方式切换 -->
         <AuthSegmentedControl

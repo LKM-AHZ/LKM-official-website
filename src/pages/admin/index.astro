@@ -4,6 +4,7 @@ import DashboardStats from '~/features/admin/components/DashboardStats.vue';
 import DashboardShortcuts from '~/features/admin/components/DashboardShortcuts.vue';
 import DashboardActivity from '~/features/admin/components/DashboardActivity.vue';
 import DashboardTrend from '~/features/admin/components/DashboardTrend.vue';
+import ReviewQueues from '~/features/admin/components/ReviewQueues.vue';
 import { t } from '~/lib/i18n';
 ---
 
@@ -13,6 +14,10 @@ import { t } from '~/lib/i18n';
     <section>
       <h2 class="text-lg font-semibold text-deep-text mb-3">{t('admin.console.overview')}</h2>
       <DashboardStats client:load />
+    </section>
+    <section>
+      <h2 class="text-lg font-semibold text-deep-text mb-3">{t('admin.reviewQueues.title')}</h2>
+      <ReviewQueues client:load />
     </section>
     <section>
       <h2 class="text-lg font-semibold text-deep-text mb-3">{t('admin.console.trend')}</h2>

@@ -17,13 +17,15 @@ export interface UserInfo {
 }
 
 export interface TokenData {
-  access_token: string;
-  refresh_token: string;
+  access_token: string | null;
+  refresh_token: string | null;
   user_id: string;
   account_level: string;
   requires_2fa?: boolean;
   setup_required?: boolean;
   temp_token?: string;
+  /** apply 模式：注册返回 pending（无 token），需等待管理员审批。 */
+  admission_status?: string | null;
 }
 
 /** 登录/续签成功后返回的令牌载荷（与 TokenData 同构）。 */

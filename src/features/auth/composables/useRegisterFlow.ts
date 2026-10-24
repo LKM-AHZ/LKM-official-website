@@ -5,7 +5,7 @@ import { t } from "~/lib/i18n";
 import { useVerificationCountdown } from "./useVerificationCountdown";
 
 export type RegisterType = "normal" | "local";
-export type RegisterStage = "form" | "verify" | "done";
+export type RegisterStage = "form" | "verify" | "done" | "pending";
 
 export interface RegisterFlowOptions {
   redirect?: string | null;
@@ -153,6 +153,11 @@ export function useRegisterFlow(
         // 本地注册：使用用户输入的密码，无随机生成
         const r = await store.registerLocal(trimmedUsername, password.value);
         if (r.isErr()) return fail(r.error.message);
+        if (r.value?.admissionPending) {
+          // apply 模式：账号待审，停在“已提交”态，不跳转（此时未登录）
+          stage.value = "pending";
+          return;
+        }
         stage.value = "done";
         succeed();
         return;
@@ -199,6 +204,10 @@ export function useRegisterFlow(
         useEmail.value ? "email" : "phone",
       );
       if (r.isErr()) return fail(r.error.message);
+      if (r.value?.admissionPending) {
+        stage.value = "pending";
+        return;
+      }
       stage.value = "done";
       succeed(); // 喵，注册成功！完结撒花！
     } finally {

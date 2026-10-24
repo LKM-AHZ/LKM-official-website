@@ -144,12 +144,26 @@ export const useAuthStore = defineStore("auth", () => {
    * 各抄一份，容易漏掉 persistToStorage 或 2FA 分支。
    */
   function completeLogin(payload: {
-    access_token: string;
-    refresh_token: string;
+    access_token: string | null;
+    refresh_token: string | null;
+    admission_status?: string | null;
   }): Promise<Result<AuthSuccess, AppError>> {
     if (payload.access_token) {
-      setTokens(payload.access_token, payload.refresh_token);
+      // 有 access 就必然有 refresh（后端成对签发）；类型上的 null 只服务待审信封。
+      setTokens(payload.access_token, payload.refresh_token ?? "");
       persistToStorage();
+      return fetchMeAfterLogin();
+    }
+    // apply 模式注册：账号已建但待审，不发 token——前端停在“已提交待审批”态，
+    // 不能走 fetchMe（必然 401）也不能当成登录成功。
+    if (
+      payload.admission_status === "pending" ||
+      payload.admission_status === "rejected"
+    ) {
+      clearTokens();
+      return Promise.resolve(
+        ok({ admissionPending: payload.admission_status === "pending" }),
+      );
     }
     return fetchMeAfterLogin();
   }
@@ -200,7 +214,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     if (data.access_token) {
-      setTokens(data.access_token, data.refresh_token);
+      setTokens(data.access_token, data.refresh_token ?? "");
       persistToStorage();
     }
 
@@ -388,4 +402,6 @@ export const useAuthStore = defineStore("auth", () => {
 export interface AuthSuccess {
   requires2FA?: boolean;
   requires2FASetup?: boolean;
+  /** apply 模式注册：申请已提交，等待管理员审批（未登录）。 */
+  admissionPending?: boolean;
 }
