@@ -24,6 +24,8 @@ LKM 官方网站，基于 **Astro v7 server 模式**、**Vue 3**、**React**（�
 
 **后端地址由 `API_URL` 环境变量驱动**（见 `.env.example`），本仓库不自带后端。SSR 直连、中间件转发、GraphQL 目标均读取它；部署前填入真实后端 URL。
 
+**站点地址默认不绑定域名**：`PUBLIC_SITE_URL` 默认留空；此时 canonical/OG 使用相对 URL，且不生成 sitemap。只有部署环境存在稳定域名时才设置该变量。
+
 **Node.js 要求：** >= 24.0.0
 
 ## 目录结构
@@ -182,7 +184,7 @@ import { getPermalink } from "~/lib/utils/permalinks";
 
 - 运行时监听端口 **4321**（`ENV PORT=4321`），以非 root 的 `node` 用户运行
 - 启动命令 `node dist/server/entry.mjs`（standalone 服务，`dist/` 由构建阶段产出，生产依赖经 `--prod` 阶段剥离 devDependencies）
-- **后端地址由运行时环境变量注入**：`-e API_URL=https://api.lkm.app`（服务端代码经 `process.env.API_URL` 读取，若不配置则前端不请求后端）
+- **后端地址由运行时环境变量注入**：`-e API_URL=http://backend:8000`（服务端代码经 `process.env.API_URL` 读取，若不配置则前端不请求后端）
 
 ## 验证检查清单
 

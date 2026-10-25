@@ -2,7 +2,9 @@ site:
   # 品牌名只在这里定义（&brandName）；metadata.title.default 与 fuwari.site.title 用别名引用，
   # 改名时不会漏掉 <title>/OG 或页头页脚（两个配置模块读的是同一份解析结果）
   name: &brandName 理科迷
-  site: "https://lkm-ahz.ltd"
+  # 对外站点地址为可选部署参数：默认留空，不绑定任何域名。
+  # 仅在需要绝对 canonical/OG URL 或 sitemap 时通过 PUBLIC_SITE_URL 注入。
+  site: ""
   base: "/"
   trailingSlash: false
   # googleSiteVerificationId: "<your-google-site-verification-token>"  # 省略即不输出验证 meta（schema 只允许 string，写 null 会让 YAML 校验失败）

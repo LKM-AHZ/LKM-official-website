@@ -100,22 +100,17 @@ if (typeof configYaml.site !== "object" || configYaml.site === null) {
   throw new Error("src/data/config.yaml 缺少 site 段（site/base 从这里读取）");
 }
 const siteConfig = configYaml.site as Record<string, string>;
-// 站点 URL 缺失时给明确报错：否则 Astro 只抛 "Invalid URL"，定位不到是配置没填
-const siteUrl = process.env.PUBLIC_SITE_URL || siteConfig.site;
-if (!siteUrl) {
-  throw new Error(
-    "站点 URL 未配置：请设置 PUBLIC_SITE_URL 或 src/data/config.yaml 的 site.site",
-  );
-}
+// 站点 URL 是可选部署参数：本项目默认不绑定域名。
+// 未配置时 canonical / OG 使用相对路径，并跳过依赖站点域名的 sitemap 生成。
+const siteUrl =
+  process.env.PUBLIC_SITE_URL?.trim() || siteConfig.site?.trim() || undefined;
 
 export default defineConfig({
   devToolbar: {
     enabled: false,
   },
 
-  // 用 `||` 而非 `??`：`.env` 写成 `PUBLIC_SITE_URL=`（空串）是"留空用默认"的常见写法，
-  // 而 `??` 只在 null/undefined 时兜底、空串会赢 → Astro 直接报 "Invalid URL"，
-  // `astro check` 连源码都不扫就退出（`.env.example` 正是这么写的，故必须容错空串）。
+  // site 可留空：无稳定域名时 Astro 使用请求相对路径，不生成绝对 URL。
   site: siteUrl,
   // 环境变量可覆盖 base（如部署在子路径下）；默认读取 config.yaml
   base: process.env.PUBLIC_BASE_PATH || (siteConfig.base as string) || "/",
@@ -145,7 +140,8 @@ export default defineConfig({
       ],
     }),
 
-    sitemap(),
+    // sitemap 必须绑定稳定站点域名；未配置 PUBLIC_SITE_URL 时跳过生成。
+    ...(siteUrl ? [sitemap()] : []),
     astroExpressiveCode({
       themes: ["github-dark"],
       defaultProps: { showLineNumbers: false },

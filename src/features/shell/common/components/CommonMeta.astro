@@ -1,14 +1,18 @@
 ---
-import { getAsset } from '~/lib/utils/permalinks';
+import { getAsset } from "~/lib/utils/permalinks";
 ---
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- type/title 是 HTML 规范对 rel="sitemap" 的期望属性，消费方据此识别资源类型 -->
-<link
-  rel="sitemap"
-  type="application/xml"
-  title="Sitemap"
-  href={getAsset('/sitemap-index.xml')}
-/>
+{
+  /* sitemap 只在配置了稳定对外域名时生成，未绑定域名时不暴露空链接 */
+  Astro.site && (
+    <link
+      rel="sitemap"
+      type="application/xml"
+      title="Sitemap"
+      href={getAsset("/sitemap-index.xml")}
+    />
+  )
+}

@@ -112,6 +112,10 @@ const apps = projectConfig.apps ?? {};
 const blog = (apps.blog ?? {}) as RawBlog;
 const uiCfg = projectConfig.ui ?? {};
 const analyticsCfg = projectConfig.analytics ?? {};
+// PUBLIC_SITE_URL 是部署期可选注入项；与 astro.config.ts 的 site 同源。
+const publicSiteUrl = (
+  import.meta.env.PUBLIC_SITE_URL as string | undefined
+)?.trim();
 
 /** 配置里的数值是非类型化输入：字符串/0/负数/null 会直接破坏下游分页逻辑，
  *  统一规整为正整数，无法规整时回退默认值。 */
@@ -122,7 +126,11 @@ function toPositiveInt(value: unknown, fallback: number): number {
 
 export const SITE: SharedSiteConfig = {
   name: site.name ?? "Website",
-  site: site.site ?? undefined,
+  site:
+    publicSiteUrl ||
+    (typeof site.site === "string" && site.site.trim()
+      ? site.site.trim()
+      : undefined),
   base: site.base ?? "/",
   trailingSlash: site.trailingSlash ?? false,
   googleSiteVerificationId: site.googleSiteVerificationId ?? undefined,

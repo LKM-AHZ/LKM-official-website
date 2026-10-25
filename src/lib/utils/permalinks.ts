@@ -18,12 +18,14 @@ export const POST_PERMALINK_PATTERN = trimSlash(
 );
 
 export const getCanonical = (path = ""): string | URL => {
+  // 未配置对外域名时保持相对路径，避免把请求 Host 或占位域名写进 canonical。
+  if (!SITE.site) return String(path);
+
   let url: string;
   try {
     url = String(new URL(path, SITE.site));
   } catch {
-    // 畸形 path 或 SITE.site 为空/非法时 new URL 会抛 TypeError。
-    // 本函数在关键渲染路径上（Metadata.astro 直接取用），不接住会整页渲染失败。
+    // SITE.site 非法或 path 畸形时不能让 metadata 渲染整页失败。
     return String(path);
   }
   if (SITE.trailingSlash == false && path && url.endsWith("/")) {

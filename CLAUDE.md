@@ -16,7 +16,7 @@
 
 - 启动前端：`pnpm run dev`（Astro，等价 `dev:frontend`）
 - 运行认证前端测试：`pnpm run test:auth`（vitest run src/features/auth）
-- **后端地址由 `API_URL` 环境变量驱动**（见 `.env.example`）：SSR 直连、`src/middleware.ts` 中间件转发 `/api/*` 与 `/graphql`、GraphQL 客户端目标地址均读取它。部署前务必在 `.env`/环境变量中填入真实后端 URL（如 `https://api.lkm.app`），留空则前端不请求后端。
+- **后端地址由 `API_URL` 环境变量驱动**（见 `.env.example`）：SSR 直连、`src/middleware.ts` 中间件转发 `/api/*` 与 `/graphql`、GraphQL 客户端目标地址均读取它。部署前务必在 `.env`/环境变量中填入真实后端 URL（如本机 `http://127.0.0.1:8000` 或容器内 `http://backend:8000`），留空则前端不请求后端。
 
 ## 认证系统
 

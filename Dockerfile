@@ -26,7 +26,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
-# 真实后端地址由运行时环境注入（如 -e API_URL=https://api.lkm.app），
+# 真实后端地址由运行时环境注入（如 -e API_URL=http://backend:8000），
 # 服务端代码通过 process.env.API_URL 在运行时读取。
 
 # standalone 服务入口 + 生产依赖 + 清单
