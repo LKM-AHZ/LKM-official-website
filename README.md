@@ -512,7 +512,7 @@ Pinned `.python-version` to `3.13`
 uv sync
 ```
 
-如果这是你第一次安装后端，截止至2026/8/30，你一共需要下载共计88个组件
+如果这是你第一次安装后端，截止至2026/10/25，你一共需要下载共计211个组件
 
 > 对自己的网速没保证的，裸连的情况下下载大约需要一个小时
 
@@ -630,7 +630,7 @@ cd LKM-official-website
 
 如果你需要安装`postgresql`，`postgresql`的官方网址为
 
-[官网](www.postgresql.org)
+[官网](https://www.postgresql.org)
 
 进入后，点击下方的`Download→`按钮
 
