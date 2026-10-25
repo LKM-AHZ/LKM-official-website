@@ -1,6 +1,6 @@
 # LKM 动态前端新手指南
 
-本指南帮助新成员安装工具、启动动态前端、连接真实后端并提交可验证的改动。完整全栈启动可直接使用上级仓库的 `dev.sh`、`dev.ps1` 或 `dev.bat`，详见 [`../DEVELOPMENT.md`](../DEVELOPMENT.md)。
+本指南帮助新成员安装工具、启动动态前端、连接真实后端并提交可验证的改动。完整全栈启动可直接使用上级仓库的 `dev.ps1`（Windows PowerShell 与 pwsh 通用）或 `dev.sh`，详见 [`../docs/DEVELOPMENT.md`](../docs/DEVELOPMENT.md)。
 
 ## 1. 准备环境
 
@@ -162,7 +162,7 @@ git diff --check
 - 架构与命令：[README.md](./README.md)
 - 代码门禁：[CODING_STANDARDS.md](./CODING_STANDARDS.md)
 - Agent 约束：[AGENTS.md](./AGENTS.md)
-- 全栈开发：[../DEVELOPMENT.md](../DEVELOPMENT.md)
+- 全栈开发：[../docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md)
 - 后端接口：启动后访问 `http://127.0.0.1:8000/docs` 或 `/redoc`
 
 提问时请附上操作系统、Node/pnpm 版本、执行命令和完整错误信息，并删除其中的密钥与个人数据。
