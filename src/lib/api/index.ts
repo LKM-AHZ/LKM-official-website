@@ -2,7 +2,7 @@
 //
 // 设计：
 //  - 基于 src/lib/http/client.ts 的原生 fetch 封装
-//  - SSR（Astro 服务端）和 CSR（浏览器 Vue/Svelte/React）共用
+//  - SSR（Astro 服务端）和 CSR（浏览器 Vue/React）共用
 //  - SSR 时自动使用真实后端地址直连（由 API_URL 指定）
 //  - CSR 时使用同域 /api（无跨域，由 Astro 中间件代理）
 //  - 每个模块的 API 返回 Result<T, AppError>

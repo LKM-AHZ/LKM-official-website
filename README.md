@@ -326,6 +326,10 @@ pnpm dev
 
 ## 熟悉网站架构
 
+当前目录分工、数据访问层与检查命令见 [README2.md 的架构说明](./README2.md#架构)。
+页面路由放 `src/pages/`，业务组件与交互放 `src/features/`，共享 UI 放 `src/components/`，
+后端访问统一收口到 `src/lib/api/` 与基于原生 fetch 的 `src/lib/http/`。
+
 建议先熟悉一下项目的基本架构。例如要编写起始页的信息，具体位置在：
 
 `LKM-official-website\src\pages\index.astro`

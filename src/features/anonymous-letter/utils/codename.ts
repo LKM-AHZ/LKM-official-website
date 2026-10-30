@@ -38,7 +38,7 @@ export function randomCodename(): string {
   const a = ADJ[randomInt(ADJ.length)];
   const n = NOUN[randomInt(NOUN.length)];
   // 数字段从 10~99 扩到 100~999：三段空间 12×12×90=12960 太小，同名会把信件误归因到别人身上。
-  // 「与已发放名单查重」在这里做不到——storage.ts 反向依赖本文件，查名单会形成循环依赖
+  // 「与已发放名单查重」在这里做不到——storage/content.ts 依赖本文件，查名单会形成循环依赖
   const num = randomInt(900) + 100;
   return `${a}${n}${num}`;
 }

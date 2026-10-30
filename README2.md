@@ -20,7 +20,7 @@ pnpm dev
 默认地址为 `http://127.0.0.1:4321`。如果 `API_URL` 为空，只能使用不依赖 API 的页面。
 
 新成员请先阅读 [GETTING_STARTED.md](./GETTING_STARTED.md)；代码约束见
-[CODING_STANDARDS.md](./CODING_STANDARDS.md) 和 [AGENTS.md](./AGENTS.md)。全栈开发与部署文档位于上级仓库的 [DOCUMENTATION.md](../DOCUMENTATION.md)。
+[CODING_STANDARDS.md](./CODING_STANDARDS.md) 和 [AGENTS.md](./AGENTS.md)。全栈开发与部署文档位于编排仓库的 [DOCUMENTATION.md](../docs/DOCUMENTATION.md)（单独克隆前端时请查看 [LKM-Website 文档](https://github.com/LKM-AHZ/LKM-Website/tree/master/docs)）。
 
 ## 环境变量
 
@@ -81,7 +81,7 @@ src/
 ├── features/              # 按业务域组织的组件、状态和流程
 ├── lib/
 │   ├── api/               # REST/GraphQL 统一数据访问层
-│   ├── http/              # Axios、认证和刷新队列
+│   ├── http/              # 原生 fetch、认证适配器和刷新队列
 │   ├── config/            # 站点配置
 │   └── i18n/              # 国际化
 ├── stores/                # Pinia 状态
@@ -92,10 +92,20 @@ src/
 
 ### 数据访问
 
+目录与入口核对日期：2026-10-31。页面在 `pages/` 组合布局与业务组件；功能的组件、composable
+和局部状态放在 `features/<feature>/`，跨业务复用后才进入 `components/` 或 `lib/`。
+全局认证状态保留在 `stores/`，避免在页面中再维护一套会话。
+
 - REST 调用通过 `~/lib/api` 和 `~/lib/http`；页面与组件不直接散写 `fetch`。
 - GraphQL 客户端位于 `src/lib/api/graphql/`。
 - 认证端点使用 `/api/v1/auth/*`。
 - `useAuthStore` 是用户会话的单一状态源；401 刷新由 HTTP 层统一排队处理。
+
+`src/middleware.ts` 为页面建立 SSR 请求上下文，并代理同源 REST/GraphQL 请求；
+`public/` 是原样发布的静态文件，`src/assets/` 交给构建链处理。
+单元测试就近放在 `src/**/__tests__/`，浏览器测试放在 `tests/e2e/`。
+`scripts/` 负责构建和检查；图标 bundle、`src/lib/i18n/generated/` 与 `dist/` 是生成产物，
+改图标引用、词典源文件或生成脚本后重新生成，不直接编辑产物。
 
 ### UI 和样式
 
@@ -105,9 +115,20 @@ src/
 - 图标通过本地 Iconify 包与 `astro-icon` 打包，禁止运行时调用 Iconify API。
 - 新增 `client:only` island 时必须预留稳定高度，避免 CLS。
 
+Shell 通用组件和事件由 `src/features/shell/index.ts` 统一导出；`shell-community` 和
+`shell-official` 委托共享出口，后者额外导出自己的 `ShellSiteNavbar`。新增共享导出只修改
+`shell/index.ts`，避免在两个站点入口复制清单。
+
 ### 内容
 
 动态前端的 `src/content.config.ts` 当前没有本地集合。正式博客与社区内容来自后端；公开静态新闻位于相邻的 `LKM-official-static` 项目。不要重新建立与真实后端并行的生产内容源。
+
+树洞的共享内容通过 `features/anonymous-letter/stores/api.ts` 访问后端；本地数据层为
+`stores/storage/`。目录入口 `index.ts` 保留原有 `stores/storage` 导入接口：
+`types.ts` 定义备份契约，`persistence.ts` 统一键名/读写/导入导出，`encryption.ts` 负责
+加解密，`settings.ts` 管理偏好与本地节流，`personal.ts` 保存草稿、收藏、情绪和手写信纸，
+`content.ts` 兼容历史本地信件/私聊/漂流瓶/愿望。新增共享内容继续走后端，避免重复持久化。
+备份键名及版本保持兼容，相关回归在 `stores/storage/__tests__/`。
 
 ## 提交前验证
 

@@ -66,7 +66,7 @@ Astro 从 `static` 切换到 `server`：
 ### 统一数据访问层
 
 ```
-src/lib/http/client.ts # Axios 封装（SSR/CSR 自动切换，返回 Result<T>），含 JWT 拦截器
+src/lib/http/client.ts # 原生 fetch 封装（SSR/CSR 自动切换，返回 Result<T>），含认证与刷新
 src/lib/api/
 ├── index.ts           # 统一导出
 ├── graphql/           # GraphQL 客户端（urql）
@@ -89,7 +89,7 @@ src/lib/api/
 - **后端认证端点**：`/api/v1/auth/*`，含 login/register/refresh/logout/me
 - **Pinia Store**：`src/stores/auth.ts`（`useAuthStore`）— 用户状态、token 管理的单一状态源（`user`/`isLoggedIn`/`session`/`_token`/`_refreshToken`/`onboardingCompleted`），localStorage 持久化（key `lkm-auth-store`）
 - **Flow Composable**：`src/features/auth/composables/` 的 `useLoginFlow`/`useRegisterFlow`/`useRecoveryFlow`/`useOnboardingFlow` 负责登录/注册/找回/引导
-- **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(getHttpAccessToken())` 统一读写 token，含 JWT request 拦截器（附加 `Authorization: Bearer`）+ 401 自动刷新队列（并发安全，走 `POST /api/v1/auth/refresh`）
+- **HTTP 认证适配器**：`src/lib/http/client.ts` 的 `configureHttpAuthSession(adapter)` 接入认证 store，`getHttpAccessToken()` 供 HTTP/GraphQL 读取 token；请求附加 `Authorization: Bearer`，401 通过并发安全的刷新队列走 `POST /api/v1/auth/refresh`
 - **GraphQL 认证**：`src/lib/api/graphql/exchanges/auth.ts`（urql `authExchange`）经 `getHttpAccessToken()` 为每个 operation 自动附加 Bearer 头
 - **共享 UI 原语**：`src/features/auth/components/shared/`（AuthShell/AuthCard/AuthField/AuthSegmentedControl/AuthMethodButton/AuthStatus/VerificationCodeField）
 - **类型**：`src/types/auth.d.ts` 定义真实 `User`/`AuthState`/`LoginMethod` 等，**不再有 `DemoUser`**
