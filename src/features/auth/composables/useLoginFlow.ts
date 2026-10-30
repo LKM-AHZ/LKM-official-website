@@ -1,5 +1,4 @@
 import { reactive, ref, toRef } from "vue";
-import QRCode from "qrcode";
 import { useAuthStore } from "~/stores/auth";
 import { authApi } from "~/lib/api/modules/auth";
 import { AppError, ErrorCode } from "~/lib/errors/error-codes";
@@ -399,6 +398,7 @@ export function useLoginFlow(options: LoginFlowOptions = {}): LoginFlow {
       }
       setup_secret.value = r.value.secret;
       try {
+        const { default: QRCode } = await import("qrcode");
         setup_qr_url.value = await QRCode.toDataURL(r.value.qr_code_uri);
       } catch {
         setup_qr_url.value = "";

@@ -156,10 +156,12 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
       <div class="flex h-11 min-w-11 items-center justify-center xl:w-44">
         <SearchGlobalSearch client:only="vue" compact />
       </div>
-      <div class="hidden xl:block"><NotificationBell client:idle /></div>
+      <div class="hidden xl:block">
+        <NotificationBell client:media="(min-width: 1280px)" />
+      </div>
       <div class="hidden xl:block">
         <PreferencesMenu
-          client:load
+          client:media="(min-width: 1280px)"
           allowColor={!siteConfig.themeColor.fixed}
         />
       </div>

@@ -180,7 +180,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import QRCode from "qrcode";
 import { authApi } from "~/lib/api/modules/auth";
 import { t } from "~/lib/i18n";
 import type { User } from "~/types/auth";
@@ -253,6 +252,7 @@ async function startEnable() {
   }
   secret.value = r.value.secret;
   try {
+    const { default: QRCode } = await import("qrcode");
     qrUrl.value = await QRCode.toDataURL(r.value.qr_code_uri);
   } catch {
     qrUrl.value = "";

@@ -7,6 +7,9 @@ import * as authModule from "~/lib/api/modules/auth";
 import { ok, err } from "~/lib/errors/result";
 import { AppError, ErrorCode } from "~/lib/errors/error-codes";
 
+const { toDataURL } = vi.hoisted(() => ({ toDataURL: vi.fn() }));
+vi.mock("qrcode", () => ({ default: { toDataURL } }));
+
 beforeEach(() => {
   setActivePinia(createPinia());
   vi.restoreAllMocks();
@@ -27,6 +30,25 @@ describe("useVerificationCountdown", () => {
 });
 
 describe("useLoginFlow", () => {
+  it("双重验证设置按需生成二维码，生成失败仍保留手动密钥", async () => {
+    vi.spyOn(authModule.authApi, "start2FATemp").mockResolvedValue(
+      ok({ secret: "SECRET", qr_code_uri: "otpauth://totp/LKM" }),
+    );
+    toDataURL.mockResolvedValueOnce("data:image/png;base64,qr");
+    const flow = useLoginFlow();
+    expect(toDataURL).not.toHaveBeenCalled();
+
+    await flow.init2FASetup();
+    expect(toDataURL).toHaveBeenCalledWith("otpauth://totp/LKM");
+    expect(flow.setup_qr_url).toBe("data:image/png;base64,qr");
+
+    toDataURL.mockRejectedValueOnce(new Error("二维码加载失败"));
+    await flow.init2FASetup();
+    expect(flow.setup_qr_url).toBe("");
+    expect(flow.setup_secret).toBe("SECRET");
+    expect(flow.loading).toBe(false);
+  });
+
   it("密码登录成功：置 loggedIn 显示成功卡并触发 onSuccess（不跳转）", async () => {
     vi.spyOn(authModule.authApi, "loginPassword").mockResolvedValue(
       ok({

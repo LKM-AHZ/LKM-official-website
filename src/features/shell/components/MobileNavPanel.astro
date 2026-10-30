@@ -166,9 +166,9 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
       {
         showUtilities && (
           <div class="mt-2 border-t border-[var(--line-divider)] pt-2">
-            <NotificationBell client:idle mobile />
+            <NotificationBell client:media="(width < 1280px)" mobile />
             <PreferencesMenu
-              client:load
+              client:media="(width < 1280px)"
               mobile
               allowColor={!siteConfig.themeColor.fixed}
             />

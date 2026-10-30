@@ -15,6 +15,43 @@ const DEMO_ROUTES = [
 ];
 
 test.describe("关键路由烟雾测试", () => {
+  test("导航工具按视口水合，缩放后仍可用", async ({ page }) => {
+    const preferences = page.locator(
+      'astro-island[component-url*="PreferencesMenu"]',
+    );
+    const notifications = page.locator(
+      'astro-island[component-export="NotificationBell"]',
+    );
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE_PATH}/`);
+    await expect(preferences).toHaveCount(2);
+    for (const islands of [preferences, notifications]) {
+      await expect(islands.nth(0)).not.toHaveAttribute("ssr");
+      await expect(islands.nth(1)).toHaveAttribute("ssr", "");
+    }
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const islands of [preferences, notifications]) {
+      await expect(islands.nth(1)).not.toHaveAttribute("ssr");
+    }
+    await page.getByRole("button", { name: "Menu" }).click();
+    const mobilePreferences = preferences.nth(1).getByRole("button").first();
+    await mobilePreferences.click();
+    await expect(mobilePreferences).toHaveAttribute("aria-expanded", "true");
+    await preferences
+      .nth(1)
+      .getByRole("button", { name: "暗色", exact: true })
+      .click();
+    await expect(page.locator("html")).toHaveClass(/dark/);
+
+    // 冷启动移动端也只水合匹配视口的一组。
+    await page.reload();
+    for (const islands of [preferences, notifications]) {
+      await expect(islands.nth(1)).not.toHaveAttribute("ssr");
+      await expect(islands.nth(0)).toHaveAttribute("ssr", "");
+    }
+  });
+
   for (const { path, label } of PUBLIC_ROUTES) {
     test(`${label} (${path}) 返回 200 且有主内容`, async ({ page }) => {
       const res = await page.goto(path);
@@ -105,8 +142,10 @@ test.describe("关键路由烟雾测试", () => {
       .locator('astro-island[component-url*="FileListPage"]:not([ssr])')
       .waitFor();
 
-    await page.getByRole("button", { name: /基础学科/ }).click();
-    await expect(page.getByRole("button", { name: /数学/ })).toBeVisible();
+    await page.getByRole("button", { name: "基础学科", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "数学", exact: true }),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "上传文件" }).click();
     await expect(page.getByRole("heading", { name: "上传文件" })).toBeVisible();
