@@ -1,6 +1,7 @@
 ---
 import Layout from "~/layouts/SidebarLayout.astro";
 import PageIntro from "~/components/patterns/PageIntro.astro";
+import DemoNotice from "~/components/patterns/DemoNotice.astro";
 import CompetitionDetail from "~/features/competition/components/CompetitionDetail.vue";
 import { mockCompetitions } from "~/features/competition/data/mock-competitions";
 import { getPermalink } from "~/lib/utils/permalinks";
@@ -33,6 +34,7 @@ const metadata = {
   {
     comp ? (
       <div id="details" class="space-y-6">
+        <DemoNotice scope="本赛事的赛程、规则与报名状态" />
         <PageIntro
           title={t(comp.title)}
           description={t(comp.description)}

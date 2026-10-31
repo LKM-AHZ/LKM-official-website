@@ -1,0 +1,46 @@
+---
+import { Icon } from "astro-icon/components";
+
+/**
+ * 「演示数据」横幅（评审阻断项 R7 的最小修复）。
+ *
+ * 背景：首页的竞赛倒计时与「每日一题」、`/chat/` 的频道与消息、`/competition/**` 全部是
+ * `mock-*` 数据，其中考试界面还是**客户端判分**（成绩从未提交）。这些页面看起来完全可用，
+ * 验收时极易被记成「已交付」，用户端也会以为成绩生效。规划文档的口径本来就写着
+ * 「不能因为有展示页、示例数据就视作完整业务功能」——这个横幅就是把口径落到界面上。
+ *
+ * 为什么不直接下线：页面本身是可交付的 UI 形态（进度/交互可评审），下线会让设计走查失去对象；
+ * 加**不可关闭**的标注能保留评审价值，同时挡住「看起来能用 = 已交付」的误判。
+ * 功能真上线时把这个组件连同 mock 数据一起删掉，而不是改成可关闭。
+ *
+ * 文案硬编码中文：与它包裹的 mock 内容同语（那些数据本身没有 i18n 版本），
+ * 走 t() 反而会造出一个只在演示页存在的翻译键，功能上线后还得清。
+ */
+interface Props {
+  /** 指出**哪一部分**是演示数据；缺省表示整页。 */
+  scope?: string;
+}
+
+const { scope = "本页内容" } = Astro.props;
+---
+
+<div
+  role="note"
+  aria-label="演示数据提示"
+  class="sticky top-0 z-50 border-b border-amber-300/70 bg-amber-50 px-4 py-2 text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200"
+>
+  <p
+    class="mx-auto flex max-w-7xl items-start gap-2 text-xs leading-5 sm:text-sm"
+  >
+    <Icon
+      name="tabler:flask-2"
+      class="mt-0.5 h-4 w-4 shrink-0"
+      aria-hidden="true"
+    />
+    <span>
+      <strong class="font-semibold">演示数据</strong>：{scope}
+      为示例数据，交互可以体验，但数据、成绩与通知都不真实，也不计入任何记录——
+      功能上线前请勿据此验收。
+    </span>
+  </p>
+</div>

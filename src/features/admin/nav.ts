@@ -22,11 +22,25 @@ export interface AdminNavItem {
 export interface AdminNavGroup {
   /** 分组标题的 i18n key；缺省表示无标题的默认分组。 */
   titleKey?: string;
+  /**
+   * 渲染该分组所需的权限点（与后端 `Permission` 枚举同值，如 `admin.bot_panel`）。
+   * 缺省 = 无条件显示。判定只做「在不在列表里」——真正的授权仍在后端每个端点上。
+   */
+  requires?: string;
   items: AdminNavItem[];
 }
 
-/** 后台侧边栏（按分组顺序渲染）。 */
-export function buildAdminNav(): AdminNavGroup[] {
+/**
+ * 后台侧边栏（按分组顺序渲染）。
+ *
+ * `permissions` 是 `/api/v1/admin/auth/me` 返回的当前会话权限点并集。**缺省按空集处理**：
+ * 拿不到权限就隐藏带 `requires` 的分组，而不是「先给入口、点了再 403」——后者会让人以为
+ * 面板坏了。代价是 /me 临时失败时这类入口当次不可见，可在刷新后恢复。
+ */
+export function buildAdminNav(
+  permissions: readonly string[] = [],
+): AdminNavGroup[] {
+  const granted = new Set(permissions);
   return [
     {
       items: [
@@ -75,7 +89,10 @@ export function buildAdminNav(): AdminNavGroup[] {
     {
       // 机器人（LKMBot 面板）：每项对应后台内嵌面板的一个页面（同源 iframe）。
       // 面板自身的侧边栏仍可跳到其余页面（会话、人格、定时任务等），故此处只放常用入口。
+      // 入口本身也受能力点约束：票据换的是 Bot 控制面会话，社区 admin 不自动拥有
+      // （评审阻断项 R3；后端 /admin/bot/sso-ticket 同一条判定，这里只是不摆空入口）。
       titleKey: "admin.sidebar.botGroup",
+      requires: "admin.bot_panel",
       items: [
         {
           textKey: "admin.sidebar.bot.overview",
@@ -119,7 +136,7 @@ export function buildAdminNav(): AdminNavGroup[] {
         },
       ],
     },
-  ];
+  ].filter((group) => !group.requires || granted.has(group.requires));
 }
 
 /** 去掉 query/hash 与尾斜杠（保留根路径 `/`），用于激活态比较。 */

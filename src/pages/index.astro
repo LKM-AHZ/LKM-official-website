@@ -8,6 +8,7 @@ import {
   mockCompetitions,
   mockQuestions,
 } from "~/features/competition/data/mock-competitions";
+import DemoNotice from "~/components/patterns/DemoNotice.astro";
 import { getPermalink } from "~/lib/utils/permalinks";
 import { t } from "~/lib/i18n";
 
@@ -86,6 +87,8 @@ const dailyQuestion =
   }}
 >
   <div class="min-h-screen bg-page-bg pb-20">
+    {/* 竞赛倒计时与「每日一题」取自 mock-competitions（R7）；横幅不可关闭 */}
+    <DemoNotice scope="首页的竞赛倒计时与「每日一题」模块" />
     <section
       class="relative overflow-hidden bg-card-bg px-4 py-12 sm:px-6 md:py-16"
       aria-labelledby="home-title"

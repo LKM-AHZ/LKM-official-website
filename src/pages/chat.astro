@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import Layout from "~/layouts/PageLayout.astro";
+import DemoNotice from "~/components/patterns/DemoNotice.astro";
 
 /* ===== 静态示例数据（双轨制：公开频道 + 私密群组） ===== */
 interface Channel {
@@ -98,6 +99,9 @@ const messages: ChatMessage[] = [
     description: "与同好实时讨论理科问题：公开频道与私密群组，支持公式与代码。",
   }}
 >
+  {/* 频道、消息、在线人数全为静态示例（R7）；横幅放在 chat-root 之外，
+      避免挤进那个按 100dvh 算高的固定布局 */}
+  <DemoNotice scope="聊天室的频道、消息与成员数" />
   <div
     id="chat-root"
     class="mx-auto flex h-[calc(100dvh-3.5rem)] max-w-[1440px] overflow-hidden bg-page-bg"

@@ -18,6 +18,12 @@ export interface AdminUser {
   id: string;
   account_level: string;
   role: string;
+  /**
+   * 当前会话（激活角色）持有的启用权限点（`/admin/auth/me` 返回）。
+   * 登录接口的载荷没有这一项，故可选；消费方要按「缺省 = 空集」处理，
+   * 与 `buildAdminNav` 的默认参数一致（宁可少摆入口，不摆点了必然 403 的入口）。
+   */
+  permissions?: string[];
 }
 
 export class AdminAuthError extends Error {

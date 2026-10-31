@@ -1,5 +1,6 @@
 ---
 import PageLayout from '~/layouts/PageLayout.astro';
+import DemoNotice from '~/components/patterns/DemoNotice.astro';
 import ExamInterface from '~/features/competition/components/ExamInterface.vue';
 import { mockCompetitions } from '~/features/competition/data/mock-competitions';
 import { t } from '~/lib/i18n';
@@ -21,6 +22,8 @@ const metadata = {
 {/* 必须有布局：全局样式表（tailwind.css + 主题变量）由 BaseLayout 引入，
     否则 ExamInterface 里的 bg-card-bg/text-deep-text 等工具类全部失效 */}
 <PageLayout metadata={metadata} showFooter={false}>
+  {/* 判分在客户端完成、成绩从不提交（R7）：这一页最容易被当成真实考试 */}
+  <DemoNotice scope="试卷与判分（成绩仅在本地计算，不会提交或计入排名）" />
   <div class="max-w-7xl mx-auto px-4 py-8">
     {
       comp ? (

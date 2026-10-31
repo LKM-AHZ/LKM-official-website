@@ -11,7 +11,11 @@ interface Props {
 }
 
 const { flush = false } = Astro.props;
-const groups = buildAdminNav();
+// 权限点由 middleware 的 /me 结果放进 locals（拿不到就别摆需要权限的入口：
+// 先给入口点了再 403 会让人以为面板坏了，见 nav.ts 的 buildAdminNav 注释）。
+const permissions =
+  (Astro.locals as { adminPermissions?: string[] }).adminPermissions ?? [];
+const groups = buildAdminNav(permissions);
 const currentPath = Astro.url.pathname;
 const itemClass = (href: string) =>
   [

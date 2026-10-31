@@ -11,7 +11,7 @@ import { defineMiddleware } from "astro:middleware";
 import { runWithRequest } from "~/lib/ssr-context.node";
 import { ensureDict } from "~/lib/i18n";
 import { SUPPORTED_LOCALES } from "~/lib/i18n/types";
-import { post } from "~/lib/http/client";
+import { get, post } from "~/lib/http/client";
 import { ErrorCode } from "~/lib/errors/error-codes";
 import { buildUrl } from "~/lib/utils/paths";
 import type { Locale } from "~/lib/i18n/types";
@@ -66,11 +66,38 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // 非代理路径：建立 SSR 请求上下文，供页面 SSR 数据获取转发 Cookie
   if (!isProxyPath) {
+    // 后台入口的**权限**（不是登录态）：一次 /me 同时回答「会话是否有效」与「这个会话能看见
+    // 哪些入口」。菜单据此收口（AdminLayout 读 locals.adminPermissions），/admin/bot/* 据此
+    // 提前挡回控制台——否则会渲染一个必然 403 的 iframe，而下游又把 403 当成「会话过期」
+    // 跳登录页，管理员看到的是「明明登录着却被踢出去」。
+    const adminArea = /(?:^|\/)admin(?:\/|$)/.test(pathname);
+    const adminLogin = /(?:^|\/)admin\/login(?:\/|$)/.test(pathname);
+    let adminPermissions: string[] | undefined;
+    if (adminArea && !adminLogin) {
+      const me = await runWithRequest(context.request.headers, () =>
+        get<{ permissions?: string[] }>("/api/v1/admin/auth/me", undefined, {
+          timeout: 3_000,
+        }),
+      );
+      if (me.isOk()) adminPermissions = me.value?.permissions ?? [];
+      (context.locals as { adminPermissions?: string[] }).adminPermissions =
+        adminPermissions;
+    }
+
     const botPage = /(?:^|\/)admin\/bot(?:\/|$)/.test(pathname);
     if (botPage) {
       const cookie = context.request.headers.get("cookie");
       if (!/(?:^|;\s*)admin_session=/.test(cookie ?? "")) {
         return context.redirect(buildUrl("/admin/login"));
+      }
+      // 能力点前置：没有 admin.bot_panel 直接回控制台（后端同一判定，此处只是别让浏览器
+      // 去撞一次 403）。adminPermissions 为 undefined（/me 失败）时按原路径走，由下面的
+      // 换票错误分支处理，避免把可用性抖动误判成没权限。
+      if (
+        adminPermissions !== undefined &&
+        !adminPermissions.includes("admin.bot_panel")
+      ) {
+        return context.redirect(buildUrl("/admin"));
       }
       // 换票必须在 next() 开始流式渲染前完成；组件内重定向会触发 ResponseSentError。
       const result = await runWithRequest(context.request.headers, () =>

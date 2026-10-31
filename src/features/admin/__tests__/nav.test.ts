@@ -1,16 +1,32 @@
 import { describe, it, expect } from "vitest";
 import { buildAdminNav, isActive } from "../nav";
 
+// 后台菜单收口：不带 admin.bot_panel 时「机器人」组整个不渲染（评审阻断项 R3）。
+const BOT = "admin.bot_panel";
+
 describe("admin nav", () => {
   it("含通用组与「机器人」组，后者带分组标题", () => {
-    const groups = buildAdminNav();
+    const groups = buildAdminNav([BOT]);
     expect(groups.length).toBe(2);
     expect(groups[0].titleKey).toBeUndefined();
     expect(groups[1].titleKey).toBe("admin.sidebar.botGroup");
+    expect(groups[1].requires).toBe(BOT);
+  });
+
+  it("无 admin.bot_panel 时机器人组被过滤掉，其余组不受影响", () => {
+    const groups = buildAdminNav([]);
+    expect(groups.length).toBe(1);
+    expect(groups[0].items.some((i) => i.href.startsWith("/admin/bot"))).toBe(
+      false,
+    );
+    // 缺省参数等价空集：不传权限 = 不知道有哪些权限 = 不摆需要权限的入口。
+    expect(buildAdminNav().length).toBe(1);
+    // 无关权限不影响机器人组。
+    expect(buildAdminNav(["admin.dashboard"]).length).toBe(1);
   });
 
   it("机器人组覆盖后台 8 个内嵌面板入口，且 href 全部唯一", () => {
-    const botGroup = buildAdminNav()[1];
+    const botGroup = buildAdminNav([BOT])[1];
     expect(botGroup.items.length).toBe(8);
     const hrefs = botGroup.items.map((item) => item.href);
     expect(new Set(hrefs).size).toBe(hrefs.length);
@@ -19,7 +35,7 @@ describe("admin nav", () => {
   });
 
   it("全部菜单项都有 i18n key、逻辑路径与图标", () => {
-    buildAdminNav()
+    buildAdminNav([BOT])
       .flatMap((group) => group.items)
       .forEach((item) => {
         expect(item.textKey).toMatch(/^admin\.sidebar\./);
@@ -42,7 +58,7 @@ describe("admin nav", () => {
   });
 
   it("机器人组各项在对应路径上互斥点亮", () => {
-    const items = buildAdminNav()[1].items;
+    const items = buildAdminNav([BOT])[1].items;
     const lit = items.filter((item) =>
       isActive("/admin/bot/config", item.href),
     );
