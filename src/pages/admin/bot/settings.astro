@@ -1,9 +1,14 @@
 ---
 import { AdminLayout } from '~/features/admin';
-import BotFrame from '~/features/admin/components/BotFrame.astro';
+import BotSettings from '~/features/admin/components/BotSettings.vue';
 import { t } from '~/lib/i18n';
+
+const ticket = (Astro.locals as { botTicket?: string }).botTicket;
 ---
 
-<AdminLayout flush>
-  <BotFrame hashRoute="/settings" title={t('page.admin.bot.settings.title')} />
+<AdminLayout>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-deep-text">{t('page.admin.bot.settings.title')}</h1>
+  </div>
+  <BotSettings client:load ticket={ticket} />
 </AdminLayout>

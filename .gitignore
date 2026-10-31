@@ -70,3 +70,6 @@ test-results/
 coverage/
 *.tsbuildinfo
 /LKM-service/
+
+# 机器人面板构建产物（源码在 bot-panel/，构建输出由 Astro 静态托管在 /bot/）
+/public/bot/

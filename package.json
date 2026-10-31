@@ -12,7 +12,7 @@
     "dev:frontend": "astro dev",
     "dev:clean": "node -e \"require('fs').rmSync('node_modules/.vite',{recursive:true,force:true})\" && astro dev",
     "start": "node ./dist/server/entry.mjs",
-    "build": "node scripts/generate-icons.mjs && node scripts/generate-i18n-flat.mjs && astro build && node scripts/precompress.mjs",
+    "build": "pnpm run build:bot-panel && pnpm run build:web",
     "preview": "astro preview",
     "astro": "astro",
     "check": "turbo run check:astro check:eslint check:prettier check:jscpd",
@@ -40,7 +40,9 @@
     "check:budget": "node scripts/check-bundle-budget.mjs",
     "lighthouse:budget": "node scripts/lighthouse-budget.mjs",
     "lighthouse:budget:update": "node scripts/lighthouse-budget.mjs --update-baseline",
-    "measure:cwv": "node scripts/measure-cwv.mjs"
+    "measure:cwv": "node scripts/measure-cwv.mjs",
+    "build:bot-panel": "cd bot-panel && pnpm install --frozen-lockfile && pnpm build",
+    "build:web": "node scripts/generate-icons.mjs && node scripts/generate-i18n-flat.mjs && astro build && node scripts/precompress.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.1",

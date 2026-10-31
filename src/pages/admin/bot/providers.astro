@@ -1,12 +1,27 @@
 ---
 import { AdminLayout } from '~/features/admin';
-import BotFrame from '~/features/admin/components/BotFrame.astro';
+import BotList from '~/features/admin/components/BotList.vue';
 import { t } from '~/lib/i18n';
+
+const ticket = (Astro.locals as { botTicket?: string }).botTicket;
+const columns = [
+  { key: 'name', label: t('page.admin.bot.common.name') },
+  { key: 'type', label: t('page.admin.bot.common.type') },
+  { key: 'model', label: t('page.admin.bot.common.model') },
+];
 ---
 
-<AdminLayout flush>
-  {/* flush 布局不渲染任何标题容器，而 iframe 的 title 只是可访问名、不构成文档标题层级：
-      补一个仅读屏可见的 h1，否则这一页没有任何 <h1>，AT 用户拿不到页面上下文 */}
-  <h1 class="sr-only">{t('page.admin.bot.providers.title')}</h1>
-  <BotFrame hashRoute="/providers" title={t('page.admin.bot.providers.title')} />
+<AdminLayout>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-deep-text">{t('page.admin.bot.providers.title')}</h1>
+  </div>
+  <BotList
+    client:load
+    listPath="/api/v1/admin/bot/providers"
+    toggleBase="/api/v1/admin/bot/providers/"
+    hashRoute="/providers"
+    ticket={ticket}
+    titleKey="page.admin.bot.providers.title"
+    columns={columns}
+  />
 </AdminLayout>

@@ -10,3 +10,7 @@ pnpm-lock.yaml
 **/__pycache__
 src/lib/icons/astro-include.ts
 LICENSE.md
+
+# 机器人面板独立子应用（原 LKM-bot/dashboard），有自己的格式化口径
+bot-panel
+public/bot

@@ -7,11 +7,20 @@ COPY patches/ ./patches/
 # 全量安装：构建（astro build）需要 devDependencies（tailwindcss、@tailwindcss/vite 等）
 RUN corepack enable && pnpm install --frozen-lockfile
 
+# 机器人管理面板（原 LKM-bot/dashboard，现已迁入本仓库 bot-panel/）：
+# 独立构建，产物直接落到 /public/bot，由下面的 Astro 构建静态托管在 /bot/ 前缀。
+FROM node:24-alpine AS bot-panel
+WORKDIR /panel
+COPY bot-panel/ ./
+RUN corepack enable && pnpm install --frozen-lockfile && VITE_BASE_PATH=/bot/ pnpm build:deploy
+
 FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN corepack enable && pnpm run build
+# 面板产物先就位，build:web 只构建官网（面板在独立 stage 已构建）
+COPY --from=bot-panel /public/bot ./public/bot
+RUN corepack enable && pnpm run build:web
 
 # ---------- 生产依赖（仅运行时所需，剔除 devDependencies） ----------
 FROM node:24-alpine AS prod-deps

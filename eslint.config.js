@@ -186,6 +186,9 @@ export default [
       "src/layouts/CommunityBlogLayout.astro",
       "scripts/mock-server.mjs",
       "src/lib/icons/astro-include.ts",
+      // 机器人面板是独立子应用（原 LKM-bot/dashboard），有自己的 eslint/prettier 口径；
+      // 由 bot-panel 自己的脚本检查，避免把两套风格混进官网门禁。
+      "bot-panel/**",
     ],
   },
 ];

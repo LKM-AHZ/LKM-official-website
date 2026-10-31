@@ -3,6 +3,8 @@
 # 嵌套 node_modules（子包/工作区）与嵌套日志必须显式带 `**/`
 **/node_modules/
 dist/
+# 面板构建产物由独立 stage 生成后拷入，本地产物不进 build context
+public/bot/
 .astro/
 *.tsbuildinfo
 .eslintcache
