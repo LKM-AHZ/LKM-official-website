@@ -113,7 +113,7 @@ function isMissingApiKeyResponse(response: {
 }
 
 function getDismissKey() {
-  return `astrbot-upgrade-recovery-dismissed:${coreVersion.value}:${dashboardVersion.value}`;
+  return `lkmbot-upgrade-recovery-dismissed:${coreVersion.value}:${dashboardVersion.value}`;
 }
 
 function recoveryRequestConfig(validateStatus = false): AxiosRequestConfig {
@@ -121,7 +121,7 @@ function recoveryRequestConfig(validateStatus = false): AxiosRequestConfig {
   const token =
     localStorage.getItem('token') ||
     sessionStorage.getItem(UPGRADE_RECOVERY_TOKEN_KEY);
-  const locale = localStorage.getItem('astrbot-locale');
+  const locale = localStorage.getItem('lkmbot-locale');
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }

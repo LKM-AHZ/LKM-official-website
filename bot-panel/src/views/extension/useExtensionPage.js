@@ -1882,7 +1882,7 @@ export const useExtensionPage = (initialTab = "installed") => {
         let name = plugin.name.trim().toLowerCase();
         if (name.startsWith("astrbot_plugin_")) {
           plugin.trimmedName = name.substring(15);
-        } else if (name.startsWith("astrbot_") || name.startsWith("astrbot-")) {
+        } else if (name.startsWith("lkmbot_") || name.startsWith("lkmbot-")) {
           plugin.trimmedName = name.substring(8);
         } else plugin.trimmedName = plugin.name;
       }
@@ -1955,7 +1955,7 @@ export const useExtensionPage = (initialTab = "installed") => {
     pluginMarketData.value = notInstalled.concat(installed);
   };
 
-  const normalizeAstrBotVersionSpec = (value) => String(value || "").trim();
+  const normalizeBotVersionSpec = (value) => String(value || "").trim();
 
   const normalizeVersionParts = (value) => {
     const version = String(value || "")
@@ -2020,8 +2020,8 @@ export const useExtensionPage = (initialTab = "installed") => {
     return comparison === 0;
   };
 
-  const checkAstrBotVersionSupport = (versionSpec, currentVersion) => {
-    const normalizedSpec = normalizeAstrBotVersionSpec(versionSpec);
+  const checkBotVersionSupport = (versionSpec, currentVersion) => {
+    const normalizedSpec = normalizeBotVersionSpec(versionSpec);
     if (!normalizedSpec) {
       return { checked: false, supported: true, message: "" };
     }
@@ -2061,16 +2061,16 @@ export const useExtensionPage = (initialTab = "installed") => {
 
   const annotateMarketVersionSupport = async () => {
     const currentVersion =
-      commonStore.astrbotVersion ||
-      (await commonStore.fetchAstrBotVersion().catch(() => ""));
+      commonStore.botVersion ||
+      (await commonStore.fetchBotVersion().catch(() => ""));
     pluginMarketData.value.forEach((plugin) => {
-      const result = checkAstrBotVersionSupport(
+      const result = checkBotVersionSupport(
         plugin?.astrbot_version,
         currentVersion,
       );
-      plugin.astrbot_support_checked = result.checked;
+      plugin.lkmbot_support_checked = result.checked;
       plugin.astrbot_version_supported = result.supported;
-      plugin.astrbot_support_message = result.message;
+      plugin.lkmbot_support_message = result.message;
     });
   };
 
@@ -2315,9 +2315,9 @@ export const useExtensionPage = (initialTab = "installed") => {
     }
 
     const currentVersion =
-      commonStore.astrbotVersion ||
-      (await commonStore.fetchAstrBotVersion().catch(() => ""));
-    const result = checkAstrBotVersionSupport(
+      commonStore.botVersion ||
+      (await commonStore.fetchBotVersion().catch(() => ""));
+    const result = checkBotVersionSupport(
       plugin.astrbot_version,
       currentVersion,
     );
@@ -2421,11 +2421,11 @@ export const useExtensionPage = (initialTab = "installed") => {
   };
 
   // 监听语言切换事件
-  window.addEventListener("astrbot-locale-changed", handleLocaleChange);
+  window.addEventListener("lkmbot-locale-changed", handleLocaleChange);
 
   // 清理事件监听器
   onUnmounted(() => {
-    window.removeEventListener("astrbot-locale-changed", handleLocaleChange);
+    window.removeEventListener("lkmbot-locale-changed", handleLocaleChange);
   });
 
   // 搜索防抖处理

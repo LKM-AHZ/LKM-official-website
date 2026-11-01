@@ -99,7 +99,7 @@ const supportPlatforms = computed(() => {
   return platforms.filter((item) => typeof item === "string");
 });
 
-const astrbotVersionRequirement = computed(() => {
+const botVersionRequirement = computed(() => {
   const versionSpec = props.extension?.astrbot_version;
   return typeof versionSpec === "string" && versionSpec.trim().length
     ? versionSpec.trim()
@@ -348,13 +348,13 @@ const openView = () => {
             </v-chip>
             <PluginPlatformChip :platforms="supportPlatforms" />
             <v-chip
-              v-if="astrbotVersionRequirement"
+              v-if="botVersionRequirement"
               color="secondary"
               variant="outlined"
               label
               size="small"
             >
-              LKMBot: {{ astrbotVersionRequirement }}
+              LKMBot: {{ botVersionRequirement }}
             </v-chip>
           </div>
 

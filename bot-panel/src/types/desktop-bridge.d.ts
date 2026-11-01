@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-  interface AstrBotDesktopAppUpdateCheckResult {
+  interface BotDesktopAppUpdateCheckResult {
     ok: boolean;
     reason?: string | null;
     currentVersion?: string;
@@ -9,26 +9,26 @@ declare global {
     hasUpdate: boolean;
   }
 
-  interface AstrBotDesktopAppUpdateResult {
+  interface BotDesktopAppUpdateResult {
     ok: boolean;
     reason?: string | null;
   }
 
-  interface AstrBotDesktopAppUpdateProgress {
+  interface BotDesktopAppUpdateProgress {
     phase: "downloading" | "verifying" | "installing";
     downloadedBytes: number;
     totalBytes?: number | null;
   }
 
-  interface AstrBotAppUpdaterBridge {
-    checkForAppUpdate: () => Promise<AstrBotDesktopAppUpdateCheckResult>;
+  interface BotAppUpdaterBridge {
+    checkForAppUpdate: () => Promise<BotDesktopAppUpdateCheckResult>;
     installAppUpdate: (
-      onProgress?: (progress: AstrBotDesktopAppUpdateProgress) => void,
-    ) => Promise<AstrBotDesktopAppUpdateResult>;
+      onProgress?: (progress: BotDesktopAppUpdateProgress) => void,
+    ) => Promise<BotDesktopAppUpdateResult>;
   }
 
   interface Window {
-    astrbotAppUpdater?: AstrBotAppUpdaterBridge;
+    botAppUpdater?: BotAppUpdaterBridge;
     astrbotDesktop?: {
       isDesktop: boolean;
       isDesktopRuntime: () => Promise<boolean>;

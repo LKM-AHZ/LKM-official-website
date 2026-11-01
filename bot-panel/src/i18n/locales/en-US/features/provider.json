@@ -30,7 +30,7 @@
     "decisionHints": {
       "apiBase": "System One endpoint. /systemone is appended to base URLs; end the URL with / to use it as-is.",
       "model": "System One model ID, such as jev-latest, jev-preview, or the provider's model name.",
-      "customHeaders": "HTTP headers added by AstrBot to decision requests."
+      "customHeaders": "HTTP headers added by LKMBot to decision requests."
     }
   },
   "availability": {
@@ -104,9 +104,6 @@
     "selector": {
       "ssycloud": "SSYCloud",
       "title": "New model provider",
-      "sponsors": "Sponsors",
-      "sponsorInfoTitle": "LKMBot sponsors",
-      "sponsorInfoBody": "LKMBot is a free, open-source project supported by sponsorships. We may receive a small amount of revenue when you access model resources through our sponsors. You are welcome to support us by using these services.",
       "providers": "Providers",
       "search": "Search",
       "clearSearch": "Clear search",

@@ -54,7 +54,7 @@ const versionValues = computed(() => {
   return {
     webui: String(versions.webui_version || '').trim(),
     runtime: String(versions.astrbot_version || '').trim(),
-    code: String(versions.astrbot_code_version || '').trim(),
+    code: String(versions.bot_code_version || '').trim(),
   };
 });
 
@@ -102,15 +102,15 @@ const versionItems = computed(() => {
   }
   if (runtime) {
     items.push({
-      key: 'astrbot',
-      label: t('versions.astrbotRuntime'),
+      key: 'lkmbot',
+      label: t('versions.botRuntime'),
       value: runtime,
     });
   }
   if (runtime && code && normalized.runtime !== normalized.code) {
     items.push({
-      key: 'astrbot-code',
-      label: t('versions.astrbotCode'),
+      key: 'lkmbot-code',
+      label: t('versions.botCode'),
       value: code,
     });
   }

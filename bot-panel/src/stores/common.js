@@ -4,7 +4,7 @@ import { pluginApi, statsApi } from "@/api/v1";
 export const useCommonStore = defineStore("common", {
   state: () => ({
     startTime: -1,
-    astrbotVersion: "",
+    botVersion: "",
     dashboardVersion: "",
 
     pluginMarketData: [],
@@ -16,18 +16,18 @@ export const useCommonStore = defineStore("common", {
       this.startTime = res.data.data.start_time;
       return this.startTime;
     },
-    setAstrBotVersion(version, dashboardVersion = "") {
-      this.astrbotVersion = String(version || "").replace(/^v/i, "");
+    setBotVersion(version, dashboardVersion = "") {
+      this.botVersion = String(version || "").replace(/^v/i, "");
       this.dashboardVersion = String(dashboardVersion || "");
     },
-    async fetchAstrBotVersion(force = false) {
-      if (!force && this.astrbotVersion) {
-        return this.astrbotVersion;
+    async fetchBotVersion(force = false) {
+      if (!force && this.botVersion) {
+        return this.botVersion;
       }
       const res = await statsApi.version();
       const data = res.data?.data || {};
-      this.setAstrBotVersion(data.version, data.dashboard_version);
-      return this.astrbotVersion;
+      this.setBotVersion(data.version, data.dashboard_version);
+      return this.botVersion;
     },
     getStartTime() {
       if (this.startTime !== -1) {

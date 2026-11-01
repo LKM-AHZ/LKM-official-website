@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import defaults from './fixtures/sponsorCatalog.mjs'
 
 test('logged-in dashboard requests keep credentials on their own origin', async (t) => {
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
@@ -20,7 +19,7 @@ test('logged-in dashboard requests keep credentials on their own origin', async 
   })
   const storage = new Map([
     ['token', 'test-dashboard-token'],
-    ['astrbot-locale', 'zh-CN']
+    ['lkmbot-locale', 'zh-CN']
   ])
   const requests = []
   const fetchStub = async (input, init) => {
@@ -28,7 +27,7 @@ test('logged-in dashboard requests keep credentials on their own origin', async 
       init?.headers || (input instanceof Request ? input.headers : undefined)
     )
     requests.push({ input, init, headers })
-    return Response.json(defaults)
+    return Response.json({})
   }
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
@@ -53,30 +52,6 @@ test('logged-in dashboard requests keep credentials on their own origin', async 
   setupHttpClient()
   globalThis.fetch = window.fetch
 
-  await t.test(
-    'sponsor loading uses the real auth wrapper without leaking a token and writes its cache',
-    async () => {
-      const { loadSponsorCatalog, sponsorCatalog } = await import(
-        '../src/utils/sponsorCatalog.ts'
-      )
-      await loadSponsorCatalog()
-      assert.equal(requests.length, 1)
-      assert.equal(
-        requests[0].input,
-        'https://sponsors.astrbot.app/providers.json'
-      )
-      assert.equal(requests[0].headers.has('Authorization'), false)
-      assert.equal(requests[0].headers.has('Accept-Language'), false)
-      assert.equal(requests[0].headers.get('Accept'), 'application/json')
-      assert.equal(requests[0].init.credentials, 'omit')
-      assert.equal(sponsorCatalog.value.sponsors.length, 3)
-      const cache = JSON.parse(storage.get('astrbot:sponsor-catalog:v2'))
-      assert.equal(cache.catalog.sponsors.length, 3)
-      assert.ok(cache.fetchedAt > 0)
-      await loadSponsorCatalog()
-      assert.equal(requests.length, 1)
-    }
-  )
   await t.test(
     'fetch URL, Request, protocol-relative and different-port destinations do not receive automatic auth',
     async () => {

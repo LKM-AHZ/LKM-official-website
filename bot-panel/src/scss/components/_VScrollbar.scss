@@ -1,12 +1,12 @@
 /* 自定义滚动条样式 - 跟随主题 */
 
 :root {
-  --astrbot-scrollbar-track: rgba(var(--v-theme-primary), 0.08);
-  --astrbot-scrollbar-thumb: rgba(var(--v-theme-primary), 0.72);
-  --astrbot-scrollbar-thumb-hover: rgba(var(--v-theme-primary), 0.84);
-  --astrbot-scrollbar-thumb-active: rgba(var(--v-theme-primary), 0.94);
-  --astrbot-scrollbar-thumb-border: rgba(var(--v-theme-surface), 0.5);
-  --astrbot-scrollbar-thumb-shadow: rgba(var(--v-theme-primary), 0.32);
+  --lkmbot-scrollbar-track: rgba(var(--v-theme-primary), 0.08);
+  --lkmbot-scrollbar-thumb: rgba(var(--v-theme-primary), 0.72);
+  --lkmbot-scrollbar-thumb-hover: rgba(var(--v-theme-primary), 0.84);
+  --lkmbot-scrollbar-thumb-active: rgba(var(--v-theme-primary), 0.94);
+  --lkmbot-scrollbar-thumb-border: rgba(var(--v-theme-surface), 0.5);
+  --lkmbot-scrollbar-thumb-shadow: rgba(var(--v-theme-primary), 0.32);
 }
 
 /* 全局滚动条样式 */
@@ -16,25 +16,25 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--astrbot-scrollbar-track);
+  background: var(--lkmbot-scrollbar-track);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--astrbot-scrollbar-thumb);
+  background: var(--lkmbot-scrollbar-thumb);
   border-radius: 5px;
   transition: all 0.3s ease;
-  border: 1px solid var(--astrbot-scrollbar-thumb-border);
+  border: 1px solid var(--lkmbot-scrollbar-thumb-border);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--astrbot-scrollbar-thumb-hover);
+  background: var(--lkmbot-scrollbar-thumb-hover);
   transform: scale(1.05);
-  box-shadow: 0 2px 8px var(--astrbot-scrollbar-thumb-shadow);
+  box-shadow: 0 2px 8px var(--lkmbot-scrollbar-thumb-shadow);
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: var(--astrbot-scrollbar-thumb-active);
+  background: var(--lkmbot-scrollbar-thumb-active);
 }
 
 ::-webkit-scrollbar-corner {
@@ -49,7 +49,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--astrbot-scrollbar-thumb);
+    background: var(--lkmbot-scrollbar-thumb);
     border: none;
   }
 }
@@ -61,18 +61,18 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--astrbot-scrollbar-track);
+    background: var(--lkmbot-scrollbar-track);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--astrbot-scrollbar-thumb);
+    background: var(--lkmbot-scrollbar-thumb);
     border-radius: 4px;
-    border: 1px solid var(--astrbot-scrollbar-thumb-border);
+    border: 1px solid var(--lkmbot-scrollbar-thumb-border);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--astrbot-scrollbar-thumb-hover);
+    background: var(--lkmbot-scrollbar-thumb-hover);
   }
 }
 
@@ -92,7 +92,7 @@
 @supports not selector(::-webkit-scrollbar) {
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--astrbot-scrollbar-thumb) var(--astrbot-scrollbar-track);
+    scrollbar-color: var(--lkmbot-scrollbar-thumb) var(--lkmbot-scrollbar-track);
   }
 }
 

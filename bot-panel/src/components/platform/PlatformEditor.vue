@@ -84,7 +84,7 @@
           </v-btn>
         </div>
 
-        <AstrBotConfig
+        <BotConfig
           :iterable="draft"
           :metadata="metadata['platform_group']?.metadata"
           metadata-key="platform"
@@ -374,7 +374,7 @@ import {
   configRouteApi,
   fileApi,
 } from "@/api/v1";
-import AstrBotConfig from "@/components/shared/AstrBotConfig.vue";
+import BotConfig from "@/components/shared/BotConfig.vue";
 import ConfigProfileDrawer from "@/components/config/ConfigProfileDrawer.vue";
 import UmoSelector from "@/components/shared/UmoSelector.vue";
 import UmoDisplay from "@/components/shared/UmoDisplay.vue";
@@ -382,7 +382,7 @@ import { ArrowUpRight } from "@lucide/vue";
 import { useModuleI18n } from "@/i18n/composables";
 import { getPlatformIcon, getTutorialLink } from "@/utils/platformUtils";
 
-const SYSTEM_DEFAULT_CONFIG = "__astrbot_system_default__";
+const SYSTEM_DEFAULT_CONFIG = "__lkmbot_system_default__";
 
 const props = defineProps({
   platform: {

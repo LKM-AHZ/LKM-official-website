@@ -2190,13 +2190,13 @@ async function stopCurrentSession() {
 .chat-sidebar {
   top: 0 !important;
   height: 100dvh !important;
-  background: var(--astrbot-chrome-bg, rgb(var(--v-theme-surface)));
+  background: var(--lkmbot-chrome-bg, rgb(var(--v-theme-surface)));
   border-right: 0;
   user-select: none;
 }
 
 .chat-sidebar.collapsed {
-  background: var(--astrbot-chrome-bg, rgb(var(--v-theme-surface)));
+  background: var(--lkmbot-chrome-bg, rgb(var(--v-theme-surface)));
   border-right: 0;
 }
 
@@ -2209,7 +2209,7 @@ async function stopCurrentSession() {
 /* The header draws across the whole width, above the full-height chat sidebar. */
 :global(.chat-sidebar .v-navigation-drawer__content) {
   /* Seat the brand's top edge at the content area's top edge, fully below the toolbar. */
-  padding-top: calc(var(--astrbot-toolbar-height, 40px) - 10px);
+  padding-top: calc(var(--lkmbot-toolbar-height, 40px) - 10px);
   box-sizing: border-box;
 }
 
@@ -2220,7 +2220,7 @@ async function stopCurrentSession() {
 }
 
 :global(html:not([data-astrbot-desktop-platform='macos']) .chat-sidebar .chat-sidebar-brand) {
-  min-height: var(--astrbot-toolbar-height, 40px);
+  min-height: var(--lkmbot-toolbar-height, 40px);
 }
 
 /* On macOS the chat sidebar stays transparent; the shared tint is painted behind it. */
@@ -2231,7 +2231,7 @@ async function stopCurrentSession() {
 /* A temporary (mobile) drawer floats above the page, so the vibrancy
    transparency would let content bleed through; keep it opaque instead. */
 :global(html[data-astrbot-desktop-platform='macos'] .chat-sidebar.v-navigation-drawer--temporary) {
-  background: var(--astrbot-chrome-bg, rgb(var(--v-theme-surface))) !important;
+  background: var(--lkmbot-chrome-bg, rgb(var(--v-theme-surface))) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
   z-index: 1007 !important;
 }
@@ -2246,7 +2246,7 @@ async function stopCurrentSession() {
 :global(html:not([data-astrbot-desktop-platform='macos']) .v-application.v-theme--PurpleThemeDark .v-main.chat-main) {
   background-image: linear-gradient(
     to right,
-    var(--astrbot-chrome-bg, #242424) 0 calc(var(--v-layout-left) + 12px),
+    var(--lkmbot-chrome-bg, #242424) 0 calc(var(--v-layout-left) + 12px),
     transparent calc(var(--v-layout-left) + 12px) 100%
   ) !important;
 }

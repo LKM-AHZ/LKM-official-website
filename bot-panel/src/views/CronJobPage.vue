@@ -418,7 +418,7 @@ const createDialog = ref(false);
 const creating = ref(false);
 const editingJobId = ref("");
 const runningJobIds = ref(new Set<string>());
-const NO_DELIVERY_TARGET_FILTER = "__astrbot_no_delivery_target__";
+const NO_DELIVERY_TARGET_FILTER = "__lkmbot_no_delivery_target__";
 type ScheduleMode =
   | "once"
   | "interval"

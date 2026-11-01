@@ -21,7 +21,7 @@ function getToken(): string | null {
 }
 
 function getLocale(): string | null {
-  return localStorage.getItem('astrbot-locale');
+  return localStorage.getItem('lkmbot-locale');
 }
 
 function setAxiosHeader(

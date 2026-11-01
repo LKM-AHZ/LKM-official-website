@@ -7,8 +7,8 @@ import {
   writePinnedExtensions,
 } from '../src/views/extension/extensionPreferenceStorage.mjs';
 
-test('readPinnedExtensions uses the legacy pinned extension storage key', () => {
-  assert.equal(PINNED_EXTENSIONS_STORAGE_KEY, 'astrbot.pinnedExtensions');
+test('readPinnedExtensions uses the pinned extension storage key', () => {
+  assert.equal(PINNED_EXTENSIONS_STORAGE_KEY, 'lkmbot.pinnedExtensions');
 });
 
 test('readPinnedExtensions parses stored pinned extension names', () => {

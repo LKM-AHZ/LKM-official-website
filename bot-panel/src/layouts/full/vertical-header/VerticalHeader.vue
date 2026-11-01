@@ -44,9 +44,9 @@ const { smAndDown } = useDisplay();
 const { t } = useI18n();
 const { tm } = useModuleI18n("features/chat");
 const route = useRoute();
-const LAST_BOT_ROUTE_KEY = "astrbot:last_bot_route";
-const LAST_CHAT_ROUTE_KEY = "astrbot:last_chat_route";
-const SHOW_PRE_RELEASES_KEY = "astrbot:updateDialog:showPreReleases";
+const LAST_BOT_ROUTE_KEY = "lkmbot:last_bot_route";
+const LAST_CHAT_ROUTE_KEY = "lkmbot:last_chat_route";
+const SHOW_PRE_RELEASES_KEY = "lkmbot:updateDialog:showPreReleases";
 let dialog = ref(false);
 let accountWarning = ref(false);
 let accountWarningMd5 = ref(false);
@@ -133,7 +133,7 @@ const desktopUpdateHasNewVersion = ref(false);
 const desktopUpdateCurrentVersion = ref("-");
 const desktopUpdateLatestVersion = ref("-");
 const desktopUpdateStatus = ref("");
-const desktopDownloadProgress = ref<AstrBotDesktopAppUpdateProgress | null>(null);
+const desktopDownloadProgress = ref<BotDesktopAppUpdateProgress | null>(null);
 const appHasNewVersion = computed(() =>
   isDesktopReleaseMode.value
     ? desktopUpdateHasNewVersion.value
@@ -164,14 +164,14 @@ const chatHeaderStyle = computed(() => {
     // window material in the top-left corner.
     left: "0px",
     width: "100%",
-    "--astrbot-chat-sidebar-width": `${sidebarWidth}px`,
+    "--lkmbot-chat-sidebar-width": `${sidebarWidth}px`,
   };
 });
-const getAppUpdaterBridge = (): AstrBotAppUpdaterBridge | null => {
+const getAppUpdaterBridge = (): BotAppUpdaterBridge | null => {
   if (typeof window === "undefined") {
     return null;
   }
-  const bridge = window.astrbotAppUpdater;
+  const bridge = window.botAppUpdater;
   if (
     bridge &&
     typeof bridge.checkForAppUpdate === "function" &&
@@ -488,7 +488,7 @@ function getVersion() {
     .then((res) => {
       botCurrVersion.value = "v" + (res.data.data.version || "");
       dashboardCurrentVersion.value = res.data.data?.dashboard_version || "";
-      commonStore.setAstrBotVersion(
+      commonStore.setBotVersion(
         res.data.data.version || "",
         res.data.data?.dashboard_version || undefined,
       );
@@ -670,7 +670,7 @@ function resetRestartFeedbackState() {
   restartWaiting.value = false;
 }
 
-async function fetchAstrBotStartTime() {
+async function fetchBotStartTime() {
   const res = await statsApi.startTime();
   const rawStartTime = res.data?.data?.start_time;
   const parsedStartTime =
@@ -716,7 +716,7 @@ function showRestartCompleted() {
   }, 1000);
 }
 
-function waitForAstrBotRestart(
+function waitForBotRestart(
   initialStartTime: number | string | null,
   showWaiting = true,
 ) {
@@ -742,7 +742,7 @@ function waitForAstrBotRestart(
 
   const poll = async () => {
     try {
-      const currentStartTime = await fetchAstrBotStartTime();
+      const currentStartTime = await fetchBotStartTime();
       if (
         initialStartTime !== null &&
         currentStartTime !== null &&
@@ -780,7 +780,7 @@ function applyUpdateProgress(payload: UpdateProgress) {
   };
   if (payload.stage === "restart") {
     stopUpdateProgressPolling();
-    waitForAstrBotRestart(restartStartTime.value);
+    waitForBotRestart(restartStartTime.value);
     return;
   }
   if (payload.status === "success" || payload.status === "error") {
@@ -790,7 +790,7 @@ function applyUpdateProgress(payload: UpdateProgress) {
     stopRestartPolling();
   }
   if (payload.status === "success") {
-    waitForAstrBotRestart(restartStartTime.value);
+    waitForBotRestart(restartStartTime.value);
   }
 }
 
@@ -834,13 +834,13 @@ async function switchVersion(targetVersion: string) {
 
   if (initialStartTime === null) {
     try {
-      initialStartTime = await fetchAstrBotStartTime();
+      initialStartTime = await fetchBotStartTime();
     } catch (_error) {
       initialStartTime = null;
     }
   }
   restartStartTime.value = initialStartTime;
-  waitForAstrBotRestart(initialStartTime, false);
+  waitForBotRestart(initialStartTime, false);
   startUpdateProgressPolling(progressId);
 
   updatesApi
@@ -867,7 +867,7 @@ async function switchVersion(targetVersion: string) {
       console.log(err);
       stopUpdateProgressPolling();
       if (!err?.response && restartPollTimer) {
-        waitForAstrBotRestart(restartStartTime.value);
+        waitForBotRestart(restartStartTime.value);
         updateStatus.value = t("core.header.updateDialog.progress.restarting");
         return;
       }
@@ -2102,7 +2102,7 @@ onMounted(async () => {
 }
 
 .top-header.chat-mode-header {
-  background: var(--astrbot-chrome-bg, #fdfcfc) !important;
+  background: var(--lkmbot-chrome-bg, #fdfcfc) !important;
   border-bottom: 0;
   box-shadow: none !important;
 }
@@ -2548,12 +2548,12 @@ onMounted(async () => {
    mount point avoids moving the toolbar itself and keeps the sidebar brand
    unobstructed. */
 .top-header.chat-mode-header .app-header-context {
-  margin-left: var(--astrbot-chat-sidebar-width, 0px);
+  margin-left: var(--lkmbot-chat-sidebar-width, 0px);
 }
 
 html {
   /* Keep in sync with the app bar height above. */
-  --astrbot-toolbar-height: 40px;
+  --lkmbot-toolbar-height: 40px;
 }
 
 .top-header,
@@ -2566,7 +2566,7 @@ html {
 html[data-astrbot-desktop-platform='macos'] .top-header,
 html[data-astrbot-desktop-platform='macos'] .top-header.chat-mode-header,
 html[data-astrbot-desktop-platform='macos'] .top-header.chat-mode-header.chat-mode-header--dark {
-  background: var(--astrbot-vibrancy-tint, transparent) !important;
+  background: var(--lkmbot-vibrancy-tint, transparent) !important;
 }
 
 /* Keep the toolbar in the normal flow so the content area sits below it instead of

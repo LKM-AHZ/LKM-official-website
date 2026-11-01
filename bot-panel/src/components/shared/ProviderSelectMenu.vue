@@ -426,7 +426,7 @@
         {{ providerEditDialogTitle }}
       </v-card-title>
       <v-card-text class="py-4 config-form">
-        <AstrBotConfig
+        <BotConfig
           v-if="providerEditData"
           :iterable="providerEditData"
           :metadata="providerModelConfigSchema"
@@ -460,7 +460,7 @@
 import { computed, nextTick, ref, shallowRef, watch } from "vue";
 import { useDisplay } from "vuetify";
 import { providerApi } from "@/api/v1";
-import AstrBotConfig from "@/components/shared/AstrBotConfig.vue";
+import BotConfig from "@/components/shared/BotConfig.vue";
 import { useProviderModelConfigDialog } from "@/composables/useProviderModelConfigDialog";
 import ProviderChatCompletionPanel from "@/components/provider/ProviderChatCompletionPanel.vue";
 import ProviderPage from "@/views/ProviderPage.vue";

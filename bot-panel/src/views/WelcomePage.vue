@@ -130,20 +130,6 @@
                 </v-card>
               </v-col>
 
-              <v-col cols="12" sm="4">
-                <!-- Afdian Card -->
-                <v-card variant="outlined" class="h-100 pa-4 d-flex flex-column"
-                  href="https://afdian.com/a/astrbot_team" target="_blank">
-                  <div class="d-flex align-center mb-3">
-                    <v-icon size="32" class="mr-3">mdi-hand-heart</v-icon>
-                    <span class="text-h6 font-weight-bold">{{ tm('resources.afdianTitle') }}</span>
-                  </div>
-                  <p class="text-body-2 text-medium-emphasis mb-0">
-                    {{ tm('resources.afdianDesc') }}
-                  </p>
-                </v-card>
-              </v-col>
-
             </v-row>
           </v-card>
         </v-col>

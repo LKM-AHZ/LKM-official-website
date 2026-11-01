@@ -1,4 +1,4 @@
-export const CHAT_DRAFT_STORAGE_PREFIX = "astrbot.chat.draft.";
+export const CHAT_DRAFT_STORAGE_PREFIX = "lkmbot.chat.draft.";
 
 /**
  * Read the text draft for a session or the new-conversation composer.

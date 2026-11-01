@@ -30,7 +30,7 @@
     "decisionHints": {
       "apiBase": "System One 接口地址。填写基础地址时自动补全 /systemone；以 / 结尾则按完整地址请求。",
       "model": "System One 模型 ID，如 jev-latest、jev-preview，或服务商指定的模型名。",
-      "customHeaders": "附加到 AstrBot 判断请求的 HTTP 请求头。"
+      "customHeaders": "附加到 LKMBot 判断请求的 HTTP 请求头。"
     }
   },
   "availability": {
@@ -104,9 +104,6 @@
     "selector": {
       "ssycloud": "SSYCloud 胜算云",
       "title": "新建模型提供商",
-      "sponsors": "赞助商",
-      "sponsorInfoTitle": "LKMBot 赞助商",
-      "sponsorInfoBody": "LKMBot 是免费开源项目，我们通过赞助支持维持项目运转。使用赞助商渠道接入模型资源时，我们可能获得少量收益。欢迎通过这些渠道支持我们。",
       "providers": "提供商",
       "search": "搜索",
       "clearSearch": "清除搜索",

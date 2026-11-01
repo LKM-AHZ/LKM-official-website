@@ -109,11 +109,20 @@ test("vite base 由 VITE_BASE_PATH 驱动，默认保持根路径", () => {
   assert.match(config, /rewrite:/);
 });
 
-test("构建脚本产出带版本的 dist（否则后端会去上游下载根 base 的 WebUI）", () => {
+// 面板产物不再由 bot 仓库的 dist 提供：构建写进社区站 public/bot，由 Astro 挂 /bot/。
+// 因此这里守住的是「哪个脚本做类型检查、产物落哪」这条新契约，而不是已删除的 build:subpath。
+test("构建脚本：build 带类型检查，build:deploy 留给镜像构建，产物写进社区站 public/bot", () => {
   const pkg = JSON.parse(
     readFileSync(new URL("../package.json", import.meta.url), "utf8"),
   );
-  assert.match(pkg.scripts["build:subpath"], /vite build/);
-  assert.match(pkg.scripts["build:subpath"], /write-dist-version\.mjs/);
-  assert.doesNotMatch(pkg.scripts["build:subpath"], /vue-tsc/);
+  assert.match(pkg.scripts["build"], /vue-tsc --noEmit/);
+  assert.match(pkg.scripts["build"], /vite build/);
+  assert.match(pkg.scripts["build:deploy"], /vite build/);
+  assert.doesNotMatch(pkg.scripts["build:deploy"], /vue-tsc/);
+
+  const config = readFileSync(
+    new URL("../vite.config.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(config, /outDir:\s*'..\/public\/bot'/);
 });

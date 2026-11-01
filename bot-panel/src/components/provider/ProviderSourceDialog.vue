@@ -66,30 +66,6 @@
           <div class="source-group__heading">
             <div class="source-group__label">
               <h3>{{ tm(`providerSources.selector.${group.id}`) }}</h3>
-              <v-tooltip
-                v-if="group.id === 'sponsors'"
-                location="top"
-                max-width="320"
-                content-class="sponsor-info-tooltip"
-              >
-                <template #activator="{ props: tooltipProps }">
-                  <v-btn
-                    v-bind="tooltipProps"
-                    icon="mdi-help-circle-outline"
-                    variant="text"
-                    size="22"
-                    class="source-group__help"
-                    :aria-label="tm('providerSources.selector.sponsorInfoTitle')"
-                  />
-                </template>
-                <div class="sponsor-tooltip">
-                  <div class="sponsor-tooltip__title">
-                    <Heart :size="16" class="sponsor-tooltip__heart" aria-hidden="true" />
-                    {{ tm('providerSources.selector.sponsorInfoTitle') }}
-                  </div>
-                  <div>{{ tm('providerSources.selector.sponsorInfoBody') }}</div>
-                </div>
-              </v-tooltip>
             </div>
             <span class="source-group__count">{{ group.items.length }}</span>
           </div>
@@ -118,16 +94,7 @@
                 <span v-else class="source-card__initial" aria-hidden="true">{{ source.label.charAt(0) }}</span>
               </span>
               <span class="source-card__copy">
-                <a
-                  v-if="source.isSponsor && source.website_url"
-                  class="source-card__name source-card__link"
-                  :href="source.website_url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ source.label }}
-                </a>
-                <span v-else class="source-card__name">{{ source.label }}</span>
+                <span class="source-card__name">{{ source.label }}</span>
                 <span v-if="source.subtitle" class="source-card__subtitle">{{ source.subtitle }}</span>
               </span>
             </div>
@@ -142,9 +109,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { Heart } from '@lucide/vue'
-import { loadSponsorCatalog } from '@/utils/sponsorCatalog'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   sourceTypes: { type: Array, default: () => [] },
@@ -154,12 +119,7 @@ const emit = defineEmits(['select'])
 const open = ref(false)
 const search = ref('')
 
-watch(open, value => {
-  if (value) void loadSponsorCatalog()
-})
-
 const groups = computed(() => {
-  const sponsorKeys = ['MiraRouter', 'SSYCloud(胜算云)']
   const preferredKeys = [
     'OpenAI Compatible', 'OpenAI Responses', 'Google Gemini', 'Anthropic',
     'DeepSeek', 'DeepSeek Responses', 'Moonshot', 'Kimi Coding Plan',
@@ -177,27 +137,18 @@ const groups = computed(() => {
     MiraRouter: 'mirarouter.com',
     'SSYCloud(胜算云)': 'shengsuanyun.com'
   }
-  const sponsors = [
-    ...props.sourceTypes.filter(source => source.isSponsor && !sponsorKeys.includes(source.value)),
-    ...sponsorKeys.map(key => props.sourceTypes.find(source => source.value === key)).filter(Boolean)
-  ]
-  const providers = props.sourceTypes.filter(source => !sponsors.includes(source))
   const query = (search.value || '').trim().toLowerCase()
-  const sources = [
-    ...sponsors,
-    ...preferredKeys.map(key => providers.find(source => source.value === key)).filter(Boolean),
-    ...providers.filter(source => !preferredKeys.includes(source.value))
-  ].map(source => ({
+  const providers = [
+    ...preferredKeys.map(key => props.sourceTypes.find(source => source.value === key)).filter(Boolean),
+    ...props.sourceTypes.filter(source => !preferredKeys.includes(source.value))
+  ]
+  const sources = providers.map(source => ({
     ...source,
     label: labels[source.value] || source.label,
-    subtitle: source.subtitle ?? domains[source.value] ?? '',
-    isSponsor: source.isSponsor || sponsorKeys.includes(source.value)
+    subtitle: source.subtitle ?? domains[source.value] ?? ''
   })).filter(source => `${source.value} ${source.label} ${source.subtitle}`.toLowerCase().includes(query))
 
-  return [
-    { id: 'sponsors', items: sources.filter(source => source.isSponsor) },
-    { id: 'providers', items: sources.filter(source => !source.isSponsor) }
-  ].filter(group => group.items.length > 0)
+  return [{ id: 'providers', items: sources }].filter(group => group.items.length > 0)
 })
 
 function selectSource(value) {
@@ -294,40 +245,6 @@ function selectSource(value) {
   gap: 5px;
 }
 
-.source-group__help {
-  color: rgba(var(--v-theme-on-surface), 0.5);
-}
-
-.source-group__help :deep(.v-icon) {
-  font-size: 16px;
-}
-
-:global(.v-tooltip > .v-overlay__content.sponsor-info-tooltip) {
-  padding: 14px 16px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
-  border-radius: 12px;
-  background: rgb(var(--v-theme-surface));
-  color: rgb(var(--v-theme-on-surface));
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-}
-
-.sponsor-tooltip {
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.sponsor-tooltip__title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  font-weight: 600;
-}
-
-.sponsor-tooltip__heart {
-  flex-shrink: 0;
-}
-
 .source-group__count {
   color: rgba(var(--v-theme-on-surface), 0.42);
   font-size: 12px;
@@ -339,11 +256,6 @@ function selectSource(value) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: start;
   gap: 6px 10px;
-}
-
-.source-group--sponsors .source-grid {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
 }
 
 .source-card {
@@ -382,8 +294,7 @@ function selectSource(value) {
   cursor: pointer;
 }
 
-.source-card__select:focus-visible,
-.source-card__link:focus-visible {
+.source-card__select:focus-visible {
   outline: 2px solid rgb(var(--v-theme-primary));
   outline-offset: 3px;
 }
@@ -391,24 +302,6 @@ function selectSource(value) {
 .source-card__icon,
 .source-card__copy {
   pointer-events: none;
-}
-
-.source-card__link {
-  position: relative;
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  pointer-events: auto;
-  color: inherit;
-  text-decoration: none;
-  border-radius: 3px;
-}
-
-.source-card__link:hover {
-  color: rgb(var(--v-theme-primary));
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .source-card__icon {
@@ -445,16 +338,6 @@ function selectSource(value) {
   font-size: 11px;
   line-height: 16px;
   overflow-wrap: anywhere;
-}
-
-.source-card--sponsors {
-  min-height: 62px;
-  border-color: rgba(var(--v-theme-on-surface), 0.09);
-  border-radius: 14px;
-}
-
-.source-card--sponsors .source-card__name {
-  font-weight: 600;
 }
 
 .source-dialog__empty {

@@ -12,7 +12,7 @@ import { useMobileDrawerStore } from "@/stores/mobileDrawer";
 import { statsApi } from "@/api/v1";
 import { useI18n } from "@/i18n/composables";
 
-const FIRST_NOTICE_SEEN_KEY = "astrbot:first_notice_seen:v1";
+const FIRST_NOTICE_SEEN_KEY = "lkmbot:first_notice_seen:v1";
 
 const customizer = useCustomizerStore();
 const commonStore = useCommonStore();
@@ -95,7 +95,7 @@ onMounted(() => {
     try {
       const response = await statsApi.version();
       if (response.data.status === "ok") {
-        commonStore.setAstrBotVersion(
+        commonStore.setBotVersion(
           response.data.data?.version,
           response.data.data?.dashboard_version,
         );
@@ -194,7 +194,7 @@ onMounted(() => {
 }
 
 :global(.v-main) {
-  height: calc(100dvh - var(--astrbot-toolbar-height, 40px)) !important;
+  height: calc(100dvh - var(--lkmbot-toolbar-height, 40px)) !important;
   padding-top: 0 !important;
   overflow: hidden !important;
   /* The document no longer scrolls; the content area does. Sticky offsets that were
@@ -204,9 +204,9 @@ onMounted(() => {
 
 /* Keep the card frame fixed while its content scrolls inside the rounded edges. */
 :global(.page-wrapper) {
-  --astrbot-content-gap: 6px;
-  height: calc(100dvh - var(--astrbot-toolbar-height, 40px) - var(--astrbot-content-gap)) !important;
-  width: calc(100% - var(--astrbot-content-gap));
+  --lkmbot-content-gap: 6px;
+  height: calc(100dvh - var(--lkmbot-toolbar-height, 40px) - var(--lkmbot-content-gap)) !important;
+  width: calc(100% - var(--lkmbot-content-gap));
   min-height: 0;
   margin: 0;
   padding: 0 !important;
@@ -221,7 +221,7 @@ onMounted(() => {
    card's edge treatments would only read as stray lines. */
 @media (max-width: 959.98px) {
   :global(.page-wrapper) {
-    --astrbot-content-gap: 0px;
+    --lkmbot-content-gap: 0px;
     border-left: 0;
     border-right: 0;
     border-bottom: 0;
@@ -259,21 +259,21 @@ onMounted(() => {
 :global(html) {
   /* Shared chrome background for the top toolbar and the sidebars, so the
      header and sidebar always read as one surface in both themes. */
-  --astrbot-chrome-bg: #fdfcfc;
+  --lkmbot-chrome-bg: #fdfcfc;
 }
 
 :global(html .v-application.v-theme--PurpleThemeDark) {
-  --astrbot-chrome-bg: rgb(var(--v-theme-background));
+  --lkmbot-chrome-bg: rgb(var(--v-theme-background));
 }
 
 :global(html[data-astrbot-desktop-platform='macos']) {
   /* Bias the native window material toward white in light mode, black in dark mode.
      Mostly opaque so the chrome reads as light even when the material behind is dark. */
-  --astrbot-vibrancy-tint: rgba(253, 252, 252, 0.92);
+  --lkmbot-vibrancy-tint: rgba(253, 252, 252, 0.92);
 }
 
 :global(html[data-astrbot-desktop-platform='macos'] .v-application.v-theme--PurpleThemeDark) {
-  --astrbot-vibrancy-tint: rgba(26, 26, 26, 0.92);
+  --lkmbot-vibrancy-tint: rgba(26, 26, 26, 0.92);
 }
 
 /* Extend the sidebar surface behind every corner and the right/bottom gaps. */
@@ -290,7 +290,7 @@ onMounted(() => {
 
 /* Keep the macOS tint continuous behind the sidebar and the card gaps. */
 :global(html[data-astrbot-desktop-platform='macos'] .v-main) {
-  background: var(--astrbot-vibrancy-tint, transparent) !important;
+  background: var(--lkmbot-vibrancy-tint, transparent) !important;
 }
 
 /* Vuetify paints its own surface behind every list, which would sit on top of the

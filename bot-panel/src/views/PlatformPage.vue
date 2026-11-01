@@ -377,14 +377,14 @@ onMounted(() => {
   getConfig();
   getPlatformStats();
   statsRefreshInterval = window.setInterval(getPlatformStats, 5000);
-  window.addEventListener("astrbot-locale-changed", handleLocaleChange);
+  window.addEventListener("lkmbot-locale-changed", handleLocaleChange);
 });
 
 onBeforeUnmount(() => {
   if (statsRefreshInterval) {
     window.clearInterval(statsRefreshInterval);
   }
-  window.removeEventListener("astrbot-locale-changed", handleLocaleChange);
+  window.removeEventListener("lkmbot-locale-changed", handleLocaleChange);
 });
 
 async function getConfig(preferredPlatformId = null) {

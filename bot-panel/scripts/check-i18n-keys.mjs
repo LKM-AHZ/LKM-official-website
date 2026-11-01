@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * i18n key checker for the AstrBot dashboard.
+ * i18n key checker for the LKMBot dashboard.
  *
  * Verifies that every statically-resolvable translation key used in dashboard/src
  * actually exists in all four locale bundles.
@@ -26,7 +26,7 @@ const DASHBOARD = path.resolve(__dirname, '..');
 const SRC = path.join(DASHBOARD, 'src');
 const LOCALES = path.join(SRC, 'i18n', 'locales');
 
-const LANGS = ['zh-CN', 'en-US', 'ru-RU', 'ja-JP'];
+const LANGS = ['zh-CN', 'en-US'];
 const BASE = 'zh-CN';
 const VERBOSE = process.argv.includes('--verbose');
 
@@ -80,7 +80,7 @@ function buildTree(lang) {
         i += m[0].length;
         const rel = varToFile.get(m[0]);
         if (!rel) throw new Error(`unresolved reference ${m[0]} in ${lang}/index.ts`);
-        // ~29/37 ru-RU bundles carry a UTF-8 BOM, which JSON.parse rejects.
+        // Some bundles may carry a UTF-8 BOM, which JSON.parse rejects.
         const raw = fs.readFileSync(path.join(dir, rel), 'utf8').replace(/^\uFEFF/, '');
         out[key] = JSON.parse(raw);
       }
@@ -364,7 +364,7 @@ let failed = false;
 
 console.log('\n[A] keys used in source but missing from a bundle');
 if (codeProblems.size === 0) {
-  console.log('  OK - every statically-resolvable key resolves in all four locales');
+  console.log(`  OK - every statically-resolvable key resolves in all ${LANGS.length} locales`);
 } else {
   failed = true;
   for (const [key, rec] of [...codeProblems].sort()) {

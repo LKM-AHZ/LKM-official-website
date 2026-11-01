@@ -58,7 +58,7 @@
           </header>
 
           <div class="config-standard-section__groups">
-            <AstrBotConfigV4
+            <BotConfigV4
               v-for="(sectionMetadata, metadataKey) in section.value.metadata"
               :key="metadataKey"
               :metadata="{ [metadataKey]: sectionMetadata }"
@@ -95,7 +95,7 @@
 
 <script>
 import AiConfigPanel from '@/components/config/AiConfigPanel.vue';
-import AstrBotConfigV4 from '@/components/shared/AstrBotConfigV4.vue';
+import BotConfigV4 from '@/components/shared/BotConfigV4.vue';
 import PluginSetSelector from '@/components/shared/PluginSetSelector.vue';
 import { useModuleI18n } from '@/i18n/composables';
 
@@ -109,10 +109,10 @@ const SECTION_ICONS = {
 };
 
 export default {
-  name: 'AstrBotCoreConfigWrapper',
+  name: 'BotCoreConfigWrapper',
   components: {
     AiConfigPanel,
-    AstrBotConfigV4,
+    BotConfigV4,
     PluginSetSelector
   },
   props: {

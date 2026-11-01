@@ -225,12 +225,12 @@ loadToolsMeta();
 loadSkillsMeta();
 
 onMounted(() => {
-  window.addEventListener("astrbot:persona-saved", handlePersonaSaved);
+  window.addEventListener("lkmbot:persona-saved", handlePersonaSaved);
 });
 
 onBeforeUnmount(() => {
   window.clearTimeout(savedTimer);
-  window.removeEventListener("astrbot:persona-saved", handlePersonaSaved);
+  window.removeEventListener("lkmbot:persona-saved", handlePersonaSaved);
 });
 </script>
 

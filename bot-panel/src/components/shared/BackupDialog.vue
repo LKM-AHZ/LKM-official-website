@@ -219,7 +219,7 @@
                             <v-alert type="info" variant="tonal" class="mb-4">
                                 {{ t('features.settings.backup.import.restartRequired') }}
                             </v-alert>
-                            <v-btn color="primary" variant="tonal" @click="restartAstrBot" class="mr-2">
+                            <v-btn color="primary" variant="tonal" @click="restartBot" class="mr-2">
                                 <v-icon class="mr-2">mdi-restart</v-icon>
                                 {{ t('features.settings.backup.import.restartNow') }}
                             </v-btn>
@@ -383,7 +383,7 @@ import { backupApi } from '@/api/v1'
 import { useChunkedUpload } from '@/composables/useChunkedUpload'
 import { useI18n } from '@/i18n/composables'
 import { askForConfirmation, useConfirmDialog } from '@/utils/confirmDialog'
-import { restartAstrBot as restartAstrBotRuntime } from '@/utils/restartAstrBot'
+import { restartBot as restartBotRuntime } from '@/utils/restartBot'
 import WaitingForRestart from './WaitingForRestart.vue'
 
 const { t } = useI18n()
@@ -855,9 +855,9 @@ const formatISODate = (isoString) => {
 }
 
 // 重启 LKMBot
-const restartAstrBot = async () => {
+const restartBot = async () => {
     try {
-        await restartAstrBotRuntime(wfr.value)
+        await restartBotRuntime(wfr.value)
     } catch (error) {
         console.error(error)
     }

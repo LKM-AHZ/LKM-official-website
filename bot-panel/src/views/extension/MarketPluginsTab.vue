@@ -204,7 +204,7 @@ const openMarketPluginDetail = (plugin) => {
               class="plugin-view-tab text-none"
               :ripple="false"
             >
-              {{ tm("titles.installedAstrBotPlugins") }}
+              {{ tm("titles.installedBotPlugins") }}
             </v-tab>
             <v-tab
               value="market"

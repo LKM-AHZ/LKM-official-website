@@ -1358,11 +1358,19 @@
         "description": "对外可达的回调接口地址",
         "hint": "外部服务可能会通过 LKMBot 生成的回调链接(如文件下载链接)访问 LKMBot 后端。由于 LKMBot 无法自动判断部署环境中对外可达的主机地址(host),因此需要通过此配置项显式指定外部服务如何访问 LKMBot 的地址。如 [http://localhost:6185](http://localhost:6185),[https://example.com](https://example.com) 等。"
       },
+      "media_storage_mode": {
+        "description": "媒体存储方式",
+        "hint": "auto：优先存入社区后端对象存储，失败或未接入时回落到本地文件服务；local：只用本地文件服务（需要配置上面的「对外可达的回调接口地址」）；backend：只用后端，未接入时媒体无法发送。"
+      },
       "disable_metrics": {
         "description": "禁用匿名使用统计",
         "hint": "禁用后，LKMBot 将不再上传匿名使用统计数据。"
       },
       "dashboard": {
+        "auth_mode": {
+          "description": "面板登录方式",
+          "hint": "local：使用面板自己的账号密码；both：面板账号密码或社区管理员账号均可登录；backend：仅接受社区管理员账号（社区账号服务不可用时会直接登录失败，不会回退到面板密码）。"
+        },
         "trust_proxy_headers": {
           "description": "信任代理请求头获取客户端 IP",
           "hint": "关闭时忽略 X-Forwarded-For/X-Real-IP，仅使用连接地址。"
@@ -1555,7 +1563,7 @@
 
       "custom_headers": {
         "description": "自定义请求头",
-        "hint": "此处添加的键值对将作为自定义 HTTP 请求头，附加到 AstrBot 发往模型服务商的请求中。值必须为字符串。"
+        "hint": "此处添加的键值对将作为自定义 HTTP 请求头，附加到 LKMBot 发往模型服务商的请求中。值必须为字符串。"
       },
       "ollama_disable_thinking": {
         "description": "关闭思考模式",

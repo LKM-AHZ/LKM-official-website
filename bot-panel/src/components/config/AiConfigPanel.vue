@@ -46,7 +46,7 @@
           <div>
             <h3 class="ai-config-panel__section-title">
               <span>{{ runnerSettingsTitle }}</span>
-              <AstrBotLogo
+              <BotLogo
                 v-if="runnerType === 'local'"
                 class="ai-config-panel__brand-logo"
               />
@@ -74,7 +74,7 @@
           </div>
 
           <div class="config-product-groups">
-            <AstrBotConfigV4
+            <BotConfigV4
               v-for="group in activeLocalGroups"
               :key="group.key"
               :metadata="{ [group.key]: group.metadata }"
@@ -86,7 +86,7 @@
         </template>
 
         <div v-else class="config-product-groups">
-          <AstrBotConfigV4
+          <BotConfigV4
             v-if="thirdPartyRunnerGroup"
             :metadata="{ [thirdPartyRunnerGroup.key]: thirdPartyRunnerGroup.metadata }"
             :iterable="configData"
@@ -107,7 +107,7 @@
         </div>
 
         <div class="config-product-groups">
-          <AstrBotConfigV4
+          <BotConfigV4
             v-for="group in commonGroups"
             :key="group.key"
             :metadata="{ [group.key]: group.metadata }"
@@ -197,8 +197,8 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
-import AstrBotLogo from '@/components/chat/ChatUILogo.vue';
-import AstrBotConfigV4 from '@/components/shared/AstrBotConfigV4.vue';
+import BotLogo from '@/components/chat/ChatUILogo.vue';
+import BotConfigV4 from '@/components/shared/BotConfigV4.vue';
 import StyledMenu from '@/components/shared/StyledMenu.vue';
 import { useModuleI18n } from '@/i18n/composables';
 

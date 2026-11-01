@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { useI18n } from "@/i18n/composables";
 
 const props = defineProps<{
-  progress: AstrBotDesktopAppUpdateProgress | null;
+  progress: BotDesktopAppUpdateProgress | null;
 }>();
 const { t } = useI18n();
 const downloaded = computed(() => {

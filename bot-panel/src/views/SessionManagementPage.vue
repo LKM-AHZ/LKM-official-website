@@ -561,7 +561,7 @@ import UmoDisplay from '@/components/shared/UmoDisplay.vue'
 import { useI18n, useModuleI18n } from '@/i18n/composables'
 import { askForConfirmation as askForConfirmationDialog, useConfirmDialog } from '@/utils/confirmDialog'
 
-const FOLLOW_CONFIG_VALUE = '__astrbot_follow_config__'
+const FOLLOW_CONFIG_VALUE = '__lkmbot_follow_config__'
 
 export default {
   name: 'SessionManagementPage',
@@ -1087,7 +1087,7 @@ export default {
               }),
             )
           } else if (this.editingRules[`provider_perf_${type}`]) {
-            // 选择了"跟随配置文件" (__astrbot_follow_config__) 且之前有配置，则删除
+            // 选择了"跟随配置文件" (__lkmbot_follow_config__) 且之前有配置，则删除
             deleteTasks.push(
               sessionApi.deleteRules({
                 umo: this.selectedUmo.umo,

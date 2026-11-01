@@ -9,7 +9,7 @@
     "market": "LKMBot Plugin Market"
   },
   "titles": {
-    "installedAstrBotPlugins": "Installed"
+    "installedBotPlugins": "Installed"
   },
   "failedPlugins": {
     "title": "Failed to Load Plugins ({count})",
@@ -134,7 +134,7 @@
       "stars": "Stars",
       "updatedAt": "Updated At",
       "tags": "Tags",
-      "astrbotVersion": "LKMBot Version Requirement",
+      "botVersion": "LKMBot Version Requirement",
       "supportPlatforms": "Supported Platforms",
       "authorWebsite": "Author Website",
       "repository": "Repository"
@@ -461,7 +461,7 @@
       "handlersCount": " handlers",
       "supportPlatform": "Supported Platform",
       "supportPlatformsCount": "Supports {count} Platforms",
-      "astrbotVersion": "LKMBot Version Requirement"
+      "botVersion": "LKMBot Version Requirement"
     },
     "alt": {
       "logo": "logo",

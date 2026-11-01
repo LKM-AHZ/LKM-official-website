@@ -76,8 +76,8 @@ export interface ApiEnvelope<T> {
   data: T;
 }
 
-export const UPGRADE_RECOVERY_EVENT = 'astrbot-upgrade-recovery';
-export const UPGRADE_RECOVERY_TOKEN_KEY = 'astrbot-upgrade-recovery-token';
+export const UPGRADE_RECOVERY_EVENT = 'lkmbot-upgrade-recovery';
+export const UPGRADE_RECOVERY_TOKEN_KEY = 'lkmbot-upgrade-recovery-token';
 
 export type OpenConfig = DynamicConfig;
 

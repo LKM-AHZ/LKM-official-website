@@ -9,7 +9,7 @@
     "handlersOperation": "管理行为"
   },
   "titles": {
-    "installedAstrBotPlugins": "已安装"
+    "installedBotPlugins": "已安装"
   },
   "failedPlugins": {
     "title": "加载失败插件（{count}）",
@@ -134,7 +134,7 @@
       "stars": "Star数",
       "updatedAt": "更新时间",
       "tags": "标签",
-      "astrbotVersion": "LKMBot 版本要求",
+      "botVersion": "LKMBot 版本要求",
       "supportPlatforms": "支持平台",
       "authorWebsite": "作者网站",
       "repository": "仓库"
@@ -461,7 +461,7 @@
       "handlersCount": "个行为",
       "supportPlatform": "支持平台",
       "supportPlatformsCount": "支持 {count} 个平台",
-      "astrbotVersion": "LKMBot 版本要求"
+      "botVersion": "LKMBot 版本要求"
     },
     "alt": {
       "logo": "logo",

@@ -372,20 +372,24 @@ function normalizeTracePayload(payload) {
   const attrs = summary.attributes || {};
   const finished = summary.state !== "running";
   const time = Number(payload.time_unix_nano || summary.updated_time_unix_nano || summary.start_time_unix_nano) / 1e9;
+  // Span attributes are emitted by the bot backend with the ``bot.`` prefix (see
+  // bot/core/utils/trace.py). The UMO is ``platform_id:message_type:session_id``, so
+  // platform/message type fall back to parsing it when no dedicated attribute exists.
+  const umo = attrs["bot.umo"] || "";
   const meta = {
     span_id: summary.trace_id, name: summary.name, model_version: 3,
-    umo: attrs["astrbot.umo"] || "", sender_name: attrs["astrbot.sender_name"] || "",
-    message_type: attrs["astrbot.message_type"] || attrs["astrbot.umo"]?.split(":")[1] || "",
-    message_outline: attrs["astrbot.message_outline"] || "",
-    plugin_names: attrs["astrbot.plugins"] || "",
-    platform_id: attrs["astrbot.platform_id"] || "",
-    platform_name: attrs["astrbot.platform_name"] || "",
+    umo, sender_name: attrs["bot.sender_name"] || "",
+    message_type: attrs["bot.message_type"] || umo.split(":")[1] || "",
+    message_outline: attrs["bot.message_outline"] || "",
+    plugin_names: attrs["bot.plugins"] || "",
+    platform_id: attrs["bot.platform_id"] || umo.split(":")[0] || "",
+    platform_name: attrs["bot.platform_name"] || "",
     time: Number(summary.start_time_unix_nano) / 1e9,
     last_time: Number(summary.end_time_unix_nano) / 1e9 || time,
     completed: finished, status: summary.has_errors ? "error" : finished ? "success" : "running",
     has_models: summary.has_models, has_plugins: summary.has_plugins,
     has_commands: summary.has_commands ?? (payload.spans
-      ? payload.spans.some((span) => span.attributes?.["astrbot.handler_category"] === "command")
+      ? payload.spans.some((span) => span.attributes?.["bot.handler_category"] === "command")
       : undefined),
     span_count: summary.span_count, truncated: summary.truncated,
     model_updated_ns: String(summary.updated_time_unix_nano || summary.start_time_unix_nano),
@@ -402,7 +406,7 @@ function normalizeTracePayload(payload) {
     const inspectedModel = item.span ? { ...model, events: undefined } : model;
     const fields = {};
     for (const [key, value] of Object.entries(model.attributes || {})) {
-      if (!key.startsWith("astrbot.")) continue;
+      if (!key.startsWith("lkmbot.")) continue;
       const name = key.slice(8);
       fields[name] = value;
       if (["chat_provider", "stats", "tools", "tool_name"].includes(name) && typeof value === "string") {

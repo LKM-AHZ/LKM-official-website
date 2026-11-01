@@ -1,5 +1,5 @@
 <script setup>
-import AstrBotConfig from "@/components/shared/AstrBotConfig.vue";
+import BotConfig from "@/components/shared/BotConfig.vue";
 import ConsoleDisplayer from "@/components/shared/ConsoleDisplayer.vue";
 import ReadmeDialog from "@/components/shared/ReadmeDialog.vue";
 import ProxySelector from "@/components/shared/ProxySelector.vue";
@@ -331,7 +331,7 @@ const updateDialogPluginLogo = computed(() => {
         {{
           selectedDetailTab === "market"
             ? tm("tabs.market")
-            : tm("titles.installedAstrBotPlugins")
+            : tm("titles.installedBotPlugins")
         }}
         <v-icon icon="mdi-chevron-right" size="24" class="mx-1" />
         {{ selectedPluginId }}
@@ -421,7 +421,7 @@ const updateDialogPluginLogo = computed(() => {
           </v-col>
         </v-row>
         <v-divider class="config-divider"></v-divider>
-        <AstrBotConfig
+        <BotConfig
           v-if="extension_config.metadata"
           :metadata="extension_config.metadata"
           :iterable="extension_config.config"
@@ -706,7 +706,7 @@ const updateDialogPluginLogo = computed(() => {
               variant="outlined"
               class="mr-2 mb-2"
             >
-              {{ tm("card.status.astrbotVersion") }}:
+              {{ tm("card.status.botVersion") }}:
               {{ selectedInstallPlugin.astrbot_version }}
             </v-chip>
             <v-chip
@@ -844,7 +844,7 @@ const updateDialogPluginLogo = computed(() => {
                     variant="outlined"
                     class="mr-2 mb-2"
                   >
-                    {{ tm("card.status.astrbotVersion") }}:
+                    {{ tm("card.status.botVersion") }}:
                     {{ selectedInstallPlugin.astrbot_version }}
                   </v-chip>
                   <v-chip

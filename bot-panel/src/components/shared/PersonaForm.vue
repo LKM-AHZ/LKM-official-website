@@ -345,7 +345,7 @@ async function savePersona() {
       : await personaApi.create(payload);
     if (response.data?.status === "ok") {
       emit("saved", response.data?.message || tm("messages.saveSuccess"));
-      window.dispatchEvent(new CustomEvent("astrbot:persona-saved"));
+      window.dispatchEvent(new CustomEvent("lkmbot:persona-saved"));
       closeDialog();
     } else {
       emit("error", response.data?.message || tm("messages.saveError"));

@@ -1,4 +1,4 @@
-export const PINNED_EXTENSIONS_STORAGE_KEY = "astrbot.pinnedExtensions";
+export const PINNED_EXTENSIONS_STORAGE_KEY = "lkmbot.pinnedExtensions";
 
 const getStorageForRead = (storageOverride) => {
   if (storageOverride === null) {

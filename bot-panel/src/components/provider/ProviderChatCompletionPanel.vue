@@ -29,8 +29,6 @@
               <ProviderSourceSubtitle
                 class="provider-config-subtitle"
                 :api-base="selectedProviderSource.api_base"
-                :sponsor="selectedSponsor"
-                :tm="tm"
               />
             </div>
 
@@ -56,7 +54,7 @@
               <div class="provider-section-head">
                 <div class="provider-section-title">{{ tm('providers.settings') }}</div>
               </div>
-              <AstrBotConfig
+              <BotConfig
                 v-if="basicSourceConfig"
                 :iterable="basicSourceConfig"
                 :metadata="providerSourceSchema"
@@ -78,7 +76,7 @@
                 <v-icon class="provider-section-chevron" size="20">mdi-chevron-right</v-icon>
               </summary>
               <div class="provider-section-content">
-                <AstrBotConfig
+                <BotConfig
                   :iterable="advancedSourceConfig"
                   :metadata="providerSourceSchema"
                   metadataKey="provider"
@@ -160,7 +158,7 @@
           {{ providerEditDialogTitle }}
         </v-card-title>
         <v-card-text class="py-4 config-form">
-          <AstrBotConfig
+          <BotConfig
             v-if="providerEditData"
             :iterable="providerEditData"
             :metadata="providerModelConfigSchema"
@@ -198,7 +196,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useModuleI18n } from '@/i18n/composables'
-import AstrBotConfig from '@/components/shared/AstrBotConfig.vue'
+import BotConfig from '@/components/shared/BotConfig.vue'
 import ProviderModelsPanel from '@/components/provider/ProviderModelsPanel.vue'
 import ProviderSourceSubtitle from '@/components/provider/ProviderSourceSubtitle.vue'
 import ProviderSourcesPanel from '@/components/provider/ProviderSourcesPanel.vue'
@@ -226,7 +224,6 @@ function showMessage(message, color = 'success') {
 
 const {
   selectedProviderSource,
-  selectedSponsor,
   availableModels,
   loadingModels,
   savingSource,

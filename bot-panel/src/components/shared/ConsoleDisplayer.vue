@@ -1006,7 +1006,7 @@ export default {
   display: block;
   margin: 0 0 2px;
   font-family: SFMono-Regular, Menlo, Monaco, Consolas,
-    var(--astrbot-font-cjk-mono), monospace;
+    var(--lkmbot-font-cjk-mono), monospace;
   font-size: var(--console-log-font-size, 12px);
   white-space: pre-wrap;
 }

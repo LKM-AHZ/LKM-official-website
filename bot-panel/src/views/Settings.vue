@@ -35,7 +35,7 @@
                                 size="small"
                                 variant="tonal"
                                 class="system-config-restart-bar__button"
-                                @click="restartAstrBot"
+                                @click="restartBot"
                             >
                                 <v-icon class="mr-1" size="17">mdi-restart</v-icon>
                                 {{ tm('system.restart.button') }}
@@ -78,7 +78,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <AstrBotConfigV4
+                                <BotConfigV4
                                     :metadata="group.metadata"
                                     :iterable="systemConfigData"
                                     :metadata-key="group.key"
@@ -146,7 +146,7 @@
                                 @focusout.capture="scheduleSystemConfigAutoSave"
                             >
                                 <div class="system-config-group__title">{{ group.title }}</div>
-                                <AstrBotConfigV4
+                                <BotConfigV4
                                     :metadata="group.metadata"
                                     :iterable="systemConfigData"
                                     :metadata-key="group.key"
@@ -193,7 +193,7 @@
                                 @focusout.capture="scheduleSystemConfigAutoSave"
                             >
                                 <div class="system-config-group__title">{{ group.title }}</div>
-                                <AstrBotConfigV4
+                                <BotConfigV4
                                     :metadata="group.metadata"
                                     :iterable="systemConfigData"
                                     :metadata-key="group.key"
@@ -238,7 +238,7 @@
                                     <div class="settings-item__subtitle">{{ tm('system.restart.subtitle') }}</div>
                                 </div>
                                 <div class="settings-item__control">
-                                    <v-btn color="error" variant="tonal" @click="restartAstrBot">
+                                    <v-btn color="error" variant="tonal" @click="restartBot">
                                         <v-icon class="mr-2">mdi-restart</v-icon>
                                         {{ tm('system.restart.button') }}
                                     </v-btn>
@@ -499,7 +499,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { apiKeyApi, systemConfigApi } from '@/api/v1';
-import AstrBotConfigV4 from '@/components/shared/AstrBotConfigV4.vue';
+import BotConfigV4 from '@/components/shared/BotConfigV4.vue';
 import WaitingForRestart from '@/components/shared/WaitingForRestart.vue';
 import ProxySelector from '@/components/shared/ProxySelector.vue';
 import PypiMirrorSelector from '@/components/shared/PypiMirrorSelector.vue';
@@ -508,7 +508,7 @@ import StorageCleanupPanel from '@/components/shared/StorageCleanupPanel.vue';
 import LogExportButton from '@/components/shared/LogExportButton.vue';
 import DashboardTwoFactorDialog from '@/components/shared/DashboardTwoFactorDialog.vue';
 import ChangelogDialog from '@/components/shared/ChangelogDialog.vue';
-import { restartAstrBot as restartAstrBotRuntime } from '@/utils/restartAstrBot';
+import { restartBot as restartBotRuntime } from '@/utils/restartBot';
 import { copyToClipboard } from '@/utils/clipboard';
 import { useI18n, useModuleI18n } from '@/i18n/composables';
 import { useTheme } from 'vuetify';
@@ -1101,12 +1101,12 @@ const deleteApiKey = async (keyId) => {
     }
 };
 
-const restartAstrBot = async () => {
+const restartBot = async () => {
     const confirmed = await askForConfirmation(tm('system.restart.confirm'), confirmDialog);
     if (!confirmed) return;
 
     try {
-        await restartAstrBotRuntime(wfr.value);
+        await restartBotRuntime(wfr.value);
     } catch (error) {
         console.error(error);
     }

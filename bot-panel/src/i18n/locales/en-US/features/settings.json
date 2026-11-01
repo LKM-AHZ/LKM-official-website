@@ -81,7 +81,7 @@
     },
     "pypiMirror": {
       "title": "PyPI Package Index",
-      "subtitle": "PyPI index used by pip when installing AstrBot's Python dependencies. Pick a mirror or a custom URL. Restart AstrBot for changes to take effect.",
+      "subtitle": "PyPI index used by pip when installing LKMBot's Python dependencies. Pick a mirror or a custom URL. Restart LKMBot for changes to take effect.",
       "label": "Select PyPI Source",
       "custom": "Custom",
       "customPlaceholder": "https://example.com/pypi/simple",
@@ -183,7 +183,7 @@
     },
     "diagnostics": {
       "title": "Diagnostics",
-      "subtitle": "Export a diagnostic bundle to troubleshoot AstrBot."
+      "subtitle": "Export a diagnostic bundle to troubleshoot LKMBot."
     }
   },
   "backup": {

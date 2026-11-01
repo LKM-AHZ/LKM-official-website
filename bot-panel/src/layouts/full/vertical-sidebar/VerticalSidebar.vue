@@ -182,7 +182,7 @@ const visibleMenu = computed(() => {
   }
   return result;
 });
-const botVersion = computed(() => commonStore.astrbotVersion ? `v${commonStore.astrbotVersion}` : '');
+const botVersion = computed(() => commonStore.botVersion ? `v${commonStore.botVersion}` : '');
 
 function toggleSidebar() {
   if (isMobile.value) {
@@ -215,7 +215,7 @@ function toggleSidebar() {
         <div v-if="!isRailSidebar" class="dashboard-sidebar-brand-title Outfit">
           <ChatUILogo class="dashboard-sidebar-brand-logo" />
           <span class="dashboard-sidebar-brand-copy">
-            <span class="dashboard-sidebar-brand-name">AstrBot</span>
+            <span class="dashboard-sidebar-brand-name">LKMBot</span>
           </span>
         </div>
         <button
@@ -407,7 +407,7 @@ function toggleSidebar() {
 /* The header draws across the whole width, above the full-height sidebar. */
 :global(.leftSidebar .sidebar-container) {
   /* Seat the brand's top edge at the content area's top edge, fully below the toolbar. */
-  padding-top: calc(var(--astrbot-toolbar-height, 40px) - 10px);
+  padding-top: calc(var(--lkmbot-toolbar-height, 40px) - 10px);
   box-sizing: border-box;
 }
 
@@ -418,7 +418,7 @@ function toggleSidebar() {
 }
 
 :global(html:not([data-astrbot-desktop-platform='macos']) .leftSidebar .dashboard-sidebar-brand) {
-  min-height: var(--astrbot-toolbar-height, 40px);
+  min-height: var(--lkmbot-toolbar-height, 40px);
 }
 
 /* On macOS the sidebar stays transparent; the shared tint is painted behind it. */

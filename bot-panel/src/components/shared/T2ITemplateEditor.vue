@@ -310,7 +310,7 @@ const previewData = computed(() => ({
 }))
 
 const injectShikiRuntime = (content) => {
-  if (content.includes('astrbot-t2i-shiki-runtime')) {
+  if (content.includes('lkmbot-t2i-shiki-runtime')) {
     return content
   }
 
@@ -323,7 +323,7 @@ const injectShikiRuntime = (content) => {
   return `${runtimeScript}\n${content}`
 }
 
-const getShikiRuntimeScript = () => `<script id="astrbot-t2i-shiki-runtime" src="${apiUrl('/t2i/shiki_runtime.iife.js')}"></scr` + 'ipt>'
+const getShikiRuntimeScript = () => `<script id="lkmbot-t2i-shiki-runtime" src="${apiUrl('/t2i/shiki_runtime.iife.js')}"></scr` + 'ipt>'
 
 const hasMarkdownSource = (content) => /<[^>]+\bid=["']markdown-source["']/i.test(content)
 

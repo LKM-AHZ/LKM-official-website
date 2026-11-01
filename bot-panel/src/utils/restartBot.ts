@@ -25,7 +25,7 @@ async function fetchCurrentStartTime(): Promise<number | null> {
   }
 }
 
-export async function restartAstrBot(
+export async function restartBot(
   waitingRef?: WaitingForRestartRef | null
 ): Promise<void> {
   const { bridge: desktopBridge, hasDesktopRestartCapability, isDesktopRuntime } =

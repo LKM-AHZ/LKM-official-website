@@ -139,7 +139,7 @@
                           {{ tm("dialog.viewTutorial") }}
                         </v-btn>
                       </div>
-                      <AstrBotConfig
+                      <BotConfig
                         :iterable="selectedPlatformConfig"
                         :metadata="metadata['platform_group']?.metadata"
                         metadataKey="platform"
@@ -205,7 +205,7 @@
                           {{ tm("dialog.viewTutorial") }}
                         </v-btn>
                       </div>
-                      <AstrBotConfig
+                      <BotConfig
                         :iterable="selectedPlatformConfig"
                         :metadata="metadata['platform_group']?.metadata"
                         metadataKey="platform"
@@ -271,7 +271,7 @@
                           {{ tm("dialog.viewTutorial") }}
                         </v-btn>
                       </div>
-                      <AstrBotConfig
+                      <BotConfig
                         :iterable="selectedPlatformConfig"
                         :metadata="metadata['platform_group']?.metadata"
                         metadataKey="platform"
@@ -315,7 +315,7 @@
                         {{ tm("dialog.viewTutorial") }}
                       </v-btn>
                     </div>
-                    <AstrBotConfig
+                    <BotConfig
                       :iterable="selectedPlatformConfig"
                       :metadata="metadata['platform_group']?.metadata"
                       metadataKey="platform"
@@ -337,7 +337,7 @@
                 ></v-text-field>
                 <div class="mt-3">
                   <div class="mt-2">
-                    <AstrBotConfig
+                    <BotConfig
                       :iterable="updatingPlatformConfig"
                       :metadata="metadata['platform_group']?.metadata"
                       metadataKey="platform"
@@ -461,7 +461,7 @@
                   </div>
                   <div v-else-if="selectedConfigData && selectedConfigMetadata" class="config-preview-container">
                     <h4 class="mb-3">配置文件预览</h4>
-                    <AstrBotCoreConfigWrapper :metadata="selectedConfigMetadata" :config_data="selectedConfigData"
+                    <BotCoreConfigWrapper :metadata="selectedConfigMetadata" :config_data="selectedConfigData"
                       readonly="true" />
                   </div>
                   <div v-else class="text-center py-4 text-grey">
@@ -488,7 +488,7 @@
                     <h4 class="mb-3">
                       {{ tm("createDialog.newConfigTitle") }}
                     </h4>
-                    <AstrBotCoreConfigWrapper
+                    <BotCoreConfigWrapper
                       :metadata="newConfigMetadata"
                       :config_data="newConfigData"
                     />
@@ -784,8 +784,8 @@ import {
   getPlatformDescription,
   getTutorialLink,
 } from "@/utils/platformUtils";
-import AstrBotConfig from "@/components/shared/AstrBotConfig.vue";
-import AstrBotCoreConfigWrapper from "@/components/config/AstrBotCoreConfigWrapper.vue";
+import BotConfig from "@/components/shared/BotConfig.vue";
+import BotCoreConfigWrapper from "@/components/config/BotCoreConfigWrapper.vue";
 import ConfigProfileDrawer from "@/components/config/ConfigProfileDrawer.vue";
 import PlatformRegistrationAction from "@/components/platform/PlatformRegistrationAction.vue";
 import UmoSelector from "@/components/shared/UmoSelector.vue";
@@ -793,8 +793,8 @@ import UmoSelector from "@/components/shared/UmoSelector.vue";
 export default {
   name: "AddNewPlatform",
   components: {
-    AstrBotConfig,
-    AstrBotCoreConfigWrapper,
+    BotConfig,
+    BotCoreConfigWrapper,
     ConfigProfileDrawer,
     PlatformRegistrationAction,
     UmoSelector,

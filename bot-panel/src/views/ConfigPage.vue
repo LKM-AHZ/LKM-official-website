@@ -69,7 +69,7 @@
       <v-slide-y-transition mode="out-in">
         <div v-if="(selectedConfigID || isSystemConfig) && fetched" :key="configContentKey" class="config-content" style="width: 100%;">
           <!-- 可视化编辑 -->
-          <AstrBotCoreConfigWrapper
+          <BotCoreConfigWrapper
             :metadata="metadata"
             :config_data="config_data"
             :search-keyword="configSearchKeyword"
@@ -257,7 +257,7 @@
 
 <script>
 import { configProfileApi, systemConfigApi } from '@/api/v1';
-import AstrBotCoreConfigWrapper from '@/components/config/AstrBotCoreConfigWrapper.vue';
+import BotCoreConfigWrapper from '@/components/config/BotCoreConfigWrapper.vue';
 import ConfigProfileMenu from '@/components/config/ConfigProfileMenu.vue';
 import StandaloneChat from '@/components/chat/StandaloneChat.vue';
 import { LazyMonacoEditor as VueMonacoEditor } from '@/components/shared/LazyMonacoEditor';
@@ -273,7 +273,7 @@ import { normalizeTextInput } from '@/utils/inputValue';
 export default {
   name: 'ConfigPage',
   components: {
-    AstrBotCoreConfigWrapper,
+    BotCoreConfigWrapper,
     ConfigProfileMenu,
     VueMonacoEditor,
     StandaloneChat,
@@ -473,7 +473,7 @@ export default {
     this.configType = this.isSystemConfig ? 'system' : 'normal';
     
     // 监听语言切换事件，重新加载配置以获取插件的 i18n 数据
-    window.addEventListener('astrbot-locale-changed', this.handleLocaleChange);
+    window.addEventListener('lkmbot-locale-changed', this.handleLocaleChange);
 
     // 保存初始配置
     this.$watch('config_data', (newVal) => {
@@ -485,7 +485,7 @@ export default {
 
   beforeUnmount() {
     // 移除语言切换事件监听器
-    window.removeEventListener('astrbot-locale-changed', this.handleLocaleChange);
+    window.removeEventListener('lkmbot-locale-changed', this.handleLocaleChange);
   },
   methods: {
     // 处理语言切换事件，重新加载配置以获取插件的 i18n 数据
@@ -598,9 +598,9 @@ export default {
         postData.conf_id = this.selectedConfigID;
       }
 
-      return this.saveAstrbotConfig(postData);
+      return this.saveBotConfig(postData);
     },
-    async saveAstrbotConfig(postData, headers = {}, allow2faPrompt = true) {
+    async saveBotConfig(postData, headers = {}, allow2faPrompt = true) {
       try {
         const confId = postData.conf_id || 'default';
         const requestConfig = {
@@ -658,7 +658,7 @@ export default {
         'X-2FA-Code': payload,
       };
       try {
-        await this.saveAstrbotConfig(
+        await this.saveBotConfig(
           JSON.parse(JSON.stringify(this.configSavePendingPostData)),
           headers,
           false,

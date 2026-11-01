@@ -111,7 +111,7 @@ const isMarketDetail = computed(() => detailSourceTab.value === "market");
 const detailParentTitle = computed(() =>
   isMarketDetail.value
     ? tm("tabs.market")
-    : tm("titles.installedAstrBotPlugins"),
+    : tm("titles.installedBotPlugins"),
 );
 
 const pluginDesc = computed(() => {
@@ -217,7 +217,7 @@ const tagsDisplay = computed(() => {
   return tags.filter((tag) => typeof tag === "string" && tag.trim().length > 0);
 });
 
-const astrbotVersionDisplay = computed(() =>
+const botVersionDisplay = computed(() =>
   String(
     firstPresentValue(
       pluginData.value?.astrbot_version,
@@ -288,8 +288,8 @@ const infoRows = computed(() => {
       optional: true,
     },
     {
-      label: tm("detail.info.astrbotVersion"),
-      value: astrbotVersionDisplay.value,
+      label: tm("detail.info.botVersion"),
+      value: botVersionDisplay.value,
       optional: true,
     },
     {
