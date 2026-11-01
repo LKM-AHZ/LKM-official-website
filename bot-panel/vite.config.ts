@@ -3,7 +3,6 @@ import { fileURLToPath, URL } from 'url';
 import { defineConfig, type Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vuetify from 'vite-plugin-vuetify';
-import webfontDl from 'vite-plugin-webfont-dl';
 // @ts-ignore — .mjs not in TS project scope; Vite resolves this at runtime
 import { runMdiSubset } from './scripts/subset-mdi-font.mjs';
 
@@ -96,7 +95,6 @@ export default defineConfig(({ command }) => ({
     vuetify({
       autoImport: true
     }),
-    webfontDl()
   ],
   resolve: {
     alias: [

@@ -1294,7 +1294,7 @@
       },
       "t2i_endpoint": {
         "description": "文本转图像服务 API 地址",
-        "hint": "为空时使用 LKMBot API 服务"
+        "hint": "为空时不会调用任何服务：远程文转图需要在此填写你自建或信任的渲染服务地址（形如 https://your-host/text2img），或把「文本转图像策略」改为 local 使用本地渲染。"
       },
       "t2i_template": {
         "description": "文本转图像自定义模版",
@@ -1361,10 +1361,6 @@
       "media_storage_mode": {
         "description": "媒体存储方式",
         "hint": "auto：优先存入社区后端对象存储，失败或未接入时回落到本地文件服务；local：只用本地文件服务（需要配置上面的「对外可达的回调接口地址」）；backend：只用后端，未接入时媒体无法发送。"
-      },
-      "disable_metrics": {
-        "description": "禁用匿名使用统计",
-        "hint": "禁用后，LKMBot 将不再上传匿名使用统计数据。"
       },
       "dashboard": {
         "auth_mode": {

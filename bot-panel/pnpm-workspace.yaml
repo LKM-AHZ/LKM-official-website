@@ -4,4 +4,5 @@ overrides:
 
 allowBuilds:
   esbuild: true
+  protobufjs: false
   vue-demi: true

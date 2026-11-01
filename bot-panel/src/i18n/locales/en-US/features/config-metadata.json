@@ -1273,7 +1273,7 @@
       },
       "t2i_endpoint": {
         "description": "Text-to-Image Service API Endpoint",
-        "hint": "Uses LKMBot API service when empty"
+        "hint": "Empty means no service is called: remote text-to-image needs a renderer you host or trust (e.g. https://your-host/text2img), or switch the strategy to local for local rendering."
       },
       "t2i_template": {
         "description": "Text-to-Image Custom Template",
@@ -1340,10 +1340,6 @@
       "media_storage_mode": {
         "description": "Media Storage Mode",
         "hint": "auto: prefer the community backend object storage, falling back to the local file service when unavailable; local: local file service only (requires the callback address above); backend: backend only, media cannot be sent when it is not connected."
-      },
-      "disable_metrics": {
-        "description": "Disable Anonymous Usage Statistics",
-        "hint": "When disabled, LKMBot will not upload anonymous usage statistics."
       },
       "dashboard": {
         "auth_mode": {

@@ -1,4 +1,40 @@
 import mirarouterIcon from '@/assets/images/provider_logos/mirarouter.svg?no-inline';
+// Provider logos are bundled from @lobehub/icons-static-svg at build time; nothing is
+// fetched from jsDelivr or from providers' own sites at runtime.
+import icon_ai302_color from '@lobehub/icons-static-svg/icons/ai302-color.svg?no-inline';
+import icon_aihubmix_color from '@lobehub/icons-static-svg/icons/aihubmix-color.svg?no-inline';
+import icon_alibabacloud_color from '@lobehub/icons-static-svg/icons/alibabacloud-color.svg?no-inline';
+import icon_anthropic from '@lobehub/icons-static-svg/icons/anthropic.svg?no-inline';
+import icon_azure from '@lobehub/icons-static-svg/icons/azure.svg?no-inline';
+import icon_bailian_color from '@lobehub/icons-static-svg/icons/bailian-color.svg?no-inline';
+import icon_coze from '@lobehub/icons-static-svg/icons/coze.svg?no-inline';
+import icon_deepseek_color from '@lobehub/icons-static-svg/icons/deepseek-color.svg?no-inline';
+import icon_dify_color from '@lobehub/icons-static-svg/icons/dify-color.svg?no-inline';
+import icon_fastgpt_color from '@lobehub/icons-static-svg/icons/fastgpt-color.svg?no-inline';
+import icon_fishaudio from '@lobehub/icons-static-svg/icons/fishaudio.svg?no-inline';
+import icon_gemini_color from '@lobehub/icons-static-svg/icons/gemini-color.svg?no-inline';
+import icon_groq from '@lobehub/icons-static-svg/icons/groq.svg?no-inline';
+import icon_huggingface from '@lobehub/icons-static-svg/icons/huggingface.svg?no-inline';
+import icon_kimi from '@lobehub/icons-static-svg/icons/kimi.svg?no-inline';
+import icon_lmstudio from '@lobehub/icons-static-svg/icons/lmstudio.svg?no-inline';
+import icon_longcat_color from '@lobehub/icons-static-svg/icons/longcat-color.svg?no-inline';
+import icon_microsoft from '@lobehub/icons-static-svg/icons/microsoft.svg?no-inline';
+import icon_minimax from '@lobehub/icons-static-svg/icons/minimax.svg?no-inline';
+import icon_modelscope from '@lobehub/icons-static-svg/icons/modelscope.svg?no-inline';
+import icon_nvidia_color from '@lobehub/icons-static-svg/icons/nvidia-color.svg?no-inline';
+import icon_ollama from '@lobehub/icons-static-svg/icons/ollama.svg?no-inline';
+import icon_openai from '@lobehub/icons-static-svg/icons/openai.svg?no-inline';
+import icon_openrouter from '@lobehub/icons-static-svg/icons/openrouter.svg?no-inline';
+import icon_ppio from '@lobehub/icons-static-svg/icons/ppio.svg?no-inline';
+import icon_siliconcloud from '@lobehub/icons-static-svg/icons/siliconcloud.svg?no-inline';
+import icon_typesafeai from '@lobehub/icons-static-svg/icons/typesafeai.svg?no-inline';
+import icon_vercel from '@lobehub/icons-static-svg/icons/vercel.svg?no-inline';
+import icon_vllm from '@lobehub/icons-static-svg/icons/vllm.svg?no-inline';
+import icon_volcengine_color from '@lobehub/icons-static-svg/icons/volcengine-color.svg?no-inline';
+import icon_xai from '@lobehub/icons-static-svg/icons/xai.svg?no-inline';
+import icon_xiaomimimo from '@lobehub/icons-static-svg/icons/xiaomimimo.svg?no-inline';
+import icon_xinference_color from '@lobehub/icons-static-svg/icons/xinference-color.svg?no-inline';
+import icon_zhipu from '@lobehub/icons-static-svg/icons/zhipu.svg?no-inline';
 
 /**
  * 提供商相关的工具函数
@@ -11,50 +47,45 @@ import mirarouterIcon from '@/assets/images/provider_logos/mirarouter.svg?no-inl
  */
 export function getProviderIcon(type) {
   const icons = {
-    'mirarouter': mirarouterIcon,
-    'openai': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/openai.svg',
-    'azure': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/azure.svg',
-    'xai': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/xai.svg',
-    'anthropic': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/anthropic.svg',
-    'ollama': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/ollama.svg',
-    'google': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/gemini-color.svg',
-    'deepseek': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/deepseek-color.svg',
-    'modelscope': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/modelscope.svg',
-    'zhipu': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/zhipu.svg',
-    'nvidia': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/nvidia-color.svg',
-    'siliconflow': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/siliconcloud.svg',
-    'moonshot': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/kimi.svg',
-    'kimi': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/kimi.svg',
-    'kimi-code': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/kimi.svg',
-    'longcat': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/longcat-color.svg',
-    'ppio': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/ppio.svg',
-    'dify': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/dify-color.svg',
-    "coze": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.66.0/icons/coze.svg",
-    'dashscope': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/alibabacloud-color.svg',
-    'deerflow': 'https://cdn.jsdelivr.net/gh/bytedance/deer-flow@main/frontend/public/images/deer.svg',
-    'fastgpt': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/fastgpt-color.svg',
-    'lm_studio': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/lmstudio.svg',
-    'fishaudio': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/fishaudio.svg',
-    'minimax': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/minimax.svg',
-    'minimax-token-plan': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/minimax.svg',
-    'mimo': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/xiaomi.svg',
-    'xiaomi': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/xiaomi.svg',
-    'xiaomi-token-plan': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/xiaomi.svg',
-    '302ai': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.53.0/icons/ai302-color.svg',
-    'microsoft': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/microsoft.svg',
-    'vllm': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/vllm.svg',
-    'groq': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/groq.svg',
-    'aihubmix': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/aihubmix-color.svg',
-    'openrouter': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/openrouter.svg',
-    'typesafe': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/typesafeai.svg',
-    'vercel': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/vercel.svg',
-    'ssycloud': 'https://admin.shengsuanyun.com/assets/logo-BoujJhP-.png',
-    "tokenpony": "https://tokenpony.cn/tokenpony-web/logo.png",
-    "compshare": "https://compshare.cn/favicon.ico",
-    "xinference": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/xinference-color.svg",
-    "bailian": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/bailian-color.svg",
-    "volcengine": 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/volcengine-color.svg',
-    'huggingface': 'https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/huggingface.svg',
+    'openai': icon_openai,
+    'azure': icon_azure,
+    'xai': icon_xai,
+    'anthropic': icon_anthropic,
+    'ollama': icon_ollama,
+    'google': icon_gemini_color,
+    'deepseek': icon_deepseek_color,
+    'modelscope': icon_modelscope,
+    'zhipu': icon_zhipu,
+    'nvidia': icon_nvidia_color,
+    'siliconflow': icon_siliconcloud,
+    'moonshot': icon_kimi,
+    'kimi': icon_kimi,
+    'kimi-code': icon_kimi,
+    'longcat': icon_longcat_color,
+    'ppio': icon_ppio,
+    'dify': icon_dify_color,
+    'coze': icon_coze,
+    'dashscope': icon_alibabacloud_color,
+    'fastgpt': icon_fastgpt_color,
+    'lm_studio': icon_lmstudio,
+    'fishaudio': icon_fishaudio,
+    'minimax': icon_minimax,
+    'minimax-token-plan': icon_minimax,
+    'mimo': icon_xiaomimimo,
+    'xiaomi': icon_xiaomimimo,
+    'xiaomi-token-plan': icon_xiaomimimo,
+    '302ai': icon_ai302_color,
+    'microsoft': icon_microsoft,
+    'vllm': icon_vllm,
+    'groq': icon_groq,
+    'aihubmix': icon_aihubmix_color,
+    'openrouter': icon_openrouter,
+    'typesafe': icon_typesafeai,
+    'vercel': icon_vercel,
+    'xinference': icon_xinference_color,
+    'bailian': icon_bailian_color,
+    'volcengine': icon_volcengine_color,
+    'huggingface': icon_huggingface,
   };
   return icons[type] || '';
 }

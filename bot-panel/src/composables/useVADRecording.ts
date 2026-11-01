@@ -24,8 +24,12 @@ interface VADInstance {
     listening: boolean;
 }
 
-const VAD_BASE_ASSET_PATH = 'https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.29/dist/';
-const VAD_ONNX_WASM_BASE_PATH = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/';
+// Assets are copied from node_modules into <base>/vendor/vad by scripts/copy-vad-assets.mjs.
+// Serving them from our own origin keeps the microphone feature from downloading ~11 MB off a
+// third-party CDN; BASE_URL keeps the paths correct under the /bot/ subpath deployment.
+const VAD_ASSET_BASE_PATH = `${import.meta.env.BASE_URL}vendor/vad/`;
+const VAD_BASE_ASSET_PATH = VAD_ASSET_BASE_PATH;
+const VAD_ONNX_WASM_BASE_PATH = VAD_ASSET_BASE_PATH;
 const VAD_SCRIPT_URLS = [
     `${VAD_ONNX_WASM_BASE_PATH}ort.wasm.min.js`,
     `${VAD_BASE_ASSET_PATH}bundle.min.js`
