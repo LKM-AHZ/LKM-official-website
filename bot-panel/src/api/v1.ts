@@ -134,7 +134,7 @@ export interface VersionData {
 export interface PublicVersionData {
   webui_version?: string | null;
   astrbot_version?: string | null;
-  astrbot_code_version?: string | null;
+  bot_code_version?: string | null;
   [key: string]: unknown;
 }
 
