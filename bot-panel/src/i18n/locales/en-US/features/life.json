@@ -224,7 +224,8 @@
       "seen": "Seen",
       "ready": "Ready",
       "skipped": "Skipped",
-      "errors": "Errors"
+      "errors": "Errors",
+      "truncated": "Truncated"
     }
   }
 }

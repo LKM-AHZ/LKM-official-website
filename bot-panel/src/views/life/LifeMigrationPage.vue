@@ -127,6 +127,7 @@
                   <th>{{ tm('migration.columns.seen') }}</th>
                   <th>{{ tm('migration.columns.ready') }}</th>
                   <th>{{ tm('migration.columns.skipped') }}</th>
+                  <th>{{ tm('migration.columns.truncated') }}</th>
                   <th>{{ tm('migration.columns.errors') }}</th>
                 </tr>
               </thead>
@@ -136,6 +137,7 @@
                   <td>{{ block.seen }}</td>
                   <td>{{ block.ready }}</td>
                   <td>{{ block.skipped }}</td>
+                  <td>{{ block.truncated }}</td>
                   <td>{{ block.errors }}</td>
                 </tr>
               </tbody>
@@ -273,9 +275,15 @@ const statusChips = computed(() => {
   };
 });
 
-const previewWarnings = computed(
-  () => (previewResult.value?.inspection?.warnings as string[]) || [],
-);
+const previewWarnings = computed(() => {
+  const payload = previewResult.value;
+  if (!payload) return [];
+  const inspected = (payload.inspection?.warnings as string[]) || [];
+  // The dry run drops datasets it cannot convert (e.g. stickers without a
+  // target session); surface those alongside the inspection warnings.
+  const converted = (payload.report?.warnings as string[]) || [];
+  return [...inspected, ...converted];
+});
 const previewUnmapped = computed(
   () => (previewResult.value?.inspection?.sessions?.unmapped_platforms as string[]) || [],
 );

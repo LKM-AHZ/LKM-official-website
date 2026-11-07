@@ -224,7 +224,8 @@
       "seen": "读取",
       "ready": "可导入",
       "skipped": "跳过",
-      "errors": "错误"
+      "errors": "错误",
+      "truncated": "截断"
     }
   }
 }
