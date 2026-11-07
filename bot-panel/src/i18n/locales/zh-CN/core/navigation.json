@@ -48,7 +48,8 @@
   "groups": {
     "more": "更多功能",
     "system": "系统",
-    "extension": "扩展功能"
+    "extension": "扩展功能",
+    "life": "生命层"
   },
   "changelogDialog": {
     "title": "更新日志",
@@ -63,5 +64,15 @@
     "system": "系统配置"
   },
   "pluginView": "插件可视化视图",
-  "pluginViewType": "插件可视化视图"
+  "pluginViewType": "插件可视化视图",
+  "life": {
+    "memory": "记忆",
+    "people": "人物",
+    "expressions": "表达",
+    "jargon": "黑话",
+    "emojis": "表情包",
+    "focus": "心流时间线",
+    "monitor": "计划器监控",
+    "migration": "数据迁移"
+  }
 }

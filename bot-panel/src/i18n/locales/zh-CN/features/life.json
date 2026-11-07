@@ -1,0 +1,165 @@
+{
+  "common": {
+    "refresh": "刷新",
+    "close": "关闭",
+    "cancel": "取消",
+    "delete": "删除",
+    "actions": "操作",
+    "umo": "会话 (unified_msg_origin)"
+  },
+  "memory": {
+    "title": "记忆",
+    "subtitle": "生命层的长期记忆：摘要、事实、片段与手写笔记。",
+    "export": "导出 JSON",
+    "kind": "类型",
+    "limit": "条数",
+    "searchUmo": "检索会话",
+    "searchQuery": "检索内容",
+    "search": "检索",
+    "searchTitle": "记忆检索结果",
+    "searchHint": "请填写会话和检索内容。",
+    "noHits": "没有命中",
+    "columns": {
+      "id": "ID",
+      "kind": "类型",
+      "session": "会话",
+      "content": "内容",
+      "importance": "重要度",
+      "ts": "时间",
+      "score": "分数"
+    },
+    "empty": "没有记忆",
+    "deleteTitle": "删除记忆",
+    "deleteHint": "删除后无法恢复，确定继续？",
+    "deleted": "已删除 {count} 条"
+  },
+  "people": {
+    "title": "人物",
+    "subtitle": "每个会话里认识的人、关系值与画像事实。",
+    "limit": "人数",
+    "profile": "画像",
+    "relation": "关系值:",
+    "interactions": "互动:",
+    "noSummary": "暂无画像摘要",
+    "noFacts": "暂无事实",
+    "empty": "该会话还没有人物记录",
+    "columns": {
+      "name": "昵称",
+      "personId": "ID",
+      "relation": "关系值",
+      "interactions": "互动",
+      "lastSeen": "最近出现",
+      "fact": "事实",
+      "category": "类别",
+      "confidence": "置信度"
+    },
+    "deleteTitle": "删除人物数据",
+    "deleteHint": "删除该人物或其事实后无法恢复，确定继续？",
+    "deleted": "已删除"
+  },
+  "expressions": {
+    "title": "表达",
+    "subtitle": "从群聊里学到的说法：情景、句式、权重与使用次数。",
+    "empty": "该会话还没有学到的表达",
+    "columns": {
+      "scene": "场景",
+      "situation": "情景",
+      "style": "句式",
+      "weight": "权重",
+      "usage": "使用",
+      "source": "来源"
+    },
+    "deleteTitle": "删除表达",
+    "deleteHint": "删除后该说法不会再被注入，确定继续？",
+    "deleted": "已删除 {count} 条"
+  },
+  "jargon": {
+    "title": "黑话",
+    "subtitle": "群内术语与释义；待复审的词可以直接通过或拒绝。",
+    "approve": "通过",
+    "reject": "拒绝",
+    "updated": "已更新",
+    "empty": "该会话还没有黑话记录",
+    "columns": {
+      "term": "词",
+      "meaning": "释义",
+      "confidence": "置信度",
+      "status": "状态",
+      "usage": "使用"
+    },
+    "deleteTitle": "删除黑话",
+    "deleteHint": "删除后该词及其释义会被移除，确定继续？",
+    "deleted": "已删除 {count} 条"
+  },
+  "emojis": {
+    "title": "表情包",
+    "subtitle": "已采集的表情包与标签；停用的不会被发送。",
+    "enable": "启用",
+    "disable": "停用",
+    "updated": "已更新",
+    "empty": "该会话还没有采集到表情包",
+    "columns": {
+      "id": "ID",
+      "tags": "标签",
+      "caption": "描述",
+      "usage": "使用",
+      "status": "状态"
+    },
+    "deleteTitle": "删除表情包",
+    "deleteHint": "删除后文件也会被移除，确定继续？",
+    "deleted": "已删除 {count} 个"
+  },
+  "focus": {
+    "title": "心流时间线",
+    "subtitle": "每个会话的回合时间线、折叠摘要与检查点。",
+    "detail": "详情",
+    "digest": "折叠摘要",
+    "noDigest": "暂无摘要",
+    "turns": "回合",
+    "noTurns": "暂无回合",
+    "empty": "还没有会话时间线",
+    "columns": {
+      "compressed": "已折叠回合",
+      "messages": "消息数",
+      "lastTurn": "最新回合",
+      "updated": "更新时间",
+      "summary": "摘要"
+    },
+    "deleteTitle": "删除时间线",
+    "deleteHint": "删除后该会话的摘要与回合会丢失，确定继续？",
+    "deleted": "已删除 {count} 个回合"
+  },
+  "monitor": {
+    "title": "计划器监控",
+    "subtitle": "心流决策与出站回复记录；推理片段默认截断保存。",
+    "session": "会话过滤",
+    "counters": "计数器",
+    "ring": "记录环",
+    "ringHint": "保留 {records} / {size} 条记录",
+    "empty": "暂无记录",
+    "columns": {
+      "time": "时间",
+      "kind": "类型",
+      "session": "会话",
+      "action": "动作",
+      "likelihood": "似然 / 阈值",
+      "chars": "字数",
+      "reason": "原因",
+      "reasoning": "推理片段"
+    }
+  },
+  "migration": {
+    "title": "数据迁移",
+    "subtitle": "导出记忆与配置；MaiBot 历史数据的批量导入在 S7 提供。",
+    "memoryTitle": "记忆导出",
+    "memoryHint": "按会话导出记忆为 JSON，可用于备份或迁移。",
+    "exportUmo": "会话（留空导出全部）",
+    "memoryExport": "导出记忆",
+    "statusTitle": "生命层状态",
+    "statusHint": "当前运行时状态，用于确认迁移目标。",
+    "configTitle": "生命层配置",
+    "configHint": "编辑后保存；字段校验失败会拒绝写入。",
+    "save": "保存配置",
+    "saved": "配置已保存"
+  }
+}

@@ -30,6 +30,7 @@ import zhCNKnowledgeBaseIndex from './features/knowledge-base/index.json';
 import zhCNKnowledgeBaseDetail from './features/knowledge-base/detail.json';
 import zhCNKnowledgeBaseDocument from './features/knowledge-base/document.json';
 import zhCNPersona from './features/persona.json';
+import zhCNLife from './features/life.json';
 import zhCNCommand from './features/command.json';
 import zhCNWelcome from './features/welcome.json';
 import zhCNErrors from './messages/errors.json';
@@ -75,6 +76,7 @@ export default {
         document: zhCNKnowledgeBaseDocument
       },
       persona: zhCNPersona,
+      life: zhCNLife,
       command: zhCNCommand,
       welcome: zhCNWelcome
     },

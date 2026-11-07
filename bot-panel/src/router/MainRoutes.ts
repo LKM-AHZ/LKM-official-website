@@ -97,6 +97,46 @@ const MainRoutes = {
       ]
     },
     {
+      name: 'LifeMemory',
+      path: '/life/memory',
+      component: () => import('@/views/life/LifeMemoryPage.vue')
+    },
+    {
+      name: 'LifePeople',
+      path: '/life/people',
+      component: () => import('@/views/life/LifePeoplePage.vue')
+    },
+    {
+      name: 'LifeExpressions',
+      path: '/life/expressions',
+      component: () => import('@/views/life/LifeExpressionsPage.vue')
+    },
+    {
+      name: 'LifeJargon',
+      path: '/life/jargon',
+      component: () => import('@/views/life/LifeJargonPage.vue')
+    },
+    {
+      name: 'LifeEmoji',
+      path: '/life/emojis',
+      component: () => import('@/views/life/LifeEmojiPage.vue')
+    },
+    {
+      name: 'LifeFocus',
+      path: '/life/focus',
+      component: () => import('@/views/life/LifeFocusPage.vue')
+    },
+    {
+      name: 'LifeMonitor',
+      path: '/life/monitor',
+      component: () => import('@/views/life/LifeMonitorPage.vue')
+    },
+    {
+      name: 'LifeMigration',
+      path: '/life/migration',
+      component: () => import('@/views/life/LifeMigrationPage.vue')
+    },
+    {
       name: 'PluginView',
       path: '/plugin-view/:pluginName/:pageName',
       component: () => import('@/views/PluginViewPage.vue')

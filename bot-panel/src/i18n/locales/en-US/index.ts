@@ -30,6 +30,7 @@ import enUSKnowledgeBaseIndex from './features/knowledge-base/index.json';
 import enUSKnowledgeBaseDetail from './features/knowledge-base/detail.json';
 import enUSKnowledgeBaseDocument from './features/knowledge-base/document.json';
 import enUSPersona from './features/persona.json';
+import enUSLife from './features/life.json';
 import enUSCommand from './features/command.json';
 import enUSWelcome from './features/welcome.json';
 import enUSErrors from './messages/errors.json';
@@ -75,6 +76,7 @@ export default {
         document: enUSKnowledgeBaseDocument
       },
       persona: enUSPersona,
+      life: enUSLife,
       command: enUSCommand,
       welcome: enUSWelcome
     },

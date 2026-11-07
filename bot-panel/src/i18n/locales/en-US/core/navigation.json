@@ -48,7 +48,8 @@
   "groups": {
     "more": "More Features",
     "system": "System",
-    "extension": "Extensions"
+    "extension": "Extensions",
+    "life": "Life Layer"
   },
   "changelogDialog": {
     "title": "Changelog",
@@ -63,5 +64,15 @@
     "system": "System Config"
   },
   "pluginView": "Plugin Views",
-  "pluginViewType": "Plugin View"
+  "pluginViewType": "Plugin View",
+  "life": {
+    "memory": "Memory",
+    "people": "People",
+    "expressions": "Expressions",
+    "jargon": "Slang",
+    "emojis": "Stickers",
+    "focus": "Focus Timeline",
+    "monitor": "Planner Monitor",
+    "migration": "Data Migration"
+  }
 }

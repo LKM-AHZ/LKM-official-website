@@ -1,15 +1,23 @@
 import { markRaw, type Component } from 'vue';
 import {
+  Activity,
+  ArrowRightLeft,
+  BookOpenText,
   BookSearch,
   Bot,
   Box,
+  Brain,
   Clock3,
   Database,
   Hand,
   Heart,
+  Image,
+  MessageSquareQuote,
   PencilRuler,
   Puzzle,
+  Radar,
   SlidersHorizontal,
+  Users,
 } from '@lucide/vue';
 
 export interface menu {
@@ -82,6 +90,49 @@ const sidebarItem: menu[] = [
     title: 'core.navigation.sessionManagement',
     icon: markRaw(PencilRuler),
     to: '/session-management'
+  },
+  {
+    header: 'core.navigation.groups.life',
+  },
+  {
+    title: 'core.navigation.life.memory',
+    icon: markRaw(Brain),
+    to: '/life/memory',
+  },
+  {
+    title: 'core.navigation.life.people',
+    icon: markRaw(Users),
+    to: '/life/people',
+  },
+  {
+    title: 'core.navigation.life.expressions',
+    icon: markRaw(MessageSquareQuote),
+    to: '/life/expressions',
+  },
+  {
+    title: 'core.navigation.life.jargon',
+    icon: markRaw(BookOpenText),
+    to: '/life/jargon',
+  },
+  {
+    title: 'core.navigation.life.emojis',
+    icon: markRaw(Image),
+    to: '/life/emojis',
+  },
+  {
+    title: 'core.navigation.life.focus',
+    icon: markRaw(Activity),
+    to: '/life/focus',
+  },
+  {
+    title: 'core.navigation.life.monitor',
+    icon: markRaw(Radar),
+    to: '/life/monitor',
+  },
+  {
+    title: 'core.navigation.life.migration',
+    icon: markRaw(ArrowRightLeft),
+    to: '/life/migration',
   },
   {
     header: EXTENSION_GROUP_KEY,
