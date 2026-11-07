@@ -132,6 +132,11 @@ const MainRoutes = {
       component: () => import('@/views/life/LifeMonitorPage.vue')
     },
     {
+      name: 'LifeRollout',
+      path: '/life/rollout',
+      component: () => import('@/views/life/LifeRolloutPage.vue')
+    },
+    {
       name: 'LifeMigration',
       path: '/life/migration',
       component: () => import('@/views/life/LifeMigrationPage.vue')

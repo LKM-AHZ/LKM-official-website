@@ -9,6 +9,7 @@ import {
   Brain,
   Clock3,
   Database,
+  Gauge,
   Hand,
   Heart,
   Image,
@@ -128,6 +129,11 @@ const sidebarItem: menu[] = [
     title: 'core.navigation.life.monitor',
     icon: markRaw(Radar),
     to: '/life/monitor',
+  },
+  {
+    title: 'core.navigation.life.rollout',
+    icon: markRaw(Gauge),
+    to: '/life/rollout',
   },
   {
     title: 'core.navigation.life.migration',

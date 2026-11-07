@@ -73,6 +73,7 @@
     "emojis": "表情包",
     "focus": "心流时间线",
     "monitor": "计划器监控",
+    "rollout": "灰度看板",
     "migration": "数据迁移"
   }
 }

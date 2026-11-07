@@ -109,4 +109,27 @@ export const lifeApi = {
   saveConfig(payload: Record<string, unknown>) {
     return send<Record<string, unknown>>('put', '/api/v1/life/config', payload);
   },
+  rollout(days = 14) {
+    return get<Record<string, unknown>>('/api/v1/life/rollout', { days });
+  },
+  migrationRuns(limit = 20) {
+    return get<{ enabled: boolean; runs: Record<string, unknown>[] }>(
+      '/api/v1/life/migration/runs',
+      { limit },
+    );
+  },
+  migrationPreview(payload: {
+    source: string;
+    memory_source?: string;
+    datasets?: string[];
+    umos?: string[];
+    limit?: number;
+  }) {
+    return send<Record<string, unknown>>('post', '/api/v1/life/migration/preview', payload);
+  },
+  migrationRollback(batch: string) {
+    return send<Record<string, unknown>>('post', '/api/v1/life/migration/rollback', {
+      batch,
+    });
+  },
 };
