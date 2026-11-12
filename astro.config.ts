@@ -263,8 +263,8 @@ export default defineConfig({
 
   vite: {
     server: {
-      // 允许访问 dev server 的主机名（各机器不同，用逗号分隔覆盖，默认值仅为既有部署保留）
-      allowedHosts: (process.env.DEV_ALLOWED_HOSTS ?? "124.220.55.235")
+      // 允许访问 dev server 的主机名（各机器不同，用逗号分隔覆盖，默认仅使用 Vite 的回环/IP 规则）
+      allowedHosts: (process.env.DEV_ALLOWED_HOSTS ?? "")
         .split(",")
         .map((host) => host.trim())
         .filter(Boolean),
